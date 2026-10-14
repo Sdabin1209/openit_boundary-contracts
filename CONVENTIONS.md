@@ -93,3 +93,4 @@ SDK의 원격 구현과 서비스 API가 같은 규칙을 쓴다.
 - `ArtifactRef.version`은 문자열이다. 문항 세트는 버전 번호 n의 문자열이며 `QuestionBank.version`(정수)과 같은 번호다.
 - 같은 조합에 판정이 여러 개이면 가장 최근(`decided_at`, 같으면 `decision_id`가 큰 것)이 현재 판정이다.
 - `serving_config_hash`는 `canonical.sha256_hash(serving_config)`이다(기본값을 채우지 않은 그대로).
+- **외부 식별자를 봉투에 넣을 때:** 세션 ID·턴 ID처럼 바깥(Frontend)이 정한 식별자가 `Id` 형식(`[A-Za-z0-9][A-Za-z0-9._:-]*`, 128자)에 맞으면 그대로 쓰고, 맞지 않으면 `x-` + 원본 UTF-8의 SHA-256 앞 32자(소문자 16진)로 바꿔 쓴다. 결정적이므로 같은 원본은 같은 값이 되어 멱등성이 유지된다. 원본은 `trace` 본문에 남아 있다. 공개 API(O06)가 `Id` 형식으로 발급하기로 정해지면 이 변환은 쓰이지 않는다.

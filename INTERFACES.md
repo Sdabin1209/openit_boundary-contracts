@@ -86,7 +86,7 @@ find_decisions(*, question_set: Ref | None = None, lora_a: Ref | None = None, lo
 list_releases(*, cursor=None, limit=100) -> Page[ReleaseManifest]   # 최신부터
 ```
 
-서비스가 지키는 것: 포인터가 바뀌면 **새 세션부터** 새 릴리스를 쓴다(O13). `runtime_contract_version`을 지원하지 않는 릴리스는 `load_bundle` 결과를 적재하지 않고 이전 릴리스를 유지한다.
+서비스가 지키는 것: 포인터가 바뀌면 **새 세션부터** 새 릴리스를 쓴다(O13). 적재를 거부하는 경우는 둘이다: (1) `runtime_contract_version`이 지원 버전이 아님, (2) 릴리스의 `turn_engine_version` 또는 `model_runtime_version`의 MAJOR.MINOR가 이미지에 설치된 것과 다름(게이트가 승인한 동작과 달라질 수 있기 때문이다. PATCH 차이는 경고만 하고 적재한다). 거부하면 이전 릴리스를 유지하고 이유를 `/readyz`에 낸다. `runtime_contract_version`을 지원하지 않는 릴리스는 `load_bundle` 결과를 적재하지 않고 이전 릴리스를 유지한다.
 
 ## I5. GateService (release-gate)
 
@@ -153,11 +153,13 @@ SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 ## I9. model-runtime (라이브러리)
 
 ```
-load(adapters: Mapping["LORA_A"|"LORA_B", Path], serving_config: Mapping, *, schema_dir: Path,
-     expected_serving_config_hash: str, backend=None) -> ModelSession
+load(adapters: Mapping["LORA_A"|"LORA_B", Path], serving_configs: Mapping["LORA_A"|"LORA_B", Mapping], *,
+     schema_dir: Path, expected_serving_config_hashes: Mapping["LORA_A"|"LORA_B", str], backend=None) -> ModelSession
+    # 설정과 해시는 역할마다 받는다(D45). ReleaseManifest.adapters[role]과 모델 패키지가 역할별이기 때문이다.
+    # 어댑터, 설정, 기대 해시의 역할 집합이 서로 다르면 ContractViolation.
     # schema_dir: 문진 스키마의 배포 스키마 디렉터리(`<...>/schema/schemas`, <계약명>.json이 있는 곳). 상위의 CONTRACT_VERSION을 읽어
     #   SUPPORTED_RUNTIME_CONTRACT_VERSION과 다르면 ContractVersionMismatch.
-    # serving_config_hash(serving_config) != expected_serving_config_hash 이면 ServingConfigMismatch.
+    # 역할마다 serving_config_hash(serving_configs[role]) != expected_serving_config_hashes[role] 이면 ServingConfigMismatch.
     # 지원하지 않는 프롬프트 템플릿·디코딩 버전이면 UnsupportedServingConfig.
 ModelSession.parse(input: UtteranceParserInput) -> ParserOutput          # 항상 스키마를 통과하는 값. 아래 '출력 보호'
 ModelSession.generate(input: ResponseGeneratorInput) -> GeneratorOutput  # 항상 스키마를 통과하는 값. 아래 '출력 보호'
