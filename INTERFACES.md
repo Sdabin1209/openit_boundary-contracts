@@ -142,16 +142,23 @@ SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 ## I9. model-runtime (라이브러리)
 
 ```
-load(adapters: Mapping["LORA_A"|"LORA_B", Path], serving_config: Mapping) -> ModelSession
+load(adapters: Mapping["LORA_A"|"LORA_B", Path], serving_config: Mapping, *, expected_serving_config_hash: str) -> ModelSession
+    # serving_config_hash(serving_config) != expected_serving_config_hash 이면 ServingConfigMismatch.
+    # serving_config가 지원하지 않는 프롬프트 템플릿·디코딩 버전을 말하면 UnsupportedServingConfig.
+    # 호출자는 ModelPackageManifest.serving_config_hash를 expected로 넘긴다.
 ModelSession.parse(input: UtteranceParserInput) -> ParserOutput
 ModelSession.generate(input: ResponseGeneratorInput) -> GeneratorOutput
-render_prompt(role: "LORA_A"|"LORA_B", input: Mapping) -> str     # 학습 데이터 변환과 서빙이 같은 프롬프트를 쓰게 한다
-FakeModelSession                    # 모델 없이 호출 경로를 시험하는 구현
+render_prompt(role: "LORA_A"|"LORA_B", input: Mapping, *, serving_config: Mapping) -> str   # 학습 데이터 변환과 서빙이 같은 프롬프트를 쓰게 한다
+serving_config_hash(serving_config: Mapping) -> str     # CONVENTIONS의 정규화 JSON 해시
+validate_serving_config(serving_config: Mapping) -> None  # 형식 위반이면 ContractViolation. model-lab이 매니페스트를 쓰기 전에 호출한다
+FakeModelSession                    # 모델 없이 호출 경로를 시험하는 구현. 실제와 같은 검증·재시도 경로를 거친다
 RUNTIME_VERSION: str
 SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 ```
 
-출력이 문진 스키마를 통과하지 못하면 규정된 재시도 뒤 `ModelOutputInvalid`를 던진다. 조용히 통과시키지 않는다(O14는 이 라이브러리가 방식을 정한다).
+`serving_config`의 형식은 model-runtime이 정하고 라이브러리로 내놓는다(`ServingConfig`). 프롬프트 템플릿 버전, 디코딩 방식과 설정(제약 모드, 온도, 기본 시드), `max_attempts`를 반드시 포함한다. 어댑터에는 버전 정보를 따로 넣지 않는다. 어댑터는 `adapter_hash`로, 설정은 `serving_config_hash`로 고정된다.
+
+출력이 문진 스키마를 통과하지 못하면 `max_attempts`까지 재시도한 뒤 `ModelOutputInvalid`를 던진다. 조용히 통과시키지 않는다. 재시도의 프롬프트는 첫 시도와 같고(검증 오류를 덧붙이지 않는다), 시드만 `기본 시드 + 시도 번호`로 바꾼다. `ModelOutputInvalid`, `ServingConfigMismatch`, `UnsupportedServingConfig`는 라이브러리 예외이며 `BoundaryError`가 아니다. 제약 디코딩은 교체 가능한 백엔드이고 엔진 선택은 model-runtime이 정한다(O14).
 
 ## I10. 공개 API (survey-service ↔ Frontend)
 
