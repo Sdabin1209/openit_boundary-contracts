@@ -16,7 +16,10 @@
 
 ## 코드
 
-- `boundary_contracts/canonical.py`: JCS 정규화와 해시의 기준 구현. 시험: `python3 -m unittest discover -s tests`.
+- `boundary_contracts/canonical.py`: JCS 정규화와 해시의 기준 구현.
+- `boundary_contracts/errors.py`: 모든 경계 호출이 던지는 `BoundaryError`.
+- `boundary_contracts/sdk.py`: 인터페이스 I1~I7의 `typing.Protocol`. 소유 영역이 구현하고 소비 영역은 이것에 맞춰 개발한다.
+- 시험: `python3 -m unittest discover -s tests`.
 
 ## 문서
 
