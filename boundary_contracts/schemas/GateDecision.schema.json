@@ -75,7 +75,8 @@
           "result": {
             "enum": [
               "PASS",
-              "FAIL"
+              "FAIL",
+              "SKIPPED"
             ]
           },
           "evidence_ref": {
@@ -125,6 +126,19 @@
     },
     "submission_id": {
       "$ref": "_common.schema.json#/$defs/Id"
+    },
+    "reject_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "POLICY_INCOMPLETE",
+          "CHECK_FAILED",
+          "SUBJECT_UNREADABLE"
+        ]
+      },
+      "description": "반려의 기계 판독 사유. POLICY_INCOMPLETE는 정책이 비었거나 불완전해서 판정하지 않은 것이라 조합이 나쁘다는 뜻이 아니다. 소비자는 모르는 값을 '알 수 없음'으로 처리한다."
     }
   },
   "allOf": [
@@ -141,8 +155,17 @@
           "release_id"
         ],
         "not": {
-          "required": [
-            "reject_reasons"
+          "anyOf": [
+            {
+              "required": [
+                "reject_reasons"
+              ]
+            },
+            {
+              "required": [
+                "reject_codes"
+              ]
+            }
           ]
         },
         "properties": {
@@ -159,7 +182,8 @@
       },
       "else": {
         "required": [
-          "reject_reasons"
+          "reject_reasons",
+          "reject_codes"
         ],
         "not": {
           "required": [
@@ -169,5 +193,5 @@
       }
     }
   ],
-  "description": "문항·모델 조합 하나에 대한 게이트 판정. 통과와 반려 모두 기록한다. PASS이면 모든 검사가 PASS이고 release_id가 있다."
+  "description": "문항·모델 조합 하나에 대한 게이트 판정. 통과와 반려 모두 기록한다. PASS이면 모든 검사가 PASS이고 release_id가 있다. 같은 조합에 판정이 여러 개 있을 수 있다(정책 버전이 바뀐 뒤의 재판정). 가장 최근(decided_at, 같으면 decision_id가 큰 것)이 그 조합의 현재 판정이다."
 }

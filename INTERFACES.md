@@ -30,10 +30,13 @@ Page[T]    = (items: list[T], next_cursor: str | None)
 ```
 get_question_bank(ref: Ref) -> QuestionBank            # 문진 스키마 JSON. 해시 검증. NOT_FOUND, INTEGRITY_ERROR
 latest(question_set_id: str, *, reviewed_only: bool = False) -> Ref   # reviewed_only면 APPROVED 검수가 있고 clinical_basis_approved가 true인 최신. 없으면 NOT_FOUND
+list_ids(*, cursor=None, limit=100) -> Page[str]       # 문항 세트 ID 목록
 list_versions(question_set_id: str, *, cursor=None, limit=100) -> Page[Ref]   # 오래된 것부터
 get_reviews(ref: Ref) -> list[ReviewRecord]            # 시각순
 get_change(ref: Ref) -> ChangeClassification | None    # 첫 버전이면 None
 ```
+
+`ArtifactRef.version`은 문항 세트 버전 번호 n(1부터)의 문자열이고, 같은 번호가 `QuestionBank.version`(정수)이다. 즉 `ref.version == str(question_bank.version)`이 항상 성립한다. `reviewed_only`는 가장 최근 `ReviewRecord`가 승인(APPROVED이면서 `clinical_basis_approved`가 true)인 버전만 낸다. 승인 뒤에 반려가 덧붙으면 그 버전은 나오지 않는다(승인 철회). `ChangeClassification.affected_slots`의 각 문자열은 `<question_id>.<slot_id>`이다(반복 키는 쓰지 않는다). 문항 자료를 올린 출처는 `ReviewRecord.ext["question-authoring"].source`에 있다.
 
 저작 영역이 지키는 것: 문항 세트 버전은 저자(의료인)가 미리보기로 확인해야 만들어지고, 그 확인이 `ReviewRecord`(`clinical_basis_approved`)로 남는다(D30, D31). 검수가 끝나지 않은 버전도 `get_question_bank`로는 읽히지만 `reviewed_only` 조회에는 나오지 않는다. 같은 `(question_set_id, version)`의 내용은 바뀌지 않는다.
 
@@ -59,7 +62,8 @@ publish(manifest: ModelPackageManifest, adapter_dir: Path, eval_report: bytes) -
     # adapter_dir의 해시가 manifest.adapter_hash와 같아야 한다. eval_report는 manifest.eval_report_ref로 저장된다.
     # 멱등 규칙은 I2와 같다. 같은 (package_id, version)은 불변.
 get_manifest(package_id: str, version: str) -> ModelPackageManifest
-list_versions(package_id: str) -> list[str]
+list_ids(*, cursor=None, limit=100) -> Page[str]       # 패키지 ID 목록
+list_versions(package_id: str) -> list[str]            # 오래된 것부터(I2와 같다)
 open_adapter(package_id: str, version: str, *, dest: Path) -> Path   # dest 아래에 어댑터를 풀고 해시를 검증한다
 get_eval_report(ref: str) -> bytes                     # 사람이 읽는 첨부. 게이트는 내용을 해석하지 않는다
 ```
@@ -74,16 +78,19 @@ get_release(release_id: str) -> ReleaseManifest
 load_bundle(release_id: str, *, dest: Path) -> ReleaseBundle
     # ReleaseBundle(manifest: ReleaseManifest, question_bank: QuestionBank,
     #               adapters: dict["LORA_A"|"LORA_B", Path])
+    # 서비스가 I9 load에 넘기는 serving_config와 해시는 manifest.adapters[role]에 있다(I3를 읽지 않는다).
     # 모든 해시를 검증한다. 통과(PASS)하지 않은 릴리스는 FAILED_PRECONDITION.
 get_decision(decision_id: str) -> GateDecision
 find_decisions(*, question_set: Ref | None = None, lora_a: Ref | None = None, lora_b: Ref | None = None,
-               submission_id: str | None = None, cursor=None, limit=100) -> Page[GateDecision]   # 최신부터
+               submission_id: str | None = None, cursor=None, limit=100) -> Page[GateDecision]   # 최신부터. 같은 조합의 첫 항목이 그 조합의 현재 판정이다
 list_releases(*, cursor=None, limit=100) -> Page[ReleaseManifest]   # 최신부터
 ```
 
 서비스가 지키는 것: 포인터가 바뀌면 **새 세션부터** 새 릴리스를 쓴다(O13). `runtime_contract_version`을 지원하지 않는 릴리스는 `load_bundle` 결과를 적재하지 않고 이전 릴리스를 유지한다.
 
 ## I5. GateService (release-gate)
+
+역할(`requested_by_role`)은 **토큰에 묶여 있다**. 호출자가 말한 역할이 토큰의 역할과 다르면 `PERMISSION_DENIED`이고, 인자는 기록용이다. 허용 역할: 접수 `operator`·`release-gate-collector`·`question-authoring`·`model-lab`, 활성화 `operator`, 롤백 `ops-feedback`·`operator`(설정으로 바꾼다). 같은 조합에 판정이 여러 개일 수 있다. 정책 버전이 바뀐 뒤의 재판정은 같은 `submission_id`에 새 `GateDecision`을 더하고 가장 최근 것이 현재 판정이다. `reject_codes`가 `POLICY_INCOMPLETE`이면 조합이 나쁘다는 뜻이 아니다.
 
 서비스 API다. 쓰기 권한은 게이트에만 있다.
 
@@ -108,6 +115,8 @@ send(envelope: TraceEnvelope) -> IngestResult
     # trace는 envelope.runtime_contract_version의 문진 스키마 TurnTrace로 검증한다. 위반이면 INVALID_RECORD.
 ```
 
+HTTP 규약은 `CONVENTIONS.md` 9절이다: `POST /v1/traces`.
+
 서비스가 지키는 것: 전송은 턴 처리와 분리한다. 실패하면 서비스 쪽 영속 버퍼에 두고 `UNAVAILABLE`일 때만 재시도한다(최소 1회 전달, D16). 전송 때문에 턴 응답이 늦어지거나 실패하면 안 된다.
 수집이 지키는 것: 원본은 비식별 처리기만 읽는다(D15).
 
@@ -119,8 +128,10 @@ get_case(case_id: str, *, version: int | None = None) -> FailureCase   # 기본�
 list_cases(*, review_status=None, failure_type=None, source_release_id=None,
            updated_since: datetime | None = None, latest_only: bool = True,
            cursor=None, limit=100) -> Page[FailureCase]
-get_trace(deidentified_trace_ref: str) -> dict         # 비식별 TurnTrace. FailureCase에 비식별 전 데이터는 없다
+get_trace(deidentified_trace_ref: str) -> dict         # 비식별 TurnTrace(DeidentifiedTurnTrace). FailureCase에 비식별 전 데이터는 없다
 ```
+
+`get_trace`가 돌려주는 것은 TurnTrace의 **형태를 따르지만 TurnTrace 스키마 통과를 보장하지 않는다.** 자유 문자열은 마스킹 토큰으로 바뀌고, 스키마에 없는 키와 구조 없는 객체는 제거되며, 정책이 지목한 값은 통째로 마스킹된다. 소비자는 이것을 `TurnTrace`로 검증하지 말고 **구조 정보**(열거값, 식별자, 개수, 순서)만 쓴다. 비식별 뒤에 발화 문장 자체를 어디까지 남길지는 비식별 기준이며 사용자가 정한다(O19). `RollbackRequest.evidence_refs`는 ops-feedback이 해석하는 불투명한 Id이고 게이트는 기록만 한다.
 
 소비자가 지키는 것: `review_status`가 CONFIRMED이고 `expected`가 있는 것만 정답 있는 회귀 케이스로 쓴다.
 

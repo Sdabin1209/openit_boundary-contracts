@@ -14,9 +14,14 @@
 
 `../head/docs/STRUCTURE.md` 7절의 11개 모두: ReleaseManifest, GateDecision, TraceEnvelope, ReviewRecord, ChangeClassification, ParserSample, GeneratorSample, DatasetManifest, ModelPackageManifest, FailureCase, RollbackRequest. 모두 불변 레코드다(D25). 여기에 BoundaryError, IngestResult, GateSubmission, ActivePointer, RollbackReceipt가 더해진다.
 
+## 설치
+
+`pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@v1.0.0` (Git 태그 설치, D18). 패키지 버전의 MAJOR.MINOR는 `pipeline_schema_version`과 같다. 개발 중에는 `pip install -e ../boundary-contracts`.
+
 ## 코드
 
 - `boundary_contracts/canonical.py`: JCS 정규화와 해시의 기준 구현.
+- `boundary_contracts/schemas/`: 스키마(패키지 데이터). 저장소 루트의 `schemas`는 이것을 가리키는 링크다. `load_schema(name)`, `validator(name)`, `schema_dir()`로 쓴다.
 - `boundary_contracts/errors.py`: 모든 경계 호출이 던지는 `BoundaryError`.
 - `boundary_contracts/sdk.py`: 인터페이스 I1~I7의 `typing.Protocol`. 소유 영역이 구현하고 소비 영역은 이것에 맞춰 개발한다.
 - 시험: `python3 -m unittest discover -s tests`.

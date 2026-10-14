@@ -34,5 +34,8 @@
   ],
   "approver": {
     "role": "gate-service"
-  }
+  },
+  "reject_codes": [
+    "CHECK_FAILED"
+  ]
 }

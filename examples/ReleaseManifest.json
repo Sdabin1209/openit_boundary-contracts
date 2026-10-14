@@ -21,5 +21,21 @@
   "runtime_contract_version": 1,
   "turn_engine_version": "0.1.0",
   "model_runtime_version": "0.1.0",
-  "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "adapters": {
+    "LORA_A": {
+      "adapter_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "serving_config": {
+        "protection_policy_version": "protect-1"
+      },
+      "serving_config_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "LORA_B": {
+      "adapter_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "serving_config": {
+        "protection_policy_version": "protect-1"
+      },
+      "serving_config_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
 }

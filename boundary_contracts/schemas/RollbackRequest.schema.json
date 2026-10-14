@@ -39,7 +39,8 @@
       "minItems": 1,
       "items": {
         "$ref": "_common.schema.json#/$defs/Id"
-      }
+      },
+      "description": "근거 식별자. 요청하는 영역(ops-feedback)이 해석하는 불투명한 Id(지표 스냅샷, FailureCase.case_id 등)이고 게이트는 해석하지 않고 기록만 한다."
     },
     "requested_by_role": {
       "type": "string",

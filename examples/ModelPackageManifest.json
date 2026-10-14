@@ -20,7 +20,14 @@
     },
     "training_run_id": "run-1",
     "turn_engine_version": "0.1.0",
-    "model_runtime_version": "0.1.0"
+    "model_runtime_version": "0.1.0",
+    "question_sets": [
+      {
+        "id": "qs-main",
+        "version": "3",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    ]
   },
   "eval_report_ref": "eval-7",
   "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"

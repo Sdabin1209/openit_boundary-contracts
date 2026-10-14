@@ -14,7 +14,8 @@
     "runtime_contract_version",
     "turn_engine_version",
     "model_runtime_version",
-    "content_hash"
+    "content_hash",
+    "adapters"
   ],
   "properties": {
     "pipeline_schema_version": {
@@ -53,6 +54,59 @@
     "ext": {
       "type": "object",
       "description": "영역이 계약을 바꾸지 않고 덧붙이는 부가 정보. 키는 영역 이름(예: 'model-lab')이고 값은 그 영역이 정한다. 다른 영역은 이해하지 못해도 보존하고 전달해야 하며, 판단에 쓰지 않는다. 여러 영역이 필요로 하게 되면 정식 필드로 올린다."
+    },
+    "adapters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "LORA_A",
+        "LORA_B"
+      ],
+      "properties": {
+        "LORA_A": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "adapter_hash",
+            "serving_config",
+            "serving_config_hash"
+          ],
+          "properties": {
+            "adapter_hash": {
+              "$ref": "_common.schema.json#/$defs/Hash"
+            },
+            "serving_config": {
+              "type": "object",
+              "description": "model-runtime의 ServingConfig. serving_config_hash는 canonical.sha256_hash(serving_config)이다(기본값을 채우지 않은 그대로)."
+            },
+            "serving_config_hash": {
+              "$ref": "_common.schema.json#/$defs/Hash"
+            }
+          }
+        },
+        "LORA_B": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "adapter_hash",
+            "serving_config",
+            "serving_config_hash"
+          ],
+          "properties": {
+            "adapter_hash": {
+              "$ref": "_common.schema.json#/$defs/Hash"
+            },
+            "serving_config": {
+              "type": "object",
+              "description": "model-runtime의 ServingConfig. serving_config_hash는 canonical.sha256_hash(serving_config)이다(기본값을 채우지 않은 그대로)."
+            },
+            "serving_config_hash": {
+              "$ref": "_common.schema.json#/$defs/Hash"
+            }
+          }
+        }
+      },
+      "description": "서비스가 I9 load에 넘기는 값. ModelPackageManifest의 같은 값을 게이트가 복사해 담는다. 서비스가 모델 레지스트리(I3)를 읽지 않아도 되게 한다."
     }
   },
   "description": "게이트가 통과시킨 문항 세트·LoRA-A·LoRA-B 조합. 불변이다. content_hash는 이 객체에서 content_hash를 뺀 값의 정규화 JSON(RFC 8785)의 해시이며, 참조한 산출물은 각각 자기 content_hash를 가진다."

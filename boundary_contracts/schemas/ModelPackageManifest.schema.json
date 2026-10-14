@@ -90,6 +90,13 @@
         },
         "model_runtime_version": {
           "$ref": "_common.schema.json#/$defs/LibraryVersion"
+        },
+        "question_sets": {
+          "type": "array",
+          "items": {
+            "$ref": "_common.schema.json#/$defs/ArtifactRef"
+          },
+          "description": "학습에 쓴 문항 세트. 게이트의 QUESTION_MODEL_COMPAT가 참고하는 정보이며 반려 근거로 쓰지는 않는다(새 문항 세트는 재학습 없이 출고할 수 있다, D32)."
         }
       }
     },

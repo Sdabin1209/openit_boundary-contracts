@@ -33,6 +33,10 @@ neg("시나리오 분리 미확인 데이터셋", "DatasetManifest", "DatasetMan
 neg("비식별 안 된 실패 사례", "FailureCase", "FailureCase", lambda d: d.update(deidentified=False))
 neg("근거 없는 롤백 요청", "RollbackRequest", "RollbackRequest", lambda d: d.update(evidence_refs=[]))
 neg("모델 패키지에 알 수 없는 상태 필드", "ModelPackageManifest", "ModelPackageManifest", lambda d: d.update(status="APPROVED"))
+neg("REJECT인데 reject_codes 없음", "GateDecision", "GateDecision.reject", lambda d: d.pop("reject_codes"))
+neg("PASS에 SKIPPED 검사 포함", "GateDecision", "GateDecision.pass", lambda d: d["checks"][0].update(result="SKIPPED"))
+neg("PASS인데 reject_codes 있음", "GateDecision", "GateDecision.pass", lambda d: d.update(reject_codes=["CHECK_FAILED"]))
+neg("adapters에 LORA_B 없음", "ReleaseManifest", "ReleaseManifest", lambda d: d["adapters"].pop("LORA_B"))
 neg("알 수 없는 오류 코드", "BoundaryError", "BoundaryError", lambda d: d.update(code="WHATEVER"))
 neg("적용된 롤백에 포인터 없음", "RollbackReceipt", "RollbackReceipt", lambda d: d.pop("active_pointer"))
 neg("거부된 롤백에 사유 없음", "RollbackReceipt", "RollbackReceipt", lambda d: (d.update(status="REJECTED"), d.pop("active_pointer")))
@@ -40,4 +44,13 @@ neg("포인터 버전 0", "ActivePointer", "ActivePointer", lambda d: d.update(p
 # 확장 필드는 허용되어야 한다
 d = ex("ReleaseManifest"); d["ext"] = {"model-lab": {"note": "x"}}
 errs = list(val("ReleaseManifest").iter_errors(d)); print("OK  " if not errs else "FAIL", "ext 허용"); bad += bool(errs)
+# 문진 스키마가 같은 워크스페이스에 있으면 TraceEnvelope.trace를 TurnTrace로 검증한다.
+survey = os.path.join(here, "..", "survey-service", "schema", "schemas", "TurnTrace.json")
+if os.path.exists(survey):
+    _tt = json.load(open(survey)); _tt.pop("$id", None)  # 상대 $id는 참조 해석을 깨뜨린다
+    tt = jsonschema.Draft202012Validator(_tt)
+    errs = [e.message for e in tt.iter_errors(ex("TraceEnvelope")["trace"])]
+    print("OK  " if not errs else "FAIL", "TraceEnvelope.trace는 TurnTrace를 통과", errs[:2]); bad += bool(errs)
+else:
+    print("건너뜀: 문진 스키마가 없어 TraceEnvelope.trace를 TurnTrace로 검증하지 않음")
 sys.exit(1 if bad else 0)

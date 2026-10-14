@@ -64,3 +64,30 @@ SDK는 `BoundaryError`를 예외로 던진다. 메모리 구현도 같은 예외
 - 데이터셋 파일은 JSON Lines(UTF-8, 한 줄에 샘플 하나)다.
 - 문항 세트(`QuestionBank`)와 FailureCase의 비식별 Trace는 JSON이다.
 - 어댑터는 디렉터리이며 `adapter_hash`는 `directory_hash`다.
+
+## 9. HTTP 전송 규약 (서비스 API)
+
+SDK의 원격 구현과 서비스 API가 같은 규칙을 쓴다.
+- 본문은 JSON, 인증은 `Authorization: Bearer <서비스 토큰>`이다. 토큰은 환경 변수로 받고, 서버가 토큰에 **역할을 묶어** 둔다. 호출자가 역할을 주장하지 못한다. 토큰 발급·회전은 단일 서버에서는 정적 토큰으로 시작하고 deploy가 비밀 값으로 관리한다.
+- 모든 서비스는 `GET /healthz`, `GET /readyz`를 둔다.
+- 실패는 `BoundaryError` 레코드를 본문으로 낸다. 상태 코드는 다음으로 고정한다.
+
+| BoundaryError.code | HTTP |
+| --- | --- |
+| INVALID_RECORD | 400 |
+| PERMISSION_DENIED | 403 |
+| NOT_FOUND | 404 |
+| CONFLICT | 409 |
+| FAILED_PRECONDITION | 412 |
+| UNSUPPORTED_VERSION, INTEGRITY_ERROR | 422 |
+| UNAVAILABLE | 503 |
+
+- 수집(I6): `POST /v1/traces`, 본문 `TraceEnvelope`, 성공은 200과 `IngestResult`.
+- 쓰기 요청의 멱등성은 4절을 따른다(같은 ID와 내용이면 같은 응답).
+
+## 10. 직렬화 규칙
+
+- `SlotRef`를 문자열로 쓸 때는 `<question_id>.<slot_id>`이다(반복 키는 쓰지 않는다).
+- `ArtifactRef.version`은 문자열이다. 문항 세트는 버전 번호 n의 문자열이며 `QuestionBank.version`(정수)과 같은 번호다.
+- 같은 조합에 판정이 여러 개이면 가장 최근(`decided_at`, 같으면 `decision_id`가 큰 것)이 현재 판정이다.
+- `serving_config_hash`는 `canonical.sha256_hash(serving_config)`이다(기본값을 채우지 않은 그대로).
