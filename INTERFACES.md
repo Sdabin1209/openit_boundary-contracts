@@ -142,25 +142,35 @@ SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 ## I9. model-runtime (라이브러리)
 
 ```
-load(adapters: Mapping["LORA_A"|"LORA_B", Path], serving_config: Mapping, *, expected_serving_config_hash: str) -> ModelSession
+load(adapters: Mapping["LORA_A"|"LORA_B", Path], serving_config: Mapping, *, schema_dir: Path,
+     expected_serving_config_hash: str, backend=None) -> ModelSession
+    # schema_dir: 문진 스키마의 배포 스키마 디렉터리(`<...>/schema/schemas`, <계약명>.json이 있는 곳). 상위의 CONTRACT_VERSION을 읽어
+    #   SUPPORTED_RUNTIME_CONTRACT_VERSION과 다르면 ContractVersionMismatch.
     # serving_config_hash(serving_config) != expected_serving_config_hash 이면 ServingConfigMismatch.
-    # serving_config가 지원하지 않는 프롬프트 템플릿·디코딩 버전을 말하면 UnsupportedServingConfig.
-    # 호출자는 ModelPackageManifest.serving_config_hash를 expected로 넘긴다.
-ModelSession.parse(input: UtteranceParserInput) -> ParserOutput
-ModelSession.generate(input: ResponseGeneratorInput) -> GeneratorOutput
-render_prompt(role: "LORA_A"|"LORA_B", input: Mapping, *, serving_config: Mapping) -> str   # 학습 데이터 변환과 서빙이 같은 프롬프트를 쓰게 한다
-serving_config_hash(serving_config: Mapping) -> str     # CONVENTIONS의 정규화 JSON 해시
+    # 지원하지 않는 프롬프트 템플릿·디코딩 버전이면 UnsupportedServingConfig.
+ModelSession.parse(input: UtteranceParserInput) -> ParserOutput          # 항상 스키마를 통과하는 값. 아래 '출력 보호'
+ModelSession.generate(input: ResponseGeneratorInput) -> GeneratorOutput  # 항상 스키마를 통과하는 값. 아래 '출력 보호'
+ModelSession.parse_raw(input) -> RawResult    # 평가용: 보호 전 모델 출력과 유효 여부. RawResult(output: dict | None, valid: bool, errors: list[str])
+ModelSession.generate_raw(input) -> RawResult
+ModelSession.last_call_info                   # 시도 횟수, 보호(repaired|fallback) 여부와 종류 등. 입력 원문은 담지 않는다
+render_prompt(role: "LORA_A"|"LORA_B", input: Mapping, *, serving_config: Mapping, schema_dir: Path) -> str
+serving_config_hash(serving_config: Mapping) -> str     # boundary_contracts.canonical 기준
 validate_serving_config(serving_config: Mapping) -> None  # 형식 위반이면 ContractViolation. model-lab이 매니페스트를 쓰기 전에 호출한다
-FakeModelSession                    # 모델 없이 호출 경로를 시험하는 구현. 실제와 같은 검증·재시도 경로를 거친다
+FakeModelSession                    # 모델 없이 호출 경로를 시험하는 구현. 실제와 같은 검증·재시도·보호 경로를 거친다
 RUNTIME_VERSION: str
 SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 ```
 
-I9 밖의 선택 확장(model-runtime이 추가, 헤드가 승인): `load`의 선택 인자 `backend`(테스트용 백엔드 주입)와 `schema_dir`, `ModelSession.last_call_info`(마지막 호출의 시도 횟수 등 메타데이터. 입력 원문은 담지 않는다). 문진 스키마 사본은 라이브러리에 묶지 않고 **호출자가 `schema_dir`로 넘긴다**(서비스는 자기 `schema/`, 다른 영역은 `../survey-service/schema/schemas`). 라이브러리는 `schema_dir`의 상위 `CONTRACT_VERSION`을 읽어 `SUPPORTED_RUNTIME_CONTRACT_VERSION`과 다르면 `UnsupportedServingConfig`가 아니라 `ContractVersionMismatch`를 던진다.
+전역 설정 함수(`configure`)는 두지 않는다. 필요한 값은 모두 인자로 받는다.
 
-`serving_config`의 형식은 model-runtime이 정하고 라이브러리로 내놓는다(`ServingConfig`). 프롬프트 템플릿 버전, 디코딩 방식과 설정(제약 모드, 온도, 기본 시드), `max_attempts`를 반드시 포함한다. 어댑터에는 버전 정보를 따로 넣지 않는다. 어댑터는 `adapter_hash`로, 설정은 `serving_config_hash`로 고정된다.
+`serving_config`의 형식은 model-runtime이 정하고 라이브러리로 내놓는다(`ServingConfig`). 프롬프트 템플릿 버전, 디코딩 방식과 설정(제약 모드, 온도, 기본 시드), `max_attempts`를 반드시 포함한다. 어댑터에는 버전 정보를 따로 넣지 않는다. 어댑터는 `adapter_hash`(`directory_hash`)로, 설정은 `serving_config_hash`로 고정된다.
 
-출력이 문진 스키마를 통과하지 못하면 `max_attempts`까지 재시도한 뒤 `ModelOutputInvalid`를 던진다. 조용히 통과시키지 않는다. 재시도의 프롬프트는 첫 시도와 같고(검증 오류를 덧붙이지 않는다), 시드만 `기본 시드 + 시도 번호`로 바꾼다. `ModelOutputInvalid`, `ServingConfigMismatch`, `UnsupportedServingConfig`는 라이브러리 예외이며 `BoundaryError`가 아니다. 제약 디코딩은 교체 가능한 백엔드이고 엔진 선택은 model-runtime이 정한다(O14).
+**출력 보호(D36).** 문진 스키마의 업무 규칙은 각 컴포넌트가 "출력이 자기 계약을 지키는 것까지 책임지고, 지키지 못할 때 낼 대체 출력도 정해 둔다"고 한다. 그래서 `parse`와 `generate`는 모델 출력이 깨져도 예외를 던지지 않고 **규칙이 정한 대체 출력**을 돌려준다(턴은 실패하지 않는다). 재시도(`max_attempts`)를 다 쓴 뒤에도 유효하지 않으면 보호를 적용한다. 재시도의 프롬프트는 첫 시도와 같고(검증 오류를 덧붙이지 않는다), 시드만 `기본 시드 + 시도 번호`로 바꾼다.
+- `parse`: 형식을 못 지키면 빈 목록. 항목의 의도, 대상, 값이 규칙을 어기면 규칙이 정한 대로 고친다(대체 출력 규칙은 업무 규칙 문서에 있고, 이 라이브러리가 코드로 구현한다). 대상이 문항 정의에 없는 항목은 고치지 않고 그대로 낸다.
+- `generate`: 모델은 `response_text`만 낸다. `is_fallback`은 **모델이 아니라 코드가 채운다**(정상이면 false). 응답 지시를 지키지 못하면 문장 재료를 그대로 읽는 문장을 만들고 `is_fallback=true`로 낸다.
+- 보호가 적용되면 `last_call_info`에 어떤 보호가 몇 건 적용됐는지 남긴다. 조용히 지나가지 않는다. model-lab은 `*_raw`로 보호 전 품질을 따로 잰다.
+- 라이브러리 예외는 인프라 문제에만 쓴다(`BackendNotAvailable` 등). `BoundaryError`가 아니다.
+제약 디코딩은 교체 가능한 백엔드이고 엔진 선택은 model-runtime이 정한다(O14).
 
 ## I10. 공개 API (survey-service ↔ Frontend)
 
