@@ -1,0 +1,38 @@
+{
+  "pipeline_schema_version": "1.0",
+  "decision_id": "gd-0002",
+  "decided_at": "2026-10-14T00:00:00Z",
+  "gate_policy_version": "1",
+  "subject": {
+    "question_set": {
+      "id": "qs-main",
+      "version": "4",
+      "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "lora_a": {
+      "id": "lora-a",
+      "version": "1.2.0",
+      "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "lora_b": {
+      "id": "lora-b",
+      "version": "1.0.1",
+      "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "runtime_contract_version": 1,
+  "result": "REJECT",
+  "checks": [
+    {
+      "kind": "QUESTION_MODEL_COMPAT",
+      "result": "FAIL",
+      "detail": "문항 4의 단위 코드가 LoRA-A 학습 범위 밖"
+    }
+  ],
+  "reject_reasons": [
+    "QUESTION_MODEL_COMPAT 실패"
+  ],
+  "approver": {
+    "role": "gate-service"
+  }
+}

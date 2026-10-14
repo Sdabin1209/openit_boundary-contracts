@@ -1,0 +1,40 @@
+{
+  "pipeline_schema_version": "1.0",
+  "decision_id": "gd-0001",
+  "decided_at": "2026-10-14T00:00:00Z",
+  "gate_policy_version": "1",
+  "subject": {
+    "question_set": {
+      "id": "qs-main",
+      "version": "3",
+      "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "lora_a": {
+      "id": "lora-a",
+      "version": "1.2.0",
+      "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "lora_b": {
+      "id": "lora-b",
+      "version": "1.0.1",
+      "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "runtime_contract_version": 1,
+  "result": "PASS",
+  "checks": [
+    {
+      "kind": "CONTRACT_COMPAT",
+      "result": "PASS"
+    },
+    {
+      "kind": "ACCEPTANCE_EVAL",
+      "result": "PASS",
+      "evidence_ref": "eval-0007"
+    }
+  ],
+  "approver": {
+    "role": "gate-service"
+  },
+  "release_id": "rel-0001"
+}

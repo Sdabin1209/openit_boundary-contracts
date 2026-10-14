@@ -1,0 +1,27 @@
+{
+  "pipeline_schema_version": "1.0",
+  "package_id": "lora-a",
+  "version": "1.2.0",
+  "role": "LORA_A",
+  "created_at": "2026-10-15T00:00:00Z",
+  "runtime_contract_version": 1,
+  "base_model": {
+    "id": "base-model",
+    "revision": "r1"
+  },
+  "adapter_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "serving_config": {},
+  "serving_config_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "lineage": {
+    "dataset": {
+      "id": "ds-1",
+      "version": "1",
+      "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "training_run_id": "run-1",
+    "turn_engine_version": "0.1.0",
+    "model_runtime_version": "0.1.0"
+  },
+  "eval_report_ref": "eval-7",
+  "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+}

@@ -1,0 +1,17 @@
+{
+  "pipeline_schema_version": "1.0",
+  "sample_id": "gs-1",
+  "scenario_id": "sc-1",
+  "question_set": {
+    "id": "qs-main",
+    "version": "3",
+    "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "runtime_contract_version": 1,
+  "style_guide_version": "1",
+  "split": "EVAL",
+  "origin": "FAILURE_CASE_SEED",
+  "seed_case_id": "fc-1",
+  "input": {},
+  "expected": {}
+}

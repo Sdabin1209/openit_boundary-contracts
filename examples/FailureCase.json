@@ -1,0 +1,13 @@
+{
+  "pipeline_schema_version": "1.0",
+  "case_id": "fc-1",
+  "version": 1,
+  "created_at": "2026-10-15T00:00:00Z",
+  "source_release_id": "rel-0001",
+  "runtime_contract_version": 1,
+  "deidentified": true,
+  "deidentified_trace_ref": "tr-1",
+  "failure_type": "UNCLASSIFIED",
+  "detection_method": "RULE",
+  "review_status": "PENDING"
+}

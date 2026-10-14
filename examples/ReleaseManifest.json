@@ -1,0 +1,25 @@
+{
+  "pipeline_schema_version": "1.0",
+  "release_id": "rel-0001",
+  "created_at": "2026-10-14T00:00:00Z",
+  "gate_decision_id": "gd-0001",
+  "question_set": {
+    "id": "qs-main",
+    "version": "3",
+    "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "lora_a": {
+    "id": "lora-a",
+    "version": "1.2.0",
+    "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "lora_b": {
+    "id": "lora-b",
+    "version": "1.0.1",
+    "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "runtime_contract_version": 1,
+  "turn_engine_version": "0.1.0",
+  "model_runtime_version": "0.1.0",
+  "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+}

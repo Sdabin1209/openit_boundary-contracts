@@ -1,0 +1,25 @@
+{
+  "pipeline_schema_version": "1.0",
+  "classification_id": "cc-1",
+  "to": {
+    "id": "qs-main",
+    "version": "3",
+    "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "from": {
+    "id": "qs-main",
+    "version": "2",
+    "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "change_kinds": [
+    "CHOICE_UNIT"
+  ],
+  "affected_slots": [
+    "Q3b.frequency"
+  ],
+  "follow_ups": [
+    "REGENERATE_SAMPLES",
+    "REEVALUATE_MODEL"
+  ],
+  "created_at": "2026-10-15T00:00:00Z"
+}

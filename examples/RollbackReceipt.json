@@ -1,0 +1,13 @@
+{
+  "pipeline_schema_version": "1.0",
+  "request_id": "rb-1",
+  "status": "APPLIED",
+  "active_pointer": {
+    "pipeline_schema_version": "1.0",
+    "release_id": "rel-0001",
+    "pointer_version": 1,
+    "activated_at": "2026-10-15T00:00:00Z",
+    "cause": "ACTIVATE"
+  },
+  "decided_at": "2026-10-15T00:00:00Z"
+}
