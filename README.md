@@ -16,7 +16,7 @@
 
 ## 설치
 
-`pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@v1.0.0` (Git 태그 설치, D18). 패키지 버전의 MAJOR.MINOR는 `pipeline_schema_version`과 같다. 개발 중에는 `pip install -e ../boundary-contracts`.
+`pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@v1.1.0` (Git 태그 설치, D18). 패키지 버전의 MAJOR.MINOR는 `pipeline_schema_version`과 같다. 개발 중에는 `pip install -e ../boundary-contracts`.
 
 ## 코드
 

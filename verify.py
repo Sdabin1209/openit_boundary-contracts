@@ -53,4 +53,6 @@ if os.path.exists(survey):
     print("OK  " if not errs else "FAIL", "TraceEnvelope.trace는 TurnTrace를 통과", errs[:2]); bad += bool(errs)
 else:
     print("건너뜀: 문진 스키마가 없어 TraceEnvelope.trace를 TurnTrace로 검증하지 않음")
+d = ex("FailureCase"); d["pipeline_schema_version"] = "1.0"; d.pop("question_set", None); d["expected"] = {}
+errs = [e.message for e in val("FailureCase").iter_errors(d)]; print("OK  " if not errs else "FAIL", "1.0 FailureCase(expected_kind 없음)는 1.1에서도 유효", errs); bad += bool(errs)
 sys.exit(1 if bad else 0)

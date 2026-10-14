@@ -87,7 +87,9 @@ SDK의 원격 구현과 서비스 API가 같은 규칙을 쓴다.
 
 ## 10. 직렬화 규칙
 
-- `SlotRef`를 문자열로 쓸 때는 `<question_id>.<slot_id>`이다(반복 키는 쓰지 않는다).
+- `SlotRef`를 문자열로 쓸 때는 `<question_id>.<slot_id>`이다(반복 키는 쓰지 않는다). 읽을 때는 **마지막 `.`**에서 나눈다. 문항 ID에는 `.`이 있을 수 있고 슬롯 ID에는 없다.
+- `version`(데이터셋, 모델 패키지, 문항 세트 등 모든 산출물)은 Id 규칙(`[A-Za-z0-9][A-Za-z0-9._:-]*`, 128자)을 따른다. 파일 경로에 쓸 수 있어야 하기 때문이다. SDK 구현은 어기면 `INVALID_RECORD`로 거부한다.
+- 재현성: 같은 입력과 시드는 같은 **내용**을 낸다. 내용 비교는 시각과 버전을 뺀 해시(예: 데이터셋의 `ext."synthetic-data".dataset_digest`)로 하고, `content_hash` 자체는 `created_at`을 포함하므로 시각이 다르면 달라진다. 같은 내용 해시의 산출물이 이미 있으면 새로 게시하지 않는다.
 - `ArtifactRef.version`은 문자열이다. 문항 세트는 버전 번호 n의 문자열이며 `QuestionBank.version`(정수)과 같은 번호다.
 - 같은 조합에 판정이 여러 개이면 가장 최근(`decided_at`, 같으면 `decision_id`가 큰 것)이 현재 판정이다.
 - `serving_config_hash`는 `canonical.sha256_hash(serving_config)`이다(기본값을 채우지 않은 그대로).

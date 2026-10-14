@@ -69,6 +69,17 @@
     "ext": {
       "type": "object",
       "description": "영역이 계약을 바꾸지 않고 덧붙이는 부가 정보. 키는 영역 이름(예: 'model-lab')이고 값은 그 영역이 정한다. 다른 영역은 이해하지 못해도 보존하고 전달해야 하며, 판단에 쓰지 않는다. 여러 영역이 필요로 하게 되면 정식 필드로 올린다."
+    },
+    "question_set": {
+      "$ref": "_common.schema.json#/$defs/ArtifactRef",
+      "description": "이 실패가 일어난 릴리스의 문항 세트. 수집 영역이 source_release_id의 ReleaseManifest(I4)에서 채운다."
+    },
+    "expected_kind": {
+      "enum": [
+        "PARSER",
+        "GENERATOR"
+      ],
+      "description": "expected가 ParserOutput인지 GeneratorOutput인지. expected가 있으면 함께 적기를 권한다(1.0 생산자는 생략할 수 있으므로 소비자는 없을 때 expected의 형태로 판별한다). 모르는 값은 '알 수 없음'으로 처리한다."
     }
   },
   "then": {
