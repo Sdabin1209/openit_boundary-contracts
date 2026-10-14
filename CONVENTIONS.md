@@ -15,6 +15,7 @@
 - ID는 `[A-Za-z0-9][A-Za-z0-9._:-]*`, 최대 128자. 의미를 담지 않는다.
 - 시각은 UTC `Z` 표기의 RFC 3339 문자열이다.
 - 해시는 `sha256:` + 소문자 16진 64자이며, 대상 JSON을 RFC 8785(JCS)로 정규화한 바이트의 SHA-256이다. 파일은 바이트 그대로 해시한다. `content_hash` 필드가 있는 레코드는 자기 자신의 `content_hash`를 뺀 객체를 해시한다.
+- **해시는 기준 구현 `boundary_contracts.canonical`(`sha256_hash`, `content_hash`, `file_hash`, `directory_hash`)로만 계산한다.** SDK와 서비스는 자기 구현을 두지 않는다. 숫자 직렬화와 키 정렬을 구현마다 다르게 하면 해시가 어긋난다. 정수는 절댓값 2**53 이하만 허용한다. 디렉터리 해시는 파일마다 {경로, 파일 해시}를 모아 경로 순으로 정렬한 목록의 JCS 해시다. 개발 중에는 `PYTHONPATH=../boundary-contracts`로 가져온다.
 - `ArtifactRef`(id, version, content_hash)로 가리킨 것을 읽을 때, 읽는 쪽 SDK는 내용의 해시를 다시 계산해 다르면 `INTEGRITY_ERROR`를 낸다.
 
 ## 3. 오류 (`BoundaryError`)
@@ -62,4 +63,4 @@ SDK는 `BoundaryError`를 예외로 던진다. 메모리 구현도 같은 예외
 
 - 데이터셋 파일은 JSON Lines(UTF-8, 한 줄에 샘플 하나)다.
 - 문항 세트(`QuestionBank`)와 FailureCase의 비식별 Trace는 JSON이다.
-- 어댑터는 디렉터리이며 `adapter_hash`는 디렉터리 내용을 경로 순으로 이어 해시한 값이다(경로와 파일 해시의 목록을 JCS로 정규화).
+- 어댑터는 디렉터리이며 `adapter_hash`는 `directory_hash`다.

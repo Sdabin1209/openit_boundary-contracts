@@ -14,6 +14,10 @@
 
 `../head/docs/STRUCTURE.md` 7절의 11개 모두: ReleaseManifest, GateDecision, TraceEnvelope, ReviewRecord, ChangeClassification, ParserSample, GeneratorSample, DatasetManifest, ModelPackageManifest, FailureCase, RollbackRequest. 모두 불변 레코드다(D25). 여기에 BoundaryError, IngestResult, GateSubmission, ActivePointer, RollbackReceipt가 더해진다.
 
+## 코드
+
+- `boundary_contracts/canonical.py`: JCS 정규화와 해시의 기준 구현. 시험: `python3 -m unittest discover -s tests`.
+
 ## 문서
 
 - `CONVENTIONS.md`: 공통 규약(진화 규칙, ID·시각·해시, 오류, 멱등성, 인증, SDK 형태).

@@ -156,6 +156,8 @@ RUNTIME_VERSION: str
 SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 ```
 
+I9 밖의 선택 확장(model-runtime이 추가, 헤드가 승인): `load`의 선택 인자 `backend`(테스트용 백엔드 주입)와 `schema_dir`, `ModelSession.last_call_info`(마지막 호출의 시도 횟수 등 메타데이터. 입력 원문은 담지 않는다). 문진 스키마 사본은 라이브러리에 묶지 않고 **호출자가 `schema_dir`로 넘긴다**(서비스는 자기 `schema/`, 다른 영역은 `../survey-service/schema/schemas`). 라이브러리는 `schema_dir`의 상위 `CONTRACT_VERSION`을 읽어 `SUPPORTED_RUNTIME_CONTRACT_VERSION`과 다르면 `UnsupportedServingConfig`가 아니라 `ContractVersionMismatch`를 던진다.
+
 `serving_config`의 형식은 model-runtime이 정하고 라이브러리로 내놓는다(`ServingConfig`). 프롬프트 템플릿 버전, 디코딩 방식과 설정(제약 모드, 온도, 기본 시드), `max_attempts`를 반드시 포함한다. 어댑터에는 버전 정보를 따로 넣지 않는다. 어댑터는 `adapter_hash`로, 설정은 `serving_config_hash`로 고정된다.
 
 출력이 문진 스키마를 통과하지 못하면 `max_attempts`까지 재시도한 뒤 `ModelOutputInvalid`를 던진다. 조용히 통과시키지 않는다. 재시도의 프롬프트는 첫 시도와 같고(검증 오류를 덧붙이지 않는다), 시드만 `기본 시드 + 시도 번호`로 바꾼다. `ModelOutputInvalid`, `ServingConfigMismatch`, `UnsupportedServingConfig`는 라이브러리 예외이며 `BoundaryError`가 아니다. 제약 디코딩은 교체 가능한 백엔드이고 엔진 선택은 model-runtime이 정한다(O14).
