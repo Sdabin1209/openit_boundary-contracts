@@ -102,3 +102,17 @@ class HttpGateService(HttpClientBase):
         if report_hash is not None:
             body["report_hash"] = report_hash
         return check_record("GateApproval", self._json("POST", "/v1/approvals", body=body))
+
+    def list_submissions(self, *, status: Optional[str] = None, cursor: Optional[str] = None, limit: int = 100):
+        """제출 목록(D68). 승인 대기 건은 status="AWAITING_APPROVAL"."""
+        q = {"limit": limit}
+        if status:
+            q["status"] = status
+        if cursor:
+            q["cursor"] = cursor
+        r = self._json("GET", "/v1/submissions", query=q)
+        return [check_record("SubmissionView", x) for x in r.get("items", [])], r.get("next_cursor")
+
+    def get_submission(self, submission_id: str) -> dict:
+        check_id(submission_id)
+        return check_record("SubmissionView", self._json("GET", f"/v1/submissions/{submission_id}"))

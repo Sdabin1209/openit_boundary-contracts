@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SubmissionView",
+  "description": "게이트의 제출 한 건의 현재 상태(승인 화면용, D68). 제출 레코드 GateSubmission에 처리 상태를 더한 읽기용 뷰다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "submission_id",
+    "submitted_at",
+    "submitted_by_role",
+    "subject",
+    "status",
+    "updated_at"
+  ],
+  "properties": {
+    "submission_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "submitted_by_role": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "object"
+    },
+    "status": {
+      "enum": [
+        "PENDING_CHECK",
+        "AWAITING_APPROVAL",
+        "REJECTED_AUTO",
+        "REJECTED_HUMAN",
+        "PASSED"
+      ],
+      "description": "PENDING_CHECK 자동 검사 전, AWAITING_APPROVAL 사람 승인 대기, REJECTED_AUTO 자동 검사 반려, REJECTED_HUMAN 사람이 반려, PASSED 승인되어 릴리스 발급. 모르는 값은 그대로 보여 준다"
+    },
+    "decision_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "approval_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "release_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

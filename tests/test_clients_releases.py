@@ -124,6 +124,15 @@ class Approval(unittest.TestCase):
         ok = self.a.decide(self.sub, "APPROVE", approver_id="trainer-1", approver_role="release-approver")
         self.assertEqual(ok["decision"], "APPROVE")
 
+    def test_제출_목록과_조회(self):
+        items, nxt = self.g.list_submissions(status="AWAITING_APPROVAL")
+        self.assertEqual([x["submission_id"] for x in items], [self.sub])
+        self.assertEqual(self.g.get_submission(self.sub)["status"], "AWAITING_APPROVAL")
+        self.assertEqual(self.g.list_submissions(status="PASSED")[0], [])
+        with self.assertRaises(BoundaryError) as cm:
+            self.g.get_submission("sub-99")
+        self.assertEqual(cm.exception.code, "NOT_FOUND")
+
     def test_반려는_사유가_필요하고_권한이_있어야_한다(self):
         with self.assertRaises(BoundaryError) as cm:
             self.a.decide(self.sub, "REJECT", approver_id="trainer-1", approver_role="release-approver")

@@ -1,0 +1,17 @@
+{
+  "submission_id": "sub-1",
+  "submitted_at": "2026-10-15T00:00:00Z",
+  "submitted_by_role": "operator",
+  "subject": {
+    "question_set": {
+      "id": "qs-main",
+      "version": "3",
+      "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "status": "AWAITING_APPROVAL",
+  "decision_id": null,
+  "approval_id": null,
+  "release_id": null,
+  "updated_at": "2026-10-15T00:01:00Z"
+}

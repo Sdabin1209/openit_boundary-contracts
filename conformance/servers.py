@@ -30,6 +30,12 @@ def _example(name: str) -> dict:
         return json.load(f)
 
 
+def _submission_view(x: dict) -> dict:
+    return {"submission_id": x["submission_id"], "submitted_at": x["submitted_at"], "submitted_by_role": x["submitted_by_role"],
+            "subject": x["subject"], "status": "AWAITING_APPROVAL", "decision_id": None, "approval_id": None,
+            "release_id": None, "updated_at": x["submitted_at"]}
+
+
 def adapter_digest(files: dict[str, bytes]) -> str:
     """canonical.directory_hash와 같은 값(메모리 파일 버전)."""
     return sha256_hash([{"path": p, "sha256": "sha256:" + hashlib.sha256(files[p]).hexdigest()} for p in sorted(files)])
@@ -244,6 +250,16 @@ class ReferenceServer:
                 if not cs:
                     raise nf("케이스")
                 return J(max(cs, key=lambda c: c["version"]))
+            if path == "/v1/submissions":
+                items = [_submission_view(x) for x in self.submissions.values()]
+                if "status" in q:
+                    items = [x for x in items if x["status"] == q["status"]]
+                return self._page(items[::-1], q)
+            if g := m(r"/v1/submissions/([^/]+)"):
+                v = [x for x in self.submissions.values() if x["submission_id"] == g[1]]
+                if not v:
+                    raise nf("제출")
+                return J(_submission_view(v[0]))
             if g := m(r"/v1/submissions/([^/]+)/review-report"):
                 if not any(x["submission_id"] == g[1] for x in self.submissions.values()):
                     raise nf("제출")
