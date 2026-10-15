@@ -55,6 +55,10 @@
 | `submit_candidate` | `POST /v1/submissions` 본문 `{subject, requested_by_role}` | `GateSubmission` (202) |
 | `activate` | `POST /v1/activate` 본문 `{release_id, requested_by_role}` | `ActivePointer` |
 | `request_rollback` | `POST /v1/rollback` 본문 `RollbackRequest` | `RollbackReceipt` |
+| `get_review_report` (D53) | `GET /v1/submissions/{id}/review-report` | `ReviewReport`. 후보의 `EvaluationReport`와 현재 활성 릴리스의 보고서를 같은 지표끼리 맞댄 것. 게이트가 자동 검사(계약·문항-모델 호환·보고서 형식)를 끝낸 제출만 있고, 아직이면 409 |
+| `decide` (D53) | `POST /v1/approvals` 본문 `GateApproval`에서 `approval_id`·`decided_at`·`report_hash`를 뺀 것(서버가 채운다) — 쓰기 역할 `release-approver`만 | 새 `GateApproval`(201). 같은 `submission_id`에 같은 결정을 다시 보내면 같은 결과(200), 다른 결정이면 409. `report_hash`는 승인자가 본 `ReviewReport`의 해시이고, 그 사이 보고서가 바뀌었으면 409(`STALE_REPORT`) |
+
+**출고 흐름(D53):** 제출 → 자동 검사(기술 호환, 보고서 형식; 어긋나면 FAIL로 반려 가능) → 상태 `AWAITING_APPROVAL` → 승인자가 `ReviewReport`를 보고 `POST /v1/approvals` → APPROVE면 `HUMAN_APPROVAL` 검사가 PASS인 `GateDecision`(PASS) 발급, REJECT면 FAIL. 지표가 좋아도 승인 없이 PASS가 되지 않는다. 활성화(`activate`)는 PASS 릴리스만 받는다.
 
 ## I6 TraceIngest — 소유: ops-feedback (현행)
 
@@ -68,7 +72,7 @@
 | `list_cases` | `GET /v1/cases?review_status=&failure_type=&source_release_id=&updated_since=&latest_only=true\|false` | 목록(`FailureCase`) |
 | `get_trace` | `GET /v1/deidentified-traces/{ref}` | 비식별 TurnTrace JSON |
 | `publish_case` | (HTTP로 열지 않는다. ops-feedback 내부 잡이 로컬 저장소에 쓴다) | |
-| (검토 게시, 사람/검토 화면용. Protocol 밖) | `POST /v1/cases/{case_id}/review` (쓰기 역할 `reviewer`, 읽기 토큰은 403) 본문 `{review_status: "CONFIRMED"\|"DISMISSED"\|"PENDING", expected?: 객체, expected_kind?: "PARSER"\|"GENERATOR"}` | 새 `version`의 `FailureCase`(201). 같은 검토를 다시 보내면 같은 결과(200). `expected`가 있으면 `expected_kind`가 필수이고 비식별 trace의 해당 입력(`parser_input`/`generator_input`)과 맞는 문진 스키마 출력이어야 한다(아니면 INVALID_RECORD). 존재하지 않는 사례는 404 |
+| (검토 게시, 사람/검토 화면용. Protocol 밖) | `POST /v1/cases/{case_id}/review` (쓰기 역할 `reviewer`, 읽기 토큰은 403) 본문 `{review_status: "CONFIRMED"\|"DISMISSED"\|"PENDING", expected?: 객체, expected_kind?: "PARSER"\|"GENERATOR", reviewed_input?: 객체}` | 새 `version`의 `FailureCase`(201). 같은 검토를 다시 보내면 같은 결과(200). `expected`가 있으면 `expected_kind`가 필수이고 비식별 trace의 해당 입력(`parser_input`/`generator_input`)과 맞는 문진 스키마 출력이어야 한다(아니면 INVALID_RECORD). `reviewed_input`은 검토자가 개인정보 없이 고쳐 쓴 입력이며 `expected_kind`에 맞는 입력 스키마여야 한다(D55). 존재하지 않는 사례는 404 |
 
 ## 적합성
 
