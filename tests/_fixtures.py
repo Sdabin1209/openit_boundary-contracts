@@ -12,7 +12,8 @@ from boundary_contracts import sha256_hash  # noqa: E402
 from conformance.servers import ReferenceServer, adapter_digest, ref_of, sealed  # noqa: E402
 
 READ, WRITE, OTHER = "fake-read-token", "fake-write-token", "fake-other-token"
-TOKENS = {READ: "reader", WRITE: "operator", OTHER: "model-lab"}
+APPROVER = "fake-approver-token"
+TOKENS = {READ: "reader", WRITE: "operator", OTHER: "model-lab", APPROVER: "release-approver"}
 
 
 def example(name):

@@ -85,3 +85,20 @@ class HttpGateService(HttpClientBase):
     def request_rollback(self, request: dict) -> dict:
         check_outgoing("RollbackRequest", request)
         return check_record("RollbackReceipt", self._json("POST", "/v1/rollback", body=request))
+
+    def get_review_report(self, submission_id: str) -> dict:
+        """승인 요청 보고서(D53). 자동 검사 전이면 409(CONFLICT)."""
+        check_id(submission_id)
+        return check_record("ReviewReport", self._json("GET", f"/v1/submissions/{submission_id}/review-report"))
+
+    def decide(self, submission_id: str, decision: str, *, approver_id: str, approver_role: str,
+               reason: Optional[str] = None, report_hash: Optional[str] = None) -> dict:
+        """출고 결정(D53). decision은 APPROVE 또는 REJECT(반려는 reason 필수). report_hash를 주면 그 보고서를 본 것으로 대조한다."""
+        check_id(submission_id)
+        body = {"submission_id": submission_id, "decision": decision, "approver_id": approver_id,
+                "approver_role": approver_role}
+        if reason is not None:
+            body["reason"] = reason
+        if report_hash is not None:
+            body["report_hash"] = report_hash
+        return check_record("GateApproval", self._json("POST", "/v1/approvals", body=body))

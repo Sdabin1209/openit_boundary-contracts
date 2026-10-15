@@ -23,6 +23,13 @@ STATUS = {"INVALID_RECORD": 400, "PERMISSION_DENIED": 403, "NOT_FOUND": 404, "CO
 NOW = "2026-10-15T00:00:00Z"
 
 
+def _example(name: str) -> dict:
+    import os
+    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    with open(os.path.join(here, "examples", name + ".json"), encoding="utf-8") as f:
+        return json.load(f)
+
+
 def adapter_digest(files: dict[str, bytes]) -> str:
     """canonical.directory_hash와 같은 값(메모리 파일 버전)."""
     return sha256_hash([{"path": p, "sha256": "sha256:" + hashlib.sha256(files[p]).hexdigest()} for p in sorted(files)])
@@ -237,6 +244,10 @@ class ReferenceServer:
                 if not cs:
                     raise nf("케이스")
                 return J(max(cs, key=lambda c: c["version"]))
+            if g := m(r"/v1/submissions/([^/]+)/review-report"):
+                if not any(x["submission_id"] == g[1] for x in self.submissions.values()):
+                    raise nf("제출")
+                return J(dict(_example("ReviewReport"), submission_id=g[1]))
             if path == "/v1/cases":
                 cs = self.cases
                 for k in ("review_status", "failure_type", "source_release_id"):
@@ -269,6 +280,19 @@ class ReferenceServer:
                 self.submissions[key] = {"pipeline_schema_version": V, "submission_id": f"sub-{len(self.submissions) + 1}",
                                          "submitted_at": NOW, "submitted_by_role": role, "subject": b["subject"]}
             return J(self.submissions[key], 202)
+        if path == "/v1/approvals":
+            b = jb()
+            if role != "release-approver":
+                raise BoundaryError("PERMISSION_DENIED", "release-approver만 결정할 수 있다")
+            if not any(x["submission_id"] == b.get("submission_id") for x in self.submissions.values()):
+                raise nf("제출")
+            if b.get("decision") == "REJECT" and not b.get("reason"):
+                raise BoundaryError("INVALID_RECORD", "반려에는 사유가 필요하다")
+            a = dict(_example("GateApproval"), submission_id=b["submission_id"], decision=b["decision"],
+                     approver_id=b["approver_id"], approver_role=role)
+            if b.get("reason"):
+                a["reason"] = b["reason"]
+            return J(a, 201)
         if path == "/v1/activate":
             b = jb()
             self._same_role(b, role)

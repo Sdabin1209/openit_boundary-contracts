@@ -58,6 +58,8 @@
 | `get_review_report` (D53) | `GET /v1/submissions/{id}/review-report` | `ReviewReport`. 후보의 `EvaluationReport`와 현재 활성 릴리스의 보고서를 같은 지표끼리 맞댄 것. 게이트가 자동 검사(계약·문항-모델 호환·보고서 형식)를 끝낸 제출만 있고, 아직이면 409 |
 | `decide` (D53) | `POST /v1/approvals` 본문 `GateApproval`에서 `approval_id`·`decided_at`·`report_hash`를 뺀 것(서버가 채운다) — 쓰기 역할 `release-approver`만 | 새 `GateApproval`(201). 같은 `submission_id`에 같은 결정을 다시 보내면 같은 결과(200), 다른 결정이면 409. `report_hash`는 승인자가 본 `ReviewReport`의 해시이고, 그 사이 보고서가 바뀌었으면 409(`STALE_REPORT`) |
 
+사람의 반려는 `GateDecision.reject_codes`에 `CHECK_FAILED`를 쓰고, `checks`의 `HUMAN_APPROVAL`이 FAIL이면 사람이 반려한 것이다(코드를 새로 만들지 않는다, D58). 요청 본문의 `report_hash`는 선택이다: 보내면 현재 보고서와 대조(다르면 409 `STALE_REPORT`), 보내지 않으면 서버가 현재 값을 채운다.
+
 **출고 흐름(D53):** 제출 → 자동 검사(기술 호환, 보고서 형식; 어긋나면 FAIL로 반려 가능) → 상태 `AWAITING_APPROVAL` → 승인자가 `ReviewReport`를 보고 `POST /v1/approvals` → APPROVE면 `HUMAN_APPROVAL` 검사가 PASS인 `GateDecision`(PASS) 발급, REJECT면 FAIL. 지표가 좋아도 승인 없이 PASS가 되지 않는다. 활성화(`activate`)는 PASS 릴리스만 받는다.
 
 ## I6 TraceIngest — 소유: ops-feedback (현행)

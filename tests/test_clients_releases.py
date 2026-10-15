@@ -5,6 +5,7 @@ from pathlib import Path
 from _fixtures import FILES_A, FILES_B, OTHER, READ, WRITE, example, make_server, release
 from boundary_contracts import BoundaryError, directory_hash, sdk
 from boundary_contracts.clients import HttpGateService, HttpReleaseReader
+from _fixtures import APPROVER
 
 
 class Releases(unittest.TestCase):
@@ -108,3 +109,28 @@ class Releases(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Approval(unittest.TestCase):
+    def setUp(self):
+        self.srv = make_server().start()
+        self.addCleanup(self.srv.stop)
+        self.g = HttpGateService(self.srv.url, WRITE)
+        self.a = HttpGateService(self.srv.url, APPROVER)
+        self.sub = self.g.submit_candidate(example("GateDecision.pass")["subject"], requested_by_role="operator")["submission_id"]
+
+    def test_보고서와_결정(self):
+        self.assertEqual(self.a.get_review_report(self.sub)["submission_id"], self.sub)
+        ok = self.a.decide(self.sub, "APPROVE", approver_id="trainer-1", approver_role="release-approver")
+        self.assertEqual(ok["decision"], "APPROVE")
+
+    def test_반려는_사유가_필요하고_권한이_있어야_한다(self):
+        with self.assertRaises(BoundaryError) as cm:
+            self.a.decide(self.sub, "REJECT", approver_id="trainer-1", approver_role="release-approver")
+        self.assertEqual(cm.exception.code, "INVALID_RECORD")
+        with self.assertRaises(BoundaryError) as cm:
+            self.g.decide(self.sub, "APPROVE", approver_id="x", approver_role="operator")
+        self.assertEqual(cm.exception.code, "PERMISSION_DENIED")
+        with self.assertRaises(BoundaryError) as cm:
+            self.a.get_review_report("sub-99")
+        self.assertEqual(cm.exception.code, "NOT_FOUND")
