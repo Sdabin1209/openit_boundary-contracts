@@ -16,7 +16,7 @@
 
 ## 설치
 
-`pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@v1.1.0` (Git 태그 설치, D18). 패키지 버전의 MAJOR.MINOR는 `pipeline_schema_version`과 같다. 개발 중에는 `pip install -e ../boundary-contracts`.
+`pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@v1.1.1` (Git 태그 설치, D18). 패키지 버전의 MAJOR.MINOR는 `pipeline_schema_version`과 같다. 개발 중에는 `pip install -e ../boundary-contracts`.
 
 ## 코드
 
@@ -24,7 +24,21 @@
 - `boundary_contracts/schemas/`: 스키마(패키지 데이터). 저장소 루트의 `schemas`는 이것을 가리키는 링크다. `load_schema(name)`, `validator(name)`, `schema_dir()`로 쓴다.
 - `boundary_contracts/errors.py`: 모든 경계 호출이 던지는 `BoundaryError`.
 - `boundary_contracts/sdk.py`: 인터페이스 I1~I7의 `typing.Protocol`. 소유 영역이 구현하고 소비 영역은 이것에 맞춰 개발한다.
+- `boundary_contracts/clients/`: HTTP.md의 서비스 API를 부르는 클라이언트(표준 라이브러리만 사용). 아래 참조.
+- `conformance/servers.py`: HTTP.md대로 응답하는 작은 참조 서버. 클라이언트 시험과 서비스의 적합성 시험에 쓴다(패키지에는 들어가지 않는다).
 - 시험: `python3 -m unittest discover -s tests`.
+
+## HTTP 클라이언트
+
+```python
+from boundary_contracts.clients import HttpReleaseReader   # + HttpQuestionReader, HttpModelRegistry, HttpGateService, HttpTraceIngest, HttpFailureStore
+reader = HttpReleaseReader("http://release-gate:8080", token, timeout=10.0)   # 환경 변수는 읽지 않는다
+bundle = reader.load_bundle("rel-0001", dest=Path("/var/lib/survey/releases"))  # dest/rel-0001 아래에 풀고 모든 해시를 검증
+```
+
+- 실패는 `BoundaryError`다. 네트워크 오류, 타임아웃, 5xx, JSON이 아닌 응답은 `UNAVAILABLE`(재시도 가능)이고 재시도는 호출자가 한다. 해시 불일치, 스키마를 어긴 응답, 위험한 tar는 `INTEGRITY_ERROR`다.
+- 해시는 클라이언트가 다시 계산한다(문항 세트, 어댑터 디렉터리, 매니페스트의 `content_hash`). `open_adapter`는 `dest/<패키지 ID>/<버전>`, `load_bundle`은 `dest/<릴리스 ID>`에 풀고, 실패하면 풀어 둔 파일을 지운다. tar 총 크기 상한은 `client.max_tar_bytes`(기본 8GiB)다.
+- 목록은 `(items, next_cursor)`를 돌려준다. `get_reviews`와 `list_versions`(I3)는 모든 쪽을 모아 돌려준다.
 
 ## 문서
 
