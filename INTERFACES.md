@@ -185,6 +185,8 @@ SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 - 라이브러리 예외는 인프라 문제에만 쓴다(`BackendNotAvailable` 등). `BoundaryError`가 아니다.
 제약 디코딩은 교체 가능한 백엔드이고 엔진 선택은 model-runtime이 정한다(O14).
 
+**어댑터 형식과 재현성(D48).** 어댑터는 PEFT 형식의 디렉터리(`adapter_config.json`에 순위 `r`와 `base_model_name_or_path`)다. model-lab이 이 형식으로 내고, model-runtime은 엔진에 올리기 전에 `adapter_config.json`의 순위가 `serving_config`의 `max_lora_rank`를 넘으면 `UnsupportedServingConfig`로 거부한다(엔진 전체가 죽는 것을 막는다). 제약 디코딩은 엔진 버전에 따라 지원하는 스키마 키워드가 다르다. 확인된 vLLM 0.31.0 + xgrammar 0.2.7에서는 `allOf`, `if/then`, `not`을 조용히 무시하고 `uniqueItems`를 거부하므로 그런 규칙은 사후 검증과 보호가 맡는다. 엔진과 라이브러리 버전은 `serving_config.constraint.backend_version`에 고정되어 해시에 반영된다. **재현성은 같은 서버 프로세스 안에서만 약속한다.** 서버를 다시 띄우면 온도 > 0의 긴 출력은 달라질 수 있어서, 평가와 서비스의 일치를 토큰 단위로 약속하지 않는다. 평가는 온도 0에서 한다.
+
 ## I10. 공개 API (survey-service ↔ Frontend)
 
 세션 시작, 발화 전달(세션 ID와 턴 ID, 같은 턴 ID 재전송은 같은 결과), 세션 종료, 상태 확인의 4동작만 정해져 있다. 전송 방식, 인증, 문진 대상 참조, 실패 신호의 의미와 타임아웃은 Frontend 팀과 협의 중이다(O06). 확정 전에는 이 부분을 설계하지 않는다. 메시지의 본문은 문진 스키마의 `FrontendMessage`·`FrontendInput`이다.
