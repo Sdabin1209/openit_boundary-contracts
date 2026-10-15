@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PushConfig",
+  "description": "웹 푸시 구독에 필요한 서버 공개키(직원 콘솔). 비밀 키는 담지 않는다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "vapid_public_key"
+  ],
+  "properties": {
+    "vapid_public_key": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "null이면 푸시가 꺼져 있고 SSE만 동작한다"
+    }
+  }
+}

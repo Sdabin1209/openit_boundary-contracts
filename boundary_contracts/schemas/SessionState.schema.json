@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SessionState",
+  "description": "키오스크가 폴링하는 세션 상태(D66). 위험 정지가 풀렸는지와 이어서 할 안내 문장을 알린다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "session_id",
+    "state",
+    "resume_text"
+  ],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "state": {
+      "enum": [
+        "ACTIVE",
+        "PAUSED_RISK",
+        "ENDED"
+      ]
+    },
+    "resume_text": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "직원 재개 뒤 이어서 할 안내 문장. 다음 발화 턴이 접수되면 null이 된다"
+    }
+  }
+}

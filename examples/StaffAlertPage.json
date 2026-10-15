@@ -1,0 +1,14 @@
+{
+  "items": [
+    {
+      "alert_id": "al-1",
+      "session_id": "kiosk-s1",
+      "kind": "RISK_STOP",
+      "created_at": "2026-10-15T00:00:00Z",
+      "status": "OPEN",
+      "resolved_by_decision": null,
+      "resolved_at": null
+    }
+  ],
+  "next_cursor": null
+}

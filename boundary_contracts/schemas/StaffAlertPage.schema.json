@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StaffAlertPage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "items",
+    "next_cursor"
+  ],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "title": "StaffAlert",
+        "description": "직원 콘솔 알림(PUBLIC_API.md). 환자 발화와 개인정보는 담지 않는다. kind는 모르는 값을 그대로 보여 준다.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "alert_id",
+          "session_id",
+          "kind",
+          "created_at",
+          "status"
+        ],
+        "properties": {
+          "alert_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "session_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "description": "RISK_STOP 등"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "OPEN",
+              "RESOLVED"
+            ]
+          },
+          "resolved_by_decision": {
+            "enum": [
+              "RESUME",
+              "END",
+              null
+            ]
+          },
+          "resolved_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}
