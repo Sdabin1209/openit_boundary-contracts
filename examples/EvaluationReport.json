@@ -1,0 +1,62 @@
+{
+  "pipeline_schema_version": "1.3",
+  "report_id": "eval-0001",
+  "created_at": "2026-10-15T00:00:00Z",
+  "role": "LORA_A",
+  "package": {
+    "id": "lora-a",
+    "version": "1.2.0",
+    "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "dataset": {
+    "id": "ds-1",
+    "version": "1",
+    "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "question_sets": [
+    {
+      "id": "qs-main",
+      "version": "3",
+      "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "evaluation_backend": {
+    "name": "transformers+peft",
+    "version": "0.1",
+    "constrained_decoding": false
+  },
+  "decoding": {
+    "temperature": 0.0,
+    "seed": 0
+  },
+  "metrics": [
+    {
+      "name": "risk_signal_recall",
+      "group": "SAFETY",
+      "slice": {
+        "kind": "ALL",
+        "value": "ALL"
+      },
+      "value": 0.97,
+      "n": 120,
+      "higher_is_better": true,
+      "unit": "ratio"
+    },
+    {
+      "name": "value_exact_match",
+      "group": "ACCURACY",
+      "slice": {
+        "kind": "SEEN_UNSEEN",
+        "value": "UNSEEN"
+      },
+      "value": 0.61,
+      "n": 40,
+      "higher_is_better": true,
+      "unit": "ratio"
+    }
+  ],
+  "notes": [
+    "시험용 예시"
+  ],
+  "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+}

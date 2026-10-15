@@ -9,7 +9,7 @@ class Package(unittest.TestCase):
         names = sorted(p.name for p in schema_dir().glob("*.schema.json"))
         self.assertIn("ReleaseManifest.schema.json", names)
         self.assertIn("_common.schema.json", names)
-        self.assertEqual(len([n for n in names if not n.startswith("_")]), 16)
+        self.assertEqual(len([n for n in names if not n.startswith("_")]), 19)
 
     def test_모르는_계약은_KeyError(self):
         with self.assertRaises(KeyError):
@@ -23,7 +23,7 @@ class Package(unittest.TestCase):
         self.assertTrue(list(validator("ReleaseManifest").iter_errors(rec)))
 
     def test_버전_상수(self):
-        self.assertEqual(PIPELINE_SCHEMA_VERSION, "1.2")
+        self.assertEqual(PIPELINE_SCHEMA_VERSION, "1.3")
 
 
 if __name__ == "__main__":

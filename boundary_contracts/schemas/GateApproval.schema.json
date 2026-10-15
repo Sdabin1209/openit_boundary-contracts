@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GateApproval",
+  "description": "학습 담당자(출고 승인자)가 후보 조합에 내린 결정. 지표 통과 여부와 무관하게 사람이 정한다. 반려에는 사유가 필수다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pipeline_schema_version",
+    "approval_id",
+    "submission_id",
+    "decision",
+    "approver_id",
+    "approver_role",
+    "decided_at"
+  ],
+  "properties": {
+    "pipeline_schema_version": {
+      "$ref": "_common.schema.json#/$defs/PipelineSchemaVersion"
+    },
+    "approval_id": {
+      "$ref": "_common.schema.json#/$defs/Id"
+    },
+    "submission_id": {
+      "$ref": "_common.schema.json#/$defs/Id"
+    },
+    "decision": {
+      "enum": [
+        "APPROVE",
+        "REJECT"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approver_id": {
+      "$ref": "_common.schema.json#/$defs/Id"
+    },
+    "approver_role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decided_at": {
+      "$ref": "_common.schema.json#/$defs/Timestamp"
+    },
+    "report_hash": {
+      "$ref": "_common.schema.json#/$defs/Hash"
+    },
+    "ext": {
+      "type": "object",
+      "description": "영역이 계약을 바꾸지 않고 덧붙이는 부가 정보. 키는 영역 이름(예: 'model-lab')이고 값은 그 영역이 정한다. 다른 영역은 이해하지 못해도 보존하고 전달해야 하며, 판단에 쓰지 않는다. 여러 영역이 필요로 하게 되면 정식 필드로 올린다."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "REJECT"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "reason"
+        ]
+      }
+    }
+  ]
+}

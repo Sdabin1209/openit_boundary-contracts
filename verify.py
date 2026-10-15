@@ -60,4 +60,7 @@ errs = [e.message for e in val("ModelPackageManifest").iter_errors(d)]; print("O
 neg("빈 기반 모델 이름", "ModelPackageManifest", "ModelPackageManifest", lambda d: d["base_model"].update(id=""))
 d = ex("ModelPackageManifest"); d["pipeline_schema_version"] = "1.1"; d["base_model"]["id"] = "base-model"
 errs = [e.message for e in val("ModelPackageManifest").iter_errors(d)]; print("OK  " if not errs else "FAIL", "1.1 레코드(Id 형식 기반 모델)도 1.2에서 유효", errs); bad += bool(errs)
+neg("반려 승인에 사유 없음", "GateApproval", "GateApproval", lambda d: d.update(decision="REJECT"))
+neg("측정값에 표본 수 없음", "EvaluationReport", "EvaluationReport", lambda d: d["metrics"][0].pop("n"))
+neg("평가 보고서에 임계치 키(스키마가 모르는 필드)는 쓰기에서 거부", "EvaluationReport", "EvaluationReport", lambda d: d["metrics"][0].update(threshold=0.9))
 sys.exit(1 if bad else 0)

@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ReviewReport",
+  "description": "승인 요청 보고서. 게이트가 후보의 평가 보고서와 현재 활성 릴리스의 평가 보고서를 같은 지표끼리 맞대어 만든다. 승인자는 이것을 보고 결정한다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pipeline_schema_version",
+    "submission_id",
+    "generated_at",
+    "subject",
+    "checks",
+    "comparisons"
+  ],
+  "properties": {
+    "pipeline_schema_version": {
+      "$ref": "_common.schema.json#/$defs/PipelineSchemaVersion"
+    },
+    "submission_id": {
+      "$ref": "_common.schema.json#/$defs/Id"
+    },
+    "generated_at": {
+      "$ref": "_common.schema.json#/$defs/Timestamp"
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "question_set",
+        "lora_a",
+        "lora_b"
+      ],
+      "properties": {
+        "question_set": {
+          "$ref": "_common.schema.json#/$defs/ArtifactRef"
+        },
+        "lora_a": {
+          "$ref": "_common.schema.json#/$defs/ArtifactRef"
+        },
+        "lora_b": {
+          "$ref": "_common.schema.json#/$defs/ArtifactRef"
+        }
+      }
+    },
+    "active_release_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "result"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "result": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "SKIPPED"
+            ]
+          },
+          "detail": {
+            "type": "string"
+          },
+          "evidence_ref": {
+            "$ref": "_common.schema.json#/$defs/Id"
+          }
+        }
+      }
+    },
+    "reports": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "LORA_A": {
+          "$ref": "_common.schema.json#/$defs/Id"
+        },
+        "LORA_B": {
+          "$ref": "_common.schema.json#/$defs/Id"
+        }
+      }
+    },
+    "comparisons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role",
+          "name",
+          "group",
+          "candidate",
+          "higher_is_better"
+        ],
+        "properties": {
+          "role": {
+            "enum": [
+              "LORA_A",
+              "LORA_B"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "slice": {
+            "title": "MetricSlice",
+            "description": "지표를 계산한 부분집합. kind는 ALL, QUESTION_SET, SEEN_UNSEEN, INTENT, QUESTION_TYPE, UNIT, RANGE, NOISE, SCENARIO 등이고 값은 문자열이다. 모르는 kind는 그대로 보여 주기만 한다.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "value"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "minLength": 1
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "candidate": {
+            "type": "number"
+          },
+          "candidate_n": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "baseline": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "baseline_n": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "delta": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "higher_is_better": {
+            "type": "boolean"
+          },
+          "worse": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "기준 대비 나빠졌는지(참고용 표시이고 합격 판단이 아니다)"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "ext": {
+      "type": "object",
+      "description": "영역이 계약을 바꾸지 않고 덧붙이는 부가 정보. 키는 영역 이름(예: 'model-lab')이고 값은 그 영역이 정한다. 다른 영역은 이해하지 못해도 보존하고 전달해야 하며, 판단에 쓰지 않는다. 여러 영역이 필요로 하게 되면 정식 필드로 올린다."
+    }
+  }
+}
