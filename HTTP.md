@@ -76,6 +76,26 @@
 | `publish_case` | (HTTP로 열지 않는다. ops-feedback 내부 잡이 로컬 저장소에 쓴다) | |
 | (검토 게시, 사람/검토 화면용. Protocol 밖) | `POST /v1/cases/{case_id}/review` (쓰기 역할 `reviewer`, 읽기 토큰은 403) 본문 `{review_status: "CONFIRMED"\|"DISMISSED"\|"PENDING", expected?: 객체, expected_kind?: "PARSER"\|"GENERATOR", reviewed_input?: 객체}` | 새 `version`의 `FailureCase`(201). 같은 검토를 다시 보내면 같은 결과(200). `expected`가 있으면 `expected_kind`가 필수이고 비식별 trace의 해당 입력(`parser_input`/`generator_input`)과 맞는 문진 스키마 출력이어야 한다(아니면 INVALID_RECORD). `reviewed_input`은 검토자가 개인정보 없이 고쳐 쓴 입력이며 `expected_kind`에 맞는 입력 스키마여야 한다(D55). 존재하지 않는 사례는 404 |
 
+## I9 ModelRuntime 추론 서버 — 소유: model-runtime (서버), 소비: survey-service (D62)
+
+서비스는 모델을 직접 적재하거나 호출하지 않고 이 면으로만 부른다. 서버는 vLLM 컨테이너(서빙 서버)다. 이 면은 survey-service의 `docs/inference-server-spec.md`(제안 v1)와 model-runtime CR-003을 하나로 합친 것이며, 이 문서가 기준이다(D62). 어느 쪽이든 어긋나면 이 문서에 맞춘다.
+
+| 호출 | 요청 | 응답 |
+| --- | --- | --- |
+| 릴리스 적재 신호 | `PUT /v1/releases/{release_id}` (본문 없음, **멱등**) | 200 `{"release_id","state":"LOADED","error":null}` / 202 `{"state":"LOADING"}`. 실패: 412 `FAILED_PRECONDITION`(승인 없음·해시·설정 해시 불일치·어댑터 사전 검사 실패), 422 `INTEGRITY_ERROR`·`UNSUPPORTED_VERSION`, 503 `UNAVAILABLE`. 서버가 I4에서 번들을 **스스로 읽어** 적재한다(서비스는 어댑터를 보내지 않는다) |
+| 적재 상태 | `GET /v1/releases/{release_id}` | 200 `{"release_id","state":"ABSENT"\|"LOADING"\|"LOADED"\|"FAILED","error":BoundaryError\|null}` |
+| parse | `POST /v1/releases/{release_id}/parse` 본문 `UtteranceParserInput` | 200 `ParserOutput` |
+| generate | `POST /v1/releases/{release_id}/generate` 본문 `ResponseGeneratorInput` | 200 `GeneratorOutput` (`is_fallback` 포함) |
+| 정보 | `GET /v1/info` | `{"service","runtime_version","supported_contract_versions":[1],"backend","loaded":[release_id...],"serving_config_hash":{"LORA_A":…,"LORA_B":…}}` |
+| 상태 | `GET /healthz`, `GET /readyz`(인증 없음) | 200. readyz는 요청을 받을 수 있을 때 200, 아니면 503 |
+
+- 인증은 Bearer 토큰(서버 `MODEL_RUNTIME_TOKENS`, 서비스 `SURVEY_INFERENCE_TOKEN_ENV`). 오류는 `BoundaryError` 본문과 9절 상태 코드(400 입력 계약 위반, 403, 404, 412, 422, 503).
+- 적재되지 않은 릴리스에 parse/generate가 오면 **404 NOT_FOUND**(서버가 재시작해 잊은 경우 포함). 서비스는 `PUT`으로 적재를 요청한다.
+- 출력 보호(D36)는 서버의 책임이다. 서버는 항상 출력 계약을 통과하는 값을 내고, 모델 출력이 깨졌어도 오류가 아니라 보호로 대체한다. 보호 결과는 본문이 아니라 응답 헤더로 낸다: `X-Openit-Outcome: ok|repaired|fallback`, `X-Openit-Attempts: <횟수>`, `X-Openit-Protections: P1:1,G5:1`(규칙 코드별 건수). 서비스는 세기만 한다.
+- 서로 다른 세션의 호출은 동시에 들어온다. 서버는 병렬로 처리하거나 짧은 대기열 뒤에서 처리하되, 대기가 호출 타임아웃(서비스 기본 4초)을 넘을 것 같으면 큐에 쌓지 말고 503으로 거절한다. 추론 호출은 부작용이 없다.
+- 서비스의 실패 처리(재시도, 읽기 타임아웃은 재시도 없음, 404면 적재 요청 등)는 survey-service의 `inference-server-spec.md` 5절을 따른다. 이것은 서비스 내부 동작이라 계약이 아니다.
+- 서버의 헤더 이름이 model-runtime의 현행(`X-Model-Runtime-*`)과 다르므로 model-runtime이 이 이름으로 바꾼다.
+
 ## 적합성
 
 `boundary_contracts.clients`의 각 클라이언트는 `typing.Protocol` 인터페이스와 같은 적합성 시험(CONVENTIONS 7절, 오류, 멱등성, 해시 검증)을 통과해야 한다. 서비스는 자기 서버를 띄워 클라이언트로 같은 시험을 돌려 통과시킨다. 시험 모음은 `boundary-contracts/conformance/`에 있다.
