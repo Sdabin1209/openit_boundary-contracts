@@ -55,4 +55,9 @@ else:
     print("건너뜀: 문진 스키마가 없어 TraceEnvelope.trace를 TurnTrace로 검증하지 않음")
 d = ex("FailureCase"); d["pipeline_schema_version"] = "1.0"; d.pop("question_set", None); d["expected"] = {}
 errs = [e.message for e in val("FailureCase").iter_errors(d)]; print("OK  " if not errs else "FAIL", "1.0 FailureCase(expected_kind 없음)는 1.1에서도 유효", errs); bad += bool(errs)
+d = ex("ModelPackageManifest"); d["base_model"]["id"] = "org/name-with.slash_1"
+errs = [e.message for e in val("ModelPackageManifest").iter_errors(d)]; print("OK  " if not errs else "FAIL", "슬래시가 든 기반 모델 이름 허용", errs); bad += bool(errs)
+neg("빈 기반 모델 이름", "ModelPackageManifest", "ModelPackageManifest", lambda d: d["base_model"].update(id=""))
+d = ex("ModelPackageManifest"); d["pipeline_schema_version"] = "1.1"; d["base_model"]["id"] = "base-model"
+errs = [e.message for e in val("ModelPackageManifest").iter_errors(d)]; print("OK  " if not errs else "FAIL", "1.1 레코드(Id 형식 기반 모델)도 1.2에서 유효", errs); bad += bool(errs)
 sys.exit(1 if bad else 0)

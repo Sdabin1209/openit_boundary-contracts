@@ -51,7 +51,10 @@
       ],
       "properties": {
         "id": {
-          "$ref": "_common.schema.json#/$defs/Id"
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "기반 모델 이름. 허브의 이름(예: 'Qwen/Qwen2.5-1.5B-Instruct')을 그대로 쓸 수 있도록 Id 패턴이 아니라 비어 있지 않은 문자열이다(1.2에서 넓힘)."
         },
         "revision": {
           "type": "string",

@@ -23,7 +23,7 @@ class Package(unittest.TestCase):
         self.assertTrue(list(validator("ReleaseManifest").iter_errors(rec)))
 
     def test_버전_상수(self):
-        self.assertEqual(PIPELINE_SCHEMA_VERSION, "1.1")
+        self.assertEqual(PIPELINE_SCHEMA_VERSION, "1.2")
 
 
 if __name__ == "__main__":

@@ -1,12 +1,12 @@
 {
-  "pipeline_schema_version": "1.0",
+  "pipeline_schema_version": "1.2",
   "package_id": "lora-a",
   "version": "1.2.0",
   "role": "LORA_A",
   "created_at": "2026-10-15T00:00:00Z",
   "runtime_contract_version": 1,
   "base_model": {
-    "id": "base-model",
+    "id": "Qwen/Qwen2.5-1.5B-Instruct",
     "revision": "r1"
   },
   "adapter_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
