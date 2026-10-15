@@ -23,14 +23,21 @@
 - `turn_failure_signal`: null이 아니면 이번 턴 처리에 문제가 있었다는 뜻이다. `write_committed`(기록이 저장됐는지: COMMITTED/NOT_COMMITTED)와 `staff_alert`(직원 호출이 전달됐는지: NONE/DELIVERED/DELIVERY_FAILED)를 담는다. 프론트는 `DELIVERY_FAILED`이면 **현장 직원을 직접 부르는 화면**을 보여야 한다.
 - 스키마 원문은 `boundary_contracts` 패키지의 문진 스키마(`FrontendMessage`, `FrontendInput`, `TurnFailureSignal`)다.
 
-## 직원 콘솔 (위험으로 멈춘 세션 풀기, D58)
-위험 신호로 멈춘 세션은 직원이 풀어야 한다. 직원 콘솔(또는 이를 대신하는 도구)이 호출한다. 키오스크 토큰으로는 호출할 수 없다(역할 `staff`, 403).
+## 직원 콘솔 (D58, D64: 웹 화면 + 푸시 알림, 가정이며 바뀔 수 있음)
+위험 신호로 멈춘 세션은 직원이 풀어야 한다. 직원이 쓰는 웹 화면(직원 콘솔)과 푸시 알림을 가정한다. 이 호출들은 역할 `staff` 토큰만 쓸 수 있다(키오스크 토큰은 403). 서버 쪽만 정하며 화면 자체는 이 계약의 범위 밖이다.
 
 | 목적 | 요청 | 응답 |
 | --- | --- | --- |
+| 알림 목록 | `GET /v1/staff/alerts?status=OPEN\|RESOLVED&limit=` | `{"items": [StaffAlert], "next_cursor": ...}` 최신부터 |
+| 알림 실시간 구독 | `GET /v1/staff/alerts/stream` (`text/event-stream`) | 새 알림과 해결 이벤트를 `StaffAlert` JSON으로 흘린다. 끊기면 `Last-Event-ID`로 이어 받는다 |
+| 푸시 구독 등록 | `POST /v1/staff/push-subscriptions` 본문 웹 푸시 구독 객체(`endpoint`, `keys`) | 201. 같은 `endpoint`는 갱신(멱등). `DELETE /v1/staff/push-subscriptions?endpoint=`로 해지 |
 | 개입 결정 | `POST /v1/sessions/{session_id}/intervention` 본문 `{"session_id", "decision": "RESUME"\|"END", "turn_id": "..."}` | `FrontendInput` (RESUME이면 이어서 할 안내 문장, END면 종료) |
 
-`turn_id` 규칙은 발화와 같다(같은 값 재전송은 같은 응답). 멈추지 않은 세션에 보내면 409.
+- `StaffAlert`: `alert_id`, `session_id`, `kind`(`RISK_STOP` 등 모르는 값은 그대로 보여 줌), `created_at`, `status`(`OPEN`/`RESOLVED`), `resolved_by_decision`(`RESUME`/`END`/null), `resolved_at`. 환자 발화나 개인 정보는 담지 않는다(세션 ID와 종류만).
+- 위험 정지가 나면 서버는 알림을 영속 저장하고 구독자(SSE, 웹 푸시)에게 보낸다. 개입 결정이 성공하면 해당 알림이 `RESOLVED`가 된다.
+- `TurnFailureSignal.staff_alert`: 알림이 저장되고 **전달 경로가 하나 이상 살아 있을 때**(SSE 연결 또는 푸시 서비스가 접수) `DELIVERED`, 아니면 `DELIVERY_FAILED`다. 저장된 알림은 `DELIVERY_FAILED`여도 목록에서 조회된다. 프론트는 `DELIVERY_FAILED`이면 현장 직원 호출 화면을 보여야 한다.
+- 웹 푸시의 서버 키(VAPID)는 비밀 값이며 환경 변수로만 받는다. 푸시 본문에는 세션 ID와 종류만 넣는다.
+- `turn_id` 규칙은 발화와 같다(같은 값 재전송은 같은 응답). 멈추지 않은 세션에 개입을 보내면 409.
 
 ## 프론트가 지킬 것
 - STT 결과가 비었거나 신뢰할 수 없으면 서버로 보내지 않고 "다시 말씀해 주세요"를 프론트에서 안내해도 된다.
