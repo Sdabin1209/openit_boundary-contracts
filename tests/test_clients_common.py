@@ -130,3 +130,61 @@ class Common(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReadMode(unittest.TestCase):
+    """CONVENTIONS 1절: 읽는 쪽은 같은 MAJOR의 모르는 필드·열거값을 받아들이고, 쓰는 쪽은 엄격하다."""
+
+    def setUp(self):
+        from _fixtures import release
+        self.srv = make_server().start()
+        self.addCleanup(self.srv.stop)
+        self.c = HttpReleaseReader(self.srv.url, READ)
+        self.rel = self.srv.releases["rel-0001"]
+
+    def err(self, fn, *a):
+        with self.assertRaises(BoundaryError) as cm:
+            fn(*a)
+        return cm.exception.code
+
+    def reseal(self, **changes):
+        from conformance.servers import sealed
+        m = {k: v for k, v in self.rel["manifest"].items() if k != "content_hash"}
+        m.update(changes)
+        self.rel["manifest"] = sealed(m)
+
+    def test_MINOR가_높고_모르는_필드가_있어도_읽는다(self):
+        self.reseal(pipeline_schema_version="1.2", brand_new={"x": 1})
+        r = self.c.get_release("rel-0001")
+        self.assertEqual(r["brand_new"], {"x": 1})  # 보존
+
+    def test_모르는_열거값을_읽는다(self):
+        self.srv.pointer = dict(__import__("_fixtures").example("ActivePointer"), cause="SOMETHING_NEW")
+        self.assertEqual(self.c.get_active_pointer()["cause"], "SOMETHING_NEW")
+
+    def test_필수_누락과_타입_위반은_여전히_거부(self):
+        self.reseal(pipeline_schema_version="1.2")
+        m = dict(self.rel["manifest"]); m.pop("runtime_contract_version")
+        self.rel["manifest"] = m
+        self.assertEqual(self.err(self.c.get_release, "rel-0001"), "INTEGRITY_ERROR")
+        self.reseal(runtime_contract_version="one")
+        self.assertEqual(self.err(self.c.get_release, "rel-0001"), "INTEGRITY_ERROR")
+        self.srv.pointer = dict(__import__("_fixtures").example("ActivePointer"), pointer_version="x")
+        self.assertEqual(self.err(self.c.get_active_pointer), "INTEGRITY_ERROR")
+
+    def test_MAJOR가_다르면_UNSUPPORTED_VERSION(self):
+        self.reseal(pipeline_schema_version="2.0")
+        self.assertEqual(self.err(self.c.get_release, "rel-0001"), "UNSUPPORTED_VERSION")
+
+    def test_모르는_필드까지_포함해_content_hash를_검증한다(self):
+        self.reseal(pipeline_schema_version="1.2", brand_new="v")
+        self.c.get_release("rel-0001")
+        self.rel["manifest"]["brand_new"] = "tampered"
+        self.assertEqual(self.err(self.c.get_release, "rel-0001"), "INTEGRITY_ERROR")
+
+    def test_쓰기_본문은_여전히_엄격(self):
+        from _fixtures import example
+        req = dict(example("RollbackRequest"), surprise=1)
+        self.assertEqual(self.err(HttpGateService(self.srv.url, WRITE).request_rollback, req), "INVALID_RECORD")
+        env = dict(example("TraceEnvelope"), surprise=1)
+        self.assertEqual(self.err(HttpTraceIngest(self.srv.url, WRITE).send, env), "INVALID_RECORD")

@@ -10,6 +10,7 @@
 - 해시는 클라이언트가 받은 뒤 다시 계산해 `INTEGRITY_ERROR`로 판정한다(서버를 믿지 않는다). 서버는 `content_hash`를 계산해 담는다.
 - 토큰: 서버는 환경 변수 `<이름>_TOKENS=역할=토큰,역할=토큰`으로 받는다(영역 문서가 이름을 정한다). 읽기와 쓰기 역할을 구분하고, 읽기 토큰은 쓰기 경로를 호출할 수 없다(PERMISSION_DENIED, 403).
 - 클라이언트는 생성자에 `base_url`, `token`, `timeout`을 인자로 받는다(환경 변수는 서비스 진입점이 읽는다, CONVENTIONS 7절). 네트워크 오류와 5xx와 503은 `UNAVAILABLE`(재시도 가능)이다.
+- 클라이언트는 응답을 **읽기 모드**로 검증한다(CONVENTIONS 1절): 같은 MAJOR의 모르는 필드와 모르는 열거값은 받아들이고(`content_hash`는 모르는 필드까지 포함한 원본으로 계산), 필수 필드·타입·패턴 위반은 `INTEGRITY_ERROR`, `pipeline_schema_version`의 MAJOR가 다르면 `UNSUPPORTED_VERSION`이다. 요청 본문은 엄격한 스키마로 검증한다.
 - tar 스트림은 경로에 `..`, 절대 경로, 심볼릭 링크를 두지 않고 클라이언트도 풀 때 거부한다.
 
 ## I1 QuestionReader — 소유: question-authoring

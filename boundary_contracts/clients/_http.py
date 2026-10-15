@@ -18,7 +18,7 @@ from typing import Any, Optional
 
 from ..canonical import content_hash as _content_hash, directory_hash, sha256_hash
 from ..errors import CODES, BoundaryError
-from ..schemas_api import validator
+from ..schemas_api import PIPELINE_SCHEMA_VERSION, schema_dir, validator
 
 _STATUS_CODE = {400: "INVALID_RECORD", 401: "PERMISSION_DENIED", 403: "PERMISSION_DENIED", 404: "NOT_FOUND",
                 409: "CONFLICT", 412: "FAILED_PRECONDITION", 503: "UNAVAILABLE"}
@@ -37,6 +37,32 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
 @lru_cache(maxsize=None)
 def _validator(name: str):
     return validator(name)
+
+
+def _relax(node):
+    """읽기 모드 스키마(CONVENTIONS 1절 3항): 모르는 필드를 허용하고 열거값은 문자열 형태만 본다. const·필수·타입·패턴은 그대로."""
+    if isinstance(node, list):
+        return [_relax(x) for x in node]
+    if not isinstance(node, dict):
+        return node
+    out = {}
+    for k, v in node.items():
+        if k == "additionalProperties" and v is False:
+            continue
+        if k == "enum" and isinstance(v, list) and all(isinstance(x, str) for x in v):
+            out["type"] = "string"
+            continue
+        out[k] = _relax(v)
+    return out
+
+
+@lru_cache(maxsize=None)
+def _reader(name: str):
+    import jsonschema
+    base = schema_dir().as_uri() + "/"
+    store = {base + p.name: _relax(json.loads(p.read_text(encoding="utf-8"))) for p in schema_dir().glob("*.schema.json")}
+    schema = store[base + name + ".schema.json"]
+    return jsonschema.Draft202012Validator(schema, resolver=jsonschema.RefResolver(base, schema, store=store))
 
 
 def integrity(message: str, **details) -> BoundaryError:
@@ -69,7 +95,10 @@ def check_record(schema: str, rec: Any, *, hashed: bool = False) -> dict:
     """응답 레코드를 스키마로 검증한다. 위반은 서버 결함이므로 INTEGRITY_ERROR."""
     if not isinstance(rec, dict):
         raise integrity(f"{schema} 응답이 객체가 아니다")
-    errs = sorted(_validator(schema).iter_errors(rec), key=lambda e: list(e.path))
+    ver = rec.get("pipeline_schema_version")
+    if isinstance(ver, str) and re.match(r"^\d+\.\d+$", ver) and ver.split(".")[0] != PIPELINE_SCHEMA_VERSION.split(".")[0]:
+        raise BoundaryError("UNSUPPORTED_VERSION", f"{schema}의 계약 MAJOR가 다르다: {ver}")
+    errs = sorted(_reader(schema).iter_errors(rec), key=lambda e: list(e.path))
     if errs:
         e = errs[0]
         raise integrity(f"{schema} 응답이 스키마를 위반한다", path="/".join(map(str, e.path)), reason=e.message[:200])

@@ -38,6 +38,7 @@ bundle = reader.load_bundle("rel-0001", dest=Path("/var/lib/survey/releases"))  
 
 - 실패는 `BoundaryError`다. 네트워크 오류, 타임아웃, 5xx, JSON이 아닌 응답은 `UNAVAILABLE`(재시도 가능)이고 재시도는 호출자가 한다. 해시 불일치, 스키마를 어긴 응답, 위험한 tar는 `INTEGRITY_ERROR`다.
 - 해시는 클라이언트가 다시 계산한다(문항 세트, 어댑터 디렉터리, 매니페스트의 `content_hash`). `open_adapter`는 `dest/<패키지 ID>/<버전>`, `load_bundle`은 `dest/<릴리스 ID>`에 풀고, 실패하면 풀어 둔 파일을 지운다. tar 총 크기 상한은 `client.max_tar_bytes`(기본 8GiB)다.
+- 응답은 읽기 모드로 검증한다: 같은 MAJOR의 모르는 필드·열거값은 받아들이고(보존), MAJOR가 다르면 `UNSUPPORTED_VERSION`이다. 보내는 레코드는 엄격하게 검증한다.
 - 목록은 `(items, next_cursor)`를 돌려준다. `get_reviews`와 `list_versions`(I3)는 모든 쪽을 모아 돌려준다.
 
 ## 문서
