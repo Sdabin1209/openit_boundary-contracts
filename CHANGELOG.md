@@ -2,7 +2,7 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
-## 2.0.0 (D74, 검토 대기: 태그는 헤드가 붙인다)
+## 2.0.0 (D74, D75; 태그 v2.0.0-rc1 이후의 확정분 포함, 태그는 헤드가 붙인다)
 
 학습 데이터셋 v2에 서비스 구조를 맞춘다. 정규화·절차·다음 문항은 LoRA-A가 내고, 서비스는 표 찾기만 한다. v1 형식은 **병행 없이 폐기**했다(이유: v1 계약은 없어진 단계를 기술하고, 학습된 모델은 v2 형식만 말하며, 운영 데이터가 없는 데모 단계). 이전 형식은 태그 `v1.3.3`으로 남는다. 근거와 열린 항목은 `V2_DRAFT.md`.
 
@@ -13,6 +13,12 @@
 - `INTERFACES.md` I8(turn-engine: `normalize`, `judge`, `write_record`, `plan`)을 폐기했다.
 - `HTTP.md` I9: `parse`/`generate` 경로를 `extract`/`respond`로 바꾸고, 입출력과 출력 검증 규칙을 바꿨다(`respond`의 응답은 JSON이 아니라 `text/plain`).
 - `PIPELINE_SCHEMA_VERSION` "1.3" -> "2.0". 클라이언트는 MAJOR 1 레코드를 `UNSUPPORTED_VERSION`으로 거부한다.
+
+### D75로 확정한 것 (rc1 이후)
+- `extract`가 끝내 형식을 못 지키면 503 `UNAVAILABLE`, `details.reason="OUTPUT_INVALID"`. 대체 출력은 만들지 않는다. 라이브러리는 `ModelOutputInvalid`. survey-service는 한 번 재시도하고 그래도 안 되면 `turn_failure_signal`로 처리하며 세션 상태를 바꾸지 않는다. 클라이언트 `is_output_invalid(err)`, 참조 서버가 같은 규칙을 따른다. `BoundaryError.details.reason` 규약을 CONVENTIONS 10절에 적었다.
+- `runtime_contract_version`은 의미 유지(모델 패키지가 학습된 문진 스키마의 정수 버전, 소유 survey-service). 필드 그대로.
+- `INTERFACES.md` I8: 폐기가 아니라 **출력 검증 라이브러리로 대체**. 형식은 model-runtime, 의미(targets, next_item, 건너뛰기 순서, save)는 turn-engine의 순수 함수 `validate_extraction`(시그니처 초안만 문서에 있고 코드는 turn-engine 영역).
+- **시스템 프롬프트는 모델 패키지의 일부**: `ModelPackageManifest.system_prompt {path, sha256}`가 **필수 필드로 추가**되었다(`_common`의 `SystemPromptRef`). 같은 값을 `ReleaseManifest.adapters[LORA_A|LORA_B].system_prompt`(필수)로 게이트가 복사한다(서비스가 I3를 읽지 않아도 되게 하려는 이 작업의 판단이며, 지시 범위인 패키지 매니페스트 밖의 추가다). 파일은 어댑터 디렉터리 안에 있고 `adapter_hash`에도 포함된다. 클라이언트(`publish`, `open_adapter`, `load_bundle`)가 파일 존재와 해시를 확인한다. `serving_config`의 프롬프트 템플릿 버전(조립 규칙)과는 별개다.
 
 ### 더한 것
 - 스키마 6개: `ActionExtractionInput`, `ActionExtraction`, `ActionExtractionSample`(LoRA-A), `ResponseRequest`, `ResponseText`, `ResponseSample`(LoRA-B). 스키마는 모두 28개.
@@ -63,11 +69,13 @@ LoRA-B (`ResponseGeneratorInput`/`GeneratorOutput` -> `ResponseRequest`/`Respons
 |---|---|
 | `ParserSample`(`question_set`, `runtime_contract_version`이 필수; `noise_types` 등) | `ActionExtractionSample`: `sample_id`, `scenario_id`, `split`, `origin`, `input`, `expected`가 필수. `question_set`, `human_review`, `seed_case_id`, `ext`는 선택. `runtime_contract_version`, `style_guide_version`, `noise_types`는 없다 |
 | `GeneratorSample` | `ResponseSample` (`expected`는 문자열) |
+| `ModelPackageManifest` | `system_prompt {path, sha256}` 필수 추가. 기존 패키지는 어댑터 디렉터리에 프롬프트 파일을 넣고 매니페스트를 새 버전으로 다시 게시한다 |
+| `ReleaseManifest.adapters[role]` | `system_prompt`(필수) 추가 |
 | `DatasetManifest.files[].role` PARSER/GENERATOR | LORA_A/LORA_B |
 | `FailureCase.expected_kind` PARSER/GENERATOR | LORA_A/LORA_B |
 | `POST .../parse`, `.../generate` | `POST .../extract`, `.../respond` |
 | `SlotRef` 문자열 `<문항>.<칸>` | 변경 없음(`ChangeClassification`). 모델 키는 술 칸에 `[종류]`가 붙는 별도 문법 |
 
 ### 알려진 한계
-- `extract`가 끝내 깨질 때의 처리(503 `OUTPUT_INVALID`), `runtime_contract_version`의 의미, `DatasetManifest.turn_engine_version`·`generator_version` 필수 필드는 열린 항목이다(`V2_DRAFT.md` 10장).
+- `DatasetManifest.turn_engine_version`·`generator_version` 필수 필드는 그대로 남아 있다(`V2_DRAFT.md` 10장).
 - `METRICS.md`는 v1 출력을 가정한 채 남아 있다(제안 문서, 계약은 영향 없음).

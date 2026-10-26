@@ -100,9 +100,9 @@
 - 적재되지 않은 릴리스에 extract/respond가 오면 **404 NOT_FOUND**(서버가 재시작해 잊은 경우 포함). 서비스는 `PUT`으로 적재를 요청한다.
 - 출력 검증(D36)은 서버의 책임이다. 서버는 `extract`에는 항상 `ActionExtraction` 스키마를 통과하는 값을, `respond`에는 항상 비어 있지 않은 문장을 낸다. 응답 헤더(두 호출 모두): `X-Openit-Outcome: ok|fallback`, `X-Openit-Attempts: <횟수>`(선택), `X-Openit-Protections: G5:1,G2:2`(규칙 코드별 건수, 선택, 코드 값은 model-runtime이 정한다). 서비스는 세기만 한다.
   - `respond`: 모델 출력이 끝내 형식을 지키지 못하면 서버가 입력의 재료로 만든 대체 문장을 내고 `X-Openit-Outcome: fallback`을 붙인다(상태는 200). 정상이면 `ok`. 헤더가 없으면 클라이언트는 `INTEGRITY_ERROR`로 본다.
-  - `extract`: 서버가 대신 만들 수 있는 대체 출력이 없다. 모델 출력이 끝내 깨지면 503 `UNAVAILABLE`(`details.reason="OUTPUT_INVALID"`)이고, 정상이면 `X-Openit-Outcome: ok`다(제안, 헤드가 확정한다).
+  - `extract`: 서버가 대신 만들 수 있는 대체 출력이 없다. 모델 출력이 끝내 깨지면 503 `UNAVAILABLE`(`details.reason="OUTPUT_INVALID"`, `details.attempts`는 선택)이고, 정상이면 `X-Openit-Outcome: ok`다. **확정(D75).** 값을 지어내지 않는다. 호출자(survey-service)는 같은 요청을 한 번 다시 보내고, 그래도 안 되면 그 턴을 `turn_failure_signal`로 처리하며 세션 상태를 바꾸지 않는다(INTERFACES.md I9 '서비스가 지키는 것').
   - `ActionExtraction`과 `ResponseText`는 레코드가 아니라 모델 출력이어서 `pipeline_schema_version`·`ext`가 없다. 클라이언트는 읽기 모드 완화 없이 엄격하게 검증하고 위반은 `INTEGRITY_ERROR`다.
-  - 학습 때 쓴 시스템 프롬프트(A, B 각 한 종)와 같은 문장을 서빙이 써야 한다. 프롬프트 템플릿 버전은 `serving_config`가 고정한다(문장을 계약에 넣을지는 열린 항목).
+  - 시스템 프롬프트는 모델 패키지의 일부다(D75). 서버는 적재한 릴리스의 `ReleaseManifest.adapters[role].system_prompt`가 가리키는 파일(어댑터 디렉터리 안)의 문장만 쓴다. `serving_config`의 프롬프트 템플릿 버전은 조립 규칙이고 시스템 프롬프트와 별개다(INTERFACES.md I9).
 - 서로 다른 세션의 호출은 동시에 들어온다. 서버는 병렬로 처리하거나 짧은 대기열 뒤에서 처리하되, 대기가 호출 타임아웃(서비스 기본 4초)을 넘을 것 같으면 큐에 쌓지 말고 503으로 거절한다. 추론 호출은 부작용이 없다.
 - 서비스의 실패 처리(재시도, 읽기 타임아웃은 재시도 없음, 404면 적재 요청 등)는 survey-service의 `inference-server-spec.md` 5절을 따른다. 이것은 서비스 내부 동작이라 계약이 아니다.
 - 서버의 헤더 이름이 model-runtime의 현행(`X-Model-Runtime-*`)과 다르므로 model-runtime이 이 이름으로 바꾼다.

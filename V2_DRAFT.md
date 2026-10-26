@@ -1,6 +1,6 @@
 # 계약 2.0.0: 학습 데이터셋 v2의 LoRA-A/LoRA-B 입출력 (D74)
 
-상태: **2.0.0 반영 완료, 헤드 검토 대기**(브랜치 `contracts-v2-draft`). 헤드가 검토하기 전에는 main에 합치지 않고 태그를 붙이지 않고 push하지 않는다. 아래 1~9장은 초안 때 작성한 근거 기록이고(확인한 데이터, 문서와 데이터의 차이, 영향 분석), 0장이 헤드의 결정과 그 반영 결과, 10장이 열린 항목이다. 변경 목록과 v1에서 옮기는 방법은 `CHANGELOG.md`.
+상태: **2.0.0 반영 완료(D75 반영 포함), 헤드 검토 대기**(브랜치 `contracts-v2-draft`). 헤드가 검토하기 전에는 main에 합치지 않고 태그를 붙이지 않고 push하지 않는다. 아래 1~9장은 초안 때 작성한 근거 기록이고(확인한 데이터, 문서와 데이터의 차이, 영향 분석), 0장이 헤드의 결정과 그 반영 결과, 10장이 열린 항목이다. 변경 목록과 v1에서 옮기는 방법은 `CHANGELOG.md`.
 
 ## 0. 헤드의 결정과 반영 결과
 
@@ -11,7 +11,7 @@
 | B 응답은 학습한 형식 그대로 텍스트(`text/plain`)이고 대체 응답 여부는 `X-Openit-Outcome`로 알린다 | HTTP.md I9의 `respond`. 클라이언트 `HttpModelRuntime.respond` |
 | 새 reason 4종, 괄호 없는 술 키, 부분 선채움 문항으로의 NEXT는 계약으로 인정한다 | `ActionExtraction` 스키마의 설명에 명시하고 시험 추가 |
 | `ParserSample`, `GeneratorSample` 삭제 | 스키마·예시 삭제, 시험으로 부재를 확인 |
-| I8(turn-engine) 폐기 | INTERFACES.md I8를 폐기 표시로 바꾸고 영역 표에서 뺌 |
+| I8(turn-engine) 폐기 | rc1에서는 폐기 표시. D75로 "출력 검증 라이브러리로 대체"가 되었다(10장) |
 | I9를 v2로 | `parse`/`generate` -> `extract`/`respond` (HTTP.md, INTERFACES.md I9 라이브러리 절) |
 | `FailureCase.expected_kind`, `DatasetManifest` 역할 | 둘 다 `LORA_A`/`LORA_B`(제안: 게이트·릴리스 계열이 이미 쓰는 역할 어휘와 통일). `FailureCase.expected`는 객체 또는 문자열 |
 | `SlotRef` 반복 키 규약 충돌 | CONVENTIONS 10절: SlotRef 문자열과 모델 키 문법을 둘로 구분해 적음. `ChangeClassification`은 그대로 |
@@ -217,22 +217,23 @@
 - 도구: `tools/validate_dataset_v2.py`(stdin 또는 파일을 읽어 검증), `tools/verify_v2.py`(거부 시험)
 - 이 문서: `V2_DRAFT.md`
 
-## 10. 열린 항목 (2.0.0 이후에 정할 것)
+## 10. 열린 항목과 D75 결정
 
-데이터셋 담당(학습 서버)에게 정리를 요청할 것:
-1. 데이터에 있는 **새 reason 4종**(OTHER_BEVERAGE, MISSING_NUMBER, UNPARSED_VALUE, INVALID_OPTION)을 IO_SPEC 1장의 표에 올리거나, 데이터에서 기존 14종으로 합칠지. 계약은 20종을 모두 받아들인다.
-2. **괄호 없는 술 키**(`Q7_1.amount`, 종류를 모를 때)를 문서에 올릴지, 데이터에서 `BEVERAGE_MISSING`을 다른 방식으로 표현할지. 계약은 둘 다 받아들인다.
-3. **부분 선채움 문항으로의 NEXT**(57행, 같은 말에서 일부 칸이 이미 채워진 문항으로 넘어감)와 그때 `next.text`가 받은 내용을 다시 묻는 문제(impact-d74.md의 미결과 같은 현상으로 보임, 제안). 계약은 허용한다.
-4. 문서(IO_SPEC)와 데이터의 나머지 차이(3장 표): `topic`·`current`·`hold` 키, BEVERAGE_MISSING의 action(REASK), 술 칸 예시(`whisky`/`"잔"`/`.beverage`), CONFIRM의 `next_item`, Q10 END 건수, START 건수(110건).
+D75(사용자 위임, 헤드 결정, `head/docs/DECISIONS.md`)로 정리했다.
 
-헤드가 정할 것(계약은 현재 제안대로 쓰였다):
-5. `extract`가 끝내 깨질 때: 대체 출력이 없어 503 `UNAVAILABLE`(`details.reason="OUTPUT_INVALID"`)로 낸다(제안). 서비스가 그 뒤에 무엇을 할지는 survey-service와 정한다. 이를 계약의 일부로 확정할지.
-6. `respond`의 대체 문장 규칙과 `X-Openit-Protections`의 규칙 코드(P*, G*)는 model-runtime이 정한다(계약 밖).
-7. `runtime_contract_version`(문진 스키마의 정수)이 v2에서 무엇을 가리킬지. `DatasetManifest`, `FailureCase`, `ReleaseManifest`, `TraceEnvelope`, `/v1/info`의 `supported_contract_versions`가 아직 이 정수를 쓴다. 모델 입출력이 문진 스키마를 떠났으므로 소유자가 정해지지 않았다. 이 값을 지운다면 MAJOR 변경이다.
-8. `DatasetManifest.turn_engine_version`, `generator_version`: turn-engine 폐기 후에도 필수 필드로 남아 있다(바꾸면 필수 필드 삭제로 MAJOR). 이번 2.0.0에서 건드리지 않았다.
-9. A 출력의 사후 검증(targets가 values의 key 부분집합, REASK/REDIRECT의 next_item, CONFIRM의 next_item, 건너뛰기 순서)을 어디에 둘지(서비스 코드, turn-engine의 새 함수, model-runtime). `tools/validate_dataset_v2.py`가 데이터 수준에서 하는 검사를 참고할 수 있다.
-10. 학습 때 쓴 시스템 프롬프트(A, B 각 한 종)를 `serving_config`의 템플릿 버전으로만 고정할지, 문장을 계약에 넣을지.
-11. `if/then`을 뺀 평면 스키마를 제약 디코딩용으로 따로 낼지(엔진이 `allOf`/`if/then`을 무시한다).
-12. `METRICS.md`를 v2 평가 항목(action 일치율, next_item 일치율, 값 정확도 등)으로 고칠지(학습 담당자).
-13. `TraceEnvelope.trace`(문진 스키마 `TurnTrace`)의 키(`parser_*`, `normalizer_*`, `judge_*`, `planner_*`)는 survey-service의 계약 변경이다. 이 리포지토리의 `TraceEnvelope`는 그대로다.
-14. 서버 데이터 재검증: 이번 2.0.0 작업에서는 서버에 접속하지 않았다. 스키마의 형태 규칙은 초안 때 검증한 것(10,264행 실패 0)에서 바뀌지 않았다(확인: `git diff 774990c`에서 스키마의 `properties`·`allOf`·`pattern`은 건드리지 않았고 설명 문구만 바뀜). 데이터가 갱신되면 `tools/validate_dataset_v2.py`로 다시 돌린다.
+| 항목 | 결정 | 반영 |
+|---|---|---|
+| `extract`가 끝내 깨질 때 | 503 `UNAVAILABLE`, `details.reason=OUTPUT_INVALID` 확정. survey-service는 1회 재시도 후 `turn_failure_signal`, 세션 상태 불변 | HTTP.md I9, INTERFACES.md I9, CONVENTIONS 10절, 참조 서버·클라이언트·시험 |
+| `runtime_contract_version` | 의미 유지: 모델 패키지가 학습된 문진 스키마 정수 버전, 소유 survey-service. 필드 유지 | CONVENTIONS 10절, INTERFACES.md I9 |
+| A 출력 사후 검증 | 형식은 model-runtime, 의미는 turn-engine 순수 함수(`validate_extraction`)를 survey-service가 호출 | INTERFACES.md I8(대체: 출력 검증 라이브러리). 코드는 turn-engine 영역 |
+| 시스템 프롬프트 | 모델 패키지의 일부. `ModelPackageManifest.system_prompt {path, sha256}` | 스키마(필수), 예시, 시험, CHANGELOG. 같은 값을 `ReleaseManifest.adapters[role]`에도 복사(이 작업의 판단) |
+| 데이터셋 정리 요청(새 reason 4종, 괄호 없는 술 키, 부분 선채움 NEXT, IO_SPEC과 데이터의 차이) | 데이터셋 담당에게 가는 요청이며 `head/docs/dataset-requests.md`에 있다. 계약은 현재 데이터를 기준으로 인정한다 | 스키마 설명에 명시 |
+
+아직 정해지지 않은 것:
+1. `respond`의 대체 문장 규칙과 `X-Openit-Protections`의 규칙 코드(P*, G*)는 model-runtime이 정한다(계약 밖).
+2. `DatasetManifest.turn_engine_version`, `generator_version`은 필수 필드로 남아 있다(바꾸면 MAJOR 변경).
+3. `if/then`을 뺀 평면 스키마를 제약 디코딩용으로 따로 낼지(엔진이 `allOf`/`if/then`을 무시한다).
+4. `METRICS.md`를 v2 평가 항목으로 고칠지(학습 담당자).
+5. `TraceEnvelope.trace`(문진 스키마 `TurnTrace`)의 키(`parser_*`, `normalizer_*`, `judge_*`, `planner_*`)는 survey-service의 계약 변경이다.
+6. v1 의도 중 v2 출력에 대응이 없는 것(위험 신호, 직원 호출, 안내 요청)을 서비스가 어떻게 다룰지(survey-service).
+7. 서버 데이터 재검증: 이번에도 서버에 접속하지 않았다. 데이터가 갱신되면 `tools/validate_dataset_v2.py`로 다시 돌린다.

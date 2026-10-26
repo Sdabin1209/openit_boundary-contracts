@@ -19,7 +19,7 @@ Page[T]    = (items: list[T], next_cursor: str | None)
 | I5 GateService | release-gate | operator, ops-feedback | — |
 | I6 TraceIngest | ops-feedback | survey-service | — |
 | I7 FailureStore | ops-feedback | ops-feedback | synthetic-data, model-lab, question-authoring |
-| I8 turn-engine | (폐기, 2.0.0) | — | — |
+| I8 turn-engine (출력 검증, 2.0.0에서 대체) | turn-engine | — | survey-service |
 | I9 model-runtime | model-runtime | — | survey-service, model-lab, release-gate |
 | I10 공개 API | survey-service | — | Frontend (미정, O06) |
 
@@ -59,7 +59,7 @@ open_file(dataset_id: str, version: str, path: str) -> BinaryIO   # 해시 검�
 
 ```
 publish(manifest: ModelPackageManifest, adapter_dir: Path, eval_report: bytes) -> ModelPackageManifest
-    # adapter_dir의 해시가 manifest.adapter_hash와 같아야 한다. eval_report는 manifest.eval_report_ref로 저장된다.
+    # adapter_dir의 해시가 manifest.adapter_hash와 같아야 한다. adapter_dir 안에 manifest.system_prompt.path의 시스템 프롬프트 파일이 있고 그 파일 해시가 manifest.system_prompt.sha256과 같아야 한다(D75, 아니면 INTEGRITY_ERROR). eval_report는 manifest.eval_report_ref로 저장된다.
     # 멱등 규칙은 I2와 같다. 같은 (package_id, version)은 불변.
 get_manifest(package_id: str, version: str) -> ModelPackageManifest
 list_ids(*, cursor=None, limit=100) -> Page[str]       # 패키지 ID 목록
@@ -79,7 +79,7 @@ load_bundle(release_id: str, *, dest: Path) -> ReleaseBundle
     # ReleaseBundle(manifest: ReleaseManifest, question_bank: QuestionBank,
     #               adapters: dict["LORA_A"|"LORA_B", Path])
     # 서비스가 I9 load에 넘기는 serving_config와 해시는 manifest.adapters[role]에 있다(I3를 읽지 않는다).
-    # 모든 해시를 검증한다. 통과(PASS)하지 않은 릴리스는 FAILED_PRECONDITION.
+    # 모든 해시를 검증한다(어댑터 디렉터리, 그 안의 시스템 프롬프트 파일 manifest.adapters[role].system_prompt 포함). 통과(PASS)하지 않은 릴리스는 FAILED_PRECONDITION.
 get_decision(decision_id: str) -> GateDecision
 find_decisions(*, question_set: Ref | None = None, lora_a: Ref | None = None, lora_b: Ref | None = None,
                submission_id: str | None = None, cursor=None, limit=100) -> Page[GateDecision]   # 최신부터. 같은 조합의 첫 항목이 그 조합의 현재 판정이다
@@ -135,13 +135,32 @@ get_trace(deidentified_trace_ref: str) -> dict         # 비식별 TurnTrace(Dei
 
 소비자가 지키는 것: `review_status`가 CONFIRMED이고 `expected`가 있는 것만 정답 있는 회귀 케이스로 쓴다.
 
-## I8. turn-engine — 폐기 (2.0.0, D74)
+## I8. turn-engine — 대체: 출력 검증 라이브러리 (2.0.0, D74·D75)
 
-`normalize`, `judge`, `write_record`, `plan`과 `ENGINE_VERSION`은 이 계약에서 없어졌다. 이 함수들은 파서 출력을 정규화·판정하고 다음 문항을 계획하는 단계였는데, 학습 데이터셋 v2에서는 LoRA-A가 값 정규화·절차(`action`)·다음 문항(`next_item`)을 한 번에 낸다(`ActionExtraction`). 따라서 서비스에는 정규화기·판정기·Plan 코드가 없고 영역 사이 계약으로 열 함수도 없다. v1.3.3은 태그로 남는다. 살아남는 일(A 출력의 사후 검증, 저장 규칙, 건너뛰기 검산)을 turn-engine의 새 함수로 둘지 서비스 안에 둘지는 정해지지 않았다(V2_DRAFT.md 열린 항목). 정해지면 새 번호로 명세를 더한다.
+`normalize`, `judge`, `write_record`, `plan`은 이 계약에서 없어졌다. 이 함수들은 파서 출력을 정규화·판정하고 다음 문항을 계획하는 단계였는데, 학습 데이터셋 v2에서는 LoRA-A가 값 정규화·절차(`action`)·다음 문항(`next_item`)을 한 번에 낸다(`ActionExtraction`). 서비스에는 정규화기·판정기·Plan 코드가 없다. v1.3.3은 태그로 남는다.
+
+turn-engine은 폐기하지 않고 **A 출력의 의미 검증 안전망**으로 남는다(D75). 의료 문진 기록에 틀린 값이 들어가는 것보다 다시 묻는 편이 안전하기 때문이다. 검증은 둘로 나뉜다.
+- **형식(스키마)**: model-runtime이 `ActionExtraction` 스키마로 검증한다(I9). 어기면 재시도하고 끝내 못 지키면 503 `OUTPUT_INVALID`.
+- **의미**: turn-engine의 순수 함수가 검증하고 survey-service가 호출한다. 스키마로 표현할 수 없는 규칙이다: (a) `targets`가 같은 출력 `values`의 `key` 부분집합, (b) `next_item` 규칙(REASK·REDIRECT는 입력 `question_id`와 같다. CONFIRM은 `targets` 칸의 문항이다. NEXT·CORRECT·HOLD·SKIP은 문항 순서와 건너뛰기 규칙의 다음 문항이다. 한 말에 여러 문항의 값이 나오면 가장 뒤 문항이 기준이다), (c) 건너뛰기 순서, (d) `save` 규칙(`save`는 status가 ANSWERED 또는 CORRECTION일 때만 true이고, 나머지 status의 `value`는 null).
+
+함수 시그니처 **초안**(문서일 뿐이며 코드는 turn-engine 영역이 만든다. 시그니처는 그 영역이 바꿀 수 있고 바꾸면 이 절을 고친다):
+
+```
+validate_extraction(input: ActionExtractionInput, output: ActionExtraction, flow: QuestionFlowTable) -> list[Violation]
+    # 순수 함수. 같은 입력은 같은 출력이다. 위반이 없으면 빈 목록. 입력이 스키마를 어기면 ContractViolation.
+QuestionFlowTable    # 문진 스키마(QuestionBank)에서 만든 읽기 전용 표: 문항 ID 순서 목록, 건너뛰기 규칙 목록(조건 칸·값 -> 건너뛸 문항)
+Violation            # (code, path, message). code 예: TARGET_NOT_IN_VALUES, NEXT_ITEM_MISMATCH, SKIP_ORDER_MISMATCH, SAVE_RULE
+ENGINE_VERSION: str                       # 매니페스트에 기록되는 값
+SUPPORTED_RUNTIME_CONTRACT_VERSION: int
+```
+
+`validate_extraction`은 "같은 말에서 이미 일부 칸이 채워진 문항으로 넘어가는 NEXT"(계약이 허용한다, V2_DRAFT.md)를 위반으로 세지 않는다. 위반이 나오면 survey-service는 `OUTPUT_INVALID`와 같게 처리한다(I9의 "서비스가 지키는 것"). 문항 순서·건너뛰기 표는 문진 스키마가 소유하고 이 계약은 표의 형식을 정하지 않는다.
 
 ## I9. model-runtime (라이브러리)
 
-2.0.0에서 입출력이 학습 데이터셋 v2의 형식으로 바뀌었다: `parse`/`generate`와 문진 스키마의 파서·생성기 입출력은 `extract`/`respond`와 이 리포지토리의 `ActionExtraction` 계열로 대체되었다. 아래 `load`의 `schema_dir`와 `SUPPORTED_RUNTIME_CONTRACT_VERSION` 확인이 v2에서 무엇을 뜻하는지(모델 입출력이 문진 스키마를 떠났다)는 정해지지 않았다(V2_DRAFT.md 열린 항목). 정해질 때까지 현행 동작을 유지한다.
+2.0.0에서 입출력이 학습 데이터셋 v2의 형식으로 바뀌었다: `parse`/`generate`와 문진 스키마의 파서·생성기 입출력은 `extract`/`respond`와 이 리포지토리의 `ActionExtraction` 계열로 대체되었다.
+
+**`runtime_contract_version`의 의미(D75, 유지).** 모델 패키지가 학습된 **문진 스키마(문항 은행·칸 키)의 정수 버전**이다. 소유는 survey-service이고(D19, D21) 필드는 지우지 않는다(지우면 또 MAJOR). 모델 입출력 스키마가 이 리포지토리로 옮겨 왔어도 `load`의 `schema_dir`(문진 스키마 배포 디렉터리)와 `SUPPORTED_RUNTIME_CONTRACT_VERSION` 확인은 그대로다. 서비스와 게이트는 이 값이 다르면 적재를 거부한다(UNSUPPORTED_VERSION).
 
 ```
 load(adapters: Mapping["LORA_A"|"LORA_B", Path], serving_configs: Mapping["LORA_A"|"LORA_B", Mapping], *,
@@ -157,7 +176,7 @@ ModelSession.respond(input: ResponseRequest) -> ResponseResult         # LoRA-B.
 ModelSession.extract_raw(input) -> RawResult    # 평가용: 검증 전 모델 출력과 유효 여부. RawResult(output: dict | str | None, valid: bool, errors: list[str])
 ModelSession.respond_raw(input) -> RawResult
 ModelSession.last_call_info                   # 시도 횟수, 보호(repaired|fallback) 여부와 종류 등. 입력 원문은 담지 않는다
-render_prompt(role: "LORA_A"|"LORA_B", input: Mapping, *, serving_config: Mapping, schema_dir: Path) -> str
+render_prompt(role: "LORA_A"|"LORA_B", input: Mapping, *, serving_config: Mapping, system_prompt: str, schema_dir: Path) -> str   # system_prompt는 모델 패키지의 프롬프트 파일 내용(아래 '시스템 프롬프트')
 serving_config_hash(serving_config: Mapping) -> str     # boundary_contracts.canonical 기준
 validate_serving_config(serving_config: Mapping) -> None  # 형식 위반이면 ContractViolation. model-lab이 매니페스트를 쓰기 전에 호출한다
 FakeModelSession                    # 모델 없이 호출 경로를 시험하는 구현. 실제와 같은 검증·재시도·보호 경로를 거친다
@@ -170,10 +189,14 @@ SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 `serving_config`의 형식은 model-runtime이 정하고 라이브러리로 내놓는다(`ServingConfig`). 프롬프트 템플릿 버전, 디코딩 방식과 설정(제약 모드, 온도, 기본 시드), `max_attempts`를 반드시 포함한다. 어댑터에는 버전 정보를 따로 넣지 않는다. 어댑터는 `adapter_hash`(`directory_hash`)로, 설정은 `serving_config_hash`로 고정된다.
 
 **출력 검증과 대체 응답(D36, 2.0.0).** 서버와 라이브러리는 모델 출력을 계약 스키마로 검증하고, 어기면 재시도(`max_attempts`)한다. 재시도의 프롬프트는 첫 시도와 같고(검증 오류를 덧붙이지 않는다), 시드만 `기본 시드 + 시도 번호`로 바꾼다.
-- `extract`(LoRA-A): 재시도를 다 써도 `ActionExtraction`을 지키지 못하면 **대체 출력을 만들지 않는다.** action과 next_item은 문항 구조를 알아야 정할 수 있어 서버가 대신 만들 수 없기 때문이다. 라이브러리는 `ModelOutputInvalid`를 던지고, HTTP 서버는 `UNAVAILABLE`(503, `details.reason="OUTPUT_INVALID"`)로 낸다. 그 뒤의 처리(같은 문항 다시 묻기, 직원 호출 등)는 서비스가 정한다. **제안이며 헤드가 확정한다.**
+- `extract`(LoRA-A): 재시도를 다 써도 `ActionExtraction`을 지키지 못하면 **대체 출력을 만들지 않는다**(값을 지어내지 않는다). 라이브러리는 `ModelOutputInvalid`를 던지고, HTTP 서버는 503 `UNAVAILABLE`(`details.reason="OUTPUT_INVALID"`, `details.attempts`는 선택)로 낸다. **확정(D75).**
 - `respond`(LoRA-B): 출력은 JSON이 아니라 **문장 그대로의 텍스트**(`ResponseText`)다. 형식(비어 있지 않은 문자열)을 지키지 못하면 입력의 재료(`known`, `ask`, `hold`, `next.text`)를 이어 붙여 읽는 문장을 대신 내고, 대체했음을 알린다. 라이브러리는 `is_fallback=true`, HTTP는 응답 헤더 `X-Openit-Outcome: fallback`이다. `is_fallback`은 모델이 아니라 코드가 채운다. 대체 문장을 만드는 규칙은 model-runtime이 정한다(계약 밖, 미정).
 - 대체 응답이나 재시도가 일어나면 `last_call_info`에 몇 번 시도했고 어떤 보호가 몇 건 적용됐는지 남긴다. 조용히 지나가지 않는다. model-lab은 `*_raw`로 검증 전 품질을 따로 잰다.
 - 라이브러리 예외는 인프라 문제에만 쓴다(`BackendNotAvailable` 등). `BoundaryError`가 아니다.
+**서비스가 지키는 것: `OUTPUT_INVALID` 처리(D75).** survey-service는 `extract`가 503 `OUTPUT_INVALID`를 내거나 turn-engine의 `validate_extraction`이 위반을 내면 **같은 요청을 한 번 다시 보낸다.** 그래도 같으면 그 턴을 실패 신호(`TurnFailureSignal`, `write_committed`는 NOT_COMMITTED)로 처리하고 **세션 상태를 바꾸지 않는다**(기록 저장, 진행 갱신 없음). 틀린 값을 기록에 넣는 것보다 환자에게 다시 묻는 편이 안전하다. 다른 이유의 `UNAVAILABLE`은 서비스의 일반 재시도 정책을 따른다. 클라이언트는 `boundary_contracts.clients.is_output_invalid(err)`로 구분한다.
+
+**시스템 프롬프트는 모델 패키지의 일부다(D75).** LoRA 어댑터와 짝이 되는 시스템 프롬프트 파일이 어댑터 디렉터리 안에 있고, `ModelPackageManifest.system_prompt`(`path`는 디렉터리 안의 상대 경로, `sha256`은 파일 바이트의 `canonical.file_hash`)가 이를 가리킨다. 게이트는 같은 값을 `ReleaseManifest.adapters[role].system_prompt`로 복사한다(서비스가 I3를 읽지 않아도 되게). model-runtime은 서빙할 때 **이 패키지의 프롬프트만 쓴다**(코드나 설정에 박은 문장을 쓰지 않는다). LoRA 교체(D72)가 프롬프트까지 함께 바뀌어야 하기 때문이다. 프롬프트 파일은 어댑터 디렉터리 안에 있으므로 `adapter_hash`에도 포함되고, 클라이언트(`open_adapter`, `load_bundle`, `publish`)는 파일이 있고 `sha256`이 맞는지 따로 확인한다(어기면 INTEGRITY_ERROR). 역할마다 하나(A, B 각 한 종)다. `serving_config`의 **프롬프트 템플릿 버전**과는 다른 것이다: 시스템 프롬프트는 *무슨 말을 시키는가*(패키지 데이터, 학습과 짝)이고, 템플릿 버전은 *입력 JSON과 시스템 프롬프트를 어떻게 채팅 형식으로 조립하는가*(model-runtime 코드의 렌더링 규칙)다. 둘 다 해시로 고정된다(`system_prompt.sha256`, `serving_config_hash`).
+
 제약 디코딩은 교체 가능한 백엔드이고 엔진 선택은 model-runtime이 정한다(O14).
 
 **어댑터 형식과 재현성(D48).** 어댑터는 PEFT 형식의 디렉터리(`adapter_config.json`에 순위 `r`와 `base_model_name_or_path`)다. model-lab이 이 형식으로 내고, model-runtime은 엔진에 올리기 전에 `adapter_config.json`의 순위가 `serving_config`의 `max_lora_rank`를 넘으면 `UnsupportedServingConfig`로 거부한다(엔진 전체가 죽는 것을 막는다). 제약 디코딩은 엔진 버전에 따라 지원하는 스키마 키워드가 다르다. 확인된 vLLM 0.31.0 + xgrammar 0.2.7에서는 `allOf`, `if/then`, `not`을 조용히 무시하고 `uniqueItems`를 거부하므로 그런 규칙은 사후 검증과 보호가 맡는다. 엔진과 라이브러리 버전은 `serving_config.constraint.backend_version`에 고정되어 해시에 반영된다. **재현성은 같은 서버 프로세스 안에서만 약속한다.** 서버를 다시 띄우면 온도 > 0의 긴 출력은 달라질 수 있어서, 평가와 서비스의 일치를 토큰 단위로 약속하지 않는다. 평가는 온도 0에서 한다.
@@ -190,6 +213,6 @@ SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 | synthetic-data | I1, I7 | I2 |
 | model-lab | I2, I1, I7, I4, I9 | I3 |
 | release-gate | I1, I3, I9, I5 요청 | I4, I5 |
-| survey-service | I4, I9 | I6, I10 |
+| survey-service | I4, I8, I9 | I6, I10 |
 | ops-feedback | I6, I4, (롤백 요청은 I5 호출) | I7, I6 수집 |
-| model-runtime | 이 리포지토리의 모델 입출력 스키마, 문진 스키마 | I9 |
+| turn-engine / model-runtime | 이 리포지토리의 모델 입출력 스키마, 문진 스키마 | I8 / I9 |

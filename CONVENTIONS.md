@@ -94,5 +94,7 @@ SDK의 원격 구현과 서비스 API가 같은 규칙을 쓴다.
 - 재현성: 같은 입력과 시드는 같은 **내용**을 낸다. 내용 비교는 시각과 버전을 뺀 해시(예: 데이터셋의 `ext."synthetic-data".dataset_digest`)로 하고, `content_hash` 자체는 `created_at`을 포함하므로 시각이 다르면 달라진다. 같은 내용 해시의 산출물이 이미 있으면 새로 게시하지 않는다.
 - `ArtifactRef.version`은 문자열이다. 문항 세트는 버전 번호 n의 문자열이며 `QuestionBank.version`(정수)과 같은 번호다.
 - 같은 조합에 판정이 여러 개이면 가장 최근(`decided_at`, 같으면 `decision_id`가 큰 것)이 현재 판정이다.
+- **`runtime_contract_version`**(D75): 모델 패키지가 학습된 문진 스키마(문항 은행·칸 키)의 정수 버전이다. 소유는 survey-service(D19, D21)이고 필드는 그대로 둔다. 서비스와 게이트는 값이 다르면 적재를 거부한다. 모델 입출력 스키마(`ActionExtraction` 등)의 버전은 `pipeline_schema_version`(이 리포지토리의 MAJOR.MINOR)이며 이 정수와 별개다.
+- **`BoundaryError.details.reason`**: 같은 `code` 안에서 사유를 기계가 구분할 때 쓰는 대문자 코드다. 정의된 값: `STALE_REPORT`, `ALREADY_DECIDED`(409, HTTP.md I5), `OUTPUT_INVALID`(503 UNAVAILABLE, HTTP.md I9 `extract`, D75). 호출자는 `code`와 `retryable`로 행동하고 `reason`은 그 안의 세부 분기에만 쓴다.
 - `serving_config_hash`는 `canonical.sha256_hash(serving_config)`이다(기본값을 채우지 않은 그대로).
 - **외부 식별자를 봉투에 넣을 때:** 세션 ID·턴 ID처럼 바깥(Frontend)이 정한 식별자가 `Id` 형식(`[A-Za-z0-9][A-Za-z0-9._:-]*`, 128자)에 맞으면 그대로 쓰고, 맞지 않으면 `x-` + 원본 UTF-8의 SHA-256 앞 32자(소문자 16진)로 바꿔 쓴다. 결정적이므로 같은 원본은 같은 값이 되어 멱등성이 유지된다. 원본은 `trace` 본문에 남아 있다. 공개 API(O06)가 `Id` 형식으로 발급하기로 정해지면 이 변환은 쓰이지 않는다.
