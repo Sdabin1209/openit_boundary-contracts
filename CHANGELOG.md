@@ -27,39 +27,41 @@
 
 ### v1에서 옮기는 방법
 
+대응은 의미가 같은 것끼리만 짝지었다(확인: `survey-service/schema`의 v1 타입 필드를 읽고 대조). 1:1이 아닌 것은 "없어짐"으로 적었다. v1 필드의 값을 v2 값으로 자동 변환하는 규칙은 두지 않는다(v2는 모델이 추출·정규화·절차를 한 번에 내기 때문이다).
+
 LoRA-A 입력 (`UtteranceParserInput` -> `ActionExtractionInput`):
-
-| v1 (문진 스키마) | 2.0.0 |
-|---|---|
-| 현재 문항의 식별자와 문장 | `question_id`, `current_question` (둘 다 필수) |
-| 환자 발화 | `user_utterance` |
-| 직전까지의 기록 | `state`: `{ "<모델 키>": {"value", "status": ANSWERED\|UNCLEAR\|MISSING} }` (항상 객체, 빈 객체 가능) |
-
-LoRA-A 출력 (`ParserOutput` + 정규화기·판정기·Plan -> `ActionExtraction`):
 
 | v1 | 2.0.0 |
 |---|---|
-| 파서의 항목 목록(의도, 대상, 값) | `values[]`: `key`, `value`, `precision`(exact\|approximate\|unspecified), `status`(ANSWERED\|CORRECTION\|MISSING\|UNCLEAR\|CONFLICT\|UNKNOWN\|REJECTED), `save` |
-| 정규화기가 한 값 변환(단위, 범위) | 모델이 `values[].value`에 정규화된 값으로 낸다. 서비스에 정규화 코드가 없다 |
-| 판정기의 저장 여부 | `values[].save` (= status가 ANSWERED 또는 CORRECTION) |
-| Plan의 다음 행동 | `action`(NEXT, CORRECT, REASK, CONFIRM, HOLD, SKIP, REDIRECT)과 `reason` (NEXT·CORRECT에는 reason 없음) |
-| Plan의 대상 칸 | `targets[]` (REASK·CONFIRM·HOLD·SKIP만, 없으면 키 자체를 뺀다) |
-| Plan의 다음 문항 | `next_item` (문항 ID 또는 `END`) |
-| 문진표에 없는 말 | `action=REDIRECT`, `reason=OUT_OF_SCHEMA`, `note` |
+| `utterance` | `user_utterance` |
+| `last_directive`, `awaiting_questions`, `question_names`, `guide_list` | 없어짐. 대신 지금 묻는 문항을 `question_id`(문항 ID)와 `current_question`(문장)으로 준다 |
+| `answered_slots` | `state`: `{"<모델 키>": {"value", "status": ANSWERED\|UNCLEAR\|MISSING}}` (항상 객체, 빈 객체 가능) |
+
+LoRA-A 출력 (`ParserOutput` + `AnswerNormalizerInput/NormalizerOutput`, `AnswerJudgeInput/JudgeOutput`, `DialoguePlannerInput/PlannerOutput` -> `ActionExtraction`):
+
+| v1 | 2.0.0 |
+|---|---|
+| `ParserOutput.items[]` (`item_no`, `target`, `value`(문자열), `source_text`, `intent`, `progress_op`, `guide_id`, `evidence`) | `values[]` (`key`, `value`(불리언·숫자·문자열·null), `precision`, `status`, `save`). `item_no`, `source_text`, `evidence`, `progress_op`, `guide_id`는 없어짐 |
+| `intent` (ANSWERED_INTENT, CORRECTION_MARKED, SAYS_UNKNOWN, SAYS_REFUSAL, OUT_OF_SCOPE 등) | `values[].status`(ANSWERED, CORRECTION, UNKNOWN, REJECTED 등)와 `action`(CORRECT, SKIP, REDIRECT 등)으로 나뉘어 표현됨. 의도 12종과 1:1 대응은 없다. RISK_SIGNAL, USER_CALLED_STAFF, GUIDE_REQUEST, PROGRESS_OP 같은 의도는 v2 모델 출력에 대응하는 표현이 없다(서비스가 어떻게 다룰지는 survey-service 몫이며 열린 항목) |
+| 정규화기의 값 변환(단위, 범위) | 모델이 `values[].value`에 정규화된 값으로 낸다(서비스에 정규화 코드가 없다) |
+| 판정기의 저장 여부 | `values[].save` (= `status`가 ANSWERED 또는 CORRECTION) |
+| `PlannerOutput.directive` (`Action` 16종: ASK_NEXT, ASK_MISSING, ASK_CLARIFY, ASK_CONFIRM, ...) | `action` 7종(NEXT, CORRECT, REASK, CONFIRM, HOLD, SKIP, REDIRECT)과 `reason`. 대략 ASK_NEXT -> NEXT, ASK_MISSING·ASK_CLARIFY -> REASK, ASK_CONFIRM -> CONFIRM, ASK_AFTER_UNKNOWN -> HOLD, ASK_AFTER_REFUSAL -> SKIP, REDIRECT -> REDIRECT (제안, 의미 대응이며 변환 규칙이 아니다). 안내·종료·직원 호출류(RISK_NOTICE, STAFF_NOTICE, FAREWELL 등)는 v2 출력에 없다 |
+| Planner의 대상 칸·다음 문항 | `targets[]`(REASK·CONFIRM·HOLD·SKIP만, 없으면 키를 뺀다), `next_item`(문항 ID 또는 `END`) |
+| `flow`, `staff_alert`, `progress_record_update`, `planner_record_update` | 없어짐(모델 출력에 없다) |
 
 LoRA-B (`ResponseGeneratorInput`/`GeneratorOutput` -> `ResponseRequest`/`ResponseText`):
 
 | v1 | 2.0.0 |
 |---|---|
-| 생성기 입력(문장 재료) | `ResponseRequest`: `action`(START 포함), `topic`, `user_utterance`, `known`, `next{type: NEXT\|SAME\|END, question_id, text}`, 그리고 action별로 `reason`, `ask`, `previous`, `current`, `hold`, `note`. 서비스가 A 출력에서 표 찾기로 조립한다 |
+| `ResponseGeneratorInput {directive, utterance}` (`directive`의 문장 재료) | `ResponseRequest`: `action`(START 포함), `topic`, `user_utterance`, `known`, `next{type: NEXT\|SAME\|END, question_id, text}`, 그리고 action별로 `reason`, `ask`, `previous`, `current`, `hold`, `note`. 서비스가 A 출력에서 표 찾기로 조립한다 |
 | `GeneratorOutput {response_text, is_fallback}` | 응답 문장 그대로의 텍스트. 대체 여부는 응답 헤더 `X-Openit-Outcome: fallback` |
-| 시작 인사 | 서비스가 A를 부르지 않고 `action=START`로 B만 부른다 |
+| 시작 안내 | 서비스가 A를 부르지 않고 `action=START`로 B만 부른다 |
 
 데이터셋과 평가:
 
 | v1 | 2.0.0 |
 |---|---|
-| `ParserSample` (`runtime_contract_version`, `question_set`, `noise_types`가 필수 또는 있음) | `ActionExtractionSample`: `sample_id`, `scenario_id`, `split`, `origin`, `input`, `expected`가 필수. `question_set`, `human_review`, `seed_case_id`, `ext`는 선택 |
+| `ParserSample`(`question_set`, `runtime_contract_version`이 필수; `noise_types` 등) | `ActionExtractionSample`: `sample_id`, `scenario_id`, `split`, `origin`, `input`, `expected`가 필수. `question_set`, `human_review`, `seed_case_id`, `ext`는 선택. `runtime_contract_version`, `style_guide_version`, `noise_types`는 없다 |
 | `GeneratorSample` | `ResponseSample` (`expected`는 문자열) |
 | `DatasetManifest.files[].role` PARSER/GENERATOR | LORA_A/LORA_B |
 | `FailureCase.expected_kind` PARSER/GENERATOR | LORA_A/LORA_B |
