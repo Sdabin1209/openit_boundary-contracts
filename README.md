@@ -1,6 +1,6 @@
 # boundary-contracts
 
-영역 사이에 오가는 데이터의 계약이다. 소유자는 헤드다. 문진 서비스 내부의 컴포넌트 계약은 여기에 없고 `../contracts`(HealthCheckSchema)에 있다. 이 리포지토리의 스키마는 그것을 수정하지 않고 필요하면 참조만 한다.
+영역 사이에 오가는 데이터의 계약이다. 소유자는 헤드다. 문진 서비스 내부의 컴포넌트 계약은 여기에 없고 `../survey-service/schema`(문진 스키마, survey-service 소유)에 있다. 이 리포지토리의 스키마는 그것을 수정하지 않고 필요하면 참조만 한다.
 
 - `schemas/`: JSON Schema Draft 2020-12. 공통 타입은 `_common.schema.json`.
 - `examples/`: 통과해야 하는 예시.
@@ -8,15 +8,15 @@
 
 ## 버전(D14, D19)
 
-각 레코드는 `pipeline_schema_version`(`MAJOR.MINOR`)을 적는다. MAJOR는 깨지는 변경, MINOR는 읽는 쪽이 무시해도 되는 추가(선택 필드, 열거값 추가는 소비자가 모르는 값을 처리할 수 있을 때만)다. 읽는 쪽은 같은 MAJOR이고 MINOR가 자기가 아는 것 이하이거나 같을 때 읽고, 더 높은 MINOR는 모르는 필드를 무시하는 조건에서 읽는다. 런타임 계약의 정수 버전은 문진 스키마(`../contracts`)의 것이며 여기서는 `runtime_contract_version`으로 기록만 한다.
+각 레코드는 `pipeline_schema_version`(`MAJOR.MINOR`)을 적는다. MAJOR는 깨지는 변경, MINOR는 읽는 쪽이 무시해도 되는 추가(선택 필드, 열거값 추가는 소비자가 모르는 값을 처리할 수 있을 때만)다. 읽는 쪽은 같은 MAJOR이고 MINOR가 자기가 아는 것 이하이거나 같을 때 읽고, 더 높은 MINOR는 모르는 필드를 무시하는 조건에서 읽는다. 런타임 계약의 정수 버전은 문진 스키마(`../survey-service/schema`)의 것이며 여기서는 `runtime_contract_version`으로 기록만 한다.
 
-## 현재 계약 (초안, 사용자와 논의 중)
+## 현재 계약 (v1.3.3: 레코드 스키마 24개 + `_common.schema.json`)
 
-`../head/docs/STRUCTURE.md` 7절의 11개 모두: ReleaseManifest, GateDecision, TraceEnvelope, ReviewRecord, ChangeClassification, ParserSample, GeneratorSample, DatasetManifest, ModelPackageManifest, FailureCase, RollbackRequest. 모두 불변 레코드다(D25). 여기에 BoundaryError, IngestResult, GateSubmission, ActivePointer, RollbackReceipt가 더해진다.
+`../head/docs/STRUCTURE.md` 7절의 11개 모두: ReleaseManifest, GateDecision, TraceEnvelope, ReviewRecord, ChangeClassification, ParserSample, GeneratorSample, DatasetManifest, ModelPackageManifest, FailureCase, RollbackRequest. 모두 불변 레코드다(D25). 여기에 BoundaryError, IngestResult, GateSubmission, ActivePointer, RollbackReceipt가 더해진다. 이후 EvaluationReport, GateApproval, ReviewReport, SubmissionView(출고 승인), SessionState, StaffAlert, StaffAlertPage, PushConfig(공개 API·직원 알림)가 더해져 지금은 24개다(확인: `ls schemas`).
 
 ## 설치
 
-`pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@v1.1.1` (Git 태그 설치, D18). 패키지 버전의 MAJOR.MINOR는 `pipeline_schema_version`과 같다. 개발 중에는 `pip install -e ../boundary-contracts`.
+`pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@v1.3.3` (Git 태그 설치, D18. 현재 기준 태그 v1.3.3. 예외로 synthetic-data는 v1.2.0을 고정해 쓴다). 패키지 버전의 MAJOR.MINOR는 `pipeline_schema_version`과 같다. 개발 중에는 `pip install -e ../boundary-contracts`.
 
 ## 코드
 
@@ -45,6 +45,9 @@ bundle = reader.load_bundle("rel-0001", dest=Path("/var/lib/survey/releases"))  
 
 - `CONVENTIONS.md`: 공통 규약(진화 규칙, ID·시각·해시, 오류, 멱등성, 인증, SDK 형태).
 - `INTERFACES.md`: 영역 경계 명세 I1~I10(시그니처, 받는 것/내는 것).
+- `HTTP.md`: 영역 사이 HTTP API(서버는 소유 영역, 클라이언트는 `boundary_contracts.clients`).
+- `PUBLIC_API.md`: 화면 ↔ survey-service 공개 API(I10).
+- `METRICS.md`: 승인 보고서의 지표 카탈로그(제안).
 
 ## 규칙
 
