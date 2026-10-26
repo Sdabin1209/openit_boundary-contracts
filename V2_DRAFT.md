@@ -1,6 +1,22 @@
-# 계약 v2 초안: 학습 데이터셋 v2의 LoRA-A/LoRA-B 입출력 (D74)
+# 계약 2.0.0: 학습 데이터셋 v2의 LoRA-A/LoRA-B 입출력 (D74)
 
-상태: **초안**(브랜치 `contracts-v2-draft`, 2026-10-27). 헤드가 검토하기 전에는 main에 합치지 않고 push하지 않는다. 기존 파일은 하나도 바꾸지 않았고 새 파일만 더했다. 구현이 아니라 계약 초안과 영향 보고다.
+상태: **2.0.0 반영 완료, 헤드 검토 대기**(브랜치 `contracts-v2-draft`). 헤드가 검토하기 전에는 main에 합치지 않고 태그를 붙이지 않고 push하지 않는다. 아래 1~9장은 초안 때 작성한 근거 기록이고(확인한 데이터, 문서와 데이터의 차이, 영향 분석), 0장이 헤드의 결정과 그 반영 결과, 10장이 열린 항목이다. 변경 목록과 v1에서 옮기는 방법은 `CHANGELOG.md`.
+
+## 0. 헤드의 결정과 반영 결과
+
+| 결정 | 반영 |
+|---|---|
+| 계약을 **2.0.0(MAJOR)**으로 올린다. v1 형식은 병행 없이 폐기한다(v1.3.3은 태그로 남는다) | `pyproject.toml` 2.0.0, `PIPELINE_SCHEMA_VERSION` "2.0", 모든 예시 2.0. 클라이언트는 MAJOR 1 레코드를 `UNSUPPORTED_VERSION`으로 거부(시험). CONVENTIONS 1-4에 병행 예외를 적음 |
+| 스키마 이름은 `ActionExtraction` 계열을 유지한다 | 4장의 이름 그대로 |
+| B 응답은 학습한 형식 그대로 텍스트(`text/plain`)이고 대체 응답 여부는 `X-Openit-Outcome`로 알린다 | HTTP.md I9의 `respond`. 클라이언트 `HttpModelRuntime.respond` |
+| 새 reason 4종, 괄호 없는 술 키, 부분 선채움 문항으로의 NEXT는 계약으로 인정한다 | `ActionExtraction` 스키마의 설명에 명시하고 시험 추가 |
+| `ParserSample`, `GeneratorSample` 삭제 | 스키마·예시 삭제, 시험으로 부재를 확인 |
+| I8(turn-engine) 폐기 | INTERFACES.md I8를 폐기 표시로 바꾸고 영역 표에서 뺌 |
+| I9를 v2로 | `parse`/`generate` -> `extract`/`respond` (HTTP.md, INTERFACES.md I9 라이브러리 절) |
+| `FailureCase.expected_kind`, `DatasetManifest` 역할 | 둘 다 `LORA_A`/`LORA_B`(제안: 게이트·릴리스 계열이 이미 쓰는 역할 어휘와 통일). `FailureCase.expected`는 객체 또는 문자열 |
+| `SlotRef` 반복 키 규약 충돌 | CONVENTIONS 10절: SlotRef 문자열과 모델 키 문법을 둘로 구분해 적음. `ChangeClassification`은 그대로 |
+
+`PUBLIC_API.md`는 읽었고 영향이 없다(공개 API는 `FrontendInput`, `SessionState` 등 문진 스키마 쪽 타입만 쓰고 모델 입출력을 다루지 않음). `METRICS.md`는 **영향이 있으나 수정하지 않았다**: `LORA_A 파서 (UtteranceParserOutput)`, `LORA_B 생성기 (ResponseGeneratorOutput)` 절의 제목과 지표 정의(`risk_signal_*`, `intent_accuracy`, `is_fallback` 비율 등)가 v1 출력을 가정한다. 지표 이름은 자유 문자열이라 계약은 깨지지 않으며, 문서는 학습 담당자가 검토하는 "제안"이다(10장).
 
 표기: **확인**은 이번 작업에서 파일이나 데이터를 읽어 본 것, **제안**은 초안의 선택, **미정**은 근거가 없거나 결정이 필요한 것.
 
@@ -169,7 +185,7 @@
 
 ### 7.2 MAJOR 여부 (제안)
 
-**MAJOR(2.0.0)**로 올릴 것을 제안한다. 근거: CONVENTIONS 1-2는 필드 삭제·의미 변경을 MAJOR로 정한다. 새 스키마를 더하는 것만이면 MINOR지만, (1) `ParserSample`/`GeneratorSample` 폐기, (2) I8 폐기, (3) I9 호출의 입출력 교체, (4) `FailureCase`·`DatasetManifest`의 `PARSER`/`GENERATOR` 의미 변경이 함께 들어간다. 1-4는 한 릴리스 주기 동안 v1 읽기 경로를 유지한다. 이번 초안은 새 파일만 더했으므로 `pyproject.toml`의 `version`(1.3.3)과 `schemas_api.PIPELINE_SCHEMA_VERSION`("1.3")은 **올리지 않았다**. 새 스키마는 `pipeline_schema_version`의 예시 값으로 `2.0`을 쓴다. 병합과 태그(`v2.0.0`)는 헤드 결정이다.
+**MAJOR(2.0.0)**로 올릴 것을 제안한다. 근거: CONVENTIONS 1-2는 필드 삭제·의미 변경을 MAJOR로 정한다. 새 스키마를 더하는 것만이면 MINOR지만, (1) `ParserSample`/`GeneratorSample` 폐기, (2) I8 폐기, (3) I9 호출의 입출력 교체, (4) `FailureCase`·`DatasetManifest`의 `PARSER`/`GENERATOR` 의미 변경이 함께 들어간다. 1-4는 한 릴리스 주기 동안 v1 읽기 경로를 유지한다. (초안 당시의 서술. 병행 기간 제안은 헤드가 철회했고 0장이 현재 상태다.) 병합과 태그(`v2.0.0`)는 헤드 결정이다.
 
 ### 7.3 영역별 영향
 
@@ -200,3 +216,23 @@
 - 예시 19개: `examples/ActionExtraction*.json`, `examples/ResponseRequest*.json`, `examples/ResponseText.json`, `examples/ResponseSample.json` 등
 - 도구: `tools/validate_dataset_v2.py`(stdin 또는 파일을 읽어 검증), `tools/verify_v2.py`(거부 시험)
 - 이 문서: `V2_DRAFT.md`
+
+## 10. 열린 항목 (2.0.0 이후에 정할 것)
+
+데이터셋 담당(학습 서버)에게 정리를 요청할 것:
+1. 데이터에 있는 **새 reason 4종**(OTHER_BEVERAGE, MISSING_NUMBER, UNPARSED_VALUE, INVALID_OPTION)을 IO_SPEC 1장의 표에 올리거나, 데이터에서 기존 14종으로 합칠지. 계약은 20종을 모두 받아들인다.
+2. **괄호 없는 술 키**(`Q7_1.amount`, 종류를 모를 때)를 문서에 올릴지, 데이터에서 `BEVERAGE_MISSING`을 다른 방식으로 표현할지. 계약은 둘 다 받아들인다.
+3. **부분 선채움 문항으로의 NEXT**(57행, 같은 말에서 일부 칸이 이미 채워진 문항으로 넘어감)와 그때 `next.text`가 받은 내용을 다시 묻는 문제(impact-d74.md의 미결과 같은 현상으로 보임, 제안). 계약은 허용한다.
+4. 문서(IO_SPEC)와 데이터의 나머지 차이(3장 표): `topic`·`current`·`hold` 키, BEVERAGE_MISSING의 action(REASK), 술 칸 예시(`whisky`/`"잔"`/`.beverage`), CONFIRM의 `next_item`, Q10 END 건수, START 건수(110건).
+
+헤드가 정할 것(계약은 현재 제안대로 쓰였다):
+5. `extract`가 끝내 깨질 때: 대체 출력이 없어 503 `UNAVAILABLE`(`details.reason="OUTPUT_INVALID"`)로 낸다(제안). 서비스가 그 뒤에 무엇을 할지는 survey-service와 정한다. 이를 계약의 일부로 확정할지.
+6. `respond`의 대체 문장 규칙과 `X-Openit-Protections`의 규칙 코드(P*, G*)는 model-runtime이 정한다(계약 밖).
+7. `runtime_contract_version`(문진 스키마의 정수)이 v2에서 무엇을 가리킬지. `DatasetManifest`, `FailureCase`, `ReleaseManifest`, `TraceEnvelope`, `/v1/info`의 `supported_contract_versions`가 아직 이 정수를 쓴다. 모델 입출력이 문진 스키마를 떠났으므로 소유자가 정해지지 않았다. 이 값을 지운다면 MAJOR 변경이다.
+8. `DatasetManifest.turn_engine_version`, `generator_version`: turn-engine 폐기 후에도 필수 필드로 남아 있다(바꾸면 필수 필드 삭제로 MAJOR). 이번 2.0.0에서 건드리지 않았다.
+9. A 출력의 사후 검증(targets가 values의 key 부분집합, REASK/REDIRECT의 next_item, CONFIRM의 next_item, 건너뛰기 순서)을 어디에 둘지(서비스 코드, turn-engine의 새 함수, model-runtime). `tools/validate_dataset_v2.py`가 데이터 수준에서 하는 검사를 참고할 수 있다.
+10. 학습 때 쓴 시스템 프롬프트(A, B 각 한 종)를 `serving_config`의 템플릿 버전으로만 고정할지, 문장을 계약에 넣을지.
+11. `if/then`을 뺀 평면 스키마를 제약 디코딩용으로 따로 낼지(엔진이 `allOf`/`if/then`을 무시한다).
+12. `METRICS.md`를 v2 평가 항목(action 일치율, next_item 일치율, 값 정확도 등)으로 고칠지(학습 담당자).
+13. `TraceEnvelope.trace`(문진 스키마 `TurnTrace`)의 키(`parser_*`, `normalizer_*`, `judge_*`, `planner_*`)는 survey-service의 계약 변경이다. 이 리포지토리의 `TraceEnvelope`는 그대로다.
+14. 서버 데이터 재검증: 이번 2.0.0 작업에서는 서버에 접속하지 않았다. 스키마의 형태 규칙은 초안 때 검증한 것(10,264행 실패 0)에서 바뀌지 않았다(확인: `git diff 774990c`에서 스키마의 `properties`·`allOf`·`pattern`은 건드리지 않았고 설명 문구만 바뀜). 데이터가 갱신되면 `tools/validate_dataset_v2.py`로 다시 돌린다.

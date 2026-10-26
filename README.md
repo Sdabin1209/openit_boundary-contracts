@@ -10,13 +10,13 @@
 
 각 레코드는 `pipeline_schema_version`(`MAJOR.MINOR`)을 적는다. MAJOR는 깨지는 변경, MINOR는 읽는 쪽이 무시해도 되는 추가(선택 필드, 열거값 추가는 소비자가 모르는 값을 처리할 수 있을 때만)다. 읽는 쪽은 같은 MAJOR이고 MINOR가 자기가 아는 것 이하이거나 같을 때 읽고, 더 높은 MINOR는 모르는 필드를 무시하는 조건에서 읽는다. 런타임 계약의 정수 버전은 문진 스키마(`../survey-service/schema`)의 것이며 여기서는 `runtime_contract_version`으로 기록만 한다.
 
-## 현재 계약 (v1.3.3: 레코드 스키마 24개 + `_common.schema.json`)
+## 현재 계약 (v2.0.0: 스키마 28개 + `_common.schema.json`)
 
-`../head/docs/STRUCTURE.md` 7절의 11개 모두: ReleaseManifest, GateDecision, TraceEnvelope, ReviewRecord, ChangeClassification, ParserSample, GeneratorSample, DatasetManifest, ModelPackageManifest, FailureCase, RollbackRequest. 모두 불변 레코드다(D25). 여기에 BoundaryError, IngestResult, GateSubmission, ActivePointer, RollbackReceipt가 더해진다. 이후 EvaluationReport, GateApproval, ReviewReport, SubmissionView(출고 승인), SessionState, StaffAlert, StaffAlertPage, PushConfig(공개 API·직원 알림)가 더해져 지금은 24개다(확인: `ls schemas`).
+`../head/docs/STRUCTURE.md` 7절의 11개 모두: ReleaseManifest, GateDecision, TraceEnvelope, ReviewRecord, ChangeClassification, DatasetManifest, ModelPackageManifest, FailureCase, RollbackRequest. 모두 불변 레코드다(D25). 여기에 BoundaryError, IngestResult, GateSubmission, ActivePointer, RollbackReceipt가 더해진다. 이후 EvaluationReport, GateApproval, ReviewReport, SubmissionView(출고 승인), SessionState, StaffAlert, StaffAlertPage, PushConfig(공개 API·직원 알림)가 더해졌다. 2.0.0(D74)에서 v1의 ParserSample, GeneratorSample을 없애고 학습 데이터셋 v2의 모델 입출력 6개를 넣었다: ActionExtractionInput, ActionExtraction, ActionExtractionSample(LoRA-A), ResponseRequest, ResponseText, ResponseSample(LoRA-B). 지금은 28개다(확인: `ls schemas`). 바뀐 점과 v1에서 옮기는 방법은 `CHANGELOG.md`.
 
 ## 설치
 
-`pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@v1.3.3` (Git 태그 설치, D18. 현재 기준 태그 v1.3.3. 예외로 synthetic-data는 v1.2.0을 고정해 쓴다). 패키지 버전의 MAJOR.MINOR는 `pipeline_schema_version`과 같다. 개발 중에는 `pip install -e ../boundary-contracts`.
+`pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@<태그>` (Git 태그 설치, D18). 2.0.0의 태그 `v2.0.0`은 헤드가 검토·병합한 뒤 붙인다. 그 전의 기준은 v1.3.3이며 v1 형식을 쓰는 영역은 2.0.0으로 옮기기 전까지 그 태그를 쓴다. 패키지 버전의 MAJOR.MINOR는 `pipeline_schema_version`과 같다. 개발 중에는 `pip install -e ../boundary-contracts`.
 
 ## 코드
 
@@ -31,13 +31,14 @@
 ## HTTP 클라이언트
 
 ```python
-from boundary_contracts.clients import HttpReleaseReader   # + HttpQuestionReader, HttpModelRegistry, HttpGateService, HttpTraceIngest, HttpFailureStore
+from boundary_contracts.clients import HttpReleaseReader   # + HttpQuestionReader, HttpModelRegistry, HttpGateService, HttpTraceIngest, HttpFailureStore, HttpModelRuntime
 reader = HttpReleaseReader("http://release-gate:8080", token, timeout=10.0)   # 환경 변수는 읽지 않는다
 bundle = reader.load_bundle("rel-0001", dest=Path("/var/lib/survey/releases"))  # dest/rel-0001 아래에 풀고 모든 해시를 검증
 ```
 
 - 실패는 `BoundaryError`다. 네트워크 오류, 타임아웃, 5xx, JSON이 아닌 응답은 `UNAVAILABLE`(재시도 가능)이고 재시도는 호출자가 한다. 해시 불일치, 스키마를 어긴 응답, 위험한 tar는 `INTEGRITY_ERROR`다.
 - 해시는 클라이언트가 다시 계산한다(문항 세트, 어댑터 디렉터리, 매니페스트의 `content_hash`). `open_adapter`는 `dest/<패키지 ID>/<버전>`, `load_bundle`은 `dest/<릴리스 ID>`에 풀고, 실패하면 풀어 둔 파일을 지운다. tar 총 크기 상한은 `client.max_tar_bytes`(기본 8GiB)다.
+- `HttpModelRuntime`(I9)은 `load_release`, `get_release_state`, `info`, `extract`(LoRA-A, JSON), `respond`(LoRA-B, `text/plain`)를 낸다. 추론 호출은 `RuntimeResult(output, outcome, attempts, protections)`를 돌려주고, `outcome`은 응답 헤더 `X-Openit-Outcome`(`ok`, `respond`만 `fallback`)이다. 모델 출력(`ActionExtraction`, 응답 문장)은 읽기 모드 완화 없이 엄격하게 검증한다. 참조 서버는 `conformance.servers.RuntimeReferenceServer`.
 - 응답은 읽기 모드로 검증한다: 같은 MAJOR의 모르는 필드·열거값은 받아들이고(보존), MAJOR가 다르면 `UNSUPPORTED_VERSION`이다. 보내는 레코드는 엄격하게 검증한다.
 - 목록은 `(items, next_cursor)`를 돌려준다. `get_reviews`와 `list_versions`(I3)는 모든 쪽을 모아 돌려준다.
 
@@ -45,6 +46,8 @@ bundle = reader.load_bundle("rel-0001", dest=Path("/var/lib/survey/releases"))  
 
 - `CONVENTIONS.md`: 공통 규약(진화 규칙, ID·시각·해시, 오류, 멱등성, 인증, SDK 형태).
 - `INTERFACES.md`: 영역 경계 명세 I1~I10(시그니처, 받는 것/내는 것).
+- `CHANGELOG.md`: 버전별 변경과 v1에서 옮기는 방법(2.0.0).
+- `V2_DRAFT.md`: 2.0.0의 근거(학습 데이터 확정 형태, 문서와 데이터의 차이, 영향 분석)와 열린 항목.
 - `HTTP.md`: 영역 사이 HTTP API(서버는 소유 영역, 클라이언트는 `boundary_contracts.clients`).
 - `PUBLIC_API.md`: 화면 ↔ survey-service 공개 API(I10).
 - `METRICS.md`: 승인 보고서의 지표 카탈로그(제안).

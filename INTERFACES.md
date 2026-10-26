@@ -1,6 +1,6 @@
 # 영역 경계 명세
 
-각 영역이 **무엇을 내놓고 무엇을 받는지**를 정한다. 상대 영역은 블랙박스이며, 아래 명세만 믿고 개발한다. 오류·멱등성·버전·인증은 `CONVENTIONS.md`를 따른다. 타입 이름 중 `ReleaseManifest` 같은 것은 이 리포지토리의 스키마이고, `QuestionBank`·`TurnTrace`·`UtteranceParserInput` 같은 것은 문진 스키마(`survey-service/schema`)의 계약이다. 시그니처는 `typing.Protocol`로 옮길 수 있는 형태로 적었다.
+각 영역이 **무엇을 내놓고 무엇을 받는지**를 정한다. 상대 영역은 블랙박스이며, 아래 명세만 믿고 개발한다. 오류·멱등성·버전·인증은 `CONVENTIONS.md`를 따른다. 타입 이름 중 `ReleaseManifest` 같은 것은 이 리포지토리의 스키마이고, `QuestionBank`·`TurnTrace` 같은 것은 문진 스키마(`survey-service/schema`)의 계약이다. 모델 입출력(`ActionExtractionInput`, `ActionExtraction`, `ResponseRequest`, `ResponseText`)은 2.0.0부터 이 리포지토리의 스키마다. 시그니처는 `typing.Protocol`로 옮길 수 있는 형태로 적었다.
 
 ```
 Ref        = ArtifactRef
@@ -19,7 +19,7 @@ Page[T]    = (items: list[T], next_cursor: str | None)
 | I5 GateService | release-gate | operator, ops-feedback | — |
 | I6 TraceIngest | ops-feedback | survey-service | — |
 | I7 FailureStore | ops-feedback | ops-feedback | synthetic-data, model-lab, question-authoring |
-| I8 turn-engine | turn-engine | — | survey-service, synthetic-data, model-lab, release-gate, question-authoring |
+| I8 turn-engine | (폐기, 2.0.0) | — | — |
 | I9 model-runtime | model-runtime | — | survey-service, model-lab, release-gate |
 | I10 공개 API | survey-service | — | Frontend (미정, O06) |
 
@@ -42,7 +42,7 @@ get_change(ref: Ref) -> ChangeClassification | None    # 첫 버전이면 None
 
 ## I2. DatasetStore (synthetic-data)
 
-파일은 JSON Lines이고 `role`이 PARSER면 한 줄이 `ParserSample`, GENERATOR면 `GeneratorSample`이다.
+파일은 JSON Lines이고 `role`이 LORA_A면 한 줄이 `ActionExtractionSample`, LORA_B면 `ResponseSample`이다(2.0.0. v1의 PARSER/GENERATOR와 두 샘플 스키마는 없어졌다).
 
 ```
 publish(manifest: DatasetManifest, files: Mapping[str, Path]) -> DatasetManifest
@@ -135,22 +135,13 @@ get_trace(deidentified_trace_ref: str) -> dict         # 비식별 TurnTrace(Dei
 
 소비자가 지키는 것: `review_status`가 CONFIRMED이고 `expected`가 있는 것만 정답 있는 회귀 케이스로 쓴다.
 
-## I8. turn-engine (라이브러리)
+## I8. turn-engine — 폐기 (2.0.0, D74)
 
-모두 순수 함수다. 같은 입력은 같은 출력을 낸다. I/O·시간·난수는 인자로 주입한다. 입력과 출력은 문진 스키마의 계약이다.
-
-```
-normalize(input: AnswerNormalizerInput) -> NormalizerOutput
-judge(input: AnswerJudgeInput) -> JudgeOutput
-write_record(input: RecordWriterInput) -> StoreResult
-plan(input: DialoguePlannerInput) -> PlannerOutput
-ENGINE_VERSION: str                 # 매니페스트에 기록되는 값
-SUPPORTED_RUNTIME_CONTRACT_VERSION: int
-```
-
-입력이 문진 스키마를 위반하면 `ContractViolation`을 던진다(경계 호출이 아니라 라이브러리이므로 `BoundaryError`가 아님).
+`normalize`, `judge`, `write_record`, `plan`과 `ENGINE_VERSION`은 이 계약에서 없어졌다. 이 함수들은 파서 출력을 정규화·판정하고 다음 문항을 계획하는 단계였는데, 학습 데이터셋 v2에서는 LoRA-A가 값 정규화·절차(`action`)·다음 문항(`next_item`)을 한 번에 낸다(`ActionExtraction`). 따라서 서비스에는 정규화기·판정기·Plan 코드가 없고 영역 사이 계약으로 열 함수도 없다. v1.3.3은 태그로 남는다. 살아남는 일(A 출력의 사후 검증, 저장 규칙, 건너뛰기 검산)을 turn-engine의 새 함수로 둘지 서비스 안에 둘지는 정해지지 않았다(V2_DRAFT.md 열린 항목). 정해지면 새 번호로 명세를 더한다.
 
 ## I9. model-runtime (라이브러리)
+
+2.0.0에서 입출력이 학습 데이터셋 v2의 형식으로 바뀌었다: `parse`/`generate`와 문진 스키마의 파서·생성기 입출력은 `extract`/`respond`와 이 리포지토리의 `ActionExtraction` 계열로 대체되었다. 아래 `load`의 `schema_dir`와 `SUPPORTED_RUNTIME_CONTRACT_VERSION` 확인이 v2에서 무엇을 뜻하는지(모델 입출력이 문진 스키마를 떠났다)는 정해지지 않았다(V2_DRAFT.md 열린 항목). 정해질 때까지 현행 동작을 유지한다.
 
 ```
 load(adapters: Mapping["LORA_A"|"LORA_B", Path], serving_configs: Mapping["LORA_A"|"LORA_B", Mapping], *,
@@ -161,10 +152,10 @@ load(adapters: Mapping["LORA_A"|"LORA_B", Path], serving_configs: Mapping["LORA_
     #   SUPPORTED_RUNTIME_CONTRACT_VERSION과 다르면 ContractVersionMismatch.
     # 역할마다 serving_config_hash(serving_configs[role]) != expected_serving_config_hashes[role] 이면 ServingConfigMismatch.
     # 지원하지 않는 프롬프트 템플릿·디코딩 버전이면 UnsupportedServingConfig.
-ModelSession.parse(input: UtteranceParserInput) -> ParserOutput          # 항상 스키마를 통과하는 값. 아래 '출력 보호'
-ModelSession.generate(input: ResponseGeneratorInput) -> GeneratorOutput  # 항상 스키마를 통과하는 값. 아래 '출력 보호'
-ModelSession.parse_raw(input) -> RawResult    # 평가용: 보호 전 모델 출력과 유효 여부. RawResult(output: dict | None, valid: bool, errors: list[str])
-ModelSession.generate_raw(input) -> RawResult
+ModelSession.extract(input: ActionExtractionInput) -> ActionExtraction   # LoRA-A. 항상 스키마를 통과하는 값. 아래 '출력 검증'
+ModelSession.respond(input: ResponseRequest) -> ResponseResult         # LoRA-B. ResponseResult(text: str, is_fallback: bool). 아래 '출력 검증'
+ModelSession.extract_raw(input) -> RawResult    # 평가용: 검증 전 모델 출력과 유효 여부. RawResult(output: dict | str | None, valid: bool, errors: list[str])
+ModelSession.respond_raw(input) -> RawResult
 ModelSession.last_call_info                   # 시도 횟수, 보호(repaired|fallback) 여부와 종류 등. 입력 원문은 담지 않는다
 render_prompt(role: "LORA_A"|"LORA_B", input: Mapping, *, serving_config: Mapping, schema_dir: Path) -> str
 serving_config_hash(serving_config: Mapping) -> str     # boundary_contracts.canonical 기준
@@ -178,10 +169,10 @@ SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 
 `serving_config`의 형식은 model-runtime이 정하고 라이브러리로 내놓는다(`ServingConfig`). 프롬프트 템플릿 버전, 디코딩 방식과 설정(제약 모드, 온도, 기본 시드), `max_attempts`를 반드시 포함한다. 어댑터에는 버전 정보를 따로 넣지 않는다. 어댑터는 `adapter_hash`(`directory_hash`)로, 설정은 `serving_config_hash`로 고정된다.
 
-**출력 보호(D36).** 문진 스키마의 업무 규칙은 각 컴포넌트가 "출력이 자기 계약을 지키는 것까지 책임지고, 지키지 못할 때 낼 대체 출력도 정해 둔다"고 한다. 그래서 `parse`와 `generate`는 모델 출력이 깨져도 예외를 던지지 않고 **규칙이 정한 대체 출력**을 돌려준다(턴은 실패하지 않는다). 재시도(`max_attempts`)를 다 쓴 뒤에도 유효하지 않으면 보호를 적용한다. 재시도의 프롬프트는 첫 시도와 같고(검증 오류를 덧붙이지 않는다), 시드만 `기본 시드 + 시도 번호`로 바꾼다.
-- `parse`: 형식을 못 지키면 빈 목록. 항목의 의도, 대상, 값이 규칙을 어기면 규칙이 정한 대로 고친다(대체 출력 규칙은 업무 규칙 문서에 있고, 이 라이브러리가 코드로 구현한다). 대상이 문항 정의에 없는 항목은 고치지 않고 그대로 낸다.
-- `generate`: 모델은 `response_text`만 낸다. `is_fallback`은 **모델이 아니라 코드가 채운다**(정상이면 false). 응답 지시를 지키지 못하면 문장 재료를 그대로 읽는 문장을 만들고 `is_fallback=true`로 낸다.
-- 보호가 적용되면 `last_call_info`에 어떤 보호가 몇 건 적용됐는지 남긴다. 조용히 지나가지 않는다. model-lab은 `*_raw`로 보호 전 품질을 따로 잰다.
+**출력 검증과 대체 응답(D36, 2.0.0).** 서버와 라이브러리는 모델 출력을 계약 스키마로 검증하고, 어기면 재시도(`max_attempts`)한다. 재시도의 프롬프트는 첫 시도와 같고(검증 오류를 덧붙이지 않는다), 시드만 `기본 시드 + 시도 번호`로 바꾼다.
+- `extract`(LoRA-A): 재시도를 다 써도 `ActionExtraction`을 지키지 못하면 **대체 출력을 만들지 않는다.** action과 next_item은 문항 구조를 알아야 정할 수 있어 서버가 대신 만들 수 없기 때문이다. 라이브러리는 `ModelOutputInvalid`를 던지고, HTTP 서버는 `UNAVAILABLE`(503, `details.reason="OUTPUT_INVALID"`)로 낸다. 그 뒤의 처리(같은 문항 다시 묻기, 직원 호출 등)는 서비스가 정한다. **제안이며 헤드가 확정한다.**
+- `respond`(LoRA-B): 출력은 JSON이 아니라 **문장 그대로의 텍스트**(`ResponseText`)다. 형식(비어 있지 않은 문자열)을 지키지 못하면 입력의 재료(`known`, `ask`, `hold`, `next.text`)를 이어 붙여 읽는 문장을 대신 내고, 대체했음을 알린다. 라이브러리는 `is_fallback=true`, HTTP는 응답 헤더 `X-Openit-Outcome: fallback`이다. `is_fallback`은 모델이 아니라 코드가 채운다. 대체 문장을 만드는 규칙은 model-runtime이 정한다(계약 밖, 미정).
+- 대체 응답이나 재시도가 일어나면 `last_call_info`에 몇 번 시도했고 어떤 보호가 몇 건 적용됐는지 남긴다. 조용히 지나가지 않는다. model-lab은 `*_raw`로 검증 전 품질을 따로 잰다.
 - 라이브러리 예외는 인프라 문제에만 쓴다(`BackendNotAvailable` 등). `BoundaryError`가 아니다.
 제약 디코딩은 교체 가능한 백엔드이고 엔진 선택은 model-runtime이 정한다(O14).
 
@@ -196,9 +187,9 @@ SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 | 영역 | 받는 것 | 내는 것 |
 | --- | --- | --- |
 | question-authoring | 관리자 입력, I7(개선 신호), I4(판정 조회) | I1 |
-| synthetic-data | I1, I7, I8 | I2 |
-| model-lab | I2, I1, I7, I4, I8, I9 | I3 |
-| release-gate | I1, I3, I8, I9, I5 요청 | I4, I5 |
-| survey-service | I4, I8, I9 | I6, I10 |
+| synthetic-data | I1, I7 | I2 |
+| model-lab | I2, I1, I7, I4, I9 | I3 |
+| release-gate | I1, I3, I9, I5 요청 | I4, I5 |
+| survey-service | I4, I9 | I6, I10 |
 | ops-feedback | I6, I4, (롤백 요청은 I5 호출) | I7, I6 수집 |
-| turn-engine / model-runtime | 문진 스키마 | I8 / I9 |
+| model-runtime | 이 리포지토리의 모델 입출력 스키마, 문진 스키마 | I9 |
