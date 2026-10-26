@@ -1,0 +1,15 @@
+{
+  "current_question": "고혈압으로 진단받거나 약을 복용하신 적 있으신가요?",
+  "question_id": "Q1.D03",
+  "state": {
+    "Q1.D02.diagnosed": {
+      "value": true,
+      "status": "ANSWERED"
+    },
+    "Q1.D02.on_medication": {
+      "value": true,
+      "status": "ANSWERED"
+    }
+  },
+  "user_utterance": "음... 기억이 잘 안 나요. 고혈압 진단받았는지, 약 먹었는지도 잘 모르겠어요."
+}

@@ -1,0 +1,15 @@
+{
+  "current_question": "다음은 당뇨병입니다. 진단받은 적이 있으신지, 지금 약을 드시는지 알려 주세요.",
+  "question_id": "Q1.D04",
+  "state": {
+    "Q1.D03.diagnosed": {
+      "value": true,
+      "status": "ANSWERED"
+    },
+    "Q1.D03.on_medication": {
+      "value": false,
+      "status": "ANSWERED"
+    }
+  },
+  "user_utterance": "아이고, 요즘 손녀가 고양이를 가져왔어요. 그거 때문에 알레르기 생겨서 좀 애먹고 있어요. 당뇨병은 이제 좀 안 그렇고, 그건 뭐, 고양이 때문이에요."
+}

@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ResponseText",
+  "description": "[초안 v2, D74] LoRA-B 출력. 응답 문장 그대로의 텍스트(JSON으로 감싸지 않아 바로 스트리밍한다). 데이터 확인: 24~122자(전수), 한국어 존댓말 1~3문장. 길이 상한은 계약이 아니라 평가 지표로 둔다(미정).",
+  "type": "string",
+  "minLength": 1
+}

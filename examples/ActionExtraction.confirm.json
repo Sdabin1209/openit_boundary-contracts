@@ -1,0 +1,24 @@
+{
+  "action": "CONFIRM",
+  "next_item": "Q1.D01",
+  "reason": "CONFLICT_WITH_PREVIOUS",
+  "targets": [
+    "Q1.D01.on_medication"
+  ],
+  "values": [
+    {
+      "key": "Q1.D01.on_medication",
+      "precision": "exact",
+      "save": false,
+      "status": "CONFLICT",
+      "value": true
+    },
+    {
+      "key": "Q1.D01.diagnosed",
+      "precision": "approximate",
+      "save": true,
+      "status": "CORRECTION",
+      "value": true
+    }
+  ]
+}

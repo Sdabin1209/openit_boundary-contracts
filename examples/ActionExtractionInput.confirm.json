@@ -1,0 +1,15 @@
+{
+  "current_question": "네, 지금 약은 안 드시는군요. 그럼 심근경색이나 협심증으로 진단을 받았거나 치료약을 드시는 중이신가요?",
+  "question_id": "Q1.D02",
+  "state": {
+    "Q1.D01.diagnosed": {
+      "value": false,
+      "status": "ANSWERED"
+    },
+    "Q1.D01.on_medication": {
+      "value": false,
+      "status": "ANSWERED"
+    }
+  },
+  "user_utterance": "그 약은 지금 먹어요."
+}

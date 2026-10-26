@@ -1,0 +1,24 @@
+{
+  "action": "REASK",
+  "next_item": "Q1.D03",
+  "reason": "MISSING",
+  "targets": [
+    "Q1.D03.on_medication"
+  ],
+  "values": [
+    {
+      "key": "Q1.D03.diagnosed",
+      "precision": "exact",
+      "save": true,
+      "status": "ANSWERED",
+      "value": true
+    },
+    {
+      "key": "Q1.D03.on_medication",
+      "precision": "unspecified",
+      "save": false,
+      "status": "MISSING",
+      "value": null
+    }
+  ]
+}

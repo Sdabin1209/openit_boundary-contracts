@@ -1,0 +1,7 @@
+{
+  "action": "REDIRECT",
+  "next_item": "Q1.D04",
+  "note": "고양이 알레르기",
+  "reason": "OUT_OF_SCHEMA",
+  "values": []
+}

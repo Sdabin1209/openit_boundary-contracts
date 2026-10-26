@@ -1,0 +1,11 @@
+{
+  "current_question": "다음으로, 최근 1주일 중에 근력 운동을 하신 날이 며칠인가요?",
+  "question_id": "Q10",
+  "state": {
+    "Q9_1.days": {
+      "value": 5,
+      "status": "ANSWERED"
+    }
+  },
+  "user_utterance": "근력 운동하는 날은 이틀이야"
+}

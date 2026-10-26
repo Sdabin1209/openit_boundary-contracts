@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ActionExtractionSample",
+  "description": "[초안 v2, D74] LoRA-A 학습·검증·평가 샘플 하나(ParserSample 대체). input과 expected는 이 리포지토리의 ActionExtractionInput, ActionExtraction. v1과 달리 문진 스키마(UtteranceParserInput, ParserOutput)를 참조하지 않는다. runtime_contract_version과 style 필드는 없다(미정: 모델 입출력 계약이 문진 스키마를 떠나므로 버전 체계를 정해야 한다).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pipeline_schema_version",
+    "sample_id",
+    "scenario_id",
+    "split",
+    "origin",
+    "input",
+    "expected"
+  ],
+  "properties": {
+    "pipeline_schema_version": {
+      "$ref": "_common.schema.json#/$defs/PipelineSchemaVersion"
+    },
+    "sample_id": {
+      "$ref": "_common.schema.json#/$defs/Id"
+    },
+    "scenario_id": {
+      "$ref": "_common.schema.json#/$defs/Id"
+    },
+    "split": {
+      "enum": [
+        "TRAIN",
+        "VALIDATION",
+        "EVAL"
+      ]
+    },
+    "origin": {
+      "enum": [
+        "SYNTHETIC",
+        "FAILURE_CASE_SEED"
+      ]
+    },
+    "seed_case_id": {
+      "$ref": "_common.schema.json#/$defs/Id"
+    },
+    "question_set": {
+      "$ref": "_common.schema.json#/$defs/ArtifactRef"
+    },
+    "human_review": {
+      "enum": [
+        "auto_only",
+        "pending",
+        "human_ok",
+        "human_flagged",
+        "human_edited"
+      ],
+      "description": "데이터셋의 검수 상태(학습 서버 필드 그대로)."
+    },
+    "input": {
+      "$ref": "ActionExtractionInput.schema.json"
+    },
+    "expected": {
+      "$ref": "ActionExtraction.schema.json"
+    },
+    "ext": {
+      "type": "object",
+      "description": "영역이 계약을 바꾸지 않고 덧붙이는 부가 정보. 키는 영역 이름(예: 'model-lab')이고 값은 그 영역이 정한다. 다른 영역은 이해하지 못해도 보존하고 전달해야 하며, 판단에 쓰지 않는다. 여러 영역이 필요로 하게 되면 정식 필드로 올린다."
+    }
+  },
+  "if": {
+    "properties": {
+      "origin": {
+        "const": "FAILURE_CASE_SEED"
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "seed_case_id"
+    ]
+  }
+}

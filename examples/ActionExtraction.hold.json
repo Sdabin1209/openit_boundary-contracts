@@ -1,0 +1,25 @@
+{
+  "action": "HOLD",
+  "next_item": "Q1.D04",
+  "reason": "UNCERTAIN",
+  "targets": [
+    "Q1.D03.diagnosed",
+    "Q1.D03.on_medication"
+  ],
+  "values": [
+    {
+      "key": "Q1.D03.diagnosed",
+      "precision": "unspecified",
+      "save": false,
+      "status": "UNKNOWN",
+      "value": null
+    },
+    {
+      "key": "Q1.D03.on_medication",
+      "precision": "unspecified",
+      "save": false,
+      "status": "UNKNOWN",
+      "value": null
+    }
+  ]
+}
