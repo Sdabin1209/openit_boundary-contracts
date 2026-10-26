@@ -1,5 +1,6 @@
 """클라이언트 시험의 공통 준비: 참조 서버와 올바른 레코드. 토큰은 시험용 가짜 값이다."""
 import copy
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -24,8 +25,10 @@ def bank(n):
     return {"version": n, "questions": [{"question_id": f"q{n}", "text": "질문"}]}
 
 
-FILES_A = {"adapter_config.json": b'{"r": 8}', "sub/weights.bin": b"\x00\x01\x02"}
-FILES_B = {"adapter_config.json": b'{"r": 4}'}
+PROMPT_A = "시험용 LoRA-A 시스템 프롬프트".encode()
+PROMPT_B = "시험용 LoRA-B 시스템 프롬프트".encode()
+FILES_A = {"adapter_config.json": b'{"r": 8}', "sub/weights.bin": b"\x00\x01\x02", "system_prompt.txt": PROMPT_A}
+FILES_B = {"adapter_config.json": b'{"r": 4}', "system_prompt.txt": PROMPT_B}
 
 
 def release(release_id, passed=True):
@@ -42,6 +45,7 @@ def package_manifest(files=FILES_A, version="1.2.0"):
     m = example("ModelPackageManifest")
     m["version"] = version
     m["adapter_hash"] = adapter_digest(files)
+    m["system_prompt"] = {"path": "system_prompt.txt", "sha256": "sha256:" + hashlib.sha256(files["system_prompt.txt"]).hexdigest()}
     return sealed(m)
 
 

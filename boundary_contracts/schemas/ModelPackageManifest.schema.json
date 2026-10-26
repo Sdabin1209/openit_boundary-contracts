@@ -15,6 +15,7 @@
     "adapter_hash",
     "serving_config",
     "serving_config_hash",
+    "system_prompt",
     "lineage",
     "eval_report_ref",
     "content_hash"
@@ -71,6 +72,27 @@
     },
     "serving_config_hash": {
       "$ref": "_common.schema.json#/$defs/Hash"
+    },
+    "system_prompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\x00]+$",
+          "maxLength": 200,
+          "description": "어댑터 디렉터리 안의 시스템 프롬프트 파일 경로(상대 경로, '/'로 구분, '..'·절대 경로·역슬래시 금지). 예: system_prompt.txt. 파일이 어댑터 디렉터리 안에 있으므로 adapter_hash에도 포함된다."
+        },
+        "sha256": {
+          "$ref": "_common.schema.json#/$defs/Hash",
+          "description": "그 파일 바이트의 해시(canonical.file_hash). 어댑터 하나(role 하나)에 프롬프트 하나가 짝이다."
+        }
+      },
+      "description": "이 어댑터를 학습할 때 쓴 시스템 프롬프트(D75). model-runtime은 서빙할 때 이 패키지의 프롬프트만 쓴다. LoRA 교체(D72)가 프롬프트까지 함께 바뀌어야 하기 때문이다. serving_config의 프롬프트 템플릿 버전과는 별개다(INTERFACES.md I9)."
     },
     "lineage": {
       "type": "object",

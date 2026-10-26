@@ -7,10 +7,18 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 
-from ..canonical import directory_hash
+from ..canonical import directory_hash, file_hash
 from ..errors import BoundaryError
 from ._http import (TAR_TYPE, HttpClientBase, build_tar, check_id, check_outgoing, check_record, check_str, integrity,
                     verify_dir)
+
+
+def _verify_prompt(adapter_dir: Path, manifest: dict) -> None:
+    """manifest.system_prompt의 파일이 어댑터 디렉터리에 있고 해시가 맞는지 본다(D75)."""
+    sp = manifest["system_prompt"]
+    f = adapter_dir.joinpath(*sp["path"].split("/"))
+    if not f.is_file() or file_hash(f) != sp["sha256"]:
+        raise integrity("시스템 프롬프트 파일이 없거나 manifest.system_prompt.sha256과 다르다")
 
 
 class HttpModelRegistry(HttpClientBase):
@@ -36,6 +44,7 @@ class HttpModelRegistry(HttpClientBase):
         try:
             self._download_tar("/v1/packages/" + self._q(package_id, "versions", version, "adapter"), stage / "a", stage)
             verify_dir(stage / "a", manifest["adapter_hash"], "어댑터")
+            _verify_prompt(stage / "a", manifest)
             final = dest / package_id / version
             self._place(stage / "a", final)
             return final
@@ -52,6 +61,7 @@ class HttpModelRegistry(HttpClientBase):
             raise BoundaryError("INVALID_RECORD", "adapter_dir가 디렉터리가 아니다")
         if directory_hash(adapter_dir) != manifest["adapter_hash"]:
             raise integrity("adapter_dir의 해시가 manifest.adapter_hash와 다르다")
+        _verify_prompt(adapter_dir, manifest)
         entries = {"manifest.json": json.dumps(manifest, ensure_ascii=False).encode("utf-8"),
                    "eval_report": bytes(eval_report)}
         for p in adapter_dir.rglob("*"):

@@ -72,6 +72,28 @@ class Models(unittest.TestCase):
         self.assertEqual(self.code(self.r.open_adapter, "lora-a", "1.2.0", dest=dst), "INTEGRITY_ERROR")
         self.assertEqual(list(dst.rglob("*")), [])
 
+    def test_시스템_프롬프트가_어댑터와_짝이다(self):
+        # 프롬프트 파일이 없으면 게시 전에 거부한다(어댑터 해시를 다시 맞춰도 마찬가지)
+        import copy
+        from conformance.servers import adapter_digest, sealed
+        files = {k: v for k, v in FILES_A.items() if k != "system_prompt.txt"}
+        m = {k: v for k, v in self.m.items() if k != "content_hash"}
+        m["adapter_hash"] = adapter_digest(files)
+        self.assertEqual(self.code(self.w.publish, sealed(m), adapter_dir(self.tmp / "noprompt", files), b"r"), "INTEGRITY_ERROR")
+        # 파일 내용이 manifest의 sha256과 다르면 거부
+        files2 = dict(FILES_A, **{"system_prompt.txt": "다른 프롬프트".encode()})
+        m2 = copy.deepcopy(self.m)
+        m2["adapter_hash"] = adapter_digest(files2)
+        m2 = sealed({k: v for k, v in m2.items() if k != "content_hash"})
+        self.assertEqual(self.code(self.w.publish, m2, adapter_dir(self.tmp / "otherprompt", files2), b"r"), "INTEGRITY_ERROR")
+        # 서버에 올라간 뒤 프롬프트만 바뀌면(어댑터 해시도 맞춰 두어도) 열 때 거부
+        self.w.publish(self.m, self.adir, b"r")
+        pkg = self.srv.packages[("lora-a", "1.2.0")]
+        pkg["files"]["system_prompt.txt"] = "바뀐 프롬프트".encode()
+        pkg["manifest"] = sealed({**{k: v for k, v in pkg["manifest"].items() if k != "content_hash"},
+                                  "adapter_hash": adapter_digest(pkg["files"])})
+        self.assertEqual(self.code(self.r.open_adapter, "lora-a", "1.2.0", dest=self.tmp / "dst2"), "INTEGRITY_ERROR")
+
     def test_변조된_매니페스트는_INTEGRITY_ERROR(self):
         self.w.publish(self.m, self.adir, b"r")
         self.srv.packages[("lora-a", "1.2.0")]["manifest"]["role"] = "LORA_B"

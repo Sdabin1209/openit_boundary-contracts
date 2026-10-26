@@ -60,6 +60,10 @@ errs = [e.message for e in val("ModelPackageManifest").iter_errors(d)]; print("O
 neg("빈 기반 모델 이름", "ModelPackageManifest", "ModelPackageManifest", lambda d: d["base_model"].update(id=""))
 d = ex("ModelPackageManifest"); d["base_model"]["id"] = "base-model"
 errs = [e.message for e in val("ModelPackageManifest").iter_errors(d)]; print("OK  " if not errs else "FAIL", "Id 형식 기반 모델 이름도 유효", errs); bad += bool(errs)
+neg("모델 패키지에 시스템 프롬프트 없음", "ModelPackageManifest", "ModelPackageManifest", lambda d: d.pop("system_prompt"))
+neg("프롬프트 경로가 상위 디렉터리", "ModelPackageManifest", "ModelPackageManifest", lambda d: d["system_prompt"].update(path="../p.txt"))
+neg("프롬프트 경로가 절대 경로", "ModelPackageManifest", "ModelPackageManifest", lambda d: d["system_prompt"].update(path="/etc/p.txt"))
+neg("프롬프트 해시 형식 위반", "ModelPackageManifest", "ModelPackageManifest", lambda d: d["system_prompt"].update(sha256="abc"))
 neg("반려 승인에 사유 없음", "GateApproval", "GateApproval", lambda d: d.update(decision="REJECT"))
 neg("측정값에 표본 수 없음", "EvaluationReport", "EvaluationReport", lambda d: d["metrics"][0].pop("n"))
 neg("평가 보고서에 임계치 키(스키마가 모르는 필드)는 쓰기에서 거부", "EvaluationReport", "EvaluationReport", lambda d: d["metrics"][0].update(threshold=0.9))
