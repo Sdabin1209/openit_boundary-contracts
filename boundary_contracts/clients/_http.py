@@ -343,3 +343,11 @@ def verify_json_hash(value: Any, expected: str, what: str) -> None:
         ok = False
     if not ok:
         raise integrity(f"{what}의 해시가 맞지 않는다")
+
+
+def verify_system_prompt(adapter_dir: Path, ref: dict) -> None:
+    """어댑터 디렉터리 안의 시스템 프롬프트 파일(SystemPromptRef)이 있고 해시가 맞는지 본다(D75)."""
+    from ..canonical import file_hash
+    f = adapter_dir.joinpath(*ref["path"].split("/"))
+    if not f.is_file() or file_hash(f) != ref["sha256"]:
+        raise integrity("시스템 프롬프트 파일이 없거나 system_prompt.sha256과 다르다")

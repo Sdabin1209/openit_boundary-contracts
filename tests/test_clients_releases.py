@@ -65,6 +65,16 @@ class Releases(unittest.TestCase):
         self.assertEqual(self.code(self.r.load_bundle, "rel-0003", dest=self.tmp), "INTEGRITY_ERROR")
         self.assertEqual(list(self.tmp.iterdir()), [])
 
+    def test_번들의_시스템_프롬프트_해시가_다르면_INTEGRITY_ERROR(self):
+        from conformance.servers import sealed
+        rel = self.srv.releases["rel-0001"]
+        m = {k: v for k, v in rel["manifest"].items() if k != "content_hash"}
+        m["adapters"] = {r: dict(v) for r, v in m["adapters"].items()}
+        m["adapters"]["LORA_A"]["system_prompt"] = {"path": "system_prompt.txt", "sha256": "sha256:" + "1" * 64}
+        rel["manifest"] = sealed(m)
+        self.assertEqual(self.code(self.r.load_bundle, "rel-0001", dest=self.tmp), "INTEGRITY_ERROR")
+        self.assertEqual(list(self.tmp.iterdir()), [])
+
     def test_위험한_번들_tar(self):
         from conformance.servers import make_tar
         self.srv.overrides["/v1/releases/rel-0001/bundle"] = (200, "application/x-tar", make_tar({"../x": b"1"}))

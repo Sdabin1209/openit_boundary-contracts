@@ -388,7 +388,7 @@ class RuntimeReferenceServer(ReferenceServer):
     """HTTP.md I9(모델 추론 서버)를 따르는 참조 서버(계약 2.0.0). I1~I7 서버와 경로(`/v1/releases/{id}`)가 겹치므로 따로 띄운다.
 
     실제 모델은 없다. `extract_fn(요청 dict) -> dict`와 `respond_fn(요청 dict) -> (문장, outcome)`을 바꿔 끼워 동작을 정한다.
-    기본값은 예시의 고정 출력이다. 요청 본문은 서버가 스키마로 검증하고(400 INVALID_RECORD), 적재되지 않은 릴리스는 404다.
+    기본값은 예시의 고정 출력이다. `extract_fn`의 출력이 `ActionExtraction`을 어기면 서버는 그대로 내지 않고 503 OUTPUT_INVALID(D75)를 낸다. 요청 본문은 서버가 스키마로 검증하고(400 INVALID_RECORD), 적재되지 않은 릴리스는 404다.
     `available[릴리스 ID]`는 PUT 때의 결과다: "ok"(200 LOADED), "loading"(첫 PUT은 202 LOADING, 다음부터 LOADED),
     "not_pass"(412), 없으면 404. 토큰 역할 "reader"는 PUT(적재)을 할 수 없고 추론 POST는 할 수 있다.
     """
@@ -449,7 +449,13 @@ class RuntimeReferenceServer(ReferenceServer):
             raise BoundaryError("NOT_FOUND", "적재되지 않은 릴리스")
         if op == "/extract":
             req = self._checked(body, "ActionExtractionInput")
-            return 200, "application/json", json.dumps(self.extract_fn(req), ensure_ascii=False).encode(), self._headers("ok")
+            out = self.extract_fn(req)
+            from boundary_contracts import validator
+            if list(validator("ActionExtraction").iter_errors(out)):
+                # D75: 값을 지어내지 않는다. 모델 출력이 끝내 형식을 못 지키면 503 UNAVAILABLE + details.reason=OUTPUT_INVALID
+                raise BoundaryError("UNAVAILABLE", "모델 출력이 ActionExtraction 형식을 지키지 못했다",
+                                    {"reason": "OUTPUT_INVALID", "attempts": self.attempts})
+            return 200, "application/json", json.dumps(out, ensure_ascii=False).encode(), self._headers("ok")
         req = self._checked(body, "ResponseRequest")
         text, outcome = self.respond_fn(req)
         return 200, "text/plain; charset=utf-8", text.encode("utf-8"), self._headers(outcome)

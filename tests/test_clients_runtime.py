@@ -1,3 +1,4 @@
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -8,7 +9,7 @@ if str(ROOT) not in sys.path:
 
 from _fixtures import READ, TOKENS, WRITE, example  # noqa: E402
 from boundary_contracts import BoundaryError  # noqa: E402
-from boundary_contracts.clients import HttpModelRuntime  # noqa: E402
+from boundary_contracts.clients import HttpModelRuntime, is_output_invalid  # noqa: E402
 from conformance.servers import RuntimeReferenceServer  # noqa: E402
 
 
@@ -64,27 +65,35 @@ class Runtime(unittest.TestCase):
             self.c._json("POST", "/v1/releases/rel-0001/extract", body={"question_id": "Q1.D01"})
         self.assertEqual(cm.exception.code, "INVALID_RECORD")
 
-    def test_extract_출력이_스키마를_어기면_INTEGRITY_ERROR(self):
+    def test_서버_출력이_형식을_어기면_503_OUTPUT_INVALID(self):
+        # D75: 서버는 값을 지어내지 않는다. 대체 출력 없이 UNAVAILABLE(재시도 가능)이다.
         self.c.load_release("rel-0001")
         bad = example("ActionExtraction.next")
         bad["reason"] = "MISSING"  # NEXT에는 reason이 없다
         self.srv.extract_fn = lambda req: bad
-        self.assertEqual(self.code(self.c.extract, "rel-0001", example("ActionExtractionInput.next")), "INTEGRITY_ERROR")
-        bad2 = example("ActionExtraction.next")
-        bad2["unknown_field"] = 1  # 모델 출력은 읽기 모드 완화를 하지 않는다
-        self.srv.extract_fn = lambda req: bad2
-        self.assertEqual(self.code(self.c.extract, "rel-0001", example("ActionExtractionInput.next")), "INTEGRITY_ERROR")
-
-    def test_extract가_끝내_깨지면_UNAVAILABLE을_그대로_전한다(self):
-        self.c.load_release("rel-0001")
-
-        def broken(req):
-            raise BoundaryError("UNAVAILABLE", "모델 출력이 형식을 지키지 못했다", {"reason": "OUTPUT_INVALID"})
-        self.srv.extract_fn = broken
         with self.assertRaises(BoundaryError) as cm:
             self.c.extract("rel-0001", example("ActionExtractionInput.next"))
+        self.assertEqual(cm.exception.code, "UNAVAILABLE")
         self.assertTrue(cm.exception.retryable)
-        self.assertEqual(cm.exception.details.get("reason"), "OUTPUT_INVALID")
+        self.assertEqual(cm.exception.details["reason"], "OUTPUT_INVALID")
+        self.assertTrue(is_output_invalid(cm.exception))
+        self.srv.extract_fn = lambda req: example("ActionExtraction.next")  # 다음 호출은 정상(상태가 남지 않는다)
+        self.assertEqual(self.c.extract("rel-0001", example("ActionExtractionInput.next")).outcome, "ok")
+
+    def test_다른_UNAVAILABLE은_OUTPUT_INVALID가_아니다(self):
+        self.assertFalse(is_output_invalid(BoundaryError("UNAVAILABLE", "x")))
+        self.assertFalse(is_output_invalid(BoundaryError("NOT_FOUND", "x", {"reason": "OUTPUT_INVALID"})))
+
+    def test_서버가_계약을_어긴_본문을_내면_클라이언트가_INTEGRITY_ERROR(self):
+        self.c.load_release("rel-0001")
+        path = "/v1/releases/rel-0001/extract"
+        bad = example("ActionExtraction.next")
+        bad["reason"] = "MISSING"
+        bad2 = example("ActionExtraction.next")
+        bad2["unknown_field"] = 1  # 모델 출력은 읽기 모드 완화를 하지 않는다
+        for body in (bad, bad2):
+            self.srv.overrides[path] = (200, "application/json", json.dumps(body).encode(), {"X-Openit-Outcome": "ok"})
+            self.assertEqual(self.code(self.c.extract, "rel-0001", example("ActionExtractionInput.next")), "INTEGRITY_ERROR")
 
     # ---- respond (LoRA-B) ----
     def test_respond는_문장_그대로를_돌려준다(self):

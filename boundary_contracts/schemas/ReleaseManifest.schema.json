@@ -69,7 +69,8 @@
           "required": [
             "adapter_hash",
             "serving_config",
-            "serving_config_hash"
+            "serving_config_hash",
+            "system_prompt"
           ],
           "properties": {
             "adapter_hash": {
@@ -81,6 +82,9 @@
             },
             "serving_config_hash": {
               "$ref": "_common.schema.json#/$defs/Hash"
+            },
+            "system_prompt": {
+              "$ref": "_common.schema.json#/$defs/SystemPromptRef"
             }
           }
         },
@@ -90,7 +94,8 @@
           "required": [
             "adapter_hash",
             "serving_config",
-            "serving_config_hash"
+            "serving_config_hash",
+            "system_prompt"
           ],
           "properties": {
             "adapter_hash": {
@@ -102,6 +107,9 @@
             },
             "serving_config_hash": {
               "$ref": "_common.schema.json#/$defs/Hash"
+            },
+            "system_prompt": {
+              "$ref": "_common.schema.json#/$defs/SystemPromptRef"
             }
           }
         }

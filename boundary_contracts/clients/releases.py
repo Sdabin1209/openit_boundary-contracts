@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 from ..sdk import ReleaseBundle
-from ._http import HttpClientBase, check_id, check_outgoing, check_record, integrity, verify_dir, verify_json_hash
+from ._http import HttpClientBase, check_id, check_outgoing, check_record, integrity, verify_dir, verify_json_hash, verify_system_prompt
 
 ROLES = ("LORA_A", "LORA_B")
 
@@ -66,6 +66,7 @@ class HttpReleaseReader(HttpClientBase):
                 if not a.is_dir():
                     raise integrity(f"번들에 어댑터 {role}가 없다")
                 verify_dir(a, manifest["adapters"][role]["adapter_hash"], f"어댑터 {role}")
+                verify_system_prompt(a, manifest["adapters"][role]["system_prompt"])
             final = dest / release_id
             self._place(root, final)
             return ReleaseBundle(manifest, bank, {r: final / "adapters" / r for r in ROLES})

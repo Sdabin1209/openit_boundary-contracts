@@ -2,8 +2,8 @@
 from .models import HttpModelRegistry
 from .ops import HttpFailureStore, HttpTraceIngest
 from .questions import HttpQuestionReader
-from .runtime import HttpModelRuntime, RuntimeResult
+from .runtime import HttpModelRuntime, RuntimeResult, is_output_invalid
 from .releases import HttpGateService, HttpReleaseReader
 
 __all__ = ["HttpQuestionReader", "HttpModelRegistry", "HttpReleaseReader", "HttpGateService", "HttpTraceIngest",
-           "HttpFailureStore", "HttpModelRuntime", "RuntimeResult"]
+           "HttpFailureStore", "HttpModelRuntime", "RuntimeResult", "is_output_invalid"]

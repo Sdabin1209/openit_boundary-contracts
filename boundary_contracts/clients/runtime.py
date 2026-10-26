@@ -9,9 +9,11 @@ import json
 import re
 from typing import NamedTuple, Optional
 
+from ..errors import BoundaryError
 from ._http import HttpClientBase, _validator, check_id, check_outgoing, check_record, integrity
 
 OUTCOME_HEADER = "X-Openit-Outcome"
+OUTPUT_INVALID = "OUTPUT_INVALID"   # 503 UNAVAILABLE의 details.reason(D75)
 _PROTECTION = re.compile(r"^[A-Za-z][A-Za-z0-9_]*:[0-9]+(,[A-Za-z][A-Za-z0-9_]*:[0-9]+)*$")
 
 
@@ -57,7 +59,8 @@ class HttpModelRuntime(HttpClientBase):
     # ---- 추론 ----
     def extract(self, release_id: str, request: dict) -> RuntimeResult:
         """LoRA-A. 입력은 ActionExtractionInput. 출력은 ActionExtraction이며 서버가 형식 검증을 마친 것이다.
-        모델 출력이 끝내 깨지면 서버는 대체 출력을 만들지 않고 UNAVAILABLE(details.reason=OUTPUT_INVALID)을 낸다."""
+        모델 출력이 끝내 깨지면 서버는 대체 출력을 만들지 않고 503 UNAVAILABLE(details.reason=OUTPUT_INVALID, D75 확정)을 낸다.
+        클라이언트는 이를 그대로 BoundaryError(UNAVAILABLE, retryable)로 던지며 `is_output_invalid(err)`로 구분한다."""
         check_outgoing("ActionExtractionInput", request)
         resp = self._open("POST", self._infer_path(release_id, "extract"), None, self._dump(request),
                           "application/json", "application/json")
@@ -120,3 +123,8 @@ class HttpModelRuntime(HttpClientBase):
                 code, cnt = part.split(":")
                 prot[code] = prot.get(code, 0) + int(cnt)
         return RuntimeResult(output, outcome, n, prot)
+
+
+def is_output_invalid(err: BoundaryError) -> bool:
+    """extract가 끝내 형식을 못 지킨 503인가(D75). 호출자(survey-service)는 한 번 재시도하고, 그래도 같으면 턴을 실패 신호로 처리한다."""
+    return err.code == "UNAVAILABLE" and err.details.get("reason") == OUTPUT_INVALID

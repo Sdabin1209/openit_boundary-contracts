@@ -38,6 +38,8 @@ def release(release_id, passed=True):
     m["question_set"] = ref_of("qs-main", "3", b)
     for role, files in (("LORA_A", FILES_A), ("LORA_B", FILES_B)):
         m["adapters"][role]["adapter_hash"] = adapter_digest(files)
+        m["adapters"][role]["system_prompt"] = {"path": "system_prompt.txt",
+                                                "sha256": "sha256:" + hashlib.sha256(files["system_prompt.txt"]).hexdigest()}
     return {"manifest": sealed(m), "bank": b, "adapters": {"LORA_A": FILES_A, "LORA_B": FILES_B}, "pass": passed}
 
 
