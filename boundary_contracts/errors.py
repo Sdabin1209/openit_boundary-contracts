@@ -30,7 +30,7 @@ class BoundaryError(Exception):
     def retryable(self) -> bool:
         return CODES[self.code]
 
-    def to_record(self, pipeline_schema_version: str = "1.0") -> dict:
+    def to_record(self, pipeline_schema_version: str = "2.0") -> dict:
         """BoundaryError 스키마에 맞는 레코드."""
         rec = {"pipeline_schema_version": pipeline_schema_version, "code": self.code,
                "message": self.message, "retryable": self.retryable}

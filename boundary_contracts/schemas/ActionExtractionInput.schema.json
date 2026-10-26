@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ActionExtractionInput",
-  "description": "[초안 v2, D74] LoRA-A 입력. 환자 발화 1턴과 직전 문맥. 모델이 받는 JSON 그대로이며 학습 데이터의 user 메시지 내용이다. 시스템 프롬프트는 별도(serving_config의 프롬프트 템플릿 버전).",
+  "description": "LoRA-A 입력(2.0.0, D74). 환자 발화 1턴과 직전 문맥. 모델이 받는 JSON 그대로이며 학습 데이터의 user 메시지 내용이다. 시스템 프롬프트는 별도(serving_config의 프롬프트 템플릿 버전).",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -41,7 +41,7 @@
         ],
         "properties": {
           "value": {
-            "$comment": "[초안 v2] 칸 값. 데이터에서 확인한 형태: 불리언, 숫자(정수·소수), 선택지 코드 문자열, null.",
+            "$comment": "칸 값. 데이터에서 확인한 형태: 불리언, 숫자(정수·소수), 선택지 코드 문자열, null.",
             "type": [
               "boolean",
               "number",

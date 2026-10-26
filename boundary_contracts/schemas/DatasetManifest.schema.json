@@ -78,9 +78,10 @@
           },
           "role": {
             "enum": [
-              "PARSER",
-              "GENERATOR"
-            ]
+              "LORA_A",
+              "LORA_B"
+            ],
+            "description": "LORA_A 파일의 한 줄은 ActionExtractionSample, LORA_B 파일의 한 줄은 ResponseSample이다(2.0.0). v1의 PARSER/GENERATOR는 없어졌다."
           },
           "split": {
             "enum": [

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""[초안 v2, D74] 학습 데이터셋 v2 JSONL을 stdin(또는 파일)에서 읽어 새 스키마로 검증한다. 파일을 쓰지 않는다.
+"""학습 데이터셋 v2(D74) JSONL을 stdin(또는 파일)에서 읽어 새 스키마로 검증한다. 파일을 쓰지 않는다.
 
   ssh openit 'cat ~/taehyeon/data/dataset_10_14/lora_a_train.jsonl' | python3 tools/validate_dataset_v2.py a
   ssh openit 'cat ~/taehyeon/data/dataset_10_14/lora_b_train.jsonl' | python3 tools/validate_dataset_v2.py b

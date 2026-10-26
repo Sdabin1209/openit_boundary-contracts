@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ResponseRequest",
-  "description": "[초안 v2, D74] LoRA-B 입력. A 출력을 받은 서비스가 표 찾기(문항 번호로 질문 문장, 칸으로 사람 말 설명)만으로 조립한다. 모델 호출 없음, 판단 없음. 시작(START)은 A를 거치지 않고 서비스가 직접 만든다. 출력은 JSON이 아니라 응답 문장 텍스트(ResponseText).",
+  "description": "LoRA-B 입력(2.0.0, D74). A 출력을 받은 서비스가 표 찾기(문항 번호로 질문 문장, 칸으로 사람 말 설명)만으로 조립한다. 모델 호출 없음, 판단 없음. 시작(START)은 A를 거치지 않고 서비스가 직접 만든다. 출력은 JSON이 아니라 응답 문장 텍스트(ResponseText).",
   "type": "object",
   "additionalProperties": false,
   "required": [

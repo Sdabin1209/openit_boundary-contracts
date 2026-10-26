@@ -22,7 +22,7 @@ class Questions(unittest.TestCase):
         self.assertEqual(bank["version"], 2)
         self.assertEqual(len(self.c.get_reviews(refs[1])), 1)
         self.assertIsNone(self.c.get_change(refs[0]))
-        self.assertEqual(self.c.get_change(refs[2])["pipeline_schema_version"], "1.0")
+        self.assertEqual(self.c.get_change(refs[2])["pipeline_schema_version"], "2.0")
 
     def test_없으면_NOT_FOUND(self):
         with self.assertRaises(BoundaryError) as cm:

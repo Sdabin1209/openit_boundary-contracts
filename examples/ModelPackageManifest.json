@@ -1,5 +1,5 @@
 {
-  "pipeline_schema_version": "1.2",
+  "pipeline_schema_version": "2.0",
   "package_id": "lora-a",
   "version": "1.2.0",
   "role": "LORA_A",

@@ -28,7 +28,7 @@ neg("content_hash 형식 위반", "ReleaseManifest", "ReleaseManifest", lambda d
 neg("릴리스 ID 없는 봉투", "TraceEnvelope", "TraceEnvelope", lambda d: d.pop("release_id"))
 neg("승인 아닌 검수에 사유 없음", "ReviewRecord", "ReviewRecord", lambda d: d.update(decision="REJECTED"))
 neg("변경 종류 비어 있음", "ChangeClassification", "ChangeClassification", lambda d: d.update(change_kinds=[]))
-neg("실패 사례 출처 시드에 seed_case_id 없음", "GeneratorSample", "GeneratorSample", lambda d: d.pop("seed_case_id"))
+neg("실패 사례 출처 시드에 seed_case_id 없음", "ResponseSample", "ResponseSample", lambda d: (d.update(origin="FAILURE_CASE_SEED"), d.pop("seed_case_id", None)))
 neg("시나리오 분리 미확인 데이터셋", "DatasetManifest", "DatasetManifest", lambda d: d.update(scenario_disjoint_across_splits=False))
 neg("비식별 안 된 실패 사례", "FailureCase", "FailureCase", lambda d: d.update(deidentified=False))
 neg("근거 없는 롤백 요청", "RollbackRequest", "RollbackRequest", lambda d: d.update(evidence_refs=[]))
@@ -53,14 +53,24 @@ if os.path.exists(survey):
     print("OK  " if not errs else "FAIL", "TraceEnvelope.trace는 TurnTrace를 통과", errs[:2]); bad += bool(errs)
 else:
     print("건너뜀: 문진 스키마가 없어 TraceEnvelope.trace를 TurnTrace로 검증하지 않음")
-d = ex("FailureCase"); d["pipeline_schema_version"] = "1.0"; d.pop("question_set", None); d["expected"] = {}
-errs = [e.message for e in val("FailureCase").iter_errors(d)]; print("OK  " if not errs else "FAIL", "1.0 FailureCase(expected_kind 없음)는 1.1에서도 유효", errs); bad += bool(errs)
+d = ex("FailureCase"); d.pop("question_set", None); d.pop("expected_kind"); d["expected"] = {}
+errs = [e.message for e in val("FailureCase").iter_errors(d)]; print("OK  " if not errs else "FAIL", "expected_kind 없는 FailureCase도 유효(권장일 뿐)", errs); bad += bool(errs)
 d = ex("ModelPackageManifest"); d["base_model"]["id"] = "org/name-with.slash_1"
 errs = [e.message for e in val("ModelPackageManifest").iter_errors(d)]; print("OK  " if not errs else "FAIL", "슬래시가 든 기반 모델 이름 허용", errs); bad += bool(errs)
 neg("빈 기반 모델 이름", "ModelPackageManifest", "ModelPackageManifest", lambda d: d["base_model"].update(id=""))
-d = ex("ModelPackageManifest"); d["pipeline_schema_version"] = "1.1"; d["base_model"]["id"] = "base-model"
-errs = [e.message for e in val("ModelPackageManifest").iter_errors(d)]; print("OK  " if not errs else "FAIL", "1.1 레코드(Id 형식 기반 모델)도 1.2에서 유효", errs); bad += bool(errs)
+d = ex("ModelPackageManifest"); d["base_model"]["id"] = "base-model"
+errs = [e.message for e in val("ModelPackageManifest").iter_errors(d)]; print("OK  " if not errs else "FAIL", "Id 형식 기반 모델 이름도 유효", errs); bad += bool(errs)
 neg("반려 승인에 사유 없음", "GateApproval", "GateApproval", lambda d: d.update(decision="REJECT"))
 neg("측정값에 표본 수 없음", "EvaluationReport", "EvaluationReport", lambda d: d["metrics"][0].pop("n"))
 neg("평가 보고서에 임계치 키(스키마가 모르는 필드)는 쓰기에서 거부", "EvaluationReport", "EvaluationReport", lambda d: d["metrics"][0].update(threshold=0.9))
+neg("v1 역할 PARSER(DatasetManifest)", "DatasetManifest", "DatasetManifest", lambda d: d["files"][0].update(role="PARSER"))
+neg("v1 expected_kind GENERATOR(FailureCase)", "FailureCase", "FailureCase", lambda d: d.update(expected_kind="GENERATOR"))
+# v2 모델 입출력(ActionExtraction 계열, ResponseRequest, ResponseText)이 위반을 거부하는지. 같은 검사를 tests/test_v2_schemas.py가 한 번 더 한다.
+sys.path.insert(0, here)
+sys.path.insert(0, os.path.join(here, "tools")); from negatives_v2 import CASES as _V2
+for label, schema, base_ex, mutate in _V2:
+    neg(label, schema, base_ex, mutate)
+v = val("ResponseText"); r = bool(list(v.iter_errors({"response_text": "x"}))); print("OK  " if r else "FAIL", "거부되어야 함: 응답이 JSON 객체"); bad += (not r)
+removed = [n for n in ("ParserSample", "GeneratorSample") if os.path.exists(f"{here}/schemas/{n}.schema.json")]
+print("OK  " if not removed else "FAIL", "v1 스키마 ParserSample/GeneratorSample는 없다", removed); bad += bool(removed)
 sys.exit(1 if bad else 0)

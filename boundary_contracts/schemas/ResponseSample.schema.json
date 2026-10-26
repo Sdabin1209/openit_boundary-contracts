@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ResponseSample",
-  "description": "[초안 v2, D74] LoRA-B 학습·검증·평가 샘플 하나(GeneratorSample 대체). input은 ResponseRequest(START 포함), expected는 응답 문장 ResponseText(문자열). style_guide_version은 두지 않는다(미정).",
+  "description": "LoRA-B 학습·검증·평가 샘플 하나(2.0.0, D74). DatasetManifest.files[].role이 LORA_B인 파일의 한 줄이다. input은 ResponseRequest(START 포함), expected는 응답 문장 ResponseText(문자열). style_guide_version은 두지 않는다(학습 서버 데이터에 없다).",
   "type": "object",
   "additionalProperties": false,
   "required": [

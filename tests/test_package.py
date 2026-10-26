@@ -9,7 +9,11 @@ class Package(unittest.TestCase):
         names = sorted(p.name for p in schema_dir().glob("*.schema.json"))
         self.assertIn("ReleaseManifest.schema.json", names)
         self.assertIn("_common.schema.json", names)
-        self.assertEqual(len([n for n in names if not n.startswith("_")]), 24)
+        records = {n[: -len(".schema.json")] for n in names if not n.startswith("_")}
+        self.assertEqual(len(records), 28)  # 2.0.0: v1의 24개에서 ParserSample·GeneratorSample을 빼고 v2 6개를 더했다
+        self.assertFalse({"ParserSample", "GeneratorSample"} & records)
+        self.assertTrue({"ActionExtractionInput", "ActionExtraction", "ActionExtractionSample", "ResponseRequest",
+                         "ResponseText", "ResponseSample"} <= records)
 
     def test_모르는_계약은_KeyError(self):
         with self.assertRaises(KeyError):
@@ -23,7 +27,14 @@ class Package(unittest.TestCase):
         self.assertTrue(list(validator("ReleaseManifest").iter_errors(rec)))
 
     def test_버전_상수(self):
-        self.assertEqual(PIPELINE_SCHEMA_VERSION, "1.3")
+        self.assertEqual(PIPELINE_SCHEMA_VERSION, "2.0")
+
+    def test_패키지_버전은_계약_버전과_MAJOR_MINOR가_같다(self):
+        import re
+        from pathlib import Path
+        text = (Path(__file__).resolve().parent.parent / "pyproject.toml").read_text(encoding="utf-8")
+        version = re.search(r'^version = "([^"]+)"', text, re.M).group(1)
+        self.assertEqual(".".join(version.split(".")[:2]), PIPELINE_SCHEMA_VERSION)
 
 
 if __name__ == "__main__":

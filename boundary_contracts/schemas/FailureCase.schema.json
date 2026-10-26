@@ -56,8 +56,11 @@
       ]
     },
     "expected": {
-      "type": "object",
-      "description": "정답이 확정된 경우 해당 문진 스키마 출력"
+      "type": [
+        "object",
+        "string"
+      ],
+      "description": "정답이 확정된 경우의 모델 출력. expected_kind가 LORA_A면 ActionExtraction(객체), LORA_B면 ResponseText(문자열)"
     },
     "review_status": {
       "enum": [
@@ -76,14 +79,14 @@
     },
     "expected_kind": {
       "enum": [
-        "PARSER",
-        "GENERATOR"
+        "LORA_A",
+        "LORA_B"
       ],
-      "description": "expected가 ParserOutput인지 GeneratorOutput인지. expected가 있으면 함께 적기를 권한다(1.0 생산자는 생략할 수 있으므로 소비자는 없을 때 expected의 형태로 판별한다). 모르는 값은 '알 수 없음'으로 처리한다."
+      "description": "expected가 LORA_A의 출력(ActionExtraction, 객체)인지 LORA_B의 출력(ResponseText, 문자열)인지. expected가 있으면 함께 적기를 권한다(생략하면 소비자는 expected의 형태로 판별한다: 객체면 LORA_A, 문자열이면 LORA_B). 모르는 값은 '알 수 없음'으로 처리한다. v1의 PARSER/GENERATOR는 없어졌다(2.0.0)."
     },
     "reviewed_input": {
       "type": "object",
-      "description": "검토자가 개인정보를 뺀 문장으로 직접 고쳐 쓴 입력(UtteranceParserInput 또는 ResponseGeneratorInput, expected_kind에 맞는 것). 비식별 trace의 마스킹된 입력 대신 시드와 회귀 평가가 쓴다(D55)."
+      "description": "검토자가 개인정보를 뺀 문장으로 직접 고쳐 쓴 입력(expected_kind가 LORA_A면 ActionExtractionInput, LORA_B면 ResponseRequest). 비식별 trace의 마스킹된 입력 대신 시드와 회귀 평가가 쓴다(D55)."
     }
   },
   "then": {

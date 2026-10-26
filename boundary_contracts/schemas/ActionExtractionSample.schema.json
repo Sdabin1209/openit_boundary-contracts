@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ActionExtractionSample",
-  "description": "[초안 v2, D74] LoRA-A 학습·검증·평가 샘플 하나(ParserSample 대체). input과 expected는 이 리포지토리의 ActionExtractionInput, ActionExtraction. v1과 달리 문진 스키마(UtteranceParserInput, ParserOutput)를 참조하지 않는다. runtime_contract_version과 style 필드는 없다(미정: 모델 입출력 계약이 문진 스키마를 떠나므로 버전 체계를 정해야 한다).",
+  "description": "LoRA-A 학습·검증·평가 샘플 하나(2.0.0, D74). input과 expected는 이 리포지토리의 ActionExtractionInput, ActionExtraction이며 문진 스키마를 참조하지 않는다. DatasetManifest.files[].role이 LORA_A인 파일의 한 줄이다. runtime_contract_version과 style 필드는 없다(v1 샘플에 있던 필드이며 학습 서버 데이터에 없다).",
   "type": "object",
   "additionalProperties": false,
   "required": [

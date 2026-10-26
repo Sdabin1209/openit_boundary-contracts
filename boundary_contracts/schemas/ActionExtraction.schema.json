@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ActionExtraction",
-  "description": "[초안 v2, D74] LoRA-A 출력. 값 추출·정규화·절차(action)·다음 문항(next_item)을 한 번에 낸다. 서비스에는 정규화기와 Plan 코드가 없다. 모델이 내는 JSON 그대로(키 순서는 사전순)이고 모델 출력이라 ext를 두지 않는다. 제약 디코딩 엔진이 allOf/if/then을 무시할 수 있으므로(HTTP.md I9) action별 규칙은 사후 검증이 맡는다.",
+  "description": "LoRA-A 출력(2.0.0, D74). 값 추출·정규화·절차(action)·다음 문항(next_item)을 한 번에 낸다. 서비스에는 정규화기와 Plan 코드가 없다. 모델이 내는 JSON 그대로(키 순서는 사전순)이고 모델 출력이라 ext를 두지 않는다. 제약 디코딩 엔진이 allOf/if/then을 무시할 수 있으므로(HTTP.md I9) action별 규칙은 사후 검증이 맡는다.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -24,12 +24,12 @@
         ],
         "properties": {
           "key": {
-            "$comment": "[초안 v2] 키 문법 문항.칸 또는 문항[종류].칸. 문항 ID는 Q1.D01, Q4_1, Q10 형태. CONVENTIONS 10절의 SlotRef 문자열(반복 키 없음)과 다르다: 학습 데이터가 반복 키를 포함한다.",
+            "$comment": "모델 키 문법(CONVENTIONS 10절): 문항.칸 또는 문항[종류].칸. 문항 ID는 Q1.D01, Q4_1, Q10 형태. 종류 괄호는 술 칸에만 붙고, 종류를 모르는 술 칸(BEVERAGE_MISSING)은 괄호 없는 Q7_1.amount 형태로 낸다(계약으로 인정, 2.0.0). SlotRef 문자열(ChangeClassification.affected_slots)과는 다른 문법이다.",
             "type": "string",
             "pattern": "^Q[0-9]+(\\.D[0-9]{2})?(_[0-9]+)?(\\[(soju|beer|spirits|makgeolli|wine)\\])?\\.[a-z][a-z_]*$"
           },
           "value": {
-            "$comment": "[초안 v2] 칸 값. 데이터에서 확인한 형태: 불리언, 숫자(정수·소수), 선택지 코드 문자열, null.",
+            "$comment": "칸 값. 데이터에서 확인한 형태: 불리언, 숫자(정수·소수), 선택지 코드 문자열, null.",
             "type": [
               "boolean",
               "number",
@@ -168,13 +168,13 @@
         "OFF_TOPIC",
         "OUT_OF_SCHEMA"
       ],
-      "description": "NEXT·CORRECT에는 없다. action별 허용값은 allOf 참고."
+      "description": "NEXT·CORRECT에는 없다. action별 허용값은 allOf 참고. OTHER_BEVERAGE, MISSING_NUMBER, UNPARSED_VALUE, INVALID_OPTION 4종은 학습 데이터에 있어 계약으로 인정한다(데이터셋 담당의 정리 요청은 V2_DRAFT.md의 열린 항목)."
     },
     "targets": {
       "type": "array",
       "minItems": 1,
       "items": {
-        "$comment": "[초안 v2] 키 문법 문항.칸 또는 문항[종류].칸. 문항 ID는 Q1.D01, Q4_1, Q10 형태. CONVENTIONS 10절의 SlotRef 문자열(반복 키 없음)과 다르다: 학습 데이터가 반복 키를 포함한다.",
+        "$comment": "모델 키 문법(CONVENTIONS 10절): 문항.칸 또는 문항[종류].칸. 문항 ID는 Q1.D01, Q4_1, Q10 형태. 종류 괄호는 술 칸에만 붙고, 종류를 모르는 술 칸(BEVERAGE_MISSING)은 괄호 없는 Q7_1.amount 형태로 낸다(계약으로 인정, 2.0.0). SlotRef 문자열(ChangeClassification.affected_slots)과는 다른 문법이다.",
         "type": "string",
         "pattern": "^Q[0-9]+(\\.D[0-9]{2})?(_[0-9]+)?(\\[(soju|beer|spirits|makgeolli|wine)\\])?\\.[a-z][a-z_]*$"
       },
@@ -188,7 +188,7 @@
     "next_item": {
       "type": "string",
       "pattern": "^(END|Q[0-9]+(\\.D[0-9]{2})?(_[0-9]+)?)$",
-      "description": "다음에 물을 문항 또는 END. REASK·REDIRECT는 입력 question_id와 같다. CONFIRM은 대상 칸의 문항이며 입력 question_id와 다를 수 있다(데이터 확인)."
+      "description": "다음에 물을 문항 또는 END. REASK·REDIRECT는 입력 question_id와 같다. CONFIRM은 대상 칸의 문항이며 입력 question_id와 다를 수 있다(데이터 확인). NEXT·CORRECT·HOLD·SKIP은 같은 말에서 일부 칸이 이미 채워진 문항(예: Q4 예와 Q4_1.status 동시)으로 넘어갈 수 있고 이를 계약으로 인정한다."
     }
   },
   "allOf": [
