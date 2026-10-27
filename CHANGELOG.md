@@ -8,6 +8,7 @@
 
 - `PUBLIC_API.md`: 상태 값 의미(B절), 409 `CONFLICT`에 `details.reason: TURN_IN_PROGRESS`와 `Retry-After`(처리 중인 같은 `turn_id`, D86), 직원 알림 SSE의 `heartbeat`·`resync` 이벤트(D87, 하위 호환), 알림 스트림 설명.
 - `CONVENTIONS.md`: 401/403, 429, 재시도 의미(`details.reason`), gateway의 `UPSTREAM_UNAVAILABLE`, 토큰을 파일로 받는다는 서술(D84와 일치시킴).
+- `PUBLIC_API.md`(2026-10-28 후속): `turn_id` 재전송 문구를 정확히(확정된 턴만 같은 응답, NOT_COMMITTED는 재처리), 키오스크 재시도 문구를 예산 방식으로, 게이트웨이가 기기 토큰을 서비스에 그대로 전달하고 서비스가 기기 토큰 표로 재검증한다는 서술(D88 U8)로 정정.
 - `HTTP.md`·`PUBLIC_API.md`(D88): 승인(`POST /v1/approvals`)은 `X-Openit-User`가 없으면 401(이전: 본문 `approver_id`를 썼음, **동작 변경**: 소비 영역의 호출 경로를 헤더 기준으로 맞춰야 한다), 직원 접근 기록에 행위자 계정 ID를 남긴다.
 - `HTTP.md`: 서버 토큰을 `<이름>_TOKENS_FILE`로 받는다는 서술(D84).
 
