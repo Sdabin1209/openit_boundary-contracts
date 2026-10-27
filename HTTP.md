@@ -13,6 +13,8 @@
 - 클라이언트는 응답을 **읽기 모드**로 검증한다(CONVENTIONS 1절): 같은 MAJOR의 모르는 필드와 모르는 열거값은 받아들이고(`content_hash`는 모르는 필드까지 포함한 원본으로 계산), 필수 필드·타입·패턴 위반은 `INTEGRITY_ERROR`, `pipeline_schema_version`의 MAJOR가 다르면 `UNSUPPORTED_VERSION`이다. 요청 본문은 엄격한 스키마로 검증한다.
 - tar 스트림은 경로에 `..`, 절대 경로, 심볼릭 링크를 두지 않고 클라이언트도 풀 때 거부한다.
 
+**I2 DatasetStore는 이 문서에 절이 없다.** 이 리포에는 I2의 SDK 프로토콜(`boundary_contracts/sdk.py`)과 `INTERFACES.md` I2 절만 있고, I2용 HTTP 클라이언트(`boundary_contracts/clients/`)와 참조 서버(`conformance/servers.py`)가 없다. synthetic-data의 실제 서버 구현 여부는 미확인(이 리포에서 확인할 수 없다). HTTP 경로는 정해지지 않았다.
+
 ## I1 QuestionReader — 소유: question-authoring
 
 | 호출 | 요청 | 응답 |

@@ -13,7 +13,7 @@
 | 인터페이스 | 제공(소유) | 읽는 쪽 | HTTP 절(`HTTP.md`) |
 | --- | --- | --- | --- |
 | I1 QuestionReader | question-authoring | synthetic-data, model-lab, release-gate | `## I1` |
-| I2 DatasetStore | synthetic-data | model-lab | HTTP.md에 절 없음 |
+| I2 DatasetStore | synthetic-data | model-lab | HTTP.md에 절 없음(HTTP 경로 미정, 클라이언트·참조 서버 없음) |
 | I3 ModelRegistry | model-lab | release-gate | `## I3` |
 | I4 ReleaseReader | release-gate | survey-service, ops-feedback, question-authoring, model-lab | `## I4` |
 | I5 GateService | release-gate | (쓰는 쪽: operator, ops-feedback) | `## I5` |
