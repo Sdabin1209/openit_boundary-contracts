@@ -2,6 +2,10 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.0.2 (PATCH, D84)
+
+- `boundary_contracts.secrets`를 추가했다: `read_secret(NAME)`은 `NAME_FILE`(파일 경로)을 먼저 읽고, 없으면 환경 변수 `NAME`(개발·시험용)을 쓴다. 오류 메시지에 값을 넣지 않고, `secret_source(NAME)`은 값 없이 출처('file'|'env'|'unset')만 말한다. 이유: 서비스 토큰이 환경 변수라 `docker exec env`/`inspect`로 평문이 노출되는 구조였다(gpu-dev 측정 중 실제 노출). 영역마다 읽기 코드를 따로 만들면 같은 실수가 반복되므로 공유 패키지에 한 번만 둔다. 스키마 변경 없음.
+
 ## 2.0.1 (PATCH, D83 후속)
 
 - `ActionExtraction`의 `properties` 순서를 사전순으로 고쳤다(최상위: action, next_item, note, reason, targets, values / values 항목: key, precision, save, status, value). 검증 의미는 같다. 이유: xgrammar는 `properties` 순서대로 키를 내도록 강제하므로, 계약과 학습 데이터의 사전순과 어긋나면 학습된 모델의 올바른 출력도 제약 디코딩이 막는다(gpu-dev 조사, model-runtime 0.6.5 시험에서 발견).
