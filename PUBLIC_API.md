@@ -40,7 +40,7 @@
 | 목적 | 요청 | 응답 |
 | --- | --- | --- |
 | 알림 목록 | `GET /v1/staff/alerts?status=OPEN\|RESOLVED&limit=&cursor=` | `StaffAlertPage`(`limit` 기본 50, 최대 200, 최신부터, `next_cursor`는 불투명 문자열 또는 null) |
-| 알림 실시간 구독 | `GET /v1/staff/alerts/stream` (`text/event-stream`) | 이벤트 이름 `alert`(새 알림)와 `resolved`(해결), `id:`는 이벤트 순번(알림과 해결 이벤트가 각각 증가하는 번호를 받는다), `data:`는 `StaffAlert` JSON이다. 15초마다 `: ping` 주석 줄을 보낸다. 끊기면 `Last-Event-ID`로 이어 받는다 |
+| 알림 실시간 구독 | `GET /v1/staff/alerts/stream` (`text/event-stream`) | 이벤트 이름 `alert`(새 알림)와 `resolved`(해결), `id:`는 이벤트 순번(알림과 해결 이벤트가 각각 증가하는 번호를 받는다), `data:`는 `StaffAlert` JSON이다. 15초마다 `: ping` 주석 줄을 보낸다. 끊기면 `Last-Event-ID`로 이어 받는다. 추가 이벤트(하위 호환, 모르는 클라이언트는 무시한다, `id:`가 없어 `Last-Event-ID`를 바꾸지 않는다): `heartbeat`(`data: {"ts": "<UTC ISO>"}`, 연결 직후 한 번과 이후 주기마다 — 브라우저 `EventSource`는 주석 줄을 보여 주지 않으므로 앱이 연결 생존을 알 수 있게 한다)와 `resync`(`data: {"reason": "EVENTS_NOT_RESUMABLE"}`, `Last-Event-ID`로 이어 받을 수 없는 재연결에 한 번 — 클라이언트는 `GET /v1/staff/alerts?status=OPEN`으로 다시 맞춘다) |
 | 푸시 설정 | `GET /v1/staff/push-config` | `PushConfig`(웹 푸시 공개키). `vapid_public_key`가 null이면 푸시는 꺼져 있고 SSE만 동작한다 |
 | 푸시 구독 등록 | `POST /v1/staff/push-subscriptions` 본문 웹 푸시 구독 객체(`endpoint`, `keys`) | 201. 같은 `endpoint`는 갱신(멱등). `DELETE /v1/staff/push-subscriptions?endpoint=`로 해지 |
 | 개입 결정 | `POST /v1/sessions/{session_id}/intervention` 본문 `{"session_id", "decision": "RESUME"\|"END", "turn_id": "..."}` | `FrontendInput` (RESUME이면 이어서 할 안내 문장, END면 종료) |
