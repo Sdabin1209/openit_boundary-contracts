@@ -14,7 +14,7 @@
 | 401 | `PERMISSION_DENIED` | 토큰이 없거나 틀림 | 안 함 |
 | 403 | `PERMISSION_DENIED` | 토큰은 맞지만 그 호출 권한이 없음 | 안 함 |
 | 404 | `NOT_FOUND` | 모르는(또는 만료된) 세션 | 안 함 |
-| 409 | `CONFLICT` | 순서 어긋남(끝난 세션에 발화, 멈추지 않은 세션에 개입, 같은 `turn_id`에 다른 내용) | 안 함 |
+| 409 | `CONFLICT` | 순서 어긋남(끝난 세션에 발화, 멈추지 않은 세션에 개입, 같은 `turn_id`에 다른 내용) | 안 함. 단 `details.reason`이 `TURN_IN_PROGRESS`이면(같은 `turn_id`가 아직 처리 중, `Retry-After` 헤더 동봉) 같은 `turn_id`로 `Retry-After` 뒤 다시 보낸다 |
 | 429 | `UNAVAILABLE` | 과다 요청 | 함. `Retry-After`(초, 정수)를 따른다 |
 | 503 | `UNAVAILABLE` | 일시 불가 | 함. `Retry-After`가 있으면 따르고 없으면 1초 |
 
