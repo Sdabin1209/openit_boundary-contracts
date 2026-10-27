@@ -4,7 +4,7 @@
 
 이 리포지토리는 **서비스가 아니다**. 실행되는 서버가 없고 이미지도 없다. 하는 일은 (1) 영역 사이 레코드의 JSON Schema 28개와 예시를 정하고, (2) 영역 사이 HTTP 호출의 경로·요청·응답을 문서로 정하고, (3) 그 호출을 하는 클라이언트(`boundary_contracts.clients`)와 시험용 참조 서버(`conformance/`)를 제공하고, (4) 해시 계산과 비밀 읽기 같은 공통 코드를 한 곳에 두는 것이다. 하지 않는 것: 문진 내부 계약(`../survey-service/schema`, survey-service 소유)의 수정, 서버 구현(각 소유 영역), 모델·데이터 처리.
 
-> 이 README는 2026-10-27 기준 리포지토리 안의 파일을 읽고 쓴 것이다. 이 리포지토리에는 `CLAUDE.md`와 `docs/`가 없다(미확인이 아니라 확인한 사실). 문서는 루트의 `*.md`에 있다. 워크스페이스 공통 규칙은 `../CLAUDE.md`.
+> 이 README는 2026-10-27 기준 리포지토리 안의 파일을 읽고 쓴 것이다. 이 리포지토리에는 `CLAUDE.md`가 없다(미확인이 아니라 확인한 사실). 문서는 루트의 `*.md`에 있고, `docs/`에는 구조 선택의 근거(ADR)만 있다(아래 7절). 워크스페이스 공통 규칙은 `../CLAUDE.md`.
 
 ## 1. 전체 속의 위치
 
@@ -122,3 +122,17 @@ pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@v2
 | `PUBLIC_API.md` | 화면 ↔ survey-service 공개 API(I10) |
 | `METRICS.md` | 승인 보고서 지표 카탈로그(제안, v1 용어가 남아 있음: D-C) |
 | `../head/docs/` | 설계·결정 기록(DECISIONS, STATUS, OPEN_GAPS). 읽기 전용 |
+
+## 7. 구조 선택의 근거 (ADR, D89)
+
+| ADR | 내용 |
+| --- | --- |
+| [0001](docs/adr/0001-JSON-Schema를-계약-언어로-쓴다.md) | JSON Schema를 계약 언어로 쓴 이유 |
+| [0002](docs/adr/0002-pip-패키지와-Git-태그로-배포한다.md) | pip 패키지와 Git 태그로 배포하는 이유 |
+| [0003](docs/adr/0003-버전-규칙.md) | 버전 규칙(MAJOR.MINOR = pipeline_schema_version, PATCH) |
+| [0004](docs/adr/0004-하위-호환-규칙.md) | 하위 호환 규칙(ext, MINOR는 추가만, 읽기 관대) |
+| [0005](docs/adr/0005-HTTP-면을-HTTP.md와-PUBLIC_API.md로-나눈다.md) | HTTP 면을 HTTP.md와 PUBLIC_API.md로 나눈 이유 |
+| [0006](docs/adr/0006-멱등성과-오류-코드-체계.md) | 멱등성과 오류 코드 체계 |
+| [0007](docs/adr/0007-SDK는-Protocol과-원격-구현과-참조-서버를-함께-낸다.md) | Protocol, 원격 클라이언트, 참조 서버(메모리 구현은 소유 영역) |
+| [0008](docs/adr/0008-모델-입출력은-레코드로-만들지-않는다.md) | 모델 입출력을 레코드로 만들지 않은 이유 |
+| [0009](docs/adr/0009-비밀은-read_secret으로-파일에서-읽는다.md) | read_secret(NAME_FILE), D84 |
