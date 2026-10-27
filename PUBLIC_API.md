@@ -74,6 +74,7 @@
 ## B. 결과 조회 API (병원/의사 시스템용, 읽기 전용)
 역할 `result-reader` 토큰. 호출마다 접근 기록(시각, 역할 이름, session_id 또는 조회 조건, 결과; 토큰·발화 제외)을 남기고, 기록을 못 남기면 데이터를 주지 않는다(503).
 - `GET /v1/results/{session_id}` → `SessionResult`: `{"session_id", "subject_ref": str|null, "status": "IN_PROGRESS|PAUSED_RISK|ENDED_COMPLETE|ENDED_STAFF|ENDED_LEFT|ENDED_USER_STOP", "started_at": ISO|null, "ended_at": ISO|null, "release_id": str|null, "question_bank_version": str|null, "answers": [{"key","value","status","precision"}], "skipped": [str]}`. 끝나지 않은 세션과 직원·이탈로 끝난 세션의 **부분 결과도 상태와 함께** 돌려준다. 환자 발화 원문과 대화 로그는 포함하지 않는다(직원 세션 조회에만 있다).
+- **`status`의 뜻** (survey-service CR-014 반영): `ENDED_COMPLETE` 문진을 끝까지 마침(**완료는 이것뿐**). `ENDED_LEFT` 환자가 끝나기 전에 떠남(키오스크 종료 요청 또는 유휴 만료). `ENDED_STAFF` 직원이 종료. `ENDED_USER_STOP` 예약된 값으로 지금 만들어지지 않는다. `IN_PROGRESS`·`PAUSED_RISK` 아직 끝나지 않음. 완료가 아닌 상태의 `answers`는 그때까지 저장된 부분 결과이고, `skipped`는 건너뛴 문항 ID일 뿐 미응답 문항 목록이 아니다. 완료 여부는 `status == "ENDED_COMPLETE"`로만 판단한다.
 - `GET /v1/results?subject_ref=&status=&updated_after=&limit=&cursor=` → `{"items": [SessionResult], "next_cursor": str|null}` (`limit` 기본 50 최대 200).
 - 오류: 401/403(`PERMISSION_DENIED`), 404(`NOT_FOUND`), 400(`INVALID_RECORD`), 503(`UNAVAILABLE`).
 - 결과를 병원으로 **밀어 넣는** 전달기(Result Dispatcher)는 수신처가 정해질 때까지 붙이지 않는다. `/readyz`의 `result_dispatcher`는 `attached:false, status:NO_TARGET`.
