@@ -48,7 +48,7 @@ SDK는 `BoundaryError`를 예외로 던진다. 메모리 구현도 같은 예외
 
 ## 6. 인증과 권한 (단일 서버 기준)
 
-- 서비스 사이 호출은 `Authorization: Bearer <서비스 토큰>`이고 토큰은 환경 변수로 받는다. 읽기 SDK는 읽기 전용 토큰, 쓰기는 소유 영역의 토큰만 쓴다.
+- 서비스 사이 호출은 `Authorization: Bearer <서비스 토큰>`이고 토큰은 파일로 받는다(D84: `NAME_FILE`에 경로를 주고 `boundary_contracts.secrets.read_secret(NAME)`으로 읽는다. 환경 변수 `NAME`은 개발·시험용 호환일 뿐이며 운영에서는 쓰지 않는다). 읽기 SDK는 읽기 전용 토큰, 쓰기는 소유 영역의 토큰만 쓴다.
 - 저장소의 쓰기 권한은 소유 영역 하나에만 있다(경계 규칙 1). 다른 영역에는 읽기 전용 DB 계정만 준다.
 - 문진 대상 인증과 공개 API 인증은 이 규약의 대상이 아니다(O06, Frontend 팀과 협의).
 
@@ -68,7 +68,7 @@ SDK는 `BoundaryError`를 예외로 던진다. 메모리 구현도 같은 예외
 ## 9. HTTP 전송 규약 (서비스 API)
 
 SDK의 원격 구현과 서비스 API가 같은 규칙을 쓴다.
-- 본문은 JSON, 인증은 `Authorization: Bearer <서비스 토큰>`이다. 토큰은 환경 변수로 받고, 서버가 토큰에 **역할을 묶어** 둔다. 호출자가 역할을 주장하지 못한다. 토큰 발급·회전은 단일 서버에서는 정적 토큰으로 시작하고 deploy가 비밀 값으로 관리한다.
+- 본문은 JSON, 인증은 `Authorization: Bearer <서비스 토큰>`이다. 토큰은 파일로 받고(D84, 위 6절), 서버가 토큰에 **역할을 묶어** 둔다. 호출자가 역할을 주장하지 못한다. 토큰 발급·회전은 단일 서버에서는 정적 토큰으로 시작하고 deploy가 비밀 값으로 관리한다.
 - 모든 서비스는 `GET /healthz`, `GET /readyz`를 둔다.
 - 실패는 `BoundaryError` 레코드를 본문으로 낸다. 상태 코드는 다음으로 고정한다.
 
@@ -81,6 +81,13 @@ SDK의 원격 구현과 서비스 API가 같은 규칙을 쓴다.
 | FAILED_PRECONDITION | 412 |
 | UNSUPPORTED_VERSION, INTEGRITY_ERROR | 422 |
 | UNAVAILABLE | 503 |
+
+HTTP 층의 보충 규칙(PUBLIC_API.md의 표가 공개 API의 정본이다):
+- **401과 403.** 토큰이 없거나 틀리면 401, 토큰은 맞지만 그 호출 권한이 없으면 403이다. 둘 다 `BoundaryError.code`는 `PERMISSION_DENIED`이고 재시도하지 않는다.
+- **429.** 과다 요청은 429와 `UNAVAILABLE`이며 `Retry-After`(초, 정수)를 따라 재시도한다.
+- **재시도 의미는 `code`의 기본값에 사유가 덧붙는다.** `retryable`은 `code`별 기본값이다. 같은 `code` 안에서 재시도해도 되는 사유는 `details.reason`으로 구분한다. 예: 409 `CONFLICT`는 기본 재시도하지 않지만 `details.reason`이 `TURN_IN_PROGRESS`이면 `Retry-After` 뒤 같은 `turn_id`로 다시 보낸다. 새 사유는 `PUBLIC_API.md`나 `HTTP.md`에 적힌 것만 쓴다.
+- **gateway(역방향 프록시)의 상류 장애 응답은 `BoundaryError`가 아니다.** 상류 연결 거부·재시작은 503, 상류 시간 초과는 504이고 본문은 `{"code": "UPSTREAM_UNAVAILABLE"}`, `Retry-After`가 붙는다. 이 `code`는 `BoundaryError` 열거에 없다. 클라이언트는 502·503·504를 모두 재시도 가능한 일시 장애로 취급한다(`Retry-After`가 있으면 따른다). 서비스가 직접 502·504를 내는 일은 없다.
+- **SDK 클라이언트의 `Retry-After`.** 지금 `boundary_contracts.clients`의 원격 구현은 `Retry-After`를 읽지 않고 호출자가 정한다(서비스 영역이 `UNAVAILABLE` 처리를 직접 한다). 읽도록 바꾸는 것은 후속 MINOR 후보다.
 
 - 수집(I6): `POST /v1/traces`, 본문 `TraceEnvelope`, 성공은 200과 `IngestResult`.
 - 쓰기 요청의 멱등성은 4절을 따른다(같은 ID와 내용이면 같은 응답).
