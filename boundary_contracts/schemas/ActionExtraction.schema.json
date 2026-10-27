@@ -10,6 +10,63 @@
     "next_item"
   ],
   "properties": {
+    "action": {
+      "enum": [
+        "NEXT",
+        "CORRECT",
+        "REASK",
+        "CONFIRM",
+        "HOLD",
+        "SKIP",
+        "REDIRECT"
+      ],
+      "description": "START는 A가 내지 않는다(서비스가 시작할 때 B 입력에만 쓴다)."
+    },
+    "next_item": {
+      "type": "string",
+      "pattern": "^(END|Q[0-9]+(\\.D[0-9]{2})?(_[0-9]+)?)$",
+      "description": "다음에 물을 문항 또는 END. REASK·REDIRECT는 입력 question_id와 같다. CONFIRM은 대상 칸의 문항이며 입력 question_id와 다를 수 있다(데이터 확인). NEXT·CORRECT·HOLD·SKIP은 같은 말에서 일부 칸이 이미 채워진 문항(예: Q4 예와 Q4_1.status 동시)으로 넘어갈 수 있고 이를 계약으로 인정한다."
+    },
+    "note": {
+      "type": "string",
+      "minLength": 1,
+      "description": "REDIRECT의 OUT_OF_SCHEMA만. 문진표에 없는 건강 정보의 짧은 요약."
+    },
+    "reason": {
+      "enum": [
+        "MISSING",
+        "OUT_OF_RANGE",
+        "UNKNOWN_UNIT",
+        "VAGUE_QUANTITY",
+        "RANGE_SPANS_OPTIONS",
+        "COUNT_EXCEEDS_DAYS",
+        "OTHER_BEVERAGE",
+        "BEVERAGE_MISSING",
+        "MISSING_NUMBER",
+        "UNPARSED_VALUE",
+        "INVALID_OPTION",
+        "CONFLICT_WITH_PREVIOUS",
+        "CONFLICT_DOES_NOT_DRINK",
+        "CONFLICT_MAX_BELOW_USUAL",
+        "UNCERTAIN",
+        "REQUEST_SKIP",
+        "REFUSED",
+        "ASK_PURPOSE",
+        "OFF_TOPIC",
+        "OUT_OF_SCHEMA"
+      ],
+      "description": "NEXT·CORRECT에는 없다. action별 허용값은 allOf 참고. OTHER_BEVERAGE, MISSING_NUMBER, UNPARSED_VALUE, INVALID_OPTION 4종은 학습 데이터에 있어 계약으로 인정한다(데이터셋 담당의 정리 요청은 V2_DRAFT.md의 열린 항목)."
+    },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$comment": "모델 키 문법(CONVENTIONS 10절): 문항.칸 또는 문항[종류].칸. 문항 ID는 Q1.D01, Q4_1, Q10 형태. 종류 괄호는 술 칸에만 붙고, 종류를 모르는 술 칸(BEVERAGE_MISSING)은 괄호 없는 Q7_1.amount 형태로 낸다(계약으로 인정, 2.0.0). SlotRef 문자열(ChangeClassification.affected_slots)과는 다른 문법이다.",
+        "type": "string",
+        "pattern": "^Q[0-9]+(\\.D[0-9]{2})?(_[0-9]+)?(\\[(soju|beer|spirits|makgeolli|wine)\\])?\\.[a-z][a-z_]*$"
+      },
+      "description": "REASK·CONFIRM·HOLD·SKIP만. 항목은 values의 key 중 하나(스키마로 표현 못 함, 의미 검증)."
+    },
     "values": {
       "type": "array",
       "items": {
@@ -28,21 +85,15 @@
             "type": "string",
             "pattern": "^Q[0-9]+(\\.D[0-9]{2})?(_[0-9]+)?(\\[(soju|beer|spirits|makgeolli|wine)\\])?\\.[a-z][a-z_]*$"
           },
-          "value": {
-            "$comment": "칸 값. 데이터에서 확인한 형태: 불리언, 숫자(정수·소수), 선택지 코드 문자열, null.",
-            "type": [
-              "boolean",
-              "number",
-              "string",
-              "null"
-            ]
-          },
           "precision": {
             "enum": [
               "exact",
               "approximate",
               "unspecified"
             ]
+          },
+          "save": {
+            "type": "boolean"
           },
           "status": {
             "enum": [
@@ -55,8 +106,14 @@
               "REJECTED"
             ]
           },
-          "save": {
-            "type": "boolean"
+          "value": {
+            "$comment": "칸 값. 데이터에서 확인한 형태: 불리언, 숫자(정수·소수), 선택지 코드 문자열, null.",
+            "type": [
+              "boolean",
+              "number",
+              "string",
+              "null"
+            ]
           }
         },
         "allOf": [
@@ -132,63 +189,6 @@
         ]
       },
       "description": "이번 말에서 정한 칸 값들. REDIRECT는 빈 목록."
-    },
-    "action": {
-      "enum": [
-        "NEXT",
-        "CORRECT",
-        "REASK",
-        "CONFIRM",
-        "HOLD",
-        "SKIP",
-        "REDIRECT"
-      ],
-      "description": "START는 A가 내지 않는다(서비스가 시작할 때 B 입력에만 쓴다)."
-    },
-    "reason": {
-      "enum": [
-        "MISSING",
-        "OUT_OF_RANGE",
-        "UNKNOWN_UNIT",
-        "VAGUE_QUANTITY",
-        "RANGE_SPANS_OPTIONS",
-        "COUNT_EXCEEDS_DAYS",
-        "OTHER_BEVERAGE",
-        "BEVERAGE_MISSING",
-        "MISSING_NUMBER",
-        "UNPARSED_VALUE",
-        "INVALID_OPTION",
-        "CONFLICT_WITH_PREVIOUS",
-        "CONFLICT_DOES_NOT_DRINK",
-        "CONFLICT_MAX_BELOW_USUAL",
-        "UNCERTAIN",
-        "REQUEST_SKIP",
-        "REFUSED",
-        "ASK_PURPOSE",
-        "OFF_TOPIC",
-        "OUT_OF_SCHEMA"
-      ],
-      "description": "NEXT·CORRECT에는 없다. action별 허용값은 allOf 참고. OTHER_BEVERAGE, MISSING_NUMBER, UNPARSED_VALUE, INVALID_OPTION 4종은 학습 데이터에 있어 계약으로 인정한다(데이터셋 담당의 정리 요청은 V2_DRAFT.md의 열린 항목)."
-    },
-    "targets": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "$comment": "모델 키 문법(CONVENTIONS 10절): 문항.칸 또는 문항[종류].칸. 문항 ID는 Q1.D01, Q4_1, Q10 형태. 종류 괄호는 술 칸에만 붙고, 종류를 모르는 술 칸(BEVERAGE_MISSING)은 괄호 없는 Q7_1.amount 형태로 낸다(계약으로 인정, 2.0.0). SlotRef 문자열(ChangeClassification.affected_slots)과는 다른 문법이다.",
-        "type": "string",
-        "pattern": "^Q[0-9]+(\\.D[0-9]{2})?(_[0-9]+)?(\\[(soju|beer|spirits|makgeolli|wine)\\])?\\.[a-z][a-z_]*$"
-      },
-      "description": "REASK·CONFIRM·HOLD·SKIP만. 항목은 values의 key 중 하나(스키마로 표현 못 함, 의미 검증)."
-    },
-    "note": {
-      "type": "string",
-      "minLength": 1,
-      "description": "REDIRECT의 OUT_OF_SCHEMA만. 문진표에 없는 건강 정보의 짧은 요약."
-    },
-    "next_item": {
-      "type": "string",
-      "pattern": "^(END|Q[0-9]+(\\.D[0-9]{2})?(_[0-9]+)?)$",
-      "description": "다음에 물을 문항 또는 END. REASK·REDIRECT는 입력 question_id와 같다. CONFIRM은 대상 칸의 문항이며 입력 question_id와 다를 수 있다(데이터 확인). NEXT·CORRECT·HOLD·SKIP은 같은 말에서 일부 칸이 이미 채워진 문항(예: Q4 예와 Q4_1.status 동시)으로 넘어갈 수 있고 이를 계약으로 인정한다."
     }
   },
   "allOf": [

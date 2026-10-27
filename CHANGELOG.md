@@ -2,6 +2,11 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.0.1 (PATCH, D83 후속)
+
+- `ActionExtraction`의 `properties` 순서를 사전순으로 고쳤다(최상위: action, next_item, note, reason, targets, values / values 항목: key, precision, save, status, value). 검증 의미는 같다. 이유: xgrammar는 `properties` 순서대로 키를 내도록 강제하므로, 계약과 학습 데이터의 사전순과 어긋나면 학습된 모델의 올바른 출력도 제약 디코딩이 막는다(gpu-dev 조사, model-runtime 0.6.5 시험에서 발견).
+- `examples/TraceEnvelope.json`의 `trace`를 v2 키(`extract_*`, `validation_*`, `response_*`)로 바꿨다. survey-service의 TurnTrace(97e44de)가 v2 키를 필수로 하면서 `verify.py`가 깨져 있었다(v2.0.0 태그 시점에는 통과, 이후 survey-service 스키마가 바뀌며 실패). 값은 모두 null이다.
+
 ## 2.0.0 (D74, D75; 태그 v2.0.0-rc1 이후의 확정분 포함, 태그는 헤드가 붙인다)
 
 학습 데이터셋 v2에 서비스 구조를 맞춘다. 정규화·절차·다음 문항은 LoRA-A가 내고, 서비스는 표 찾기만 한다. v1 형식은 **병행 없이 폐기**했다(이유: v1 계약은 없어진 단계를 기술하고, 학습된 모델은 v2 형식만 말하며, 운영 데이터가 없는 데모 단계). 이전 형식은 태그 `v1.3.3`으로 남는다. 근거와 열린 항목은 `V2_DRAFT.md`.
