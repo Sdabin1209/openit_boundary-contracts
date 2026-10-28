@@ -2,6 +2,9 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.1.1 (PATCH, 와이어 스키마 변경 없음, `PIPELINE_SCHEMA_VERSION`은 "2.1" 그대로)
+- 추가(데이터·도구·문서): `boundary_contracts/metrics.json`과 `metrics()`/`metric_name_problems()`, `HttpPublicApi`와 `PublicApiReferenceServer`, `conformance` 패키지를 설치본에 포함(이웃 영역이 참조 서버를 가져다 쓴다), `HTTP.md` I8·I10 절, `PUBLIC_API.md` G절 동작 의미, `CONVENTIONS.md`의 `/readyz` 총 2초와 시간 상한 사슬, 예시의 폐기 지표 교체.
+
 ## v2.1.0 태그 이후 추가 (데이터 추가, 스키마 변경 없음, 미태그)
 - **지표 레지스트리 `boundary_contracts/metrics.json`** 이 평가 지표 이름의 정본이다(이름, group, unit[기존 `EvaluationReport` unit 열거 값만], higher_is_better, status ACTIVE|DEPRECATED, replaced_by, applies_to A|B|both). 내용은 METRICS.md v2와 같다(D96~D98). 로더 `boundary_contracts.metrics()`(이름 -> 읽기 전용 항목)와 `metric_name_problems(report)`(EvaluationReport/ReviewReport의 폐기·모르는 이름 검사). `EvaluationReport` 스키마는 그대로라 `name`은 여전히 자유 문자열이고 검사는 레지스트리 몫이다.
 - METRICS.md의 지표 표 3개는 `tools/gen_metrics_md.py`가 레지스트리에서 생성한다(표식 `<!-- BEGIN GENERATED metrics:A|B|COMMON -->`). `--check`로 커밋된 파일과 같은지 확인하고 unittest와 verify.py가 이를 시험한다.
