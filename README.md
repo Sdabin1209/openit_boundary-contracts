@@ -23,7 +23,7 @@
 | I9 model-runtime 추론 | model-runtime | survey-service, model-lab, release-gate | `## I9` |
 | I10 공개 API | survey-service | kiosk-frontend(환자 화면, 직원 콘솔) | `PUBLIC_API.md`, `HTTP.md ## I10` |
 
-이 영역 자체의 입력은 헤드의 변경 결정이고, 출력은 태그가 붙은 패키지(`v2.1.0`이 최신 태그, 로컬. 원격 push는 헤드가 검증 뒤 한다)다. 다른 영역은 이 패키지를 태그로 설치한다.
+이 영역 자체의 입력은 헤드의 변경 결정이고, 출력은 태그가 붙은 패키지(버전은 `pyproject.toml`, 태그는 `git tag`가 정본이다. 원격 push는 헤드가 검증 뒤 한다)다. 다른 영역은 이 패키지를 태그로 설치한다.
 
 ## 2. 구조
 
@@ -58,33 +58,28 @@
 
 ```bash
 cd boundary-contracts
-python3 -m venv .venv && . .venv/bin/activate     # .venv는 커밋하지 않는다
-pip install -e .                                   # 개발 설치 (또는 pip install jsonschema)
+bash scripts/setup-env.sh && . .venv/bin/activate  # 멱등. .venv는 커밋하지 않는다(개발 설치 + pytest)
 python3 verify.py                                  # 스키마·예시·거부 검사
 python3 -m unittest discover -s tests              # 단위·클라이언트 시험
 # 다른 영역에서 쓸 때(태그 설치, D18):
-pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@v2.1.0
+pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@<태그>   # 현재 기준 태그: deploy/scripts/lib.sh 의 DEPLOY_BC_TAG
 ```
 비밀(D84): 서비스 토큰 등은 환경 변수에 직접 넣지 않고 `NAME_FILE`에 파일 경로를 주면 `boundary_contracts.secrets.read_secret("NAME")`이 그 파일을 먼저 읽는다. 파일이 없으면 환경 변수 `NAME`(개발·시험용)을 쓴다. 오류 메시지에 값을 넣지 않는다(`CHANGELOG.md` 2.0.2).
-이 세션에서 돌려 본 것과 아닌 것:
+시험 상태(2026-10-28, 이 PC 한 곳. 새 clone이 아니라 작업 폴더의 `.venv`에서 잰 값):
 
-| 명령 | 이 세션 |
+| 명령 | 결과 |
 | --- | --- |
-| `python3 verify.py` | 돌림. OK 112줄(옆 폴더 `../survey-service/schema`가 없는 새 clone에서는 TraceEnvelope.trace 검증을 건너뛰어 111줄), 실패 0(출력 중 'FAIL' 글자는 시험 이름 "FAIL 검사 포함"에 들어 있는 것). 시스템 파이썬과, 새 clone + 새 venv(jsonschema만 설치) 두 곳 |
-| `python3 -m unittest discover -s tests` | 돌림. `Ran 134 tests ... OK`. 같은 두 환경 |
-| venv 생성, `pip install -e .`, 태그 설치 | 안 돌림 |
-| 이미지 빌드, E2E | 해당 없음 / 안 돌림 |
+| `python3 verify.py` | OK 116줄, 실패 0(출력 중 'FAIL' 글자는 시험 이름에 들어 있는 것) |
+| `python3 -m unittest discover -s tests` | `Ran 150 tests ... OK` |
+| 새 머신 설치 | `scripts/setup-env.sh`가 정본. 새 clone에서의 설치는 deploy 의 이동 시험이 확인한다 |
+| 이미지 빌드, E2E | 해당 없음(서비스가 아니다). E2E 결과는 `deploy/docs/E2E_RESULTS.md` |
 
 ## 4. 현재 상태
-확인한 것(이 세션에서 직접):
-- 패키지 버전 2.1.0(`pyproject.toml`), 태그 v1.3.3, v2.0.0-rc1, v2.0.0, v2.0.1, v2.0.2, v2.1.0이 로컬에 있다(`git tag`). v2.1.0은 push 전이며 헤드가 검증 뒤 push한다.
-- `schemas/`에 스키마 31개 + `_common`. `verify.py` 112 OK, unittest 134 통과(위 표).
-- 2.0.1은 `ActionExtraction`의 `properties`를 사전순으로 고쳤다(제약 디코딩이 순서대로 키를 내기 때문). 2.0.2는 `read_secret` 추가. 2.1.0은 직원 호출 재알림·실패 기록(CR-H001), `pause_reason`(CR-H002), METRICS v2, I2 HTTP를 더했다(`CHANGELOG.md`).
-- 헤드 STATUS는 이 패키지 `v2.0.2`를 v0.7.0 열차의 일부로 기록한다(2.1.0 반영은 헤드)(`../head/docs/STATUS.md` 10행).
+확인한 것:
+- 패키지 버전은 `pyproject.toml`, 태그는 `git tag`가 정본이다(여기에 값을 복사하지 않는다). 원격 태그는 `git ls-remote --tags origin`으로 본다.
+- `schemas/`에 스키마 31개 + `_common`. 변경 이력은 `CHANGELOG.md`.
 확인하지 못한 것:
-- 깨끗한 두 번째 환경(새 venv, 다른 머신)에서의 통과. 워크스페이스 규칙(두 번째 환경 검증)에 따라 아직 완료로 보지 않는다. OPEN_GAPS U12도 같은 취지.
-- 태그가 원격(GitHub)에 push되어 있는지. 로컬 태그만 확인했다.
-- 소비 영역들이 실제로 v2.0.2(또는 v2.1.0) 잠금으로 설치되는지(각 영역 리포지토리를 읽지 않았다).
+- 깨끗한 두 번째 환경(다른 머신)에서의 통과. 같은 머신의 새 폴더 clone 은 별도 에이전트가 확인했고(보고만 있고 이 리포에 기록하지 않는다), 다른 머신은 이전 후에 한다. OPEN_GAPS U12도 같은 취지.
 - 참조 서버(`conformance/`)와 실제 서비스 서버들의 적합성은 각 영역이 돌린다. 여기서는 확인하지 않았다.
 
 ### 태그 규칙
