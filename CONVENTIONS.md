@@ -105,3 +105,7 @@ HTTP 층의 보충 규칙(PUBLIC_API.md의 표가 공개 API의 정본이다):
 - **`BoundaryError.details.reason`**: 같은 `code` 안에서 사유를 기계가 구분할 때 쓰는 대문자 코드다. 정의된 값: `STALE_REPORT`, `ALREADY_DECIDED`(409, HTTP.md I5), `OUTPUT_INVALID`(503 UNAVAILABLE, HTTP.md I9 `extract`, D75). 호출자는 `code`와 `retryable`로 행동하고 `reason`은 그 안의 세부 분기에만 쓴다.
 - `serving_config_hash`는 `canonical.sha256_hash(serving_config)`이다(기본값을 채우지 않은 그대로).
 - **외부 식별자를 봉투에 넣을 때:** 세션 ID·턴 ID처럼 바깥(Frontend)이 정한 식별자가 `Id` 형식(`[A-Za-z0-9][A-Za-z0-9._:-]*`, 128자)에 맞으면 그대로 쓰고, 맞지 않으면 `x-` + 원본 UTF-8의 SHA-256 앞 32자(소문자 16진)로 바꿔 쓴다. 결정적이므로 같은 원본은 같은 값이 되어 멱등성이 유지된다. 원본은 `trace` 본문에 남아 있다. 공개 API(O06)가 `Id` 형식으로 발급하기로 정해지면 이 변환은 쓰이지 않는다.
+
+## 상태 확인 응답 시간 (2.1.0, FAULT_POLICY 5)
+- 서비스의 `/healthz`는 의존과 무관하게 200으로 즉시 답한다(살아 있음).
+- 서비스의 `/readyz`는 의존(데이터베이스, 이웃 서비스)이 응답하지 않거나 연결할 수 없을 때도 **총 2초 안에** 503과 사유를 답한다. 의존이 여럿이면 확인 시간이 더해져 총합이 2초를 넘지 않게 한다(병렬 확인이나 총 마감). 사유에 접속 정보를 넣지 않는다.

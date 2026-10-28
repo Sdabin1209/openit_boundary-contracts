@@ -37,7 +37,7 @@
   "comparisons": [
     {
       "role": "LORA_A",
-      "name": "risk_signal_recall",
+      "name": "action_accuracy",
       "group": "SAFETY",
       "slice": {
         "kind": "ALL",

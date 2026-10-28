@@ -119,6 +119,11 @@
 - **`StaffAlert`에 optional 필드**: `delivery_attempts`(첫 전달 포함 시도 횟수), `last_delivery_status`(`DELIVERED`/`DELIVERY_FAILED`), `manual_notice_outcome`, `manual_notice_reported_at`. 직원 콘솔은 전달 실패 알림을 눈에 띄게 보일 수 있다.
 - **호환**: 새 키오스크 + 옛 서버는 두 경로가 404/405이므로 키오스크는 기능 감지로 현재 동작("직접 알리셨나요?" 화면만)으로 물러난다. 옛 키오스크 + 새 서버는 새 경로를 쓰지 않을 뿐이다. 배포 순서는 survey-service 먼저, 키오스크 나중.
 - 키오스크가 알림 목록 읽기나 직원 확인(ack)을 쓰는 것은 이번 범위가 아니다(후속 후보).
+- **재전달 신호(동작 의미)**: 재알림이 전달되면 같은 `alert_id`의 `alert` 이벤트가 **새 이벤트 번호**로 다시 나가고, 그 `StaffAlert.delivery_attempts`는 이전 값보다 커진다. 직원 콘솔은 목록을 `alert_id`로 합치되 `delivery_attempts`가 커졌을 때만 '다시 알림'(배너·푸시 재알림)으로 처리한다. 같은 번호 이하의 이벤트(Last-Event-ID 이어받기로 다시 온 것)는 재알림으로 보지 않는다.
+- **해결된 알림**: 이미 `RESOLVED`인 알림은 재알림하지 않는다(409 `NO_OPEN_ALERT`). 실패 기록(report)은 `RESOLVED` 알림에도 남기며 이때도 같은 `alert_id`의 `alert` 이벤트(status `RESOLVED` 가능)가 나가므로 직원 콘솔은 이를 합쳐 보여야 한다. 직원이 해결(`intervention`)한 뒤에는 `resolved` 이벤트 다음에 같은 알림의 OPEN `alert` 이벤트가 나가지 않는다.
+- **429의 두 종류**: 간격 초과(`details.reason: INTERVAL`)는 `Retry-After`가 붙고, 상한 초과(`RETRY_LIMIT`)와 report 상한 초과는 기다려도 풀리지 않으므로 `Retry-After`가 없다. 클라이언트는 `details.reason`을 먼저 본다.
+- **turn_id**: 응답을 받지 못한 재전송에만 같은 `turn_id`를 쓰고(멱등), 응답을 받은 뒤의 새 호출은 새 `turn_id`를 쓴다. 5xx와 시간 초과는 처리 여부를 모르는 경우이므로 같은 `turn_id`를 유지한다.
+- **키오스크 안전 규칙(권고)**: report 결과가 `NOT_NOTIFIED`이거나 재알림이 상한·`NO_OPEN_ALERT`에 닿아도 직원 호출 화면을 끝내지 않고 '접수처로 직접 알려 달라'는 안내를 유지하며, 환자가 세션을 임의로 끝낼 수 없다(직원 개입으로만 해제). 안내 문구는 임상 검토 전 임시이다.
 
 ## H. 정지 사유 `pause_reason` (CR-H002)
 - 값: `RISK`(위험 신호로 정지), `REASK_LIMIT`(되묻기 한도 N 초과로 정지, D95), `OTHER`(그 밖). **읽는 쪽은 모르는 값과 값이 없는 경우를 `OTHER`/미상으로 취급한다**(열거 확장 대비).

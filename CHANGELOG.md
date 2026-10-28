@@ -3,6 +3,7 @@
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
 ## 2.1.0 (MINOR, 추가형: CR-H001·CR-H002·D96~D98·D100)
+- (v2.1.0 태그 뒤 문서·예시 보정, 스키마 변경 없음) PUBLIC_API G절에 재전달 신호(`delivery_attempts` 증가)·해결된 알림·429 두 종류·turn_id 재사용 규칙을 명시, CONVENTIONS에 `/readyz` 총 2초 규칙, INTERFACES의 I10 읽는 쪽 정정, 예시의 폐기 지표 이름(`risk_signal_recall`)을 `action_accuracy`로 교체.
 
 기존 클라이언트가 깨지지 않는다. 모든 변경은 optional 필드·새 경로·문서 개정이다. `PIPELINE_SCHEMA_VERSION` "2.0" -> "2.1"(2.0 레코드는 계속 읽힌다).
 

@@ -21,7 +21,7 @@ Page[T]    = (items: list[T], next_cursor: str | None)
 | I7 FailureStore | ops-feedback | ops-feedback | synthetic-data, model-lab, question-authoring |
 | I8 turn-engine (출력 검증, 2.0.0에서 대체) | turn-engine | — | survey-service |
 | I9 model-runtime | model-runtime | — | survey-service, model-lab, release-gate |
-| I10 공개 API | survey-service | — | Frontend (미정, O06) |
+| I10 공개 API | survey-service | — | kiosk-frontend(환자 화면, 직원 콘솔). 운영 화면(admin-console)은 I5·I4·I7만 쓴다 |
 
 ## I1. QuestionReader (question-authoring)
 
