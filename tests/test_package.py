@@ -10,7 +10,7 @@ class Package(unittest.TestCase):
         self.assertIn("ReleaseManifest.schema.json", names)
         self.assertIn("_common.schema.json", names)
         records = {n[: -len(".schema.json")] for n in names if not n.startswith("_")}
-        self.assertEqual(len(records), 82)  # 2.0.0: 31개. 2.2.0: ActionExtractionRules(ADR 0010) 1개와 영역 경계 스키마 50개(D107)를 더했다
+        self.assertEqual(len(records), 81)  # 2.0.0: 31개. 2.2.0: ActionExtractionRules(ADR 0010) 1개와 영역 경계 스키마 49개(D107)를 더했다
         self.assertFalse({"ParserSample", "GeneratorSample"} & records)
         self.assertTrue({"ActionExtractionInput", "ActionExtraction", "ActionExtractionSample", "ResponseRequest",
                          "ResponseText", "ResponseSample"} <= records)
