@@ -15,10 +15,10 @@ Page[T]    = (items: list[T], next_cursor: str | None)
 | I1 QuestionReader | question-authoring | 저작 API(내부) | synthetic-data, model-lab, release-gate |
 | I2 DatasetStore | synthetic-data | synthetic-data | model-lab |
 | I3 ModelRegistry | model-lab | model-lab | release-gate |
-| I4 ReleaseReader | release-gate | release-gate | survey-service, ops-feedback, question-authoring, model-lab |
-| I5 GateService | release-gate | operator, ops-feedback | — |
+| I4 ReleaseReader | release-gate | release-gate | survey-service, ops-feedback, question-authoring, model-lab, admin-console |
+| I5 GateService | release-gate | operator, ops-feedback, release-approver(admin-console 경유, 게이트웨이가 사람 인증 뒤 `X-Openit-User`를 붙임) | — |
 | I6 TraceIngest | ops-feedback | survey-service | — |
-| I7 FailureStore | ops-feedback | ops-feedback | synthetic-data, model-lab, question-authoring |
+| I7 FailureStore | ops-feedback | ops-feedback | synthetic-data, model-lab, question-authoring, admin-console(사례 검토) |
 | I8 turn-engine (출력 검증, 2.0.0에서 대체) | turn-engine | — | survey-service |
 | I9 model-runtime | model-runtime | — | survey-service, model-lab, release-gate |
 | I10 공개 API | survey-service | — | kiosk-frontend(환자 화면, 직원 콘솔). 운영 화면(admin-console)은 I5·I4·I7만 쓴다 |
@@ -67,7 +67,7 @@ get_manifest(package_id: str, version: str) -> ModelPackageManifest
 list_ids(*, cursor=None, limit=100) -> Page[str]       # 패키지 ID 목록
 list_versions(package_id: str) -> list[str]            # 오래된 것부터(I2와 같다)
 open_adapter(package_id: str, version: str, *, dest: Path) -> Path   # dest 아래에 어댑터를 풀고 해시를 검증한다
-get_eval_report(ref: str) -> bytes                     # 사람이 읽는 첨부. 게이트는 내용을 해석하지 않는다
+get_eval_report(ref: str) -> bytes                     # EvaluationReport(JSON). 사람이 읽는 첨부이기도 하다. 게이트는 스키마·해시·대상(어느 패키지의 보고서인가)만 확인하고 합격 임계치로 해석하지 않는다(D53)
 ```
 
 ## I4. ReleaseReader (release-gate)
@@ -92,7 +92,7 @@ list_releases(*, cursor=None, limit=100) -> Page[ReleaseManifest]   # 최신부�
 
 ## I5. GateService (release-gate)
 
-역할(`requested_by_role`)은 **토큰에 묶여 있다**. 호출자가 말한 역할이 토큰의 역할과 다르면 `PERMISSION_DENIED`이고, 인자는 기록용이다. 허용 역할: 접수 `operator`·`release-gate-collector`·`question-authoring`·`model-lab`, 활성화 `operator`, 롤백 `ops-feedback`·`operator`(설정으로 바꾼다). 같은 조합에 판정이 여러 개일 수 있다. 정책 버전이 바뀐 뒤의 재판정은 같은 `submission_id`에 새 `GateDecision`을 더하고 가장 최근 것이 현재 판정이다. `reject_codes`가 `POLICY_INCOMPLETE`이면 조합이 나쁘다는 뜻이 아니다.
+역할(`requested_by_role`)은 **토큰에 묶여 있다**. 호출자가 말한 역할이 토큰의 역할과 다르면 `PERMISSION_DENIED`이고, 인자는 기록용이다. 허용 역할: 접수 `operator`·`release-gate-collector`·`question-authoring`·`model-lab`, 활성화 `operator`, 롤백 `ops-feedback`·`operator`(설정으로 바꾼다), 승인 `release-approver`(D53, HTTP.md `decide`와 `X-Openit-User`). 같은 조합에 판정이 여러 개일 수 있다. 정책 버전이 바뀐 뒤의 재판정은 같은 `submission_id`에 새 `GateDecision`을 더하고 가장 최근 것이 현재 판정이다. `reject_codes`가 `POLICY_INCOMPLETE`이면 조합이 나쁘다는 뜻이 아니다.
 
 서비스 API다. 쓰기 권한은 게이트에만 있다.
 
