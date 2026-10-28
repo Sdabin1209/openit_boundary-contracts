@@ -313,7 +313,7 @@
       "name": "protection_intervened",
       "group": "PROTECTION",
       "unit": "ratio",
-      "higher_is_better": null,
+      "higher_is_better": false,
       "status": "ACTIVE",
       "replaced_by": null,
       "applies_to": "B",
@@ -328,13 +328,14 @@
           "meaning": "`X-Openit-Outcome=fallback` 비율. action별 `slice`(kind=`ACTION`)를 권한다. 대체 문장 문구(G04)는 잠정(D93)",
           "order": 15
         }
-      ]
+      ],
+      "direction_basis": "헤드 결정(임시): 낮을수록 좋음. 임상·학습 담당 확인 전. METRICS.md는 방향을 정하지 않았다"
     },
     {
       "name": "fallback_rate",
       "group": "PROTECTION",
       "unit": "ratio",
-      "higher_is_better": null,
+      "higher_is_better": false,
       "status": "ACTIVE",
       "replaced_by": null,
       "applies_to": "B",
@@ -345,7 +346,8 @@
           "joined_into": "protection_intervened",
           "order": 15
         }
-      ]
+      ],
+      "direction_basis": "헤드 결정(임시): 낮을수록 좋음. 임상·학습 담당 확인 전. METRICS.md는 방향을 정하지 않았다"
     },
     {
       "name": "length_p95_ms",
@@ -391,7 +393,7 @@
       "name": "coverage_seen_unseen_gap",
       "group": "COVERAGE",
       "unit": "ratio",
-      "higher_is_better": null,
+      "higher_is_better": false,
       "status": "ACTIVE",
       "replaced_by": null,
       "applies_to": "both",
@@ -405,7 +407,8 @@
           "meaning": "본 문항과 보지 못한 문항의 정확도 차이",
           "order": 18
         }
-      ]
+      ],
+      "direction_basis": "헤드 결정(임시): 낮을수록 좋음. 임상·학습 담당 확인 전. METRICS.md는 방향을 정하지 않았다"
     },
     {
       "name": "regression_fixed",
@@ -542,11 +545,12 @@
       "name": "output_attempts_mean",
       "group": "PROTECTION",
       "unit": "count",
-      "higher_is_better": null,
+      "higher_is_better": false,
       "status": "ACTIVE",
       "replaced_by": null,
       "applies_to": "A",
-      "doc": []
+      "doc": [],
+      "direction_basis": "헤드 결정(임시): 낮을수록 좋음. 임상·학습 담당 확인 전. METRICS.md는 방향을 정하지 않았다"
     }
   ]
 }

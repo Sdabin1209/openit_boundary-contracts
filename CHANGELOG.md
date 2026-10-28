@@ -6,6 +6,7 @@
 - **지표 레지스트리 `boundary_contracts/metrics.json`** 이 평가 지표 이름의 정본이다(이름, group, unit[기존 `EvaluationReport` unit 열거 값만], higher_is_better, status ACTIVE|DEPRECATED, replaced_by, applies_to A|B|both). 내용은 METRICS.md v2와 같다(D96~D98). 로더 `boundary_contracts.metrics()`(이름 -> 읽기 전용 항목)와 `metric_name_problems(report)`(EvaluationReport/ReviewReport의 폐기·모르는 이름 검사). `EvaluationReport` 스키마는 그대로라 `name`은 여전히 자유 문자열이고 검사는 레지스트리 몫이다.
 - METRICS.md의 지표 표 3개는 `tools/gen_metrics_md.py`가 레지스트리에서 생성한다(표식 `<!-- BEGIN GENERATED metrics:A|B|COMMON -->`). `--check`로 커밋된 파일과 같은지 확인하고 unittest와 verify.py가 이를 시험한다.
 - **패키지 데이터로는 다음 릴리스부터 나간다.** v2.1.0 태그에는 `metrics.json`이 없다. 소비 영역은 다음 태그를 기다리거나 개발 중에는 리포지토리 파일을 읽는다.
+- 방향(higher_is_better): `protection_intervened`, `fallback_rate`, `output_attempts_mean`, `coverage_seen_unseen_gap`는 false(낮을수록 좋음), `response_length_chars_p95`는 null(방향 미정, 짧은 쪽이 음성 출력에 유리하다는 설명뿐). 근거: 헤드 결정, 임상·학습 담당 확인 전 임시.
 - 시험 버전 리터럴 정리: 시험이 `PIPELINE_SCHEMA_VERSION`·설치된 패키지 버전에서 값을 읽는다.
 
 ## 2.1.0 (MINOR, 추가형: CR-H001·CR-H002·D96~D98·D100)
