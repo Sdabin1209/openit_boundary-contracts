@@ -1,0 +1,33 @@
+{
+  "rules_version": "1",
+  "description": "LoRA-A 출력(ActionExtraction)이 지켜야 하는 의미 규칙(ADR 0010, D104). 형식은 ActionExtraction 스키마가 보고, 이 파일은 스키마로 표현할 수 없는 규칙을 데이터로 정한다. 해석은 boundary_contracts.action_rules.check_action_extraction이 한다. 출력이 이 규칙을 어기면 LoRA-A 컴포넌트(model-runtime)의 책임이고, 다른 컴포넌트는 통과한 값을 다시 검사하지 않는다(R7).",
+  "statuses": {
+    "saved": ["ANSWERED", "CORRECTION"],
+    "null": ["MISSING", "UNCLEAR", "UNKNOWN", "REJECTED"]
+  },
+  "save_rule": {
+    "code": "SAVE_RULE",
+    "save_true_iff_status_in": "saved",
+    "value_null_iff_status_in": "null",
+    "saved_value_non_null": true
+  },
+  "targets": {
+    "code": "TARGET_NOT_IN_VALUES",
+    "each_target_is_a_values_key": true
+  },
+  "unknown_item": {
+    "code": "UNKNOWN_ITEM",
+    "every_item_in_flow": ["values.key", "targets", "input.question_id", "next_item"],
+    "end_marker": "END"
+  },
+  "next_item": {
+    "mismatch_code": "NEXT_ITEM_MISMATCH",
+    "skip_order_code": "SKIP_ORDER_MISMATCH",
+    "by_action": [
+      {"actions": ["REASK", "REDIRECT"], "next_item_is": "input.question_id"},
+      {"actions": ["CONFIRM"], "next_item_is": "item_of_targets"},
+      {"actions": ["NEXT", "CORRECT", "HOLD", "SKIP"], "next_item_is": "flow_next", "base_item": "last_in_flow_order_among_values_and_targets", "also_allowed": "item_of_values"}
+    ]
+  },
+  "key_syntax": "values.key는 `<문항>.<칸>` 또는 `<문항>[<종류>].<칸>`이다. 문항 ID는 마지막 `.` 앞에서 `[` 앞까지, 칸 이름은 종류 괄호를 뺀 문자열이다."
+}

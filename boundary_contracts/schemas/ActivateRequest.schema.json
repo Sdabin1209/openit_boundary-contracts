@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ActivateRequest.schema.json",
+  "title": "ActivateRequest",
+  "description": "POST /v1/activate 본문(I5). 만드는 쪽: admin-console. 읽는 쪽: release-gate. 행위자는 본문이 아니라 X-Openit-User로 기록된다(HTTP.md I5, D88).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "release_id",
+    "requested_by_role"
+  ],
+  "properties": {
+    "release_id": {
+      "$ref": "_common.schema.json#/$defs/Id"
+    },
+    "requested_by_role": {
+      "const": "operator"
+    }
+  }
+}

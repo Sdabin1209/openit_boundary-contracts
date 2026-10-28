@@ -1,0 +1,10 @@
+{
+  "release_id": "r1",
+  "state": "FAILED",
+  "error": {
+    "pipeline_schema_version": "2.0",
+    "code": "FAILED_PRECONDITION",
+    "message": "설정 불일치",
+    "retryable": false
+  }
+}

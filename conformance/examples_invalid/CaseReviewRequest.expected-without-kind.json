@@ -1,0 +1,8 @@
+{
+  "review_status": "CONFIRMED",
+  "expected": {
+    "action": "NEXT",
+    "next_item": "END",
+    "values": []
+  }
+}

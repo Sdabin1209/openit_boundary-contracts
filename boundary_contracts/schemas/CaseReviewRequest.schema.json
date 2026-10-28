@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CaseReviewRequest.schema.json",
+  "title": "CaseReviewRequest",
+  "description": "POST /v1/cases/{case_id}/review 본문(I7, Protocol 밖). 만드는 쪽: admin-console(검토자 화면). 읽는 쪽: ops-feedback. expected가 있으면 expected_kind 필수(HTTP.md I7). expected/reviewed_input의 내용 검증(ActionExtraction 등)은 이 스키마가 아니라 해당 계약 스키마와 서버의 일이다. 화면은 CONFIRMED가 아닌 결정에는 review_status만 보낸다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "review_status"
+  ],
+  "properties": {
+    "review_status": {
+      "enum": [
+        "CONFIRMED",
+        "DISMISSED",
+        "PENDING"
+      ]
+    },
+    "expected": {
+      "type": [
+        "object",
+        "string"
+      ],
+      "description": "LORA_A면 ActionExtraction(객체), LORA_B면 ResponseText(비어 있지 않은 문자열)"
+    },
+    "expected_kind": {
+      "enum": [
+        "LORA_A",
+        "LORA_B"
+      ]
+    },
+    "reviewed_input": {
+      "type": "object",
+      "description": "LORA_A면 ActionExtractionInput, LORA_B면 ResponseRequest. 개인정보 없이 고쳐 쓴 것"
+    }
+  },
+  "dependentRequired": {
+    "expected": [
+      "expected_kind"
+    ],
+    "reviewed_input": [
+      "expected_kind"
+    ]
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "review_status": {
+            "enum": [
+              "DISMISSED",
+              "PENDING"
+            ]
+          }
+        },
+        "required": [
+          "review_status"
+        ]
+      },
+      "then": {
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "expected"
+              ]
+            },
+            {
+              "required": [
+                "reviewed_input"
+              ]
+            },
+            {
+              "required": [
+                "expected_kind"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expected_kind": {
+            "const": "LORA_A"
+          }
+        },
+        "required": [
+          "expected_kind",
+          "expected"
+        ]
+      },
+      "then": {
+        "properties": {
+          "expected": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expected_kind": {
+            "const": "LORA_B"
+          }
+        },
+        "required": [
+          "expected_kind",
+          "expected"
+        ]
+      },
+      "then": {
+        "properties": {
+          "expected": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}

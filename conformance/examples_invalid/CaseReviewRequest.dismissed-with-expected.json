@@ -1,0 +1,5 @@
+{
+  "review_status": "DISMISSED",
+  "expected": "문장",
+  "expected_kind": "LORA_B"
+}

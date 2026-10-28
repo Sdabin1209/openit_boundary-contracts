@@ -1,0 +1,15 @@
+{
+  "review_status": "CONFIRMED",
+  "expected_kind": "LORA_A",
+  "reviewed_input": {
+    "question_id": "Q1.D03",
+    "current_question": "두통이 있으신가요?",
+    "user_utterance": "가상 환자가 두통이 사흘 되었다고 말한다",
+    "state": {}
+  },
+  "expected": {
+    "action": "NEXT",
+    "next_item": "END",
+    "values": []
+  }
+}

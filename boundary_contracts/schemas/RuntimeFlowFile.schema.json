@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RuntimeFlowFile.schema.json",
+  "title": "RuntimeFlowFile",
+  "description": "가짜(fake)·모방(mimic) 백엔드의 문항 흐름 파일(MODEL_RUNTIME_FAKE_FLOW_FILE, MODEL_RUNTIME_MIMIC_FLOW_FILE). deploy·survey-service의 시험 설정이 만들고 model-runtime의 가짜·모방 백엔드가 읽는다. `order`와 `skips`는 문진 스키마 QuestionFlow의 같은 이름 필드와 같은 모양이다($defs의 QuestionId, SlotName, SkipCondition은 QuestionFlow의 정의와 글자 그대로 같다). QuestionFlow 자체를 $ref할 수 없는 이유는 MANIFEST.json의 note에 있다. 두 형식: 문항 ID 목록(배열) 또는 객체. 객체의 모르는 키는 거부한다(지금 코드는 무시해 `skip` 같은 오타가 사라지므로 코드보다 엄격하다).",
+  "oneOf": [
+    {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/QuestionId"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order"
+      ],
+      "properties": {
+        "order": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/QuestionId"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "slots": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/itemId"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "key",
+                "type"
+              ],
+              "properties": {
+                "key": {
+                  "$ref": "#/$defs/modelKey"
+                },
+                "type": {
+                  "enum": [
+                    "boolean",
+                    "integer"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "skips": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SkipCondition"
+          }
+        },
+        "corrections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "contains",
+              "key",
+              "value"
+            ],
+            "properties": {
+              "contains": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "key": {
+                "$ref": "#/$defs/modelKey"
+              },
+              "value": {
+                "type": [
+                  "boolean",
+                  "number",
+                  "string"
+                ]
+              },
+              "at": {
+                "$ref": "#/$defs/itemId"
+              }
+            }
+          }
+        },
+        "reasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "contains",
+              "key"
+            ],
+            "properties": {
+              "contains": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "key": {
+                "$ref": "#/$defs/modelKey"
+              },
+              "reason": {
+                "enum": [
+                  "MISSING",
+                  "OUT_OF_RANGE",
+                  "UNKNOWN_UNIT",
+                  "VAGUE_QUANTITY",
+                  "RANGE_SPANS_OPTIONS",
+                  "COUNT_EXCEEDS_DAYS",
+                  "OTHER_BEVERAGE",
+                  "BEVERAGE_MISSING",
+                  "MISSING_NUMBER",
+                  "UNPARSED_VALUE",
+                  "INVALID_OPTION"
+                ]
+              },
+              "at": {
+                "$ref": "#/$defs/itemId"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "itemId": {
+      "$ref": "#/$defs/QuestionId"
+    },
+    "modelKey": {
+      "type": "string",
+      "pattern": "^Q[0-9]+(\\.D[0-9]{2})?(_[0-9]+)?(\\[(soju|beer|spirits|makgeolli|wine)\\])?\\.[a-z][a-z_]*$"
+    },
+    "QuestionId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "SlotName": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.]+\\.[A-Za-z0-9_]+$",
+      "description": "문항.칸 (종류 괄호 없음). 예: Q8_1.days"
+    },
+    "SkipCondition": {
+      "type": "object",
+      "description": "slot에 저장된 값이 value와 같으면(op '==') skip_item은 묻지 않는다. 값은 bool 또는 수 또는 문자열이다. 비교에서 bool과 수는 다르다(true != 1).",
+      "properties": {
+        "slot": {
+          "$ref": "#/$defs/SlotName"
+        },
+        "op": {
+          "const": "=="
+        },
+        "value": {
+          "type": [
+            "boolean",
+            "number",
+            "string"
+          ]
+        },
+        "skip_item": {
+          "$ref": "#/$defs/QuestionId"
+        }
+      },
+      "required": [
+        "slot",
+        "op",
+        "value",
+        "skip_item"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

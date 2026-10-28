@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ListEnvelope.schema.json",
+  "title": "ListEnvelope",
+  "description": "HTTP.md 공통 목록 봉투 {items, next_cursor}. 만드는 쪽: release-gate(I5 submissions, I4 releases), ops-feedback(I7 cases). 읽는 쪽: admin-console. items 원소는 객체 배열로만 정하고 원소는 호출별 계약 스키마(SubmissionView, ReleaseManifest, FailureCase)로 따로 검증한다. 쿼리: cursor(불투명 문자열), limit(기본 100, 최대 500). 모르는 키는 허용한다(읽기 쪽 관용).",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "items",
+    "next_cursor"
+  ],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  }
+}

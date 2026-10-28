@@ -1,0 +1,57 @@
+{
+  "area": "kiosk-frontend",
+  "schema_dialect": "https://json-schema.org/draft/2020-12/schema",
+  "branch": "wo6",
+  "items": [
+    {
+      "name": "DeviceConfig",
+      "source_draft": "docs/change-requests/schemas/DeviceConfig.schema.json",
+      "producer": "deploy",
+      "consumers": [
+        "kiosk-frontend"
+      ],
+      "unknown_keys": "reject",
+      "note": "ADR 0012로 변경 예정: 키오스크 기기 인증이 mTLS 인증서가 되면 device_token 필드는 구현 때 사라진다. 지금 스키마는 현재 필드(device_token, subject_ref, allow_remote_stt)를 쓴다. 읽는 쪽 코드(api/device.ts)는 모르는 키를 무시하고 스키마는 거부한다(쓰는 쪽 검증용). allow_remote_stt는 JSON true일 때만 켜진다. deploy가 이 파일을 실제로 이 모양으로 만드는지는 이웃 쪽 미확인."
+    },
+    {
+      "name": "KioskStartFragment",
+      "source_draft": "docs/change-requests/schemas/KioskStartFragment.schema.json",
+      "producer": "병원 접수(영역 밖) 또는 시연 스크립트",
+      "consumers": [
+        "kiosk-frontend"
+      ],
+      "unknown_keys": "reject",
+      "note": "ADR 0012로 변경 예정: device(기기 토큰) 키는 구현 때 사라진다. 지시표가 승격 대상으로 정한 항목이다. 만드는 쪽이 영역 밖(병원 접수)이라 소유 영역에 남길 항목인지는 헤드 판단. 조각을 풀어 만든 객체의 스키마이며 URL 문법 자체는 description에 있다. 병원 접수 쪽은 확인하지 못했다(이웃 쪽 미확인)."
+    },
+    {
+      "name": "StaffPushPayload",
+      "source_draft": "docs/change-requests/schemas/StaffPushPayload.schema.json",
+      "producer": "survey-service",
+      "consumers": [
+        "kiosk-frontend"
+      ],
+      "unknown_keys": "reject",
+      "note": "PUBLIC_API.md는 푸시 본문에 세션 ID와 종류만 넣는다고만 정했고 키 이름은 이 초안이 정한 것이다(session_id 필수, kind, alert_id 선택). survey-service가 실제로 alert_id를 싣는지, 키 이름이 같은지는 이웃 쪽 미확인(없으면 알림 tag가 고정되어 알림이 서로 교체된다)."
+    },
+    {
+      "name": "StaticImageInterface",
+      "source_draft": "docs/change-requests/schemas/StaticImageInterface.schema.json",
+      "producer": "kiosk-frontend",
+      "consumers": [
+        "deploy"
+      ],
+      "unknown_keys": "reject",
+      "note": "이 영역 이미지(Dockerfile, server/static.mjs)가 deploy에 약속하는 선언서. 이 선언서를 파일로 이미지에 싣는지는 정하지 않았다. 계약 승격 보정(wo6): user는 root/0이 아니어야 한다는 설명을 스키마 제약(not enum)으로 옮겼다. ADR 0012(mTLS)로 /config.json 경로와 device_config_schema 항목이 바뀔 수 있다. deploy 쪽이 이 선언서를 읽는 구현은 이웃 쪽 미확인."
+    },
+    {
+      "name": "TurnOutcome",
+      "source_draft": "docs/change-requests/schemas/TurnOutcome.schema.json",
+      "producer": "survey-service",
+      "consumers": [
+        "kiosk-frontend"
+      ],
+      "unknown_keys": "reject",
+      "note": "survey-service FrontendInput/TurnFailureSignal(정본, 읽기 전용)과 구조가 겹치고 의미 제약만 더한다: 신호가 있으면 NOT_COMMITTED이거나 staff_alert가 NONE이 아니어야 한다. 읽는 쪽이 만든 부분집합 금지 원칙에 걸릴 수 있어 헤드가 정본 스키마에 흡수할지 판단해 주길 바란다. 보정(wo6): survey-service가 바꾼 FrontendInput에 맞춰 선택 필드 session_id(시작 응답, 서버 발급)와 response_text 문자열 minLength 1을 반영했다. 위험 정지 턴이 신호를 항상 싣는지는 서버 쪽 미확인(키오스크는 응답 뒤 /state도 확인한다). valid 예시 TurnOutcome.{start,normal,staff-delivered,staff-delivery-failed,not-committed}는 이 영역 모의 서버가 낸 실제 응답이다(서버 구현 아님)."
+    }
+  ]
+}

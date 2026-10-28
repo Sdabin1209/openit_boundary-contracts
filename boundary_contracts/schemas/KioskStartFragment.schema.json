@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "KioskStartFragment.schema.json",
+  "title": "KioskStartFragment",
+  "description": "키오스크 시작 URL의 조각(`#device=...&subject_ref=...`)을 `key=value`로 풀어 만든 객체. 쓰는 쪽: 병원 접수(또는 시연 스크립트). 읽는 쪽: kiosk-frontend(api/device.ts parseFragment). 문법: `#` 뒤 `&`로 나눈 `key=value`, 첫 `=`에서만 나누고 값은 percent-decoding(`+`는 공백이 아니다). 쿼리 문자열(`?`)은 서버 로그에 남으므로 쓰지 않는다. 앱은 읽는 즉시 주소창과 기록에서 지운다. 조각이 DeviceConfig보다 먼저다. [ADR 0012로 변경 예정: `device`(기기 토큰) 키는 구현 때 사라진다.]",
+  "type": "object",
+  "properties": {
+    "device": {
+      "$ref": "DeviceConfig.schema.json#/properties/device_token"
+    },
+    "subject_ref": {
+      "$ref": "DeviceConfig.schema.json#/properties/subject_ref"
+    }
+  },
+  "additionalProperties": false
+}

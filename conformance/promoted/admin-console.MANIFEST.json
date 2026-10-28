@@ -1,0 +1,53 @@
+{
+  "note": "admin-console 계약 승격 준비(2026-10-29, wo6, D104). 코드 변경 없음. 읽은 것: ../boundary-contracts/schemas의 _common.schema.json(Id·Hash를 $ref로 재사용, 중복 정의 없음), GateApproval.schema.json, ../boundary-contracts/HTTP.md 공통·I5·I7 줄, 읽기 전용 확인이 허용된 ../ops-feedback/docs/change-requests/schemas의 ops-feedback-deidentified-trace 초안과 그 valid 예시. valid 예시는 tools/capture-examples.ts가 이 영역의 실제 클라이언트·컨트롤러(api/, app/)가 fetch로 보낸 본문을 가로채 만들었다. ListEnvelope의 valid 예시는 이 영역의 모의 서버가 낸 응답이며 실제 release-gate·ops-feedback 서버의 출력이 아니다(이웃 쪽 미확인). 검증: python3 validate.py.",
+  "entries": [
+    {
+      "name": "ApprovalRequest",
+      "source_draft": "docs/change-requests/schemas/ApprovalRequest.schema.json",
+      "producer": "admin-console",
+      "consumers": [
+        "release-gate"
+      ],
+      "unknown_keys": "reject",
+      "note": "POST /v1/approvals 본문. approver_id를 싣지 않는다(X-Openit-User가 유일한 길, HTTP.md I5·D88)이므로 모르는 키를 거부한다. 반려에는 reason 필수(if/then). report_hash는 GET review-report 응답 헤더를 계산 없이 돌려준 값. 이웃 쪽 미확인: release-gate 서버가 본문의 pipeline_schema_version·ext를 받는지(이 영역은 보내지 않는다), approver_role의 허용 값이 release-approver 하나인지(화면은 상수로 보낸다)."
+    },
+    {
+      "name": "ActivateRequest",
+      "source_draft": "docs/change-requests/schemas/ActivateRequest.schema.json",
+      "producer": "admin-console",
+      "consumers": [
+        "release-gate"
+      ],
+      "unknown_keys": "reject",
+      "note": "POST /v1/activate 본문 {release_id, requested_by_role: operator}. 행위자 이름이 본문에 섞이는 것을 막으려고 모르는 키를 거부한다. 이웃 쪽 미확인: 실제 release-gate가 requested_by_role 없는 본문을 받는지(CR-004 2항), 서버가 이 값을 기록용으로만 쓰는지. CR-005(request_id·expected_pointer_version 선택 필드 제안)가 계약에 반영되면 이 스키마에 선택 필드로 더한다(MINOR)."
+    },
+    {
+      "name": "CaseReviewRequest",
+      "source_draft": "docs/change-requests/schemas/CaseReviewRequest.schema.json",
+      "producer": "admin-console",
+      "consumers": [
+        "ops-feedback"
+      ],
+      "unknown_keys": "reject",
+      "note": "POST /v1/cases/{case_id}/review 본문(I7, Protocol 밖). expected가 있으면 expected_kind 필수, DISMISSED·PENDING에는 review_status만, LORA_A의 expected는 객체, LORA_B는 비어 있지 않은 문자열. expected·reviewed_input의 내용 검증(ActionExtraction, ActionExtractionInput, ResponseText, ResponseRequest)은 이 스키마가 아니라 해당 계약 스키마의 일이다(중복 정의 안 함). 이웃 쪽 미확인: ops-feedback 서버가 expected_kind만 있고 expected·reviewed_input이 없는 CONFIRMED를 받는지(스키마는 허용한다), 검토자 식별이 X-Openit-User인지(HTTP.md I7 문장으로만 확인)."
+    },
+    {
+      "name": "ListEnvelope",
+      "source_draft": "docs/change-requests/schemas/ListEnvelope.schema.json",
+      "producer": "release-gate, ops-feedback",
+      "consumers": [
+        "admin-console"
+      ],
+      "unknown_keys": "ignore",
+      "note": "HTTP.md 공통 목록 봉투 {items, next_cursor}(둘 다 필수, next_cursor는 문자열 또는 null, cursor는 불투명). 읽는 쪽 관용으로 모르는 키를 허용한다. items 원소는 객체 배열로만 정하고 호출별 스키마(SubmissionView, ReleaseManifest, FailureCase)로 따로 검증한다. 이 봉투를 모든 영역이 공유하므로 admin-console 전용 이름이 아니라 계약 공통 이름으로 올리는 것을 헤드가 판단해 달라(내는 쪽 둘 다 이웃 쪽 미확인: 빈 목록에서 next_cursor를 null로 내는지)."
+    }
+  ],
+  "not_promoted": [
+    {
+      "name": "DeidentifiedTraceView",
+      "source_draft": "docs/change-requests/schemas/DeidentifiedTraceView.schema.json",
+      "replaced_by": "OpsFeedbackDeidentifiedTrace",
+      "note": "읽는 쪽이 만든 부분집합 스키마는 두지 않는다(헤드 지시). 결론: ops-feedback 초안(ops-feedback-deidentified-trace.schema.json)이 화면이 읽는 필드를 모두 가진다고 확인했다. 화면이 읽는 필드(app/cases-view.ts traceFacts, app/cases-controller.ts prefillFromTrace, 상세 펼침): contract_version, extract_status, extract_attempts, extract_output.action, extract_output.values, validation_ok, response_input.action, response_outcome, extract_input, response_input, 펼쳐 보기만 하는 extract_output, validation_violations, response_output. 초안의 properties에 모두 있다. 열거도 같다: extract_status는 OK|OUTPUT_INVALID|VIOLATION|ERROR|null, response_outcome은 ok|fallback|fixed|null, extract_output.action은 문자열(초안은 ^[A-Z][A-Z0-9_]{0,31}$ 또는 [MASKED]). 차이 세 가지: (1) 초안은 extract_attempts 최대 2를 정하고 화면은 숫자를 그대로 보이므로 문제없다. (2) 초안의 consumers 설명에 admin-console이 없다: 읽는 쪽에 admin-console(I7 get_trace, 실패 사례 검토 화면)을 더해 달라. (3) 초안은 29개 최상위 키를 모두 필수로 하고 모르는 키를 거부하므로 비식별 출력은 엄격하지만, 화면은 필요한 필드만 읽고 없으면 '—'를 보여 주므로 엄격한 스키마로 바뀌어도 화면은 깨지지 않는다. 이웃 쪽 미확인: 실제 ops-feedback 서버가 이 스키마대로 내는지(초안과 valid 예시만 읽었다). 불일치 하나: 이 영역의 모의 서버 trace()(mock-server/cases.ts)는 이 초안을 통과하지 않는다(필수 최상위 키 누락 등 오류 20건, session_id가 p-<32 hex> 가명이 아님). 코드를 바꾸지 않는 단계라 고치지 않았고, 계약에 올라간 뒤 모의를 OpsFeedbackDeidentifiedTrace 예시로 대체하고 스키마 검증 시험을 넣는다(다음 단계)."
+    }
+  ]
+}

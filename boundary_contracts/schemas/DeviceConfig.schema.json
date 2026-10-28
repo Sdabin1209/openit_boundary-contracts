@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "DeviceConfig.schema.json",
+  "title": "DeviceConfig",
+  "description": "키오스크 기기 설정(`GET /config.json`). 쓰는 쪽: deploy(운영이 마운트하는 CONFIG_FILE 내용). 읽는 쪽: kiosk-frontend(api/device.ts loadKioskStart). 초안. 모든 키는 선택이다. device_token이 없으면 키오스크는 세션을 시작하지 않고 직원 호출 화면(NO_DEVICE_TOKEN)을 보인다. 이 문서의 값은 비밀(device_token)·개인정보 참조(subject_ref)를 담을 수 있으므로 로그·오류 응답에 쓰지 않는다. [ADR 0012(헤드)로 변경 예정: 키오스크 기기 인증이 mTLS 인증서가 되면 device_token 필드는 구현 때 사라진다. 지금 스키마는 현재 필드를 쓴다.]",
+  "type": "object",
+  "properties": {
+    "device_token": {
+      "type": "string",
+      "pattern": "^[\\x21-\\x7e]{1,512}$",
+      "description": "기기 토큰. /v1/sessions* 요청에 `Authorization: Bearer`로 그대로 실린다. 헤더에 넣을 수 있는 보이는 ASCII 1~512자(공백·한글 불가). 비밀 값."
+    },
+    "subject_ref": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:/#=+-]{1,128}$",
+      "description": "병원 접수가 넘긴 환자 참조(PUBLIC_API.md 추가 인터페이스 A의 형식). 기기당 고정 참조인지 환자마다 새 값인지는 미정(사용자 확인 대기). 시작 URL 조각의 subject_ref가 있으면 그것이 먼저다."
+    },
+    "allow_remote_stt": {
+      "type": "boolean",
+      "default": false,
+      "description": "true일 때만 기기 안 인식이 안 되는 기기에서 외부 음성 인식 제공자로 환자 음성이 나갈 수 있다(화면에 환자 고지 문구가 보인다). 없으면 false. 반드시 JSON 불리언 true여야 켜진다(문자열 \"true\"는 꺼짐)."
+    }
+  },
+  "additionalProperties": false
+}

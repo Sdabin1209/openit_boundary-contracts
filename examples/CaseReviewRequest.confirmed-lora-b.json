@@ -1,0 +1,14 @@
+{
+  "review_status": "CONFIRMED",
+  "expected_kind": "LORA_B",
+  "reviewed_input": {
+    "action": "START",
+    "topic": "가상 주제",
+    "next": {
+      "question_id": "Q1.D01",
+      "text": "[MASKED]",
+      "type": "NEXT"
+    }
+  },
+  "expected": "네, 알겠습니다. 약을 드시고 계신가요?"
+}

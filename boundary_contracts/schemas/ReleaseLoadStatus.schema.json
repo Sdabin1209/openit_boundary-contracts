@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ReleaseLoadStatus.schema.json",
+  "title": "ReleaseLoadStatus",
+  "description": "PUT/GET /v1/releases/{id}의 적재 상태 본문(HTTP.md I9 표에만 있고 JSON Schema가 없다). model-runtime이 만들고 survey-service(HttpModelRuntime 클라이언트)와 deploy가 읽는다. error는 state가 FAILED일 때만 BoundaryError 레코드이고 그 밖에는 null이다. 모르는 키는 거부한다: 이 본문은 작고 닫힌 상태 표시라 키가 늘면 계약을 고쳐야 한다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "release_id",
+    "state",
+    "error"
+  ],
+  "properties": {
+    "release_id": {
+      "$ref": "_common.schema.json#/$defs/Id"
+    },
+    "state": {
+      "enum": [
+        "ABSENT",
+        "LOADING",
+        "LOADED",
+        "FAILED"
+      ]
+    },
+    "error": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "BoundaryError.schema.json"
+        }
+      ],
+      "description": "state가 FAILED면 BoundaryError 레코드, 아니면 null."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "FAILED"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "error": {
+            "type": "object"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "error": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}

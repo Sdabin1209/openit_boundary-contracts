@@ -1,0 +1,113 @@
+{
+  "items": [
+    {
+      "submission_id": "sub-await",
+      "submitted_at": "2026-10-15T00:55:00Z",
+      "submitted_by_role": "model-lab",
+      "subject": {
+        "question_set": {
+          "id": "qs-main",
+          "version": "3",
+          "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "lora_a": {
+          "id": "lora-a",
+          "version": "1.2.0",
+          "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "lora_b": {
+          "id": "lora-b",
+          "version": "1.0.1",
+          "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      },
+      "status": "AWAITING_APPROVAL",
+      "decision_id": null,
+      "approval_id": null,
+      "release_id": null,
+      "updated_at": "2026-10-15T00:59:00Z"
+    },
+    {
+      "submission_id": "sub-await-stale",
+      "submitted_at": "2026-10-15T00:54:00Z",
+      "submitted_by_role": "model-lab",
+      "subject": {
+        "question_set": {
+          "id": "qs-main",
+          "version": "3",
+          "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "lora_a": {
+          "id": "lora-a",
+          "version": "1.2.0",
+          "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "lora_b": {
+          "id": "lora-b",
+          "version": "1.0.1",
+          "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      },
+      "status": "AWAITING_APPROVAL",
+      "decision_id": null,
+      "approval_id": null,
+      "release_id": null,
+      "updated_at": "2026-10-15T00:59:00Z"
+    },
+    {
+      "submission_id": "sub-await-403",
+      "submitted_at": "2026-10-15T00:53:00Z",
+      "submitted_by_role": "model-lab",
+      "subject": {
+        "question_set": {
+          "id": "qs-main",
+          "version": "3",
+          "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "lora_a": {
+          "id": "lora-a",
+          "version": "1.2.0",
+          "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "lora_b": {
+          "id": "lora-b",
+          "version": "1.0.1",
+          "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      },
+      "status": "AWAITING_APPROVAL",
+      "decision_id": null,
+      "approval_id": null,
+      "release_id": null,
+      "updated_at": "2026-10-15T00:59:00Z"
+    },
+    {
+      "submission_id": "sub-await-slow",
+      "submitted_at": "2026-10-15T00:52:00Z",
+      "submitted_by_role": "model-lab",
+      "subject": {
+        "question_set": {
+          "id": "qs-main",
+          "version": "3",
+          "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "lora_a": {
+          "id": "lora-a",
+          "version": "1.2.0",
+          "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "lora_b": {
+          "id": "lora-b",
+          "version": "1.0.1",
+          "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      },
+      "status": "AWAITING_APPROVAL",
+      "decision_id": null,
+      "approval_id": null,
+      "release_id": null,
+      "updated_at": "2026-10-15T00:59:00Z"
+    }
+  ],
+  "next_cursor": null
+}
