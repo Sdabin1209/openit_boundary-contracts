@@ -499,10 +499,21 @@ class RuntimeReferenceServer(ReferenceServer):
         if rid not in self.loaded:
             raise BoundaryError("NOT_FOUND", "적재되지 않은 릴리스")
         if op == "/extract":
-            req = self._checked(body, "ActionExtractionInput")
-            out = self.extract_fn(req)
+            # 2.2.0: 본문은 ExtractRequest{input, flow} 또는 2.x 호환 ActionExtractionInput. 어느 쪽인지는 스키마로 판정한다
             from boundary_contracts import validator
-            if list(validator("ActionExtraction").iter_errors(out)):
+            parsed = self._body(body)
+            flow = None
+            if isinstance(parsed, dict) and "flow" in parsed:
+                full = self._checked(body, "ExtractRequest")
+                req, flow = full["input"], full["flow"]
+            else:
+                req = self._checked(body, "ActionExtractionInput")
+            out = self.extract_fn(req)
+            bad = bool(list(validator("ActionExtraction").iter_errors(out)))
+            if not bad and flow is not None:
+                from boundary_contracts.action_rules import check_action_extraction
+                bad = bool(check_action_extraction(req, out, flow))   # flow가 있으면 규칙 보증(HTTP.md I9)
+            if bad:
                 # D75: 값을 지어내지 않는다. 모델 출력이 끝내 형식을 못 지키면 503 UNAVAILABLE + details.reason=OUTPUT_INVALID
                 raise BoundaryError("UNAVAILABLE", "모델 출력이 ActionExtraction 형식을 지키지 못했다",
                                     {"reason": "OUTPUT_INVALID", "attempts": self.attempts})

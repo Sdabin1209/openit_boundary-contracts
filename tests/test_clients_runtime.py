@@ -48,6 +48,32 @@ class Runtime(unittest.TestCase):
         self.assertEqual(r.output, example("ActionExtraction.next"))
         self.assertEqual((r.outcome, r.attempts, r.protections, r.is_fallback), ("ok", 1, {}, False))
 
+    def test_flow를_주면_ExtractRequest로_보내고_서버가_규칙을_보증한다(self):
+        # 기대: HTTP.md I9(2.2.0) — flow가 있으면 본문은 ExtractRequest, 규칙 위반 출력은 503 OUTPUT_INVALID
+        from boundary_contracts.action_rules import item_of
+        self.c.load_release("rel-0001")
+        inp = example("ActionExtractionInput.next")
+        good = example("ActionExtraction.reask")
+        good["next_item"] = inp["question_id"]          # REASK의 next_item은 입력 question_id(규칙 명세)
+        items = [inp["question_id"]] + [item_of(v["key"]) for v in good["values"]] + [item_of(t) for t in good.get("targets", [])]
+        flow = {"order": list(dict.fromkeys(items)) + ["Q99"], "skips": []}
+        self.srv.extract_fn = lambda req: good
+        self.assertEqual(self.c.extract("rel-0001", inp, flow=flow).output, good)
+        bad = dict(good, next_item="Q99")               # REASK인데 다른 문항: 규칙 위반 -> 서버가 내지 않는다
+        self.srv.extract_fn = lambda req: bad
+        with self.assertRaises(BoundaryError) as cm:
+            self.c.extract("rel-0001", inp, flow=flow)
+        self.assertTrue(is_output_invalid(cm.exception))
+        # flow 없는 호환 본문은 규칙을 보지 않는다(형식만)
+        self.assertEqual(self.c.extract("rel-0001", inp).output["next_item"], "Q99")
+
+    def test_flow가_계약을_어기면_보내지_않는다(self):
+        self.c.load_release("rel-0001")
+        n = len(self.srv.requests)
+        er = example("ExtractRequest")
+        self.assertEqual(self.code(self.c.extract, "rel-0001", er["input"], flow={"order": []}), "INVALID_RECORD")
+        self.assertEqual(len(self.srv.requests), n)
+
     def test_적재되지_않은_릴리스는_404(self):
         self.assertEqual(self.code(self.c.extract, "rel-0001", example("ActionExtractionInput.next")), "NOT_FOUND")
         self.assertEqual(self.code(self.c.respond, "rel-0001", example("ResponseRequest.start")), "NOT_FOUND")

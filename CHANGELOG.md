@@ -2,6 +2,10 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.2.1 (PATCH, 와이어 스키마 변경 없음, `PIPELINE_SCHEMA_VERSION` "2.2" 그대로)
+- 고침: `HttpModelRuntime.extract(release_id, request, flow=None)`. 2.2.0은 I9 문서가 정한 `ExtractRequest{input, flow}`를 클라이언트가 보낼 수 없었다(보내기 전 검증이 `ActionExtractionInput`만 허용). flow를 주면 `ExtractRequest`로 검증해 보낸다(survey-service 보고, 2026-10-29).
+- 기준 구현 `RuntimeReferenceServer`가 두 본문을 모두 받고, flow가 있으면 `check_action_extraction` 위반 출력을 503 OUTPUT_INVALID로 낸다(HTTP.md I9 규칙 보증).
+
 ## 2.2.0 (MINOR, 추가형. `PIPELINE_SCHEMA_VERSION` "2.2". 클라이언트는 MAJOR만 비교하므로 2.1 레코드와 섞여도 동작한다)
 - **추가 스키마(D107):** 영역 경계 스키마 49개(admin-console, deploy, kiosk-frontend, model-lab, model-runtime, ops-feedback, question-authoring, release-gate, survey-service, synthetic-data). 예시는 `examples/`(통과)와 `conformance/examples_invalid/`(거부), 출처 매니페스트는 `conformance/promoted/`. 이 예시는 각 영역이 낸 값이며 이웃이 실제로 그 모양을 읽는지는 확인하지 않았다.
 - **LoRA-A 출력 의미 규칙(ADR 0010, D104):** 규칙 명세 데이터 `boundary_contracts/data/action_extraction_rules.json`(스키마 `ActionExtractionRules`)과 기준 검사기 `boundary_contracts.action_rules.check_action_extraction(input, output, flow)`.
