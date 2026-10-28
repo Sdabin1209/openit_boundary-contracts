@@ -2,6 +2,7 @@
 from .errors import BoundaryError
 from .schemas_api import schema_dir, load_schema, validator, PIPELINE_SCHEMA_VERSION
 from .secrets import read_secret, secret_source, SecretError
+from .metrics_registry import metrics, metric_name_problems
 from .canonical import canonicalize, sha256_hash, content_hash, file_hash, directory_hash
 
-__all__ = ["BoundaryError", "schema_dir", "load_schema", "validator", "PIPELINE_SCHEMA_VERSION", "canonicalize", "sha256_hash", "content_hash", "file_hash", "directory_hash", "read_secret", "secret_source", "SecretError"]
+__all__ = ["BoundaryError", "schema_dir", "load_schema", "validator", "PIPELINE_SCHEMA_VERSION", "canonicalize", "sha256_hash", "content_hash", "file_hash", "directory_hash", "read_secret", "secret_source", "SecretError", "metrics", "metric_name_problems"]

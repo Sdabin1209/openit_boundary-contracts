@@ -27,7 +27,8 @@ class Package(unittest.TestCase):
         self.assertTrue(list(validator("ReleaseManifest").iter_errors(rec)))
 
     def test_버전_상수(self):
-        self.assertEqual(PIPELINE_SCHEMA_VERSION, "2.1")
+        from importlib.metadata import version  # 왜: 버전 리터럴을 시험에 복제하지 않고 설치된 패키지에서 읽는다
+        self.assertEqual(PIPELINE_SCHEMA_VERSION, ".".join(version("boundary-contracts").split(".")[:2]))
 
     def test_패키지_버전은_계약_버전과_MAJOR_MINOR가_같다(self):
         import re

@@ -37,6 +37,16 @@ neg("REJECT인데 reject_codes 없음", "GateDecision", "GateDecision.reject", l
 neg("PASS에 SKIPPED 검사 포함", "GateDecision", "GateDecision.pass", lambda d: d["checks"][0].update(result="SKIPPED"))
 neg("PASS인데 reject_codes 있음", "GateDecision", "GateDecision.pass", lambda d: d.update(reject_codes=["CHECK_FAILED"]))
 neg("adapters에 LORA_B 없음", "ReleaseManifest", "ReleaseManifest", lambda d: d["adapters"].pop("LORA_B"))
+# 지표 이름 레지스트리: 예시 보고서의 지표 이름이 ACTIVE이고, 폐기 이름을 넣으면 거부되는지, METRICS.md 표가 생성물과 같은지
+sys.path.insert(0, here)
+import subprocess
+from boundary_contracts import metric_name_problems
+for _k in ("EvaluationReport", "ReviewReport"):
+    _p = metric_name_problems(ex(_k)); print("OK  " if not _p else "FAIL", f"{_k} 지표 이름은 ACTIVE", _p); bad += bool(_p)
+_d = ex("EvaluationReport"); _d["metrics"][0]["name"] = "risk_signal_recall"
+_p = metric_name_problems(_d); print("OK  " if _p else "FAIL", "폐기 지표 이름은 거부"); bad += not _p
+_r = subprocess.run([sys.executable, here + "/tools/gen_metrics_md.py", "--check"])
+print("OK  " if _r.returncode == 0 else "FAIL", "METRICS.md 표는 metrics.json에서 생성한 것과 같다"); bad += _r.returncode != 0
 neg("알 수 없는 오류 코드", "BoundaryError", "BoundaryError", lambda d: d.update(code="WHATEVER"))
 neg("적용된 롤백에 포인터 없음", "RollbackReceipt", "RollbackReceipt", lambda d: d.pop("active_pointer"))
 neg("거부된 롤백에 사유 없음", "RollbackReceipt", "RollbackReceipt", lambda d: (d.update(status="REJECTED"), d.pop("active_pointer")))

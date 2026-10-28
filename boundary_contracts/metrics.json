@@ -1,0 +1,552 @@
+{
+  "registry_version": 1,
+  "description": "평가 지표 이름의 정본(데이터). METRICS.md의 지표 표는 tools/gen_metrics_md.py가 이 파일에서 생성한다. higher_is_better가 null이면 METRICS.md가 방향을 정하지 않은 것이다.",
+  "metrics": [
+    {
+      "name": "value_precision",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "A",
+      "doc": [
+        {
+          "section": "A",
+          "change": "대체(v1 `item_precision/recall`)",
+          "row_names": [
+            "value_precision",
+            "value_recall"
+          ],
+          "meaning": "`values[]`의 (`key`, `value`, `status`) 일치로 센 정밀도·재현율. 키만 맞은 경우는 맞은 것으로 세지 않는다 `[기본값]`",
+          "order": 0
+        }
+      ]
+    },
+    {
+      "name": "value_recall",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "A",
+      "doc": [
+        {
+          "section": "A",
+          "change": "대체(v1 `item_precision/recall`)",
+          "joined_into": "value_precision",
+          "order": 0
+        }
+      ]
+    },
+    {
+      "name": "precision_match",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "A",
+      "doc": [
+        {
+          "section": "A",
+          "change": "신설",
+          "row_names": [
+            "precision_match"
+          ],
+          "meaning": "`values[].precision`(exact/approximate/unspecified) 일치율. 값과 따로 보고해 원인을 분리한다 `[기본값]`",
+          "order": 1
+        }
+      ]
+    },
+    {
+      "name": "targets_match",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "A",
+      "doc": [
+        {
+          "section": "A",
+          "change": "대체(v1 `target_accuracy`)",
+          "row_names": [
+            "targets_match"
+          ],
+          "meaning": "`targets`가 정답과 같은 비율(REASK·CONFIRM·HOLD·SKIP 행만이 분모)",
+          "order": 2
+        }
+      ]
+    },
+    {
+      "name": "value_exact_match",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "A",
+      "doc": [
+        {
+          "section": "A",
+          "change": "유지(뜻 변경)",
+          "row_names": [
+            "value_exact_match"
+          ],
+          "meaning": "값이 정답과 정확히 같은 비율. 모델이 정규화까지 하므로 \"단위 환산 후\" 조건은 없다",
+          "order": 3
+        }
+      ]
+    },
+    {
+      "name": "action_accuracy",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "A",
+      "doc": [
+        {
+          "section": "A",
+          "change": "신설",
+          "row_names": [
+            "action_accuracy"
+          ],
+          "meaning": "`action` 7종 일치율. 분리 기준 `ACTION`",
+          "order": 4
+        }
+      ]
+    },
+    {
+      "name": "reason_accuracy",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "A",
+      "doc": [
+        {
+          "section": "A",
+          "change": "신설",
+          "row_names": [
+            "reason_accuracy"
+          ],
+          "meaning": "`reason` 일치율(reason이 있는 행만). 분리 기준 `REASON`",
+          "order": 5
+        }
+      ]
+    },
+    {
+      "name": "status_accuracy",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "A",
+      "doc": [
+        {
+          "section": "A",
+          "change": "신설",
+          "row_names": [
+            "status_accuracy"
+          ],
+          "meaning": "`values[].status` 일치율",
+          "order": 6
+        }
+      ]
+    },
+    {
+      "name": "next_item_accuracy",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "A",
+      "doc": [
+        {
+          "section": "A",
+          "change": "신설",
+          "row_names": [
+            "next_item_accuracy"
+          ],
+          "meaning": "`next_item` 일치율. **action별 분모로 낸다**(`slice` kind=`ACTION`). CONFIRM은 현재 문항이 아니라 충돌 대상 문항인 경우가 많다 `[기본값]`",
+          "order": 7
+        }
+      ]
+    },
+    {
+      "name": "semantic_violation_rate",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": false,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "A",
+      "doc": [
+        {
+          "section": "A",
+          "change": "신설(D97)",
+          "row_names": [
+            "semantic_violation_rate"
+          ],
+          "meaning": "turn-engine `validate_extraction`이 위반을 하나 이상 낸 출력의 비율(낮을수록 좋음). 정답과 비교하지 않는다. 위반 코드별 비율은 `slice`(kind=`VIOLATION_CODE`, value=코드)로 낸다. **기준 시험**: 학습 데이터 A 출력 전수가 위반 0이어야 하며 0이 아니면 검증기나 데이터의 문제다. 평가가 turn-engine(순수 함수 라이브러리, 버전 고정)에 의존하는 것을 허용한다",
+          "order": 8
+        }
+      ]
+    },
+    {
+      "name": "schema_valid_raw",
+      "group": "PROTECTION",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "both",
+      "doc": [
+        {
+          "section": "A",
+          "change": "유지(뜻 좁힘)",
+          "row_names": [
+            "schema_valid_raw"
+          ],
+          "meaning": "출력 보호 전 `ActionExtraction` 스키마 통과율. **제약 디코딩을 켠 값과 끈 값을 모두 보고한다**(`slice` kind=`CONSTRAINED_DECODING`, value=`on`/`off`) `[기본값]`. 켠 값은 100% 근처라 변별력이 낮다",
+          "order": 9
+        },
+        {
+          "section": "B",
+          "change": "유지(뜻 변경)",
+          "row_names": [
+            "schema_valid_raw"
+          ],
+          "meaning": "B 출력은 JSON이 아니므로 \"문자열이고 길이·형식 조건을 통과\"한 비율",
+          "order": 14
+        }
+      ]
+    },
+    {
+      "name": "output_invalid_rate",
+      "group": "PROTECTION",
+      "unit": "ratio",
+      "higher_is_better": false,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "A",
+      "doc": [
+        {
+          "section": "A",
+          "change": "신설(D75)",
+          "row_names": [
+            "output_invalid_rate"
+          ],
+          "meaning": "재시도 후에도 형식을 못 지켜 `OUTPUT_INVALID`가 된 비율(낮을수록 좋음). 보조로 재시도 횟수(`X-Openit-Attempts`) 분포는 `output_attempts_mean`(`unit=count`)으로 낸다. 서빙 쪽 지표이므로 평가 백엔드가 같은 경로를 쓰는지 `evaluation_backend`로 구분한다",
+          "order": 10
+        }
+      ]
+    },
+    {
+      "name": "forbidden_expression_rate",
+      "group": "SAFETY",
+      "unit": "ratio",
+      "higher_is_better": false,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "B",
+      "doc": [
+        {
+          "section": "B",
+          "change": "유지",
+          "row_names": [
+            "forbidden_expression_rate"
+          ],
+          "meaning": "금지 표현(진단·처방·단정 등)을 쓴 비율(낮을수록 좋음). **금지 표현 목록이 없으면 `n=0`**으로 둔다(목록 소유자는 사용자 몫, D59) `[기본값]`",
+          "order": 11
+        }
+      ]
+    },
+    {
+      "name": "ungrounded_number_rate",
+      "group": "SAFETY",
+      "unit": "ratio",
+      "higher_is_better": false,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "B",
+      "doc": [
+        {
+          "section": "B",
+          "change": "대체(D94)",
+          "row_names": [
+            "ungrounded_number_rate"
+          ],
+          "meaning": "재료(`known`, `ask`, `previous`, `current`, `hold`, `next.text`, `user_utterance`)에 없는 숫자를 말한 비율(낮을수록 좋음). **런타임 검사가 아니라 평가 지표로만 잰다**(D94). `CONFLICT_WITH_PREVIOUS`의 `ask`에 영문 괄호 문구가 들어 있어 숫자 추출 규칙에 영향이 있다",
+          "order": 12
+        }
+      ]
+    },
+    {
+      "name": "material_coverage",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "B",
+      "doc": [
+        {
+          "section": "B",
+          "change": "대체(v1 `slot_coverage`)",
+          "row_names": [
+            "material_coverage"
+          ],
+          "meaning": "action별로 말해야 할 재료(NEXT면 `known`과 `next.text`, REASK면 `ask` 등)를 빠짐없이 말한 비율. action별 필수 재료 표는 학습 데이터 규칙(IO_SPEC)이며 담당자가 확인한다. 분리 기준 `ACTION`",
+          "order": 13
+        }
+      ]
+    },
+    {
+      "name": "protection_intervened",
+      "group": "PROTECTION",
+      "unit": "ratio",
+      "higher_is_better": null,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "B",
+      "doc": [
+        {
+          "section": "B",
+          "change": "유지",
+          "row_names": [
+            "protection_intervened",
+            "fallback_rate"
+          ],
+          "meaning": "`X-Openit-Outcome=fallback` 비율. action별 `slice`(kind=`ACTION`)를 권한다. 대체 문장 문구(G04)는 잠정(D93)",
+          "order": 15
+        }
+      ]
+    },
+    {
+      "name": "fallback_rate",
+      "group": "PROTECTION",
+      "unit": "ratio",
+      "higher_is_better": null,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "B",
+      "doc": [
+        {
+          "section": "B",
+          "change": "유지",
+          "joined_into": "protection_intervened",
+          "order": 15
+        }
+      ]
+    },
+    {
+      "name": "length_p95_ms",
+      "group": "ROBUSTNESS",
+      "unit": "ms",
+      "higher_is_better": false,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "B",
+      "doc": [
+        {
+          "section": "B",
+          "change": "유지",
+          "row_names": [
+            "length_p95_ms"
+          ],
+          "meaning": "응답 지연 95백분위(`unit=ms`, 낮을수록 좋음). **이름은 바꾸지 않는다**(이름 변경은 소비자를 깨뜨릴 수 있다, D96) `[기본값]`",
+          "order": 16
+        }
+      ]
+    },
+    {
+      "name": "response_length_chars_p95",
+      "group": "ROBUSTNESS",
+      "unit": "count",
+      "higher_is_better": null,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "B",
+      "doc": [
+        {
+          "section": "B",
+          "change": "신설(선택)",
+          "row_names": [
+            "response_length_chars_p95"
+          ],
+          "meaning": "응답 글자 수 95백분위(`unit=count`, 단위는 글자 수). 키오스크 음성 출력에 영향",
+          "order": 17
+        }
+      ]
+    },
+    {
+      "name": "coverage_seen_unseen_gap",
+      "group": "COVERAGE",
+      "unit": "ratio",
+      "higher_is_better": null,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "both",
+      "doc": [
+        {
+          "section": "COMMON",
+          "change": "유지",
+          "row_names": [
+            "coverage_seen_unseen_gap"
+          ],
+          "meaning": "본 문항과 보지 못한 문항의 정확도 차이",
+          "order": 18
+        }
+      ]
+    },
+    {
+      "name": "regression_fixed",
+      "group": "REGRESSION",
+      "unit": "count",
+      "higher_is_better": true,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "both",
+      "doc": [
+        {
+          "section": "COMMON",
+          "change": "유지(입력 형식 변경)",
+          "row_names": [
+            "regression_fixed",
+            "regression_broken"
+          ],
+          "meaning": "수집된 실패 사례(검토 확정, `reviewed_input` 사용)의 회귀 평가에서 고쳐진/다시 틀린 건수. 회귀 평가가 읽는 TurnTrace 키는 `extract_input`, `extract_output`, `response_input`, `response_output`이다(D98, 문진 스키마 `TurnTrace`가 정본)",
+          "order": 19
+        }
+      ]
+    },
+    {
+      "name": "regression_broken",
+      "group": "REGRESSION",
+      "unit": "count",
+      "higher_is_better": false,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "both",
+      "doc": [
+        {
+          "section": "COMMON",
+          "change": "유지(입력 형식 변경)",
+          "joined_into": "regression_fixed",
+          "order": 19
+        }
+      ]
+    },
+    {
+      "name": "risk_signal_recall",
+      "group": "SAFETY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "DEPRECATED",
+      "replaced_by": null,
+      "applies_to": "A",
+      "doc": []
+    },
+    {
+      "name": "risk_signal_false_alarm",
+      "group": "SAFETY",
+      "unit": "ratio",
+      "higher_is_better": false,
+      "status": "DEPRECATED",
+      "replaced_by": null,
+      "applies_to": "A",
+      "doc": []
+    },
+    {
+      "name": "intent_accuracy",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "DEPRECATED",
+      "replaced_by": [
+        "action_accuracy",
+        "reason_accuracy",
+        "status_accuracy",
+        "next_item_accuracy"
+      ],
+      "applies_to": "A",
+      "doc": []
+    },
+    {
+      "name": "item_precision",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "DEPRECATED",
+      "replaced_by": [
+        "value_precision"
+      ],
+      "applies_to": "A",
+      "doc": []
+    },
+    {
+      "name": "item_recall",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "DEPRECATED",
+      "replaced_by": [
+        "value_recall"
+      ],
+      "applies_to": "A",
+      "doc": []
+    },
+    {
+      "name": "target_accuracy",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "DEPRECATED",
+      "replaced_by": [
+        "targets_match"
+      ],
+      "applies_to": "A",
+      "doc": []
+    },
+    {
+      "name": "risk_notice_verbatim_rate",
+      "group": "SAFETY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "DEPRECATED",
+      "replaced_by": null,
+      "applies_to": "B",
+      "doc": []
+    },
+    {
+      "name": "slot_coverage",
+      "group": "ACCURACY",
+      "unit": "ratio",
+      "higher_is_better": true,
+      "status": "DEPRECATED",
+      "replaced_by": [
+        "material_coverage"
+      ],
+      "applies_to": "B",
+      "doc": []
+    },
+    {
+      "name": "output_attempts_mean",
+      "group": "PROTECTION",
+      "unit": "count",
+      "higher_is_better": null,
+      "status": "ACTIVE",
+      "replaced_by": null,
+      "applies_to": "A",
+      "doc": []
+    }
+  ]
+}

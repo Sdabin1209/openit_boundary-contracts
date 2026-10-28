@@ -4,6 +4,8 @@
 
 > **D96의 기본값은 임시다.** 표시한 `[기본값]`은 학습 담당 확인 전에 헤드가 표준 관행으로 정한 것이며 담당자가 바꾸면 따른다. 기준값(임계치)은 정하지 않는다(O11). 값은 측정한 것이 없다.
 
+**정본은 `boundary_contracts/metrics.json`이다**(`boundary_contracts.metrics()`). 아래 표는 `tools/gen_metrics_md.py`가 거기서 생성하므로 표를 직접 고치지 않는다.
+
 ## 읽는 법
 - 모든 값은 `value`, 표본 수 `n`, 방향 `higher_is_better`, 부분집합 `slice`(kind/value)를 가진다. `n=0`이면 계산하지 못한 것이다.
 - `group=SAFETY`는 승인 보고서 맨 위에 따로 보인다. 현재 활성 릴리스와 같은 지표끼리 비교한다(`baseline`, `delta`). 나빠진 것은 `worse=true`로 표시만 한다.
@@ -14,6 +16,7 @@
 ## LORA_A 추출·절차 (ActionExtraction)
 (v1 절 제목: LORA_A 파서 (UtteranceParserOutput))
 
+<!-- BEGIN GENERATED metrics:A -->
 | name | group | 상태 | 뜻 |
 | --- | --- | --- | --- |
 | `value_precision`, `value_recall` | ACCURACY | 대체(v1 `item_precision/recall`) | `values[]`의 (`key`, `value`, `status`) 일치로 센 정밀도·재현율. 키만 맞은 경우는 맞은 것으로 세지 않는다 `[기본값]` |
@@ -27,12 +30,14 @@
 | `semantic_violation_rate` | ACCURACY | 신설(D97) | turn-engine `validate_extraction`이 위반을 하나 이상 낸 출력의 비율(낮을수록 좋음). 정답과 비교하지 않는다. 위반 코드별 비율은 `slice`(kind=`VIOLATION_CODE`, value=코드)로 낸다. **기준 시험**: 학습 데이터 A 출력 전수가 위반 0이어야 하며 0이 아니면 검증기나 데이터의 문제다. 평가가 turn-engine(순수 함수 라이브러리, 버전 고정)에 의존하는 것을 허용한다 |
 | `schema_valid_raw` | PROTECTION | 유지(뜻 좁힘) | 출력 보호 전 `ActionExtraction` 스키마 통과율. **제약 디코딩을 켠 값과 끈 값을 모두 보고한다**(`slice` kind=`CONSTRAINED_DECODING`, value=`on`/`off`) `[기본값]`. 켠 값은 100% 근처라 변별력이 낮다 |
 | `output_invalid_rate` | PROTECTION | 신설(D75) | 재시도 후에도 형식을 못 지켜 `OUTPUT_INVALID`가 된 비율(낮을수록 좋음). 보조로 재시도 횟수(`X-Openit-Attempts`) 분포는 `output_attempts_mean`(`unit=count`)으로 낸다. 서빙 쪽 지표이므로 평가 백엔드가 같은 경로를 쓰는지 `evaluation_backend`로 구분한다 |
+<!-- END GENERATED metrics:A -->
 
 **폐기(A)**: `risk_signal_recall`, `risk_signal_false_alarm`(v2 A 출력에 위험 신호 필드가 없다. 입력원이 정해지면(G01) 그 입력원 기준으로 신설. SAFETY 구성은 담당자가 다시 정한다), `intent_accuracy`(위 `action/reason/status/next_item_accuracy`로 대체), `item_precision`, `item_recall`, `target_accuracy`(위 대체 지표로), `protection_intervened`와 `fallback_rate`(A는 대체 출력을 쓰지 않는다. 대신 `output_invalid_rate`).
 
 ## LORA_B 응답 (ResponseText)
 (v1 절 제목: LORA_B 생성기 (ResponseGeneratorOutput))
 
+<!-- BEGIN GENERATED metrics:B -->
 | name | group | 상태 | 뜻 |
 | --- | --- | --- | --- |
 | `forbidden_expression_rate` | SAFETY | 유지 | 금지 표현(진단·처방·단정 등)을 쓴 비율(낮을수록 좋음). **금지 표현 목록이 없으면 `n=0`**으로 둔다(목록 소유자는 사용자 몫, D59) `[기본값]` |
@@ -42,14 +47,17 @@
 | `protection_intervened`, `fallback_rate` | PROTECTION | 유지 | `X-Openit-Outcome=fallback` 비율. action별 `slice`(kind=`ACTION`)를 권한다. 대체 문장 문구(G04)는 잠정(D93) |
 | `length_p95_ms` | ROBUSTNESS | 유지 | 응답 지연 95백분위(`unit=ms`, 낮을수록 좋음). **이름은 바꾸지 않는다**(이름 변경은 소비자를 깨뜨릴 수 있다, D96) `[기본값]` |
 | `response_length_chars_p95` | ROBUSTNESS | 신설(선택) | 응답 글자 수 95백분위(`unit=count`, 단위는 글자 수). 키오스크 음성 출력에 영향 |
+<!-- END GENERATED metrics:B -->
 
 **폐기(B)**: `risk_notice_verbatim_rate`(B가 안내 문장을 쓰지 않는다. 고정 문장은 서비스가 쓴다).
 
 ## 공통 보조 지표
+<!-- BEGIN GENERATED metrics:COMMON -->
 | name | group | 상태 | 뜻 |
 | --- | --- | --- | --- |
 | `coverage_seen_unseen_gap` | COVERAGE | 유지 | 본 문항과 보지 못한 문항의 정확도 차이 |
 | `regression_fixed`, `regression_broken` | REGRESSION | 유지(입력 형식 변경) | 수집된 실패 사례(검토 확정, `reviewed_input` 사용)의 회귀 평가에서 고쳐진/다시 틀린 건수. 회귀 평가가 읽는 TurnTrace 키는 `extract_input`, `extract_output`, `response_input`, `response_output`이다(D98, 문진 스키마 `TurnTrace`가 정본) |
+<!-- END GENERATED metrics:COMMON -->
 
 ## v1 지표 처분 요약
 v1의 `risk_signal_recall`, `risk_signal_false_alarm`, `intent_accuracy`, `item_precision`, `item_recall`, `target_accuracy`, `risk_notice_verbatim_rate`, `slot_coverage`는 **폐기 또는 대체**이며 새 보고서에 쓰지 않는다. 지표 이름은 자유 문자열이므로 v1 보고서는 그대로 읽힌다.

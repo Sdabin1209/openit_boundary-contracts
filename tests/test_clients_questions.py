@@ -1,6 +1,6 @@
 import unittest
 
-from _fixtures import READ, make_server
+from _fixtures import READ, example, make_server
 from boundary_contracts import BoundaryError
 from boundary_contracts.clients import HttpQuestionReader
 
@@ -22,7 +22,7 @@ class Questions(unittest.TestCase):
         self.assertEqual(bank["version"], 2)
         self.assertEqual(len(self.c.get_reviews(refs[1])), 1)
         self.assertIsNone(self.c.get_change(refs[0]))
-        self.assertEqual(self.c.get_change(refs[2])["pipeline_schema_version"], "2.0")
+        self.assertEqual(self.c.get_change(refs[2])["pipeline_schema_version"], example("ChangeClassification")["pipeline_schema_version"])
 
     def test_없으면_NOT_FOUND(self):
         with self.assertRaises(BoundaryError) as cm:

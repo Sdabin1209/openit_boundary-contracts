@@ -4,7 +4,7 @@ import threading
 import unittest
 
 from _fixtures import OTHER, READ, TOKENS, WRITE, make_server
-from boundary_contracts import BoundaryError, sdk
+from boundary_contracts import BoundaryError, PIPELINE_SCHEMA_VERSION, sdk
 from boundary_contracts.clients import (HttpFailureStore, HttpGateService, HttpModelRegistry, HttpQuestionReader,
                                         HttpReleaseReader, HttpTraceIngest)
 
@@ -12,6 +12,8 @@ PROTOCOLS = [(HttpQuestionReader, sdk.QuestionReader), (HttpModelRegistry, sdk.M
              (HttpReleaseReader, sdk.ReleaseReader), (HttpGateService, sdk.GateService),
              (HttpTraceIngest, sdk.TraceIngest), (HttpFailureStore, sdk.FailureStore)]
 SECRET = "fake-secret-token-9d1"
+MAJOR = int(PIPELINE_SCHEMA_VERSION.split(".")[0])
+NEXT_MINOR = "%d.%d" % (MAJOR, int(PIPELINE_SCHEMA_VERSION.split(".")[1]) + 1)  # 왜: 더 높은 MINOR를 상수에서 유도한다
 
 
 def free_port():
@@ -42,7 +44,7 @@ class Common(unittest.TestCase):
             self.assertNotIn("fake-wrong-token", str(e))
 
     def test_오류_코드_매핑(self):
-        body = lambda code: ('{"pipeline_schema_version":"2.0","code":"%s","message":"m","retryable":false}' % code).encode()
+        body = lambda code: ('{"pipeline_schema_version":"%s","code":"%s","message":"m","retryable":false}' % (PIPELINE_SCHEMA_VERSION, code)).encode()
         table = [(400, "INVALID_RECORD", "INVALID_RECORD"), (403, "PERMISSION_DENIED", "PERMISSION_DENIED"),
                  (401, "PERMISSION_DENIED", "PERMISSION_DENIED"), (404, "NOT_FOUND", "NOT_FOUND"),
                  (409, "CONFLICT", "CONFLICT"), (412, "FAILED_PRECONDITION", "FAILED_PRECONDITION"),
@@ -70,7 +72,7 @@ class Common(unittest.TestCase):
 
     def test_서버가_보낸_메시지의_토큰은_가린다(self):
         c = HttpQuestionReader(self.srv.url, SECRET)
-        body = ('{"pipeline_schema_version":"2.0","code":"PERMISSION_DENIED","message":"bad %s","retryable":false}' % SECRET).encode()
+        body = ('{"pipeline_schema_version":"%s","code":"PERMISSION_DENIED","message":"bad %s","retryable":false}' % (PIPELINE_SCHEMA_VERSION, SECRET)).encode()
         self.srv.overrides["/v1/question-sets"] = (403, "application/json", body)
         e = self.err(c.list_ids)
         self.assertNotIn(SECRET, str(e) + repr(e.details) + e.message)
@@ -154,7 +156,7 @@ class ReadMode(unittest.TestCase):
         self.rel["manifest"] = sealed(m)
 
     def test_MINOR가_높고_모르는_필드가_있어도_읽는다(self):
-        self.reseal(pipeline_schema_version="2.1", brand_new={"x": 1})
+        self.reseal(pipeline_schema_version=NEXT_MINOR, brand_new={"x": 1})
         r = self.c.get_release("rel-0001")
         self.assertEqual(r["brand_new"], {"x": 1})  # 보존
 
@@ -163,7 +165,7 @@ class ReadMode(unittest.TestCase):
         self.assertEqual(self.c.get_active_pointer()["cause"], "SOMETHING_NEW")
 
     def test_필수_누락과_타입_위반은_여전히_거부(self):
-        self.reseal(pipeline_schema_version="2.1")
+        self.reseal(pipeline_schema_version=NEXT_MINOR)
         m = dict(self.rel["manifest"]); m.pop("runtime_contract_version")
         self.rel["manifest"] = m
         self.assertEqual(self.err(self.c.get_release, "rel-0001"), "INTEGRITY_ERROR")
@@ -173,12 +175,12 @@ class ReadMode(unittest.TestCase):
         self.assertEqual(self.err(self.c.get_active_pointer), "INTEGRITY_ERROR")
 
     def test_MAJOR가_다르면_UNSUPPORTED_VERSION(self):
-        for ver in ("3.0", "1.3"):  # 높은 MAJOR와, 폐기된 v1(1.3.3) 레코드 모두
+        for ver in (f"{MAJOR + 1}.0", f"{MAJOR - 1}.3"):  # 높은 MAJOR와, 폐기된 v1(1.3.3) 레코드 모두
             self.reseal(pipeline_schema_version=ver)
             self.assertEqual(self.err(self.c.get_release, "rel-0001"), "UNSUPPORTED_VERSION", ver)
 
     def test_모르는_필드까지_포함해_content_hash를_검증한다(self):
-        self.reseal(pipeline_schema_version="2.1", brand_new="v")
+        self.reseal(pipeline_schema_version=NEXT_MINOR, brand_new="v")
         self.c.get_release("rel-0001")
         self.rel["manifest"]["brand_new"] = "tampered"
         self.assertEqual(self.err(self.c.get_release, "rel-0001"), "INTEGRITY_ERROR")
