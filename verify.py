@@ -69,6 +69,11 @@ neg("측정값에 표본 수 없음", "EvaluationReport", "EvaluationReport", la
 neg("평가 보고서에 임계치 키(스키마가 모르는 필드)는 쓰기에서 거부", "EvaluationReport", "EvaluationReport", lambda d: d["metrics"][0].update(threshold=0.9))
 neg("v1 역할 PARSER(DatasetManifest)", "DatasetManifest", "DatasetManifest", lambda d: d["files"][0].update(role="PARSER"))
 neg("v1 expected_kind GENERATOR(FailureCase)", "FailureCase", "FailureCase", lambda d: d.update(expected_kind="GENERATOR"))
+neg("재알림에 turn_id 없음", "StaffCallRetryRequest", "StaffCallRetryRequest", lambda d: d.pop("turn_id"))
+neg("재알림에 자유 문장 필드", "StaffCallRetryRequest", "StaffCallRetryRequest", lambda d: d.update(note="x"))
+neg("실패 기록의 outcome 값 위반", "StaffCallReport", "StaffCallReport", lambda d: d.update(outcome="MAYBE"))
+neg("재알림 응답에 retry_after_s 없음", "StaffCallRetryResult", "StaffCallRetryResult", lambda d: d.pop("retry_after_s"))
+neg("StaffAlert 전달 횟수가 음수", "StaffAlert", "StaffAlert", lambda d: d.update(delivery_attempts=-1))
 # v2 모델 입출력(ActionExtraction 계열, ResponseRequest, ResponseText)이 위반을 거부하는지. 같은 검사를 tests/test_v2_schemas.py가 한 번 더 한다.
 sys.path.insert(0, here)
 sys.path.insert(0, os.path.join(here, "tools")); from negatives_v2 import CASES as _V2

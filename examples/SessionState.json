@@ -1,5 +1,6 @@
 {
   "session_id": "kiosk-s1",
   "state": "PAUSED_RISK",
-  "resume_text": null
+  "resume_text": null,
+  "pause_reason": "REASK_LIMIT"
 }

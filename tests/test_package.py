@@ -10,7 +10,7 @@ class Package(unittest.TestCase):
         self.assertIn("ReleaseManifest.schema.json", names)
         self.assertIn("_common.schema.json", names)
         records = {n[: -len(".schema.json")] for n in names if not n.startswith("_")}
-        self.assertEqual(len(records), 28)  # 2.0.0: v1의 24개에서 ParserSample·GeneratorSample을 빼고 v2 6개를 더했다
+        self.assertEqual(len(records), 31)  # 2.0.0: v1의 24개에서 ParserSample·GeneratorSample을 빼고 v2 6개를 더했다
         self.assertFalse({"ParserSample", "GeneratorSample"} & records)
         self.assertTrue({"ActionExtractionInput", "ActionExtraction", "ActionExtractionSample", "ResponseRequest",
                          "ResponseText", "ResponseSample"} <= records)
@@ -27,7 +27,7 @@ class Package(unittest.TestCase):
         self.assertTrue(list(validator("ReleaseManifest").iter_errors(rec)))
 
     def test_버전_상수(self):
-        self.assertEqual(PIPELINE_SCHEMA_VERSION, "2.0")
+        self.assertEqual(PIPELINE_SCHEMA_VERSION, "2.1")
 
     def test_패키지_버전은_계약_버전과_MAJOR_MINOR가_같다(self):
         import re

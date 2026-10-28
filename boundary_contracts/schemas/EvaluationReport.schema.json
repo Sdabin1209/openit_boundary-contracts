@@ -113,7 +113,7 @@
           },
           "slice": {
             "title": "MetricSlice",
-            "description": "지표를 계산한 부분집합. kind는 ALL, QUESTION_SET, SEEN_UNSEEN, INTENT, QUESTION_TYPE, UNIT, RANGE, NOISE, SCENARIO 등이고 값은 문자열이다. 모르는 kind는 그대로 보여 주기만 한다.",
+            "description": "지표를 계산한 부분집합. kind는 ALL, QUESTION_SET, SEEN_UNSEEN, ACTION, REASON, QUESTION_TYPE, UNIT, RANGE, NOISE, SCENARIO 등이고(INTENT는 v1 전용, METRICS.md v2) 열거가 아니라 자유 문자열이며 값은 문자열이다. 모르는 kind는 그대로 보여 주기만 한다.",
             "type": "object",
             "additionalProperties": false,
             "required": [

@@ -55,6 +55,8 @@ list_versions(dataset_id: str) -> list[str]            # 오래된 것부터
 open_file(dataset_id: str, version: str, path: str) -> BinaryIO   # 해시 검증은 manifest의 content_hash로
 ```
 
+2.1.0부터 HTTP 면이 있다: `HTTP.md` `## I2`(D100). 원격 클라이언트는 `HttpDatasetStore`이고, `download(dataset_id, version, dest)`로 파일 묶음을 한 번에 받는다(Protocol 밖).
+
 ## I3. ModelRegistry (model-lab)
 
 ```

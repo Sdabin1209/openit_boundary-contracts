@@ -50,6 +50,43 @@
         "null"
       ],
       "format": "date-time"
+    },
+    "pause_reason": {
+      "enum": [
+        "RISK",
+        "REASK_LIMIT",
+        "OTHER",
+        null
+      ],
+      "description": "정지 사유(2.1.0, CR-H002). 읽는 쪽은 모르는 값을 OTHER로 취급한다. 없으면(옛 서버) 미상."
+    },
+    "delivery_attempts": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "전달을 시도한 횟수(첫 전달 포함, 재알림마다 1 증가, 2.1.0, CR-H001)"
+    },
+    "last_delivery_status": {
+      "enum": [
+        "DELIVERED",
+        "DELIVERY_FAILED",
+        null
+      ],
+      "description": "가장 최근 전달 시도의 결과(2.1.0)"
+    },
+    "manual_notice_outcome": {
+      "enum": [
+        "STAFF_NOTIFIED_MANUALLY",
+        "NOT_NOTIFIED",
+        null
+      ],
+      "description": "키오스크가 보고한, 현장 직원에게 직접 알렸는지(2.1.0). 보고 전에는 null 또는 생략"
+    },
+    "manual_notice_reported_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
     }
   }
 }

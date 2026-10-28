@@ -97,3 +97,32 @@
 
 ## F. 키오스크 기기 인증
 - 키오스크 앱은 기기별 토큰을 `Authorization: Bearer`로 보낸다(기기 토큰은 URL 쿼리에 두지 않는다. 시작 때 URL 조각(`#`)이나 기기 설정으로 한 번 받아 메모리에만 둔다). 게이트웨이는 기기 토큰 목록(비밀 파일, 기기마다 파일 하나, 파일을 지우면 폐기)과 대조해 통과시키고 **서비스에는 받은 기기 토큰을 그대로 전달한다**(D88 U8, `Authorization`을 바꾸지 않는다). 서비스는 같은 기기 토큰 표로 다시 검증하고 세션을 만든 기기 토큰만 그 세션에 접근하게 한다(다른 기기는 404). 공유 서비스 토큰은 하위 호환 경로로만 남고 서비스 `/readyz`의 `shared_kiosk_token`으로 경고한다. 게이트웨이에 닿는 누구나 호출할 수 있는 상태를 없앤다. 병원 내부망 제한은 배포 설정으로 병행한다.
+
+---
+
+# 2.1.0 추가 (D93~D103, CR-H001·CR-H002 채택) — 모두 추가형이다
+
+기존 요청·응답의 의미는 바뀌지 않는다. 새 필드는 optional이고 새 경로만 더한다. 모르는 필드를 무시하는 읽기 규칙(CONVENTIONS 1절)을 따르는 기존 클라이언트는 깨지지 않는다. 근거와 대안은 `docs/adr/0010`, `0011`.
+
+## G. 직원 호출 재알림과 실패 기록 (CR-H001)
+`TurnFailureSignal.staff_alert`가 `DELIVERY_FAILED`이면 키오스크는 현장 직원 호출 화면을 보여 주면서 아래 두 호출을 쓸 수 있다. 역할은 키오스크이고 **그 세션을 만든 기기 토큰만** 호출할 수 있다(다른 기기는 404, 직원 토큰은 403, F절). 두 호출 모두 환자 발화나 자유 문장을 받지 않는다.
+
+| 목적 | 요청 | 응답 |
+| --- | --- | --- |
+| 재알림 | `POST /v1/sessions/{session_id}/staff-call/retry` 본문 `StaffCallRetryRequest` `{"turn_id"}` | 200 `StaffCallRetryResult` `{"alert_id","staff_alert":"DELIVERED"\|"DELIVERY_FAILED","delivery_attempts":n,"retry_after_s":s}` |
+| 실패 기록 | `POST /v1/sessions/{session_id}/staff-call/report` 본문 `StaffCallReport` `{"outcome":"STAFF_NOTIFIED_MANUALLY"\|"NOT_NOTIFIED","turn_id"}` | 200 `StaffAlert`(`manual_notice_outcome`, `manual_notice_reported_at`이 채워짐) |
+
+- **재알림**은 그 세션의 `OPEN` 알림을 **새로 만들지 않고 같은 `alert_id`로** 구독자(SSE `alert` 이벤트, 웹 푸시)에게 다시 보낸다. 직원 콘솔은 같은 `alert_id`의 `alert` 이벤트를 중복으로 보고 합쳐야 한다(새 이벤트 이름을 만들지 않는다: 모르는 콘솔은 무시하므로 목적을 못 이룬다). `OPEN` 알림이 없으면 409(`CONFLICT`, `details.reason: NO_OPEN_ALERT`). 이미 `RESOLVED`인 알림은 다시 보내지 않는다.
+- **호출 간격 하한**: `retry_after_s`초 안의 재요청은 429(`UNAVAILABLE`, `Retry-After` 헤더). 키오스크는 이 값만큼 버튼을 비활성화한다. **간격과 횟수 상한의 값은 계약이 아니라 서비스 설정이다.** 계약의 기본 권고는 간격 30초, 세션당 상한 10회(상한 초과도 429 `details.reason: RETRY_LIMIT`)이며 **측정하지 않은 자리 표시값**이다(근거: 현장 흐름 자료 없음, ADR 0010). 서비스는 값을 영역 ADR에 근거와 함께 적는다(D89).
+- **멱등**: 같은 `turn_id`의 재전송은 같은 응답을 주고 시도 횟수를 늘리지 않는다. 같은 `turn_id`에 다른 `outcome`은 409.
+- **실패 기록**은 알림에 `manual_notice_outcome`/`manual_notice_reported_at`을 남기고 접근 기록(감사)에도 남긴다. 세션은 직원이 개입 결정으로 풀 때까지 그대로 `PAUSED_RISK`다. `NOT_NOTIFIED` 뒤 키오스크 화면 동작(재알림 계속 여부, 환자 안내 문구)은 계약이 아니라 kiosk-frontend와 현장 판단이다(임상 확인 필요, 미정).
+- **`StaffAlert`에 optional 필드**: `delivery_attempts`(첫 전달 포함 시도 횟수), `last_delivery_status`(`DELIVERED`/`DELIVERY_FAILED`), `manual_notice_outcome`, `manual_notice_reported_at`. 직원 콘솔은 전달 실패 알림을 눈에 띄게 보일 수 있다.
+- **호환**: 새 키오스크 + 옛 서버는 두 경로가 404/405이므로 키오스크는 기능 감지로 현재 동작("직접 알리셨나요?" 화면만)으로 물러난다. 옛 키오스크 + 새 서버는 새 경로를 쓰지 않을 뿐이다. 배포 순서는 survey-service 먼저, 키오스크 나중.
+- 키오스크가 알림 목록 읽기나 직원 확인(ack)을 쓰는 것은 이번 범위가 아니다(후속 후보).
+
+## H. 정지 사유 `pause_reason` (CR-H002)
+- 값: `RISK`(위험 신호로 정지), `REASK_LIMIT`(되묻기 한도 N 초과로 정지, D95), `OTHER`(그 밖). **읽는 쪽은 모르는 값과 값이 없는 경우를 `OTHER`/미상으로 취급한다**(열거 확장 대비).
+- 붙는 곳(모두 optional): `SessionState`(`GET /v1/sessions/{id}/state`, `state=PAUSED_RISK`일 때만 의미가 있고 그 밖의 상태에서는 null/생략), `StaffAlert`, 직원 세션 조회 `StaffSessionView`, 그리고 `TurnFailureSignal`.
+- `TurnFailureSignal`과 `StaffSessionView`는 문진 스키마(`../survey-service/schema`, survey-service 소유)에 있으므로 **이 리포가 고치지 않는다.** 이 문서가 정한 필드 이름·열거 값(`pause_reason`: `RISK|REASK_LIMIT|OTHER`, optional)을 survey-service가 자기 스키마에 반영한다(D21). `SessionState`·`StaffAlert`는 이 리포 스키마다.
+- 상태 이름 `PAUSED_RISK`는 바꾸지 않는다(MAJOR가 되고 `SessionResult.status` 소비자가 깨진다). `SessionResult.status` 규약도 그대로다.
+- 새 클라이언트 + 옛 서버는 필드가 없으므로 미상으로 폴백한다.
