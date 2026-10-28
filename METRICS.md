@@ -41,7 +41,7 @@
 | `schema_valid_raw` | PROTECTION | 유지(뜻 변경) | B 출력은 JSON이 아니므로 "문자열이고 길이·형식 조건을 통과"한 비율 |
 | `protection_intervened`, `fallback_rate` | PROTECTION | 유지 | `X-Openit-Outcome=fallback` 비율. action별 `slice`(kind=`ACTION`)를 권한다. 대체 문장 문구(G04)는 잠정(D93) |
 | `length_p95_ms` | ROBUSTNESS | 유지 | 응답 지연 95백분위(`unit=ms`, 낮을수록 좋음). **이름은 바꾸지 않는다**(이름 변경은 소비자를 깨뜨릴 수 있다, D96) `[기본값]` |
-| `response_length_chars_p95` | ROBUSTNESS | 신설(선택) | 응답 글자 수 95백분위(`unit=chars`). 키오스크 음성 출력에 영향 |
+| `response_length_chars_p95` | ROBUSTNESS | 신설(선택) | 응답 글자 수 95백분위(`unit=count`, 단위는 글자 수). 키오스크 음성 출력에 영향 |
 
 **폐기(B)**: `risk_notice_verbatim_rate`(B가 안내 문장을 쓰지 않는다. 고정 문장은 서비스가 쓴다).
 

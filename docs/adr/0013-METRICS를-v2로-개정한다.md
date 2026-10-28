@@ -18,6 +18,7 @@ v1 지표(`risk_signal_*`, `intent_accuracy` 등)는 v2 출력(`ActionExtraction
 - 분류 평가의 표준 정의(정밀도·재현율은 예측 단위의 정확 일치로 센다)를 따른다. 키만 맞는 경우를 맞다고 세면 오답을 놓친다.
 - 의미 위반율은 운영 실패율과 같은 규칙(같은 검증기 `validate_extraction`)으로 재야 지표의 타당성이 선다(D97). turn-engine은 순수 함수 라이브러리이고 model-lab이 이미 계보 기록용으로 의존한다. 기준 시험(학습 데이터 A 출력 전수 위반 0)이 지표와 검증기 중 어느 쪽 결함인지 가른다.
 - 지표 이름은 자유 문자열이라 계약이 깨지지 않는다. `length_p95_ms`처럼 이름이 어색해도 바꾸지 않는다(소비자 보호).
+- `response_length_chars_p95`의 `unit`은 `count`(글자 수)다: `EvaluationReport`의 unit 열거(ratio/count/ms/score)에 `chars`가 없어 검증이 실패하므로, 스키마를 넓히지 않고(MINOR라도 열거 확장은 소비자 영향) 기존 값으로 맞췄다. 이름의 `chars`가 단위를 말한다.
 - 측정하지 않았다: 어떤 지표의 값도, 임계치도 이 리포는 정하지 않는다.
 
 ## 검토한 대안과 버리는 이유
