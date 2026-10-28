@@ -70,15 +70,15 @@ pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@v2
 
 | 명령 | 이 세션 |
 | --- | --- |
-| `python3 verify.py` | 돌림. OK 110줄(옆 폴더 `../survey-service/schema`가 없는 새 clone에서는 TraceEnvelope.trace 검증을 건너뛰어 109줄), 실패 0(출력 중 'FAIL' 글자는 시험 이름 "FAIL 검사 포함"에 들어 있는 것). 시스템 파이썬과, 새 clone + 새 venv(jsonschema만 설치) 두 곳 |
-| `python3 -m unittest discover -s tests` | 돌림. `Ran 133 tests ... OK`. 같은 두 환경 |
+| `python3 verify.py` | 돌림. OK 112줄(옆 폴더 `../survey-service/schema`가 없는 새 clone에서는 TraceEnvelope.trace 검증을 건너뛰어 111줄), 실패 0(출력 중 'FAIL' 글자는 시험 이름 "FAIL 검사 포함"에 들어 있는 것). 시스템 파이썬과, 새 clone + 새 venv(jsonschema만 설치) 두 곳 |
+| `python3 -m unittest discover -s tests` | 돌림. `Ran 134 tests ... OK`. 같은 두 환경 |
 | venv 생성, `pip install -e .`, 태그 설치 | 안 돌림 |
 | 이미지 빌드, E2E | 해당 없음 / 안 돌림 |
 
 ## 4. 현재 상태
 확인한 것(이 세션에서 직접):
 - 패키지 버전 2.1.0(`pyproject.toml`), 태그 v1.3.3, v2.0.0-rc1, v2.0.0, v2.0.1, v2.0.2, v2.1.0이 로컬에 있다(`git tag`). v2.1.0은 push 전이며 헤드가 검증 뒤 push한다.
-- `schemas/`에 스키마 31개 + `_common`. `verify.py` 110 OK, unittest 133 통과(위 표).
+- `schemas/`에 스키마 31개 + `_common`. `verify.py` 112 OK, unittest 134 통과(위 표).
 - 2.0.1은 `ActionExtraction`의 `properties`를 사전순으로 고쳤다(제약 디코딩이 순서대로 키를 내기 때문). 2.0.2는 `read_secret` 추가. 2.1.0은 직원 호출 재알림·실패 기록(CR-H001), `pause_reason`(CR-H002), METRICS v2, I2 HTTP를 더했다(`CHANGELOG.md`).
 - 헤드 STATUS는 이 패키지 `v2.0.2`를 v0.7.0 열차의 일부로 기록한다(2.1.0 반영은 헤드)(`../head/docs/STATUS.md` 10행).
 확인하지 못한 것:

@@ -5,7 +5,7 @@ here = os.path.dirname(os.path.abspath(__file__)); base = "file://" + here + "/s
 common = json.load(open(here + "/schemas/_common.schema.json"))
 def val(name):
     s = json.load(open(f"{here}/schemas/{name}.schema.json")); jsonschema.Draft202012Validator.check_schema(s)
-    return jsonschema.Draft202012Validator(s, resolver=jsonschema.RefResolver(base, s, store={base + "_common.schema.json": common, base + "ActivePointer.schema.json": json.load(open(here + "/schemas/ActivePointer.schema.json"))}))
+    return jsonschema.Draft202012Validator(s, resolver=jsonschema.RefResolver(base, s, store={base + os.path.basename(q): json.load(open(q)) for q in glob.glob(here + "/schemas/*.schema.json")}))
 def ex(name): return json.load(open(f"{here}/examples/{name}.json"))
 bad = 0
 names = sorted(os.path.basename(p)[:-12] for p in glob.glob(here + "/schemas/*.schema.json") if not os.path.basename(p).startswith("_"))
@@ -73,6 +73,8 @@ neg("재알림에 turn_id 없음", "StaffCallRetryRequest", "StaffCallRetryReque
 neg("재알림에 자유 문장 필드", "StaffCallRetryRequest", "StaffCallRetryRequest", lambda d: d.update(note="x"))
 neg("실패 기록의 outcome 값 위반", "StaffCallReport", "StaffCallReport", lambda d: d.update(outcome="MAYBE"))
 neg("재알림 응답에 retry_after_s 없음", "StaffCallRetryResult", "StaffCallRetryResult", lambda d: d.pop("retry_after_s"))
+neg("StaffAlertPage 항목의 새 필드도 열거를 지킨다", "StaffAlertPage", "StaffAlertPage", lambda d: d["items"][1].update(manual_notice_outcome="MAYBE"))
+neg("StaffAlertPage 항목의 모르는 필드는 쓰기에서 거부", "StaffAlertPage", "StaffAlertPage", lambda d: d["items"][0].update(extra=1))
 neg("StaffAlert 전달 횟수가 음수", "StaffAlert", "StaffAlert", lambda d: d.update(delivery_attempts=-1))
 # v2 모델 입출력(ActionExtraction 계열, ResponseRequest, ResponseText)이 위반을 거부하는지. 같은 검사를 tests/test_v2_schemas.py가 한 번 더 한다.
 sys.path.insert(0, here)

@@ -11,7 +11,8 @@
 - **METRICS.md v2(D96·D97·D98)**: v1 지표 폐기·대체 표시, `value_precision/recall`, `action/reason/status/next_item_accuracy`, `output_invalid_rate`, `ungrounded_number_rate`(평가 지표), `material_coverage`, `semantic_violation_rate`, slice 기준 `ACTION`·`REASON`. `EvaluationReport`의 slice `kind`는 자유 문자열이라 스키마 설명 문구만 갱신. ADR 0013.
 - **I2 DatasetStore HTTP(D100)**: `HTTP.md ## I2`, 클라이언트 `HttpDatasetStore`(게시·조회·파일 묶음), 참조 서버. ADR 0012.
 - 클라이언트: 429를 `UNAVAILABLE`로 매핑(`Retry-After` 규약, 전에는 상태 불명 `UNAVAILABLE`로 `details.status`만 남았다). 읽기 모드가 null을 허용하는 열거(`pause_reason` 등)의 모르는 값도 받아들인다.
-- 시험: unittest 110 -> 133, `verify.py` OK 102 -> 110.
+- 결함 정정(같은 2.1.0): `StaffAlertPage.items`가 `StaffAlert`를 인라인 복제해 새 필드를 거부하던 것을 `$ref`로 바꿨다. 다른 스키마에 StaffAlert·SessionState 인라인 복제는 없고, SSE 이벤트 봉투 스키마는 없다(data는 StaffAlert). `verify.py`의 스키마 저장소를 전체 스키마로 넓혔다. 참조 서버에 `GET /v1/staff/alerts`를 추가했다.
+- 시험: unittest 110 -> 134, `verify.py` OK 102 -> 112.
 
 ## v2.0.2 이후 v2.1.0 이전의 문서 정정 (v2.1.0에 포함됨) (v2.0.2 태그 이후, 미태그, 문서만)
 

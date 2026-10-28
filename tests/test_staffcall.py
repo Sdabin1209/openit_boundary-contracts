@@ -81,6 +81,21 @@ class StaffCall(unittest.TestCase):
         self.srv.alerts["s1"]["pause_reason"] = "SOMETHING_NEW"
         self.assertEqual(self.c.report("s1", "NOT_NOTIFIED", "r9")["pause_reason"], "SOMETHING_NEW")
 
+    def test_목록_응답과_이벤트_본문이_새_필드를_담아도_스키마를_통과한다(self):
+        # 2.1.0 결함 재발 방지: StaffAlertPage가 StaffAlert를 인라인 복제해 새 필드를 거부했다
+        import json
+        import urllib.request
+        self.c.retry("s1", "t1")
+        self.c.report("s1", "NOT_NOTIFIED", "r1")
+        req = urllib.request.Request(self.srv.url + "/v1/staff/alerts?status=OPEN", headers={"Authorization": "Bearer " + STAFF})
+        page = json.loads(urllib.request.urlopen(req).read())
+        self.assertEqual(list(validator("StaffAlertPage").iter_errors(page)), [])
+        item = page["items"][0]
+        self.assertEqual((item["pause_reason"], item["delivery_attempts"], item["manual_notice_outcome"]), ("RISK", 2, "NOT_NOTIFIED"))
+        self.assertEqual(list(validator("StaffAlert").iter_errors(item)), [])  # SSE alert 이벤트의 data는 StaffAlert JSON이다
+        for k in ("pause_reason", "delivery_attempts", "last_delivery_status", "manual_notice_outcome", "manual_notice_reported_at"):
+            self.assertIn(k, item)
+
     def test_JSON_본문이_아니면_400(self):
         self.assertEqual(self.err(self.c._json, "POST", "/v1/sessions/s1/staff-call/report", None, [1]).code, "INVALID_RECORD")
 

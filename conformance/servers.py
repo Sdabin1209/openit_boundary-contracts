@@ -539,6 +539,11 @@ class StaffCallReferenceServer(ReferenceServer):
 
     def _route(self, method, path, q, body, role):
         from boundary_contracts import validator
+        if path == "/v1/staff/alerts" and method == "GET":  # 직원 콘솔 목록(StaffAlertPage). 최신부터
+            if role != "staff":
+                raise BoundaryError("PERMISSION_DENIED", "직원 토큰만 볼 수 있다")
+            items = [a for a in reversed(list(self.alerts.values())) if "status" not in q or a["status"] == q["status"]]
+            return self._page(items, q)
         g = re.fullmatch(r"/v1/sessions/([^/]+)/staff-call/(retry|report)", path)
         if not g or method != "POST":
             raise BoundaryError("NOT_FOUND", "경로가 없다")
