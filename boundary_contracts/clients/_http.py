@@ -22,6 +22,7 @@ from ..schemas_api import PIPELINE_SCHEMA_VERSION, schema_dir, validator
 
 _STATUS_CODE = {400: "INVALID_RECORD", 401: "PERMISSION_DENIED", 403: "PERMISSION_DENIED", 404: "NOT_FOUND",
                 409: "CONFLICT", 412: "FAILED_PRECONDITION", 429: "UNAVAILABLE", 503: "UNAVAILABLE"}
+_TRANSPORT_LIMIT = (413, 414, 431)   # RFC 9110 15.5.14·15.5.15, RFC 6585 5
 _ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]*$")
 _HASH = re.compile(r"^sha256:[0-9a-f]{64}$")
 _MAX_ERROR_BODY = 64 * 1024
@@ -229,6 +230,10 @@ class HttpClientBase:
             e.close()
         if status >= 500 and status != 503:
             return self._unavailable(f"서버 오류 {status}", status=status)
+        if status in _TRANSPORT_LIMIT:
+            # 전송 계층 한도(본문·요청 줄·헤더가 너무 큼)는 HTTP 서버가 앱을 부르기 전에 낸다(waitress 등, 본문이 BoundaryError가 아닐 수 있다).
+            # 같은 요청을 다시 보내도 같으므로 재시도하지 않는다(CONVENTIONS 9절, 2.2.2).
+            return BoundaryError("INVALID_RECORD", f"요청이 서버의 전송 한도를 넘었다({status})", {"http_status": status})
         try:
             body = json.loads(raw)
             ok = isinstance(body, dict) and body.get("code") in CODES and isinstance(body.get("message"), str)

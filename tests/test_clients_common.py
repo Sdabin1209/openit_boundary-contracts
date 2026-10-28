@@ -192,3 +192,15 @@ class ReadMode(unittest.TestCase):
         self.assertEqual(self.err(HttpGateService(self.srv.url, WRITE).request_rollback, req), "INVALID_RECORD")
         env = dict(example("TraceEnvelope"), surprise=1)
         self.assertEqual(self.err(HttpTraceIngest(self.srv.url, WRITE).send, env), "INVALID_RECORD")
+
+
+class TransportLimitTest(unittest.TestCase):
+    """CONVENTIONS 9절(2.2.2): 413/414/431은 본문이 BoundaryError가 아니어도 INVALID_RECORD(재시도 안 함)."""
+    def test_전송_한도_응답은_INVALID_RECORD(self):
+        import io, urllib.error
+        from boundary_contracts.clients._http import HttpClientBase as _B
+        for st in (413, 414, 431):
+            e = urllib.error.HTTPError("http://x/", st, "x", {}, io.BytesIO(b"Request Entity Too Large"))
+            err = _B._map_error(object.__new__(_B), e)
+            self.assertEqual(err.code, "INVALID_RECORD", st)
+            self.assertFalse(err.retryable, st)

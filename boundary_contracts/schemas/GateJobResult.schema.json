@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "GateJobResult.schema.json",
   "title": "GateJobResult",
-  "description": "run-once 잡이 표준 출력에 내는 JSON 한 줄과 종료 코드의 약속. release-gate가 내고 deploy 스케줄러가 읽는다. 종료 코드: 0 = status ok, 75 = 재시도 가능(UNAVAILABLE, status deferred 또는 failed+retryable), 1 = 그 밖의 실패(partial 포함, 인증 실패 등 재시도로 풀리지 않는 것). 설정 오류(SystemExit)와 예기치 못한 예외도 stdout에 JSON 한 줄(status \"failed\" + 오류 코드)로 낸다(헤드 결정 2026-10-29), 종료 코드는 위 표 그대로 1이다. 그 두 경우의 구체적 code 대응은 구현 단계에서 정한다(이 스키마는 BoundaryError 코드 전체를 허용한다). 쓰는 쪽은 닫힌 형식으로 내고 읽는 쪽(스케줄러)은 모르는 키를 무시한다.",
+  "description": "run-once 잡이 표준 출력에 내는 JSON 한 줄과 종료 코드의 약속. release-gate가 내고 deploy 스케줄러가 읽는다. 종료 코드: 0 = status ok, 75 = 재시도 가능(UNAVAILABLE, status deferred 또는 failed+retryable), 1 = 그 밖의 실패(partial 포함, 인증 실패 등 재시도로 풀리지 않는 것). 설정 오류(SystemExit)와 예기치 못한 예외도 stdout에 JSON 한 줄(status \"failed\" + 오류 코드)로 낸다(헤드 결정 2026-10-29). 설정 오류는 code INVALID_RECORD, 종료 코드 1(재시도로 풀리지 않음). 예기치 못한 예외는 code UNAVAILABLE, 종료 코드 75(재시도 가능, D105). 쓰는 쪽은 닫힌 형식으로 내고 읽는 쪽(스케줄러)은 모르는 키를 무시한다.",
   "type": "object",
   "required": [
     "job",

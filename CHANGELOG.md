@@ -2,6 +2,10 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.2.2 (PATCH, 와이어 스키마 변경 없음, `PIPELINE_SCHEMA_VERSION` "2.2" 그대로)
+- 고침: `boundary_contracts.clients`가 전송 계층 한도 응답(413·414·431)을 본문과 무관하게 `INVALID_RECORD`(재시도 안 함, `details.http_status`)로 읽는다. 2.2.1까지는 예상 밖 상태로 보고 `UNAVAILABLE`(재시도)로 바꿔, 너무 큰 본문을 다시 보낼 수 있었다(waitress 교체 중 synthetic-data 보고, 2026-10-29). CONVENTIONS 9절에 규칙 추가.
+- 문서: `GateJobResult` 설명의 종료 코드 문장을 표와 맞췄다(설정 오류 1, 예기치 못한 예외 75; OPEN_GAPS U27).
+
 ## 2.2.1 (PATCH, 와이어 스키마 변경 없음, `PIPELINE_SCHEMA_VERSION` "2.2" 그대로)
 - 고침: `HttpModelRuntime.extract(release_id, request, flow=None)`. 2.2.0은 I9 문서가 정한 `ExtractRequest{input, flow}`를 클라이언트가 보낼 수 없었다(보내기 전 검증이 `ActionExtractionInput`만 허용). flow를 주면 `ExtractRequest`로 검증해 보낸다(survey-service 보고, 2026-10-29).
 - 기준 구현 `RuntimeReferenceServer`가 두 본문을 모두 받고, flow가 있으면 `check_action_extraction` 위반 출력을 503 OUTPUT_INVALID로 낸다(HTTP.md I9 규칙 보증).
