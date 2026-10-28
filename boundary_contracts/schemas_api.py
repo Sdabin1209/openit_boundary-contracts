@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-PIPELINE_SCHEMA_VERSION = "2.1"
+PIPELINE_SCHEMA_VERSION = "2.2"
 
 
 def schema_dir() -> Path:

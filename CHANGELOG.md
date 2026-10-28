@@ -2,6 +2,14 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.2.0 (MINOR, 추가형. `PIPELINE_SCHEMA_VERSION` "2.2". 클라이언트는 MAJOR만 비교하므로 2.1 레코드와 섞여도 동작한다)
+- **추가 스키마(D107):** 영역 경계 스키마 49개(admin-console, deploy, kiosk-frontend, model-lab, model-runtime, ops-feedback, question-authoring, release-gate, survey-service, synthetic-data). 예시는 `examples/`(통과)와 `conformance/examples_invalid/`(거부), 출처 매니페스트는 `conformance/promoted/`. 이 예시는 각 영역이 낸 값이며 이웃이 실제로 그 모양을 읽는지는 확인하지 않았다.
+- **LoRA-A 출력 의미 규칙(ADR 0010, D104):** 규칙 명세 데이터 `boundary_contracts/data/action_extraction_rules.json`(스키마 `ActionExtractionRules`)과 기준 검사기 `boundary_contracts.action_rules.check_action_extraction(input, output, flow)`.
+- **I9 extract 요청 확장(D108):** `ExtractRequest{input, flow}`, `QuestionFlowTable`. 2.x는 옛 본문(`ActionExtractionInput`)도 받으며 flow가 있을 때만 서버가 규칙을 보증한다. 3.0.0에서 `ExtractRequest`만 남는다.
+- **`ImageLabels`(D108):** 필수 4개(service, revision hex, contracts.boundary, contracts.survey-schema), turn-engine·model-runtime·langgraph 선택, 값 없음은 `n/a`, 버전은 `v` 접두사.
+- **동작 변경(D106 문서의 구현):** `directory_hash`가 심볼릭 링크를 `INTEGRITY_ERROR`로 거부한다(CONVENTIONS 8절). 401/403 규칙, 서버 발급 세션 ID, 푸시 해지 본문 방식, 모델 호출 시간 예산 배분은 2.2.0 문서로 확정한다.
+- 바뀌지 않은 것: 기존 31개 스키마의 와이어 모양.
+
 ## 2.1.1 (PATCH, 와이어 스키마 변경 없음, `PIPELINE_SCHEMA_VERSION`은 "2.1" 그대로)
 - 추가(데이터·도구·문서): `boundary_contracts/metrics.json`과 `metrics()`/`metric_name_problems()`, `HttpPublicApi`와 `PublicApiReferenceServer`, `conformance` 패키지를 설치본에 포함(이웃 영역이 참조 서버를 가져다 쓴다), `HTTP.md` I8·I10 절, `PUBLIC_API.md` G절 동작 의미, `CONVENTIONS.md`의 `/readyz` 총 2초와 시간 상한 사슬, 예시의 폐기 지표 교체.
 
