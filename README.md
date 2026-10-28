@@ -70,7 +70,7 @@ pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@v2
 
 | 명령 | 이 세션 |
 | --- | --- |
-| `python3 verify.py` | 돌림. OK 110줄, 실패 0(출력 중 'FAIL' 글자는 시험 이름 "FAIL 검사 포함"에 들어 있는 것). 시스템 파이썬과, 새 clone + 새 venv(jsonschema만 설치) 두 곳 |
+| `python3 verify.py` | 돌림. OK 110줄(옆 폴더 `../survey-service/schema`가 없는 새 clone에서는 TraceEnvelope.trace 검증을 건너뛰어 109줄), 실패 0(출력 중 'FAIL' 글자는 시험 이름 "FAIL 검사 포함"에 들어 있는 것). 시스템 파이썬과, 새 clone + 새 venv(jsonschema만 설치) 두 곳 |
 | `python3 -m unittest discover -s tests` | 돌림. `Ran 133 tests ... OK`. 같은 두 환경 |
 | venv 생성, `pip install -e .`, 태그 설치 | 안 돌림 |
 | 이미지 빌드, E2E | 해당 없음 / 안 돌림 |
