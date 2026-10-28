@@ -21,7 +21,7 @@
 | I7 FailureStore | ops-feedback | synthetic-data, model-lab, question-authoring | `## I7` |
 | I8 출력 검증(2.0.0에서 대체) | turn-engine | survey-service | 라이브러리, HTTP 없음 |
 | I9 model-runtime 추론 | model-runtime | survey-service, model-lab, release-gate | `## I9` |
-| I10 공개 API | survey-service | Frontend(미정) | `PUBLIC_API.md` |
+| I10 공개 API | survey-service | kiosk-frontend(환자 화면, 직원 콘솔) | `PUBLIC_API.md`, `HTTP.md ## I10` |
 
 이 영역 자체의 입력은 헤드의 변경 결정이고, 출력은 태그가 붙은 패키지(`v2.1.0`이 최신 태그, 로컬. 원격 push는 헤드가 검증 뒤 한다)다. 다른 영역은 이 패키지를 태그로 설치한다.
 

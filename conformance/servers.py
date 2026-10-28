@@ -26,7 +26,8 @@ NOW = "2026-10-15T00:00:00Z"
 
 def _example(name: str) -> dict:
     import os
-    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # 왜: 설치된 패키지에서도 읽히도록 conformance/examples(리포지토리 examples/의 심볼릭 링크)를 먼저 본다
+    here = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(here, "examples", name + ".json"), encoding="utf-8") as f:
         return json.load(f)
 
@@ -576,12 +577,145 @@ class StaffCallReferenceServer(ReferenceServer):
         over = alert["delivery_attempts"] - 1 >= self.max_retries
         if over or wait > 0:
             n = self.retry_after_s if over else int(wait) + 1
-            err = BoundaryError("UNAVAILABLE", "재알림이 너무 잦다", {"reason": "RETRY_LIMIT" if over else "TOO_SOON", "retry_after_s": n})
-            return 429, "application/json", json.dumps(err.to_record(V)).encode(), {"Retry-After": str(n)}
+            err = BoundaryError("UNAVAILABLE", "재알림이 너무 잦다", {"reason": "RETRY_LIMIT" if over else "INTERVAL", "retry_after_s": n})
+            # PUBLIC_API.md G절: 상한 초과는 기다려도 풀리지 않으므로 Retry-After를 붙이지 않는다
+            return 429, "application/json", json.dumps(err.to_record(V)).encode(), ({} if over else {"Retry-After": str(n)})
         self._last[sid] = now
         alert["delivery_attempts"] += 1
         alert["last_delivery_status"] = self.deliver_fn()
         resp = {"alert_id": alert["alert_id"], "staff_alert": alert["last_delivery_status"],
                 "delivery_attempts": alert["delivery_attempts"], "retry_after_s": self.retry_after_s}
         self._seen[key] = (json.dumps(b, sort_keys=True), resp)
+        return self._j(resp)
+
+
+_SESSION_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+_SUBJECT_REF = re.compile(r"^[A-Za-z0-9._:/#=+-]{1,128}$")
+
+
+class PublicApiReferenceServer(StaffCallReferenceServer):
+    """PUBLIC_API.md 전체(I10) 중 화면 쪽 호출의 최소 모사: 세션 시작·발화·종료·상태·개입 결정. 직원 알림 목록과 재알림·실패 기록은
+    부모 `StaffCallReferenceServer`가 이미 구현하므로 합쳐서 쓴다. 상태 기계(ACTIVE -> PAUSED_RISK -> ACTIVE|ENDED), turn_id 멱등,
+    확정되지 않은 턴(NOT_COMMITTED)의 재처리, 기기 토큰 소유 확인(다른 기기 404, staff 403)을 모사한다.
+
+    `turn_fn(utterance) -> (response_text, committed: bool, risk: bool)`로 서비스 판단을 대신한다(기본: 안내 문장, 확정, 위험 아님).
+    `states[session_id]["inflight"]`에 turn_id를 넣으면 같은 turn_id가 처리 중인 것으로 보고 409 TURN_IN_PROGRESS를 낸다.
+    모사하지 않는 것: 결과 조회(B), 직원 세션 조회(C), 위험 신호 입력(D), `X-Openit-User` 행위자 기록(E), 푸시/SSE.
+    """
+
+    def __init__(self, tokens: dict[str, str], retry_after_s: int = 30, max_retries: int = 10):
+        super().__init__(tokens, retry_after_s, max_retries)
+        self.states: dict[str, dict] = {}
+        self.turn_fn = lambda utterance: ("다음 질문입니다.", True, False)
+        self.processed: list[str] = []   # 실제로 처리한 turn_id(멱등 시험용)
+
+    @staticmethod
+    def _fi(text, session_id=None, committed=True, alert="NONE"):
+        sig = None if committed else {"session_id": session_id, "write_committed": "NOT_COMMITTED", "staff_alert": alert}
+        return {"response_text": text, "turn_failure_signal": sig}
+
+    def _own(self, sid, role):
+        if not role.startswith("kiosk"):
+            raise BoundaryError("PERMISSION_DENIED", "키오스크 토큰만 호출할 수 있다")
+        if self.sessions.get(sid) != role or sid not in self.states:
+            raise BoundaryError("NOT_FOUND", "세션이 없다")  # 다른 기기의 세션도 404
+        return self.states[sid]
+
+    @staticmethod
+    def _msg(b, sid, kind, extra=()):
+        allowed = {"session_id", "kind", *extra}
+        if set(b) - allowed or b.get("kind") != kind or b.get("session_id") != sid or not _SESSION_ID.match(str(sid)):
+            raise BoundaryError("INVALID_RECORD", "본문이 FrontendMessage가 아니다")
+
+    def _route(self, method, path, q, body, role):
+        if path == "/v1/sessions" and method == "POST":
+            if not role.startswith("kiosk"):
+                raise BoundaryError("PERMISSION_DENIED", "키오스크 토큰만 호출할 수 있다")
+            b = self._body(body)
+            sid = b.get("session_id")
+            self._msg(b, sid, "SESSION_START", ("subject_ref",))
+            if "subject_ref" in b and not (isinstance(b["subject_ref"], str) and _SUBJECT_REF.match(b["subject_ref"])):
+                raise BoundaryError("INVALID_RECORD", "subject_ref 형식이 아니다")
+            if sid in self.states:
+                raise BoundaryError("CONFLICT", "이미 있는 세션이다")
+            self.sessions[sid] = role
+            self.states[sid] = {"state": "ACTIVE", "resume_text": None, "pause_reason": None, "turns": {}, "inflight": set(),
+                                "subject_ref": b.get("subject_ref")}
+            return self._j(self._fi("안녕하세요. 문진을 시작하겠습니다."), 201)
+        g = re.fullmatch(r"/v1/sessions/([^/]+)/(turns|end|state|intervention)", path)
+        if not g:
+            return super()._route(method, path, q, body, role)
+        sid, op = g[1], g[2]
+        if op == "intervention":
+            if method != "POST":
+                raise BoundaryError("NOT_FOUND", "경로가 없다")
+            if role != "staff":
+                raise BoundaryError("PERMISSION_DENIED", "직원 토큰만 호출할 수 있다")
+            st = self.states.get(sid)
+            if st is None:
+                raise BoundaryError("NOT_FOUND", "세션이 없다")
+            b = self._body(body)
+            if set(b) != {"session_id", "decision", "turn_id"} or b["session_id"] != sid or b["decision"] not in ("RESUME", "END") \
+                    or not isinstance(b["turn_id"], str) or not b["turn_id"]:
+                raise BoundaryError("INVALID_RECORD", "본문이 InterventionDecision이 아니다")
+            key = ("intervention", sid, b["turn_id"])
+            if key in self._seen:
+                fp, resp = self._seen[key]
+                if fp != json.dumps(b, sort_keys=True):
+                    raise BoundaryError("CONFLICT", "같은 turn_id에 다른 내용", {"reason": "TURN_ID_REUSED"})
+                return self._j(resp)
+            if st["state"] != "PAUSED_RISK":
+                raise BoundaryError("CONFLICT", "멈추지 않은 세션이다")
+            alert = self.alerts.get(sid)
+            if alert:
+                alert.update(status="RESOLVED", resolved_by_decision=b["decision"], resolved_at=NOW)
+            if b["decision"] == "RESUME":
+                st.update(state="ACTIVE", resume_text="이어서 문진을 진행하겠습니다.", pause_reason=None)
+                resp = self._fi(st["resume_text"])
+            else:
+                st.update(state="ENDED", pause_reason=None)
+                resp = self._fi(None)
+            self._seen[("intervention", sid, b["turn_id"])] = (json.dumps(b, sort_keys=True), resp)
+            return self._j(resp)
+        st = self._own(sid, role)
+        if op == "state":
+            if method != "GET":
+                raise BoundaryError("NOT_FOUND", "경로가 없다")
+            out = {"session_id": sid, "state": st["state"], "resume_text": st["resume_text"]}
+            if st["pause_reason"]:
+                out["pause_reason"] = st["pause_reason"]
+            return self._j(out)
+        if method != "POST":
+            raise BoundaryError("NOT_FOUND", "경로가 없다")
+        b = self._body(body)
+        if op == "end":
+            self._msg(b, sid, "SESSION_END")
+            st["state"] = "ENDED"  # 끝난 세션에 다시 종료해도 같은 결과(멱등)
+            return self._j(self._fi(None))
+        tid = b.pop("turn_id", None)  # turn_id는 API 봉투 필드다: 떼어 낸 나머지를 FrontendMessage로 본다
+        self._msg(b, sid, "UTTERANCE", ("utterance",))
+        if not isinstance(tid, str) or not tid or not isinstance(b.get("utterance"), str):
+            raise BoundaryError("INVALID_RECORD", "turn_id 또는 utterance가 없다")
+        fp = json.dumps(b, sort_keys=True, ensure_ascii=False)
+        if tid in st["turns"]:  # 확정된 턴만 저장되어 있다
+            sfp, resp = st["turns"][tid]
+            if sfp != fp:
+                raise BoundaryError("CONFLICT", "같은 turn_id에 다른 내용", {"reason": "TURN_ID_REUSED"})
+            return self._j(resp)
+        if tid in st["inflight"]:
+            err = BoundaryError("CONFLICT", "같은 turn_id가 처리 중이다", {"reason": "TURN_IN_PROGRESS"})
+            return 409, "application/json", json.dumps(err.to_record(V)).encode(), {"Retry-After": "1"}
+        if st["state"] == "ENDED":
+            raise BoundaryError("CONFLICT", "끝난 세션이다")
+        text, committed, risk = self.turn_fn(b["utterance"])
+        self.processed.append(tid)
+        st["resume_text"] = None  # 다음 발화 턴이 접수되면 resume_text는 null이 된다
+        alert_state = "NONE"
+        if risk:
+            st.update(state="PAUSED_RISK", pause_reason="RISK")
+            self.add_alert(sid, role, delivery="DELIVERED")
+            alert_state = "DELIVERED"
+        resp = self._fi(text, sid, committed, alert_state)
+        if committed:  # 확정되지 못한 턴은 결과를 고정하지 않아 재전송이 다시 처리된다(D86)
+            st["turns"][tid] = (fp, resp)
         return self._j(resp)

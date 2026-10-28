@@ -36,7 +36,7 @@ class StaffCall(unittest.TestCase):
         self.c.retry("s1", "t1")
         e = self.err(self.c.retry, "s1", "t2")
         self.assertEqual(e.code, "UNAVAILABLE")
-        self.assertEqual(e.details["reason"], "TOO_SOON")
+        self.assertEqual(e.details["reason"], "INTERVAL")
         self.assertGreater(e.details["retry_after_s"], 0)
         self.t[0] += 31
         self.assertEqual(self.c.retry("s1", "t2")["delivery_attempts"], 3)

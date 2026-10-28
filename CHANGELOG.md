@@ -7,6 +7,9 @@
 - METRICS.md의 지표 표 3개는 `tools/gen_metrics_md.py`가 레지스트리에서 생성한다(표식 `<!-- BEGIN GENERATED metrics:A|B|COMMON -->`). `--check`로 커밋된 파일과 같은지 확인하고 unittest와 verify.py가 이를 시험한다.
 - **패키지 데이터로는 다음 릴리스부터 나간다.** v2.1.0 태그에는 `metrics.json`이 없다. 소비 영역은 다음 태그를 기다리거나 개발 중에는 리포지토리 파일을 읽는다.
 - 방향(higher_is_better): `protection_intervened`, `fallback_rate`, `output_attempts_mean`, `coverage_seen_unseen_gap`는 false(낮을수록 좋음), `response_length_chars_p95`는 null(방향 미정, 짧은 쪽이 음성 출력에 유리하다는 설명뿐). 근거: 헤드 결정, 임상·학습 담당 확인 전 임시.
+- **I10 공개 API 클라이언트·참조 서버(데이터·코드 추가, 스키마 변경 없음)**: `boundary_contracts.clients.HttpPublicApi`(세션 시작·발화·종료·상태·개입 결정·`/healthz`)와 Protocol `sdk.PublicApi`·`sdk.StaffCall`, 참조 서버 `conformance.servers.PublicApiReferenceServer`(`StaffCallReferenceServer`를 확장해 중복 없음), 시험 `tests/test_publicapi.py`. `HttpStaffCall`을 Protocol 적합성 쌍에 추가. 참조 서버의 429를 PUBLIC_API.md G절대로 맞췄다(간격 초과 `details.reason: INTERVAL`+`Retry-After`, 상한 초과 `RETRY_LIMIT`은 `Retry-After` 없음; 전에는 `TOO_SOON`이었다).
+- **`conformance`가 설치 패키지에 들어간다(다음 릴리스부터)**: pyproject `packages`에 `conformance`와 `conformance/examples`(리포지토리 `examples/`의 심볼릭 링크)를 추가했다. v2.1.0 태그의 패키지에는 없다. 이웃 영역(survey-service 등)은 다음 태그부터 참조 서버를 복사하지 않고 `conformance.servers`를 가져다 쓴다.
+- 문서: INTERFACES I10 절을 PUBLIC_API.md를 가리키게 고치고(모순 해소) README의 I10 읽는 쪽을 kiosk-frontend로 정정, HTTP.md에 `## I10`과 `## I8`(HTTP 없음) 추가.
 - 시험 버전 리터럴 정리: 시험이 `PIPELINE_SCHEMA_VERSION`·설치된 패키지 버전에서 값을 읽는다.
 
 ## 2.1.0 (MINOR, 추가형: CR-H001·CR-H002·D96~D98·D100)

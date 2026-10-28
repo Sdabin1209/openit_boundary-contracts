@@ -6,11 +6,12 @@ import unittest
 from _fixtures import OTHER, READ, TOKENS, WRITE, make_server
 from boundary_contracts import BoundaryError, PIPELINE_SCHEMA_VERSION, sdk
 from boundary_contracts.clients import (HttpFailureStore, HttpGateService, HttpModelRegistry, HttpQuestionReader,
-                                        HttpReleaseReader, HttpTraceIngest)
+                                        HttpReleaseReader, HttpStaffCall, HttpPublicApi, HttpTraceIngest)
 
 PROTOCOLS = [(HttpQuestionReader, sdk.QuestionReader), (HttpModelRegistry, sdk.ModelRegistry),
              (HttpReleaseReader, sdk.ReleaseReader), (HttpGateService, sdk.GateService),
-             (HttpTraceIngest, sdk.TraceIngest), (HttpFailureStore, sdk.FailureStore)]
+             (HttpTraceIngest, sdk.TraceIngest), (HttpFailureStore, sdk.FailureStore),
+             (HttpStaffCall, sdk.StaffCall), (HttpPublicApi, sdk.PublicApi)]
 SECRET = "fake-secret-token-9d1"
 MAJOR = int(PIPELINE_SCHEMA_VERSION.split(".")[0])
 NEXT_MINOR = "%d.%d" % (MAJOR, int(PIPELINE_SCHEMA_VERSION.split(".")[1]) + 1)  # 왜: 더 높은 MINOR를 상수에서 유도한다

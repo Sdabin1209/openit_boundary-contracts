@@ -127,6 +127,17 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 - 서비스의 실패 처리(재시도, 읽기 타임아웃은 재시도 없음, 404면 적재 요청 등)는 survey-service의 `inference-server-spec.md` 5절을 따른다. 이것은 서비스 내부 동작이라 계약이 아니다.
 - 서버의 헤더 이름이 model-runtime의 현행(`X-Model-Runtime-*`)과 다르므로 model-runtime이 이 이름으로 바꾼다.
 
+## I8 turn-engine
+라이브러리라서 HTTP 면이 없다(INTERFACES.md I8).
+
+## I10 공개 API — 소유: survey-service, 소비: kiosk-frontend
+
+**정본은 `PUBLIC_API.md`**(경로, 본문, 응답, 상태 코드와 재시도, 인증, 직원 콘솔, 2.1.0 추가)이고 이 절은 그것을 복사하지 않는다. HTTP 규약만 적는다.
+- 클라이언트 `boundary_contracts.clients.HttpPublicApi`(`start_session`, `send_utterance`, `end_session`, `get_state`, `intervene`, `healthz`)와 `HttpStaffCall`(`retry`, `report`). 토큰은 키오스크 기기 토큰이고 `intervene`은 staff 토큰이다.
+- `turn_id`는 API 봉투 필드다. 본문 스키마(`FrontendMessage`, `FrontendInput`)는 문진 스키마라 클라이언트는 필수 필드와 타입만 확인하고(위반은 `INTEGRITY_ERROR`), `SessionState`는 이 패키지 스키마로 검증한다.
+- `/healthz`, `/readyz`는 인증이 없다. 429·503은 `UNAVAILABLE`이고 `details.reason`을 먼저 본다(PUBLIC_API.md G절).
+- 참조 서버 `conformance.servers.PublicApiReferenceServer`는 상태 기계(ACTIVE/PAUSED_RISK/ENDED), `turn_id` 멱등, 확정되지 못한 턴의 재처리, 기기 토큰 소유 확인(다른 기기 404, staff 403)을 모사한다. 모사하지 않는 것: 결과 조회(B), 직원 세션 조회(C), 위험 신호 입력(D), `X-Openit-User` 행위자 기록(E), SSE·푸시 구독.
+
 ## 적합성
 
 `boundary_contracts.clients`의 각 클라이언트는 `typing.Protocol` 인터페이스와 같은 적합성 시험(CONVENTIONS 7절, 오류, 멱등성, 해시 검증)을 통과해야 한다. 서비스는 자기 서버를 띄워 클라이언트로 같은 시험을 돌려 통과시킨다. 시험 모음은 `boundary-contracts/conformance/`에 있다.

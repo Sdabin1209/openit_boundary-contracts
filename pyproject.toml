@@ -10,7 +10,8 @@ description = "영역 사이 계약의 스키마와 기준 구현. 버전 MAJOR.
 dependencies = ["jsonschema>=4.10"]
 
 [tool.setuptools]
-packages = ["boundary_contracts", "boundary_contracts.clients"]
+packages = ["boundary_contracts", "boundary_contracts.clients", "conformance"]
 
 [tool.setuptools.package-data]
 boundary_contracts = ["schemas/*.json", "metrics.json"]
+conformance = ["examples/*.json"]

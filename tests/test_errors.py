@@ -31,10 +31,10 @@ class Errors(unittest.TestCase):
         back = BoundaryError.from_record(rec)
         self.assertEqual((back.code, back.message, back.details), (err.code, err.message, err.details))
 
-    def test_Protocol은_일곱_개(self):
+    def test_Protocol_목록(self):
         names = [n for n in dir(sdk) if n[0].isupper() and n != "Protocol" and getattr(getattr(sdk, n), "_is_protocol", False)]
-        self.assertEqual(sorted(names), ["DatasetStore", "FailureStore", "GateService", "ModelRegistry",
-                                          "QuestionReader", "ReleaseReader", "TraceIngest"])
+        self.assertEqual(sorted(names), ["DatasetStore", "FailureStore", "GateService", "ModelRegistry", "PublicApi",
+                                          "QuestionReader", "ReleaseReader", "StaffCall", "TraceIngest"])
 
 
 if __name__ == "__main__":
