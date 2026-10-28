@@ -13,5 +13,5 @@ dependencies = ["jsonschema>=4.10"]
 packages = ["boundary_contracts", "boundary_contracts.clients", "conformance"]
 
 [tool.setuptools.package-data]
-boundary_contracts = ["schemas/*.json", "metrics.json"]
+boundary_contracts = ["schemas/*.json", "metrics.json", "data/*.json"]
 conformance = ["examples/*.json"]

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ActionExtractionRules.schema.json",
+  "title": "ActionExtractionRules",
+  "description": "LoRA-A 출력 의미 규칙 명세(ADR 0010). 규칙은 데이터이고, 해석기는 boundary_contracts.action_rules 하나다.",
+  "type": "object",
+  "required": ["rules_version", "statuses", "save_rule", "targets", "unknown_item", "next_item"],
+  "properties": {
+    "rules_version": {"type": "string", "minLength": 1},
+    "description": {"type": "string"},
+    "key_syntax": {"type": "string"},
+    "statuses": {
+      "type": "object",
+      "required": ["saved", "null"],
+      "properties": {
+        "saved": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
+        "null": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true}
+      },
+      "additionalProperties": false
+    },
+    "save_rule": {
+      "type": "object",
+      "required": ["code", "save_true_iff_status_in", "value_null_iff_status_in", "saved_value_non_null"],
+      "properties": {
+        "code": {"const": "SAVE_RULE"},
+        "save_true_iff_status_in": {"const": "saved"},
+        "value_null_iff_status_in": {"const": "null"},
+        "saved_value_non_null": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "targets": {
+      "type": "object",
+      "required": ["code", "each_target_is_a_values_key"],
+      "properties": {"code": {"const": "TARGET_NOT_IN_VALUES"}, "each_target_is_a_values_key": {"type": "boolean"}},
+      "additionalProperties": false
+    },
+    "unknown_item": {
+      "type": "object",
+      "required": ["code", "every_item_in_flow", "end_marker"],
+      "properties": {
+        "code": {"const": "UNKNOWN_ITEM"},
+        "every_item_in_flow": {"type": "array", "items": {"enum": ["values.key", "targets", "input.question_id", "next_item"]}, "uniqueItems": true},
+        "end_marker": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "next_item": {
+      "type": "object",
+      "required": ["mismatch_code", "skip_order_code", "by_action"],
+      "properties": {
+        "mismatch_code": {"const": "NEXT_ITEM_MISMATCH"},
+        "skip_order_code": {"const": "SKIP_ORDER_MISMATCH"},
+        "by_action": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["actions", "next_item_is"],
+            "properties": {
+              "actions": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
+              "next_item_is": {"enum": ["input.question_id", "item_of_targets", "flow_next"]},
+              "base_item": {"const": "last_in_flow_order_among_values_and_targets"},
+              "also_allowed": {"const": "item_of_values"}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
