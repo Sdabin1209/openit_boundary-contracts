@@ -45,7 +45,7 @@
 | 푸시 구독 등록 | `POST /v1/staff/push-subscriptions` 본문 웹 푸시 구독 객체(`endpoint`, `keys`) | 201. 같은 `endpoint`는 갱신(멱등). `DELETE /v1/staff/push-subscriptions?endpoint=`로 해지 |
 | 개입 결정 | `POST /v1/sessions/{session_id}/intervention` 본문 `{"session_id", "decision": "RESUME"\|"END", "turn_id": "..."}` | `FrontendInput` (RESUME이면 이어서 할 안내 문장, END면 종료) |
 
-- `StaffAlert`: `alert_id`, `session_id`, `kind`(`RISK_STOP` 등 모르는 값은 그대로 보여 줌), `created_at`, `status`(`OPEN`/`RESOLVED`), `resolved_by_decision`(`RESUME`/`END`/null), `resolved_at`. 환자 발화나 개인 정보는 담지 않는다(세션 ID와 종류만).
+- `StaffAlert`: `alert_id`, `session_id`, `kind`(알려진 값 `RISK_STOP`, `CALL_STAFF`, `USER_CALLED_STAFF`. 모르는 값은 그대로 보여 줌. 목록 `StaffAlert`와 세션 보기 `StaffSessionView.alerts[]`는 같은 이름을 쓴다. `pause_reason`의 `RISK`와는 다른 필드다), `created_at`, `status`(`OPEN`/`RESOLVED`), `resolved_by_decision`(`RESUME`/`END`/null), `resolved_at`. 환자 발화나 개인 정보는 담지 않는다(세션 ID와 종류만).
 - 위험으로 멈춘 세션은 유휴 만료로 닫지 않는다(직원이 처리할 때까지 유지).
 - 위험 정지가 나면 서버는 알림을 영속 저장하고 구독자(SSE, 웹 푸시)에게 보낸다. 개입 결정이 성공하면 해당 알림이 `RESOLVED`가 된다.
 - `TurnFailureSignal.staff_alert`: 알림이 저장되고 **전달 경로가 하나 이상 살아 있을 때**(SSE 연결 또는 푸시 서비스가 접수) `DELIVERED`, 아니면 `DELIVERY_FAILED`다. 저장된 알림은 `DELIVERY_FAILED`여도 목록에서 조회된다. 프론트는 `DELIVERY_FAILED`이면 현장 직원 호출 화면을 보여야 한다.
