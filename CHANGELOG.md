@@ -2,7 +2,18 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
-## main (v2.0.2 태그 이후, 미태그, 문서만)
+## 2.1.0 (MINOR, 추가형: CR-H001·CR-H002·D96~D98·D100)
+
+기존 클라이언트가 깨지지 않는다. 모든 변경은 optional 필드·새 경로·문서 개정이다. `PIPELINE_SCHEMA_VERSION` "2.0" -> "2.1"(2.0 레코드는 계속 읽힌다).
+
+- **직원 호출 재알림·실패 기록(CR-H001)**: `POST /v1/sessions/{id}/staff-call/retry`, `POST .../staff-call/report`(PUBLIC_API G절). 새 스키마 `StaffCallRetryRequest`, `StaffCallRetryResult`, `StaffCallReport`. `StaffAlert`에 optional `delivery_attempts`, `last_delivery_status`, `manual_notice_outcome`, `manual_notice_reported_at`. 재알림 간격·횟수는 서비스 설정(권고 30초·10회, 측정 안 함). 클라이언트 `HttpStaffCall`, 참조 서버 `StaffCallReferenceServer`. ADR 0010.
+- **정지 사유(CR-H002)**: optional `pause_reason`(`RISK`/`REASK_LIMIT`/`OTHER`)을 `SessionState`, `StaffAlert`에 추가. `TurnFailureSignal`·`StaffSessionView`는 문진 스키마라 survey-service가 같은 이름으로 반영한다. `PAUSED_RISK` 이름은 유지. ADR 0011.
+- **METRICS.md v2(D96·D97·D98)**: v1 지표 폐기·대체 표시, `value_precision/recall`, `action/reason/status/next_item_accuracy`, `output_invalid_rate`, `ungrounded_number_rate`(평가 지표), `material_coverage`, `semantic_violation_rate`, slice 기준 `ACTION`·`REASON`. `EvaluationReport`의 slice `kind`는 자유 문자열이라 스키마 설명 문구만 갱신. ADR 0013.
+- **I2 DatasetStore HTTP(D100)**: `HTTP.md ## I2`, 클라이언트 `HttpDatasetStore`(게시·조회·파일 묶음), 참조 서버. ADR 0012.
+- 클라이언트: 429를 `UNAVAILABLE`로 매핑(`Retry-After` 규약, 전에는 상태 불명 `UNAVAILABLE`로 `details.status`만 남았다). 읽기 모드가 null을 허용하는 열거(`pause_reason` 등)의 모르는 값도 받아들인다.
+- 시험: unittest 110 -> 133, `verify.py` OK 102 -> 110.
+
+## v2.0.2 이후 v2.1.0 이전의 문서 정정 (v2.1.0에 포함됨) (v2.0.2 태그 이후, 미태그, 문서만)
 
 스키마와 패키지 코드는 바뀌지 않았다. 아래는 `PUBLIC_API.md`·`CONVENTIONS.md`·`HTTP.md`의 문서 정정과 하위 호환 추가다. 새 태그는 내지 않았다(패키지 내용이 같아서). 의존 영역은 `v2.0.2`를 그대로 쓴다.
 

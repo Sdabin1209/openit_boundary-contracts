@@ -21,7 +21,7 @@ from ..errors import CODES, BoundaryError
 from ..schemas_api import PIPELINE_SCHEMA_VERSION, schema_dir, validator
 
 _STATUS_CODE = {400: "INVALID_RECORD", 401: "PERMISSION_DENIED", 403: "PERMISSION_DENIED", 404: "NOT_FOUND",
-                409: "CONFLICT", 412: "FAILED_PRECONDITION", 503: "UNAVAILABLE"}
+                409: "CONFLICT", 412: "FAILED_PRECONDITION", 429: "UNAVAILABLE", 503: "UNAVAILABLE"}
 _ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]*$")
 _HASH = re.compile(r"^sha256:[0-9a-f]{64}$")
 _MAX_ERROR_BODY = 64 * 1024
@@ -49,8 +49,8 @@ def _relax(node):
     for k, v in node.items():
         if k == "additionalProperties" and v is False:
             continue
-        if k == "enum" and isinstance(v, list) and all(isinstance(x, str) for x in v):
-            out["type"] = "string"
+        if k == "enum" and isinstance(v, list) and all(isinstance(x, str) or x is None for x in v) and any(isinstance(x, str) for x in v):
+            out["type"] = ["string", "null"] if None in v else "string"  # 왜: null을 허용하는 열거(pause_reason 등)도 모르는 값은 받아들인다
             continue
         out[k] = _relax(v)
     return out

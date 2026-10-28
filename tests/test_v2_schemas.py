@@ -117,3 +117,19 @@ class V1Retired(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class V21Additions(unittest.TestCase):
+    """2.1.0 추가형 변경: 옛 레코드(새 필드 없음)도 통과하고, 새 필드는 열거를 지킨다."""
+
+    def test_옛_StaffAlert와_SessionState는_그대로_통과(self):
+        from boundary_contracts import validator
+        a = {"alert_id": "al-1", "session_id": "s1", "kind": "RISK_STOP", "created_at": "2026-10-15T00:00:00Z", "status": "OPEN"}
+        self.assertEqual(list(validator("StaffAlert").iter_errors(a)), [])
+        self.assertEqual(list(validator("SessionState").iter_errors({"session_id": "s1", "state": "ACTIVE", "resume_text": None})), [])
+
+    def test_pause_reason_열거(self):
+        from boundary_contracts import validator
+        for v in ("RISK", "REASK_LIMIT", "OTHER", None):
+            self.assertEqual(list(validator("SessionState").iter_errors({"session_id": "s1", "state": "PAUSED_RISK", "resume_text": None, "pause_reason": v})), [])
+        self.assertTrue(list(validator("SessionState").iter_errors({"session_id": "s1", "state": "PAUSED_RISK", "resume_text": None, "pause_reason": "X"})))

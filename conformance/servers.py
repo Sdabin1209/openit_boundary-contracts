@@ -17,6 +17,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, unquote, urlsplit
 
 from boundary_contracts import PIPELINE_SCHEMA_VERSION as V, BoundaryError, content_hash, sha256_hash
+from boundary_contracts.clients.datasets import check_publish  # 서버가 클라이언트와 같은 검증 규칙을 쓴다
 
 STATUS = {"INVALID_RECORD": 400, "PERMISSION_DENIED": 403, "NOT_FOUND": 404, "CONFLICT": 409,
           "FAILED_PRECONDITION": 412, "UNSUPPORTED_VERSION": 422, "INTEGRITY_ERROR": 422, "UNAVAILABLE": 503}
@@ -69,6 +70,7 @@ class ReferenceServer:
         self.question_sets: dict[str, list[dict]] = {}   # id -> [{"bank", "ref", "reviews", "change"}]
         self.packages: dict[tuple, dict] = {}            # (id, version) -> {"manifest", "files", "report"}
         self.eval_reports: dict[str, bytes] = {}
+        self.datasets: dict[tuple, dict] = {}            # (id, version) -> {"manifest", "files": {path: bytes}}
         self.releases: dict[str, dict] = {}              # id -> {"manifest","bank","adapters":{role:{path:bytes}},"pass":bool}
         self.release_order: list[str] = []               # 오래된 것부터
         self.decisions: list[dict] = []                  # 오래된 것부터
@@ -216,6 +218,23 @@ class ReferenceServer:
                 if g[1] not in self.eval_reports:
                     raise nf("평가 보고서")
                 return 200, "application/octet-stream", self.eval_reports[g[1]]
+            # I2
+            if path == "/v1/datasets":
+                return self._page(sorted({k[0] for k in self.datasets}), q)
+            if g := m(r"/v1/datasets/([^/]+)/versions"):
+                return self._page([k[1] for k in self.datasets if k[0] == g[1]], q)
+            if g := m(r"/v1/datasets/([^/]+)/versions/([^/]+)(|/files|/files/.+)"):
+                d = self.datasets.get((g[1], g[2]))
+                if d is None:
+                    raise nf("데이터셋")
+                if not g[3]:
+                    return J(d["manifest"])
+                if g[3] == "/files":
+                    return 200, "application/x-tar", make_tar(d["files"])
+                f = g[3][len("/files/"):]
+                if f not in d["files"]:
+                    raise nf("파일")
+                return 200, "application/octet-stream", d["files"][f]
             # I4
             if path == "/v1/active-pointer":
                 return J({"item": self.pointer})
@@ -290,6 +309,8 @@ class ReferenceServer:
         jb = lambda: self._body(body)
         if path == "/v1/packages":
             return self._publish(body)
+        if path == "/v1/datasets":
+            return self._publish_dataset(body)
         if path == "/v1/submissions":
             b = jb()
             self._same_role(b, role)
@@ -384,6 +405,35 @@ class ReferenceServer:
         return self._j(manifest, 201)
 
 
+def _publish_dataset(self, body):
+    from boundary_contracts import validator
+    try:
+        with tarfile.open(fileobj=io.BytesIO(body), mode="r:") as tf:
+            files = {m.name: tf.extractfile(m).read() for m in tf if m.isreg()}
+        manifest = json.loads(files["manifest.json"])
+    except (tarfile.TarError, KeyError, ValueError):
+        raise BoundaryError("INVALID_RECORD", "publish 본문이 잘못됐다") from None
+    if list(validator("DatasetManifest").iter_errors(manifest)):
+        raise BoundaryError("INVALID_RECORD", "manifest가 DatasetManifest 스키마를 위반한다")
+    if content_hash(manifest) != manifest["content_hash"]:
+        raise BoundaryError("INTEGRITY_ERROR", "manifest의 content_hash가 내용과 다르다")
+    data = {n[len("files/"):]: d for n, d in files.items() if n.startswith("files/")}
+    if set(data) != {f["path"] for f in manifest["files"]}:
+        raise BoundaryError("INVALID_RECORD", "파일 집합이 manifest와 다르다")
+    check_publish(manifest, lambda p: data[p])
+    key = (manifest["dataset_id"], manifest["version"])
+    old = self.datasets.get(key)
+    if old:
+        if old["manifest"]["content_hash"] != manifest["content_hash"]:
+            raise BoundaryError("CONFLICT", "같은 ID·버전에 다른 내용")
+        return self._j(old["manifest"])
+    self.datasets[key] = {"manifest": manifest, "files": data}
+    return self._j(manifest, 201)
+
+
+ReferenceServer._publish_dataset = _publish_dataset
+
+
 class RuntimeReferenceServer(ReferenceServer):
     """HTTP.md I9(모델 추론 서버)를 따르는 참조 서버(계약 2.0.0). I1~I7 서버와 경로(`/v1/releases/{id}`)가 겹치므로 따로 띄운다.
 
@@ -459,3 +509,74 @@ class RuntimeReferenceServer(ReferenceServer):
         req = self._checked(body, "ResponseRequest")
         text, outcome = self.respond_fn(req)
         return 200, "text/plain; charset=utf-8", text.encode("utf-8"), self._headers(outcome)
+
+
+class StaffCallReferenceServer(ReferenceServer):
+    """PUBLIC_API.md G절(직원 호출 재알림·실패 기록, 계약 2.1.0)을 따르는 참조 서버. 다른 참조 서버와 경로가 겹치지 않지만 따로 띄운다.
+
+    토큰 역할: "kiosk-1"·"kiosk-2"(기기별 키오스크), "staff". 세션은 만든 기기(`sessions[id] = 역할`)만 쓸 수 있다(다른 기기는 404, staff는 403).
+    `add_alert(session_id, owner)`로 OPEN 알림을 넣는다. `deliver_fn()`은 재전달 결과('DELIVERED'|'DELIVERY_FAILED')를 정한다.
+    `clock()`은 초 단위 시각(시험이 바꿔 끼운다). 간격·상한은 서비스 설정에 해당하는 값이며 계약이 아니다(기본 30초·10회, 측정 안 함).
+    """
+
+    def __init__(self, tokens: dict[str, str], retry_after_s: int = 30, max_retries: int = 10):
+        super().__init__(tokens)
+        self.retry_after_s, self.max_retries = retry_after_s, max_retries
+        self.sessions: dict[str, str] = {}
+        self.alerts: dict[str, dict] = {}
+        self.deliver_fn = lambda: "DELIVERED"
+        self.clock = time.monotonic
+        self._last: dict[str, float] = {}
+        self._seen: dict[tuple, tuple] = {}   # (kind, session_id, turn_id) -> (요청 지문, 응답)
+
+    def add_alert(self, session_id: str, owner: str, *, delivery: str = "DELIVERY_FAILED", pause_reason: str = "RISK") -> dict:
+        self.sessions[session_id] = owner
+        a = {"alert_id": "al-" + session_id, "session_id": session_id, "kind": "RISK_STOP", "created_at": NOW, "status": "OPEN",
+             "resolved_by_decision": None, "resolved_at": None, "pause_reason": pause_reason, "delivery_attempts": 1,
+             "last_delivery_status": delivery}
+        self.alerts[session_id] = a
+        return a
+
+    def _route(self, method, path, q, body, role):
+        from boundary_contracts import validator
+        g = re.fullmatch(r"/v1/sessions/([^/]+)/staff-call/(retry|report)", path)
+        if not g or method != "POST":
+            raise BoundaryError("NOT_FOUND", "경로가 없다")
+        sid, op = g[1], g[2]
+        if not role.startswith("kiosk"):
+            raise BoundaryError("PERMISSION_DENIED", "키오스크 토큰만 호출할 수 있다")
+        if self.sessions.get(sid) != role:
+            raise BoundaryError("NOT_FOUND", "세션이 없다")  # 다른 기기의 세션도 404
+        b = self._body(body)
+        schema = "StaffCallRetryRequest" if op == "retry" else "StaffCallReport"
+        if list(validator(schema).iter_errors(b)):
+            raise BoundaryError("INVALID_RECORD", f"본문이 {schema} 스키마를 위반한다")
+        alert = self.alerts.get(sid)
+        key = (op, sid, b["turn_id"])
+        if key in self._seen:
+            fp, resp = self._seen[key]
+            if fp != json.dumps(b, sort_keys=True):
+                raise BoundaryError("CONFLICT", "같은 turn_id에 다른 내용", {"reason": "TURN_ID_REUSED"})
+            return self._j(resp)
+        if op == "report":
+            if alert is None:
+                raise BoundaryError("CONFLICT", "알림이 없다", {"reason": "NO_OPEN_ALERT"})
+            alert["manual_notice_outcome"], alert["manual_notice_reported_at"] = b["outcome"], NOW
+            self._seen[key] = (json.dumps(b, sort_keys=True), dict(alert))
+            return self._j(alert)
+        if alert is None or alert["status"] != "OPEN":
+            raise BoundaryError("CONFLICT", "OPEN 알림이 없다", {"reason": "NO_OPEN_ALERT"})
+        now = self.clock()
+        wait = self.retry_after_s - (now - self._last[sid]) if sid in self._last else 0
+        over = alert["delivery_attempts"] - 1 >= self.max_retries
+        if over or wait > 0:
+            n = self.retry_after_s if over else int(wait) + 1
+            err = BoundaryError("UNAVAILABLE", "재알림이 너무 잦다", {"reason": "RETRY_LIMIT" if over else "TOO_SOON", "retry_after_s": n})
+            return 429, "application/json", json.dumps(err.to_record(V)).encode(), {"Retry-After": str(n)}
+        self._last[sid] = now
+        alert["delivery_attempts"] += 1
+        alert["last_delivery_status"] = self.deliver_fn()
+        resp = {"alert_id": alert["alert_id"], "staff_alert": alert["last_delivery_status"],
+                "delivery_attempts": alert["delivery_attempts"], "retry_after_s": self.retry_after_s}
+        self._seen[key] = (json.dumps(b, sort_keys=True), resp)
+        return self._j(resp)
