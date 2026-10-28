@@ -111,13 +111,14 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 | --- | --- | --- |
 | 릴리스 적재 신호 | `PUT /v1/releases/{release_id}` (본문 없음, **멱등**) | 200 `{"release_id","state":"LOADED","error":null}` / 202 `{"state":"LOADING"}`. 실패: 412 `FAILED_PRECONDITION`(승인 없음·해시·설정 해시 불일치·어댑터 사전 검사 실패), 422 `INTEGRITY_ERROR`·`UNSUPPORTED_VERSION`, 503 `UNAVAILABLE`. 서버가 I4에서 번들을 **스스로 읽어** 적재한다(서비스는 어댑터를 보내지 않는다) |
 | 적재 상태 | `GET /v1/releases/{release_id}` | 200 `{"release_id","state":"ABSENT"\|"LOADING"\|"LOADED"\|"FAILED","error":BoundaryError\|null}` |
-| extract (LoRA-A) | `POST /v1/releases/{release_id}/extract` 본문 `ActionExtractionInput` | 200 `ActionExtraction` (`application/json`) |
+| extract (LoRA-A) | `POST /v1/releases/{release_id}/extract` 본문 `ExtractRequest`(`input`: `ActionExtractionInput`, `flow`: `QuestionFlowTable`). 2.x에서는 본문이 `ActionExtractionInput` 그대로인 옛 형식도 받으며, 이때는 아래 규칙 보증이 없다. 3.0.0에서 `ExtractRequest`만 남는다 | 200 `ActionExtraction` (`application/json`) |
 | respond (LoRA-B) | `POST /v1/releases/{release_id}/respond` 본문 `ResponseRequest` | 200 응답 문장 그대로(`text/plain; charset=utf-8`, JSON으로 감싸지 않는다. `ResponseText`) |
 | 정보 | `GET /v1/info` | `{"service","runtime_version","supported_contract_versions":[1],"backend","loaded":[release_id...],"serving_config_hash":{"LORA_A":…,"LORA_B":…}}` |
 | 상태 | `GET /healthz`, `GET /readyz`(인증 없음) | 200. readyz는 요청을 받을 수 있을 때 200, 아니면 503 |
 
 - 인증은 Bearer 토큰(서버 `MODEL_RUNTIME_TOKENS`, 서비스 `SURVEY_INFERENCE_TOKEN_ENV`). 오류는 `BoundaryError` 본문과 9절 상태 코드(400 입력 계약 위반, 403, 404, 412, 422, 503).
 - 적재되지 않은 릴리스에 extract/respond가 오면 **404 NOT_FOUND**(서버가 재시작해 잊은 경우 포함). 서비스는 `PUT`으로 적재를 요청한다.
+- **extract 출력 규칙 보증(2.2.0, ADR 0010, D104):** 요청에 `flow`가 있으면 서버는 출력이 `ActionExtraction` 스키마를 통과할 뿐 아니라 `boundary_contracts.action_rules.check_action_extraction(input, output, flow)`(규칙 명세 `ActionExtractionRules`)에 위반이 없는 값만 낸다. 위반이면 재시도하고, 끝내 안 되면 아래 `OUTPUT_INVALID`다. **호출자는 통과한 값을 다시 검사하지 않는다(R7).**
 - 출력 검증(D36)은 서버의 책임이다. 서버는 `extract`에는 항상 `ActionExtraction` 스키마를 통과하는 값을, `respond`에는 항상 비어 있지 않은 문장을 낸다. 응답 헤더(두 호출 모두): `X-Openit-Outcome: ok|fallback`, `X-Openit-Attempts: <횟수>`(선택), `X-Openit-Protections: G5:1,G2:2`(규칙 코드별 건수, 선택, 코드 값은 model-runtime이 정한다). 서비스는 세기만 한다.
   - `respond`: 모델 출력이 끝내 형식을 지키지 못하면 서버가 입력의 재료로 만든 대체 문장을 내고 `X-Openit-Outcome: fallback`을 붙인다(상태는 200). 정상이면 `ok`. 헤더가 없으면 클라이언트는 `INTEGRITY_ERROR`로 본다.
   - `extract`: 서버가 대신 만들 수 있는 대체 출력이 없다. 모델 출력이 끝내 깨지면 503 `UNAVAILABLE`(`details.reason="OUTPUT_INVALID"`, `details.attempts`는 선택)이고, 정상이면 `X-Openit-Outcome: ok`다. **확정(D75).** 값을 지어내지 않는다. 호출자(survey-service)는 같은 요청을 한 번 다시 보내고, 그래도 안 되면 그 턴을 `turn_failure_signal`로 처리하며 세션 상태를 바꾸지 않는다(INTERFACES.md I9 '서비스가 지키는 것').

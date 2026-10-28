@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ExtractRequest.schema.json",
+  "title": "ExtractRequest",
+  "description": "I9 extract 요청 본문의 확장형(2.2.0, ADR 0010 결정 5). 모델이 받는 입력(input)과 별개로 문항 순서표(flow)를 싣는다. 서버(LoRA-A 컴포넌트)는 flow가 있으면 출력이 check_action_extraction 규칙을 지키는 것을 보증한다. 본문이 ActionExtractionInput 그대로(flow 없음)인 옛 형식은 2.x에서 받아들이며 규칙 보증이 없다. 3.0.0에서 이 형식만 남는다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["input", "flow"],
+  "properties": {
+    "input": {"$ref": "ActionExtractionInput.schema.json"},
+    "flow": {"$ref": "QuestionFlowTable.schema.json"}
+  }
+}

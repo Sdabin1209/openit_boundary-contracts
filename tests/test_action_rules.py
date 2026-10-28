@@ -123,3 +123,11 @@ class DifferentialTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ExtractRequestTest(unittest.TestCase):
+    def test_예시의_flow로_검사기가_돈다(self):
+        ex = json.loads((__import__("pathlib").Path(__file__).resolve().parent.parent / "examples" / "ExtractRequest.json").read_text(encoding="utf-8"))
+        self.assertEqual(list(validator("ExtractRequest").iter_errors(ex)), [])
+        out = {"action": "REASK", "values": [], "next_item": ex["input"]["question_id"]}
+        self.assertEqual(check_action_extraction(ex["input"], out, ex["flow"]), [])

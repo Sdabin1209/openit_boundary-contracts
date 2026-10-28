@@ -1,0 +1,18 @@
+{
+  "order": [
+    "Q10",
+    "Q1.D01",
+    "Q1.D02",
+    "Q4",
+    "Q4_1",
+    "Q5"
+  ],
+  "skips": [
+    {
+      "slot": "Q4.answer",
+      "op": "==",
+      "value": false,
+      "skip_item": "Q4_1"
+    }
+  ]
+}
