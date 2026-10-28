@@ -14,6 +14,8 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
+from .errors import BoundaryError
+
 _MAX_SAFE_INT = 2**53
 
 
@@ -117,9 +119,10 @@ def directory_hash(path: str | os.PathLike) -> str:
     """디렉터리의 해시. 파일마다 {path(상대, '/' 구분), sha256}를 모아 경로 순으로 정렬한 목록의 JCS 해시.
     어댑터의 adapter_hash가 이 값이다. 빈 디렉터리와 숨김 파일 규칙은 따로 두지 않고 모든 일반 파일을 포함한다."""
     root = Path(path)
-    entries = [
-        {"path": p.relative_to(root).as_posix(), "sha256": file_hash(p)}
-        for p in sorted(root.rglob("*"), key=lambda q: q.relative_to(root).as_posix())
-        if p.is_file()
-    ]
+    members = sorted(root.rglob("*"), key=lambda q: q.relative_to(root).as_posix())
+    # 왜: 번들 tar는 링크를 싣지 않는데 해시가 링크 대상을 포함하면 받는 쪽 해시가 어긋난다(CONVENTIONS 8절, 2.2.0).
+    for p in members:
+        if p.is_symlink():
+            raise BoundaryError("INTEGRITY_ERROR", f"심볼릭 링크는 허용하지 않는다: {p.relative_to(root).as_posix()}")
+    entries = [{"path": p.relative_to(root).as_posix(), "sha256": file_hash(p)} for p in members if p.is_file()]
     return sha256_hash(entries)
