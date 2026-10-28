@@ -10,7 +10,7 @@ class Package(unittest.TestCase):
         self.assertIn("ReleaseManifest.schema.json", names)
         self.assertIn("_common.schema.json", names)
         records = {n[: -len(".schema.json")] for n in names if not n.startswith("_")}
-        self.assertEqual(len(records), 31)  # 2.0.0: v1의 24개에서 ParserSample·GeneratorSample을 빼고 v2 6개를 더했다
+        self.assertEqual(len(records), 32)  # 2.0.0: 31개. 2.2.0: ActionExtractionRules(LoRA-A 출력 규칙 명세, ADR 0010)를 더했다
         self.assertFalse({"ParserSample", "GeneratorSample"} & records)
         self.assertTrue({"ActionExtractionInput", "ActionExtraction", "ActionExtractionSample", "ResponseRequest",
                          "ResponseText", "ResponseSample"} <= records)
