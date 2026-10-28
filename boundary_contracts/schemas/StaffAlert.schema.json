@@ -25,7 +25,7 @@
     "kind": {
       "type": "string",
       "minLength": 1,
-      "description": "RISK_STOP 등"
+      "description": "알림 종류. 알려진 값: RISK_STOP(위험으로 정지), CALL_STAFF(직원 호출), USER_CALLED_STAFF(환자가 직원 호출을 누름). 모르는 값은 그대로 보여 준다(읽기 모드). 직원 콘솔 목록(StaffAlert)과 세션 보기(StaffSessionView.alerts[])는 같은 이름을 쓴다. pause_reason의 RISK와는 다른 필드다."
     },
     "created_at": {
       "type": "string",

@@ -101,7 +101,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 | `list_cases` | `GET /v1/cases?review_status=&failure_type=&source_release_id=&updated_since=&latest_only=true\|false` | 목록(`FailureCase`) |
 | `get_trace` | `GET /v1/deidentified-traces/{ref}` | 비식별 TurnTrace JSON |
 | `publish_case` | (HTTP로 열지 않는다. ops-feedback 내부 잡이 로컬 저장소에 쓴다) | |
-| (검토 게시, 사람/검토 화면용. Protocol 밖) | `POST /v1/cases/{case_id}/review` (쓰기 역할 `reviewer`, 읽기 토큰은 403) 본문 `{review_status: "CONFIRMED"\|"DISMISSED"\|"PENDING", expected?: 객체 또는 문자열, expected_kind?: "LORA_A"\|"LORA_B", reviewed_input?: 객체}` | 새 `version`의 `FailureCase`(201). 같은 검토를 다시 보내면 같은 결과(200). `expected`가 있으면 `expected_kind`가 필수이고 그 값에 맞는 모델 출력이어야 한다: `LORA_A`면 `ActionExtraction`(객체), `LORA_B`면 `ResponseText`(문자열)이며 아니면 INVALID_RECORD다. `reviewed_input`은 검토자가 개인정보 없이 고쳐 쓴 입력이며 `LORA_A`면 `ActionExtractionInput`, `LORA_B`면 `ResponseRequest`여야 한다(D55). 존재하지 않는 사례는 404 |
+| (검토 게시, 사람/검토 화면용. Protocol 밖) | `POST /v1/cases/{case_id}/review` (쓰기 역할 `reviewer`, 읽기 토큰은 403) 본문 `{review_status: "CONFIRMED"\|"DISMISSED"\|"PENDING", expected?: 객체 또는 문자열, expected_kind?: "LORA_A"\|"LORA_B", reviewed_input?: 객체}` | 새 `version`의 `FailureCase`(201). 같은 검토를 다시 보내면 같은 결과(200). `expected`가 있으면 `expected_kind`가 필수이고 그 값에 맞는 모델 출력이어야 한다: `LORA_A`면 `ActionExtraction`(객체), `LORA_B`면 `ResponseText`(문자열)이며 아니면 INVALID_RECORD다. `reviewed_input`은 검토자가 개인정보 없이 고쳐 쓴 입력이며 `LORA_A`면 `ActionExtractionInput`, `LORA_B`면 `ResponseRequest`여야 한다(D55). 존재하지 않는 사례는 404  사람 검토자 식별: I5 승인과 같은 방식이다. 게이트웨이가 사람 인증을 마친 뒤 `X-Openit-User: <인증된 사용자 ID>`를 붙이고(클라이언트가 보낸 같은 이름의 헤더는 지운다), 서버는 `reviewer` 토큰의 요청에서 이 헤더 값을 검토자로 기록한다. 헤더가 없으면 403이다. |
 
 ## I9 ModelRuntime 추론 서버 — 소유: model-runtime (서버), 소비: survey-service (D62)
 
