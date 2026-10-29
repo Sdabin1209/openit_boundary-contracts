@@ -41,6 +41,15 @@ class HttpReleaseReader(HttpClientBase):
                 q[key + "_id"], q[key + "_version"] = ref["id"], ref["version"]
         return self._page("/v1/decisions", cursor, limit, q, schema="GateDecision")
 
+    def get_release_question_bank(self, release_id: str) -> dict:
+        """GET /v1/releases/{id}/question-bank(2.7.0, OPEN_GAPS U47, SurveyQuestionBankRead). 어댑터 없이 릴리스에 묶인 문항 세트만.
+        PASS가 아닌 릴리스는 412(load_bundle과 같다). 문항 세트 해시를 응답의 content_hash로 검증한다."""
+        body = self._record("/v1/releases/" + self._q(check_id(release_id, "release_id"), "question-bank"), "SurveyQuestionBankRead")
+        if body.get("release_id") != release_id or "question_bank" not in body:
+            raise integrity("문항 세트 응답의 release_id가 요청과 다르거나 question_bank가 없다")
+        verify_json_hash(body["question_bank"], body["content_hash"], "QuestionBank")
+        return body
+
     def load_bundle(self, release_id: str, *, dest: Path) -> ReleaseBundle:
         """dest/<release_id> 아래에 manifest.json, question_bank.json, adapters/<역할>/을 풀고 모든 해시를 검증한다."""
         check_id(release_id, "release_id")

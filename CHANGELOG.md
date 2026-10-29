@@ -2,6 +2,10 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.7.0 (MINOR, 추가형. `PIPELINE_SCHEMA_VERSION` "2.7". 클라이언트는 MAJOR만 비교)
+- **I4 `get_release_question_bank`(OPEN_GAPS U47, SurveyQuestionBankRead).** `GET /v1/releases/{id}/question-bank` → `{release_id, content_hash, question_bank}`. 어댑터 없이 릴리스에 묶인 문항 세트만 준다(survey-service가 문항 세트를 얻으려고 어댑터까지 받던 SV-16). PASS가 아닌 릴리스는 412, 클라이언트가 문항 세트 해시를 검증한다. 기준 서버 구현 포함.
+- `sdk.ReleaseReader` Protocol에는 아직 넣지 않는다(release-gate 구현이 생기기 전에 넣으면 isinstance 검사가 깨진다). 3.0.0에서 넣는다.
+
 ## 2.6.0 (MINOR, 추가·완화형. `PIPELINE_SCHEMA_VERSION` "2.6". 클라이언트는 MAJOR만 비교)
 - **U43(구조 규칙 1): 영역이 시험 환경과 잡 설정을 선언한다.** deploy가 이웃의 `.venv`·`node_modules`·시험 도구·잡 설정 파일 모양을 짐작하지 않게 한다(deploy CR-D30).
   - `SetupEnvReport.environment`: '[제안]'을 떼고 `test_command`(리포 루트에서 영역 시험 전체를 돌리는 argv) 추가. 2.x에서는 선택(없으면 deploy가 '검증 안 함'), 3.0.0에서 필수. 영역 `scripts/setup-env.sh`가 표준 출력 마지막 줄에 이 한 줄을 낸다.

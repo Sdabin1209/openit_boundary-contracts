@@ -246,7 +246,7 @@ class ReferenceServer:
                 return J({"item": self.pointer})
             if path == "/v1/releases":
                 return self._page([self.releases[r]["manifest"] for r in reversed(self.release_order)], q)
-            if g := m(r"/v1/releases/([^/]+)(|/bundle)"):
+            if g := m(r"/v1/releases/([^/]+)(|/bundle|/question-bank)"):
                 r = self.releases.get(g[1])
                 if r is None:
                     raise nf("릴리스")
@@ -254,6 +254,8 @@ class ReferenceServer:
                     return J(r["manifest"])
                 if not r["pass"]:
                     raise BoundaryError("FAILED_PRECONDITION", "PASS가 아닌 릴리스")
+                if g[2] == "/question-bank":      # 2.7.0(U47): 어댑터 없이 문항 세트만
+                    return J({"release_id": g[1], "content_hash": r["manifest"]["question_set"]["content_hash"], "question_bank": r["bank"]})
                 files = {"manifest.json": json.dumps(r["manifest"]).encode(), "question_bank.json": json.dumps(r["bank"]).encode()}
                 for role_, fs in r["adapters"].items():
                     files.update({f"adapters/{role_}/{p}": d for p, d in fs.items()})

@@ -153,3 +153,29 @@ class Approval(unittest.TestCase):
         with self.assertRaises(BoundaryError) as cm:
             self.a.get_review_report("sub-99")
         self.assertEqual(cm.exception.code, "NOT_FOUND")
+
+
+class QuestionBankRead(unittest.TestCase):
+    """2.7.0(U47, SurveyQuestionBankRead): 어댑터 없이 문항 세트만 읽는다."""
+    def setUp(self):
+        self.srv = make_server().start()
+        self.addCleanup(self.srv.stop)
+        self.r = HttpReleaseReader(self.srv.url, READ)
+
+    def code(self, fn, *a):
+        with self.assertRaises(BoundaryError) as cm:
+            fn(*a)
+        return cm.exception.code
+
+    def test_문항_세트만_받고_해시가_매니페스트와_같다(self):
+        b = self.r.get_release_question_bank("rel-0001")
+        m = self.r.get_release("rel-0001")
+        self.assertEqual(b["content_hash"], m["question_set"]["content_hash"])
+        self.assertEqual(b["question_bank"]["version"], 3)
+        self.assertNotIn("/v1/releases/rel-0001/bundle", [p for _, p, _ in self.srv.requests])
+
+    def test_PASS가_아니면_412_없으면_404_변조는_INTEGRITY(self):
+        self.assertEqual(self.code(self.r.get_release_question_bank, "rel-0002"), "FAILED_PRECONDITION")
+        self.assertEqual(self.code(self.r.get_release_question_bank, "rel-9"), "NOT_FOUND")
+        self.srv.releases["rel-0001"]["bank"]["questions"][0]["text"] = "변조"
+        self.assertEqual(self.code(self.r.get_release_question_bank, "rel-0001"), "INTEGRITY_ERROR")

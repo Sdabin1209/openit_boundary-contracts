@@ -65,6 +65,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 | `get_release` | `GET /v1/releases/{id}` | `ReleaseManifest` |
 | `list_releases` | `GET /v1/releases` | 목록(`ReleaseManifest`, 최신부터) |
 | `load_bundle` | `GET /v1/releases/{id}/bundle` | tar: `manifest.json`, `question_bank.json`, `adapters/LORA_A/…`, `adapters/LORA_B/…`. PASS가 아닌 릴리스는 412. 클라이언트가 모든 해시를 검증 |
+| `get_release_question_bank` | `GET /v1/releases/{id}/question-bank` (2.7.0) | `SurveyQuestionBankRead` 응답 `{release_id, content_hash, question_bank}`. 어댑터 없이 문항 세트만. PASS가 아닌 릴리스는 412. 클라이언트가 문항 세트 해시를 검증 |
 | `get_decision` | `GET /v1/decisions/{id}` | `GateDecision` |
 | `find_decisions` | `GET /v1/decisions?question_set_id=&question_set_version=&lora_a_id=&lora_a_version=&lora_b_id=&lora_b_version=&submission_id=` | 목록(`GateDecision`, 최신부터) |
 
