@@ -19,7 +19,7 @@ Page[T]    = (items: list[T], next_cursor: str | None)
 | I5 GateService | release-gate | operator, ops-feedback, release-approver(admin-console 경유, 게이트웨이가 사람 인증 뒤 `X-Openit-User`를 붙임) | — |
 | I6 TraceIngest | ops-feedback | survey-service | — |
 | I7 FailureStore | ops-feedback | ops-feedback | synthetic-data, model-lab, question-authoring, admin-console(사례 검토) |
-| I8 turn-engine (출력 검증, 2.0.0에서 대체) | turn-engine | — | survey-service |
+| I8 turn-engine (3.0.0 폐기: 출력 규칙은 계약 `action_rules`, 서버가 보증, D109·ADR 0010) | — | — | — |
 | I9 model-runtime | model-runtime | — | survey-service, model-lab, release-gate |
 | I10 공개 API | survey-service | — | kiosk-frontend(환자 화면, 직원 콘솔). 운영 화면(admin-console)은 I5·I4·I7만 쓴다 |
 
@@ -137,7 +137,11 @@ get_trace(deidentified_trace_ref: str) -> dict         # 비식별 TurnTrace(Dei
 
 소비자가 지키는 것: `review_status`가 CONFIRMED이고 `expected`가 있는 것만 정답 있는 회귀 케이스로 쓴다.
 
-## I8. turn-engine — 대체: 출력 검증 라이브러리 (2.0.0, D74·D75)
+## I8. turn-engine — 3.0.0 폐기 (D109)
+
+> 3.0.0: turn-engine은 쓰지 않는다. LoRA-A 출력 규칙은 계약 `boundary_contracts.action_rules`와 규칙 데이터가 정본이고 model-runtime 서버가 보증한다(ADR 0010, R7). 계보 표지는 `action_rules_version`. 아래는 2.x 기록이다.
+
+### (2.x 기록) 출력 검증 라이브러리 (2.0.0, D74·D75)
 
 `normalize`, `judge`, `write_record`, `plan`은 이 계약에서 없어졌다. 이 함수들은 파서 출력을 정규화·판정하고 다음 문항을 계획하는 단계였는데, 학습 데이터셋 v2에서는 LoRA-A가 값 정규화·절차(`action`)·다음 문항(`next_item`)을 한 번에 낸다(`ActionExtraction`). 서비스에는 정규화기·판정기·Plan 코드가 없다. v1.3.3은 태그로 남는다.
 

@@ -19,7 +19,7 @@
 | I5 GateService | release-gate | (쓰는 쪽: operator, ops-feedback) | `## I5` |
 | I6 TraceIngest | ops-feedback | (쓰는 쪽: survey-service) | `## I6` |
 | I7 FailureStore | ops-feedback | synthetic-data, model-lab, question-authoring | `## I7` |
-| I8 출력 검증(2.0.0에서 대체) | turn-engine | survey-service | 라이브러리, HTTP 없음 |
+| I8 출력 검증(3.0.0 폐기, 계약 `action_rules`가 대체, D109) | — | — | 라이브러리 없음 |
 | I9 model-runtime 추론 | model-runtime | survey-service, model-lab, release-gate | `## I9` |
 | I10 공개 API | survey-service | kiosk-frontend(환자 화면, 직원 콘솔) | `PUBLIC_API.md`, `HTTP.md ## I10` |
 

@@ -12,7 +12,8 @@ class C260(unittest.TestCase):
     def test_SetupEnvReport_시험_명령(self):
         base = {"area": "kiosk-frontend", "status": "ok", "exit_code": 0, "seconds": 3}
         self.assertTrue(ok("SetupEnvReport", dict(base, environment={"kind": "node-modules", "path": "node_modules", "test_command": ["npm", "test"]})))
-        self.assertTrue(ok("SetupEnvReport", base))                                    # 2.x에서는 선택
+        self.assertFalse(ok("SetupEnvReport", base))                                   # 3.0.0: ok면 environment 필수
+        self.assertTrue(ok("SetupEnvReport", dict(base, status="fail", exit_code=1)))  # 실패 보고에는 없어도 된다
         self.assertFalse(ok("SetupEnvReport", dict(base, environment={"kind": "node-modules", "path": "/abs", "test_command": ["npm", "test"]})))
         self.assertFalse(ok("SetupEnvReport", dict(base, environment={"kind": "python-venv", "path": ".venv", "test_command": []})))
 

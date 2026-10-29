@@ -1,5 +1,5 @@
 {
-  "pipeline_schema_version": "2.0",
+  "pipeline_schema_version": "3.0",
   "package_id": "lora-a",
   "version": "1.2.0",
   "role": "LORA_A",
@@ -23,7 +23,7 @@
       "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
     },
     "training_run_id": "run-1",
-    "turn_engine_version": "0.1.0",
+    "action_rules_version": "2",
     "model_runtime_version": "0.1.0",
     "question_sets": [
       {

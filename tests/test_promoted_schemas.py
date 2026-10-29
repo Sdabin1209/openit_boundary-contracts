@@ -56,7 +56,7 @@ class PromotedSchemas(unittest.TestCase):
     def test_스키마_목록은_매니페스트와_같다(self):
         on_disk = {p.name[: -len(".schema.json")] for p in schema_dir().glob("*.schema.json")}
         self.assertTrue(_names() <= on_disk, _names() - on_disk)
-        self.assertEqual(len(_names()), 49)  # 영역 경계 스키마 49개(D107). 늘거나 줄면 이 숫자와 test_package를 함께 고친다
+        self.assertEqual(len(_names()), 48)  # 영역 경계 스키마 49개(D107) - 3.0.0 StaticImageInterface 제거 = 48. 늘거나 줄면 이 숫자와 test_package를 함께 고친다
 
     def test_스키마는_유효하고_ref가_풀린다(self):
         for n in sorted(_names()):

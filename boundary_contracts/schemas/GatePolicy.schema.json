@@ -21,7 +21,7 @@
           "properties": {
             "require_lineage_runtime_match": {
               "type": "boolean",
-              "description": "기본 true. 모델 학습 계보의 turn-engine·model-runtime 버전이 게이트가 아는 값과 같아야 한다(RG-01의 출처 문제는 별도)."
+              "description": "기본 true. 모델 학습 계보의 규칙 세대(action_rules_version)·model-runtime 버전이 게이트가 아는 값과 같아야 한다(RG-01의 출처 문제는 별도)."
             }
           }
         }

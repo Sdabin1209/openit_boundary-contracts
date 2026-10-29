@@ -1,5 +1,5 @@
 {
-  "pipeline_schema_version": "2.0",
+  "pipeline_schema_version": "3.0",
   "code": "UNAVAILABLE",
   "message": "수집 서비스가 응답하지 않음",
   "retryable": true

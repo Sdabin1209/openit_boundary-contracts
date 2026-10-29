@@ -47,5 +47,5 @@
     }
   },
   "survey_schema_dir": "../../survey-service/schema",
-  "turn_engine_version": "0.0.0-unpinned"
+  "action_rules_version": "2"
 }

@@ -1,5 +1,5 @@
 {
-  "pipeline_schema_version": "2.0",
+  "pipeline_schema_version": "3.0",
   "classification_id": "cc-1",
   "to": {
     "id": "qs-main",

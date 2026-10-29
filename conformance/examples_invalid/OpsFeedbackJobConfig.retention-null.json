@@ -23,8 +23,6 @@
       "action",
       "next_item"
     ],
-    "scrub_string_keys": [],
-    "scrub_patterns": {},
     "unlisted_string_action": "mask",
     "mask_defs": [
       "Value"

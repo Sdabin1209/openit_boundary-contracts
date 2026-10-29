@@ -9,7 +9,7 @@
   "service_version": "0.2.0",
   "active_release": "rel-1",
   "contract_version": 1,
-  "pipeline_schema_version": "2.1",
+  "pipeline_schema_version": "3.0",
   "staff_alerts": {
     "deduplicated": 0,
     "created": 0,

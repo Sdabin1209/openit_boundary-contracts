@@ -195,7 +195,7 @@
           "row_names": [
             "semantic_violation_rate"
           ],
-          "meaning": "turn-engine `validate_extraction`이 위반을 하나 이상 낸 출력의 비율(낮을수록 좋음). 정답과 비교하지 않는다. 위반 코드별 비율은 `slice`(kind=`VIOLATION_CODE`, value=코드)로 낸다. **기준 시험**: 학습 데이터 A 출력 전수가 위반 0이어야 하며 0이 아니면 검증기나 데이터의 문제다. 평가가 turn-engine(순수 함수 라이브러리, 버전 고정)에 의존하는 것을 허용한다",
+          "meaning": "계약 `action_rules.check_action_extraction`이 위반을 하나 이상 낸 출력의 비율(낮을수록 좋음). 정답과 비교하지 않는다. 위반 코드별 비율은 `slice`(kind=`VIOLATION_CODE`, value=코드)로 낸다. **기준 시험**: 학습 데이터 A 출력 전수가 위반 0이어야 하며 0이 아니면 검증기나 데이터의 문제다. 평가가 turn-engine(순수 함수 라이브러리, 버전 고정)에 의존하는 것을 허용한다",
           "order": 8
         }
       ]

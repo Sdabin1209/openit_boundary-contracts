@@ -362,7 +362,7 @@
         "keep_string_keys",
         "unlisted_string_action"
       ],
-      "description": "비식별 정책. 기본값 없음(사용자 결정). 제안 불변식: pseudonymize_keys에 session_id가 있어야 admin delete-session이 비식별 trace를 찾는다(코드는 없어도 시작한다).",
+      "description": "비식별 정책. 기본값 없음(사용자 결정). 제안 불변식: pseudonymize_keys에 session_id가 있어야 admin delete-session이 비식별 trace를 찾는다(코드는 없어도 시작한다). 3.0.0(U25): 계약 OpsFeedbackDeidentifiedTrace 밖 출력을 내던 선택지(scrub_string_keys·scrub_patterns 치환 문장, unlisted_string_action drop, count_map_key_pattern)를 뺐다. keep_string_patterns로 64자 넘는 값을 남기는 것은 스키마로 막지 못해 비식별기가 출력 자기 검사로 DEID_FAILED로 닫는다.",
       "properties": {
         "policy_id": {
           "type": "string",
@@ -385,24 +385,12 @@
         "keep_count_map_keys": {
           "$ref": "#/$defs/StrList"
         },
-        "count_map_key_pattern": {
-          "type": "string",
-          "format": "regex"
-        },
         "keep_pause_reason": {
           "type": "boolean"
         },
-        "scrub_string_keys": {
-          "$ref": "#/$defs/StrList"
-        },
-        "scrub_patterns": {
-          "$ref": "#/$defs/RegexMap"
-        },
         "unlisted_string_action": {
-          "enum": [
-            "mask",
-            "drop"
-          ]
+          "const": "mask",
+          "description": "3.0.0(U25, ops-feedback CR-008 안 2): mask만. drop은 비식별 뷰(OpsFeedbackDeidentifiedTrace)의 필수 칸을 빠뜨려 계약 밖 출력을 냈다"
         },
         "mask_defs": {
           "$ref": "#/$defs/StrList"

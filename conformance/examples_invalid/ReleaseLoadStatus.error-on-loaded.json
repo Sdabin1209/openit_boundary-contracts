@@ -2,7 +2,7 @@
   "release_id": "r1",
   "state": "LOADED",
   "error": {
-    "pipeline_schema_version": "2.0",
+    "pipeline_schema_version": "3.0",
     "code": "UNAVAILABLE",
     "message": "x",
     "retryable": true

@@ -2,12 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "ExtractRequest.schema.json",
   "title": "ExtractRequest",
-  "description": "I9 extract 요청 본문의 확장형(2.2.0, ADR 0010 결정 5). 모델이 받는 입력(input)과 별개로 문항 순서표(flow)를 싣는다. 서버(LoRA-A 컴포넌트)는 flow가 있으면 출력이 check_action_extraction 규칙을 지키는 것을 보증한다. 본문이 ActionExtractionInput 그대로(flow 없음)인 옛 형식은 2.x에서 받아들이며 규칙 보증이 없다. 3.0.0에서 이 형식만 남는다. 2.4.0: 선택 필드 `fields`(QuestionFieldSpec)를 더한다. 서버는 fields가 있으면 출력 값이 칸 규격과 값 규칙(ActionExtractionRules.value_rules)을 지키는 것도 보증한다. 위반은 데이터셋이 그 상황에서 낸 정답 모양으로 바꾸거나(apply_value_rules), 바꿀 수 없는 위반이면 OUTPUT_INVALID로 거절한다.",
+  "description": "I9 extract 요청 본문의 확장형(2.2.0, ADR 0010 결정 5). 모델이 받는 입력(input)과 별개로 문항 순서표(flow)를 싣는다. 서버(LoRA-A 컴포넌트)는 flow가 있으면 출력이 check_action_extraction 규칙을 지키는 것을 보증한다. 본문이 ActionExtractionInput 그대로(flow 없음)인 옛 형식은 2.x에서 받아들이며 규칙 보증이 없다. 3.0.0에서 이 형식만 남는다. 2.4.0: 선택 필드 `fields`(QuestionFieldSpec)를 더한다. 서버는 fields가 있으면 출력 값이 칸 규격과 값 규칙(ActionExtractionRules.value_rules)을 지키는 것도 보증한다. 위반은 데이터셋이 그 상황에서 낸 정답 모양으로 바꾸거나(apply_value_rules), 바꿀 수 없는 위반이면 OUTPUT_INVALID로 거절한다. 3.0.0: 본문은 이것만 받는다(옛 ActionExtractionInput 그대로의 본문 거부). flow·fields 필수: 서버가 흐름 규칙과 값 규칙을 항상 보증하고, 받는 쪽은 다시 검사하지 않는다(R7, D115).",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "input",
-    "flow"
+    "flow",
+    "fields"
   ],
   "properties": {
     "input": {

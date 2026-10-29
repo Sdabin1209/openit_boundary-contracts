@@ -10,7 +10,7 @@ class Package(unittest.TestCase):
         self.assertIn("ReleaseManifest.schema.json", names)
         self.assertIn("_common.schema.json", names)
         records = {n[: -len(".schema.json")] for n in names if not n.startswith("_")}
-        self.assertEqual(len(records), 85)  # 2.8.0: SurveyRiskRulesFile(U48) 1개 추가로 85. 2.4.0: QuestionFieldSpec(U32) 1개 추가로 84. 2.0.0: 31개. 2.2.0: ActionExtractionRules(ADR 0010) 1개와 영역 경계 스키마 49개(D107), QuestionFlowTable·ExtractRequest(ADR 0010)를 더했다
+        self.assertEqual(len(records), 84)  # 3.0.0: StaticImageInterface 제거로 84. 2.8.0: SurveyRiskRulesFile(U48) 1개 추가로 85. 2.4.0: QuestionFieldSpec(U32) 1개 추가로 84. 2.0.0: 31개. 2.2.0: ActionExtractionRules(ADR 0010) 1개와 영역 경계 스키마 49개(D107), QuestionFlowTable·ExtractRequest(ADR 0010)를 더했다
         self.assertFalse({"ParserSample", "GeneratorSample"} & records)
         self.assertTrue({"ActionExtractionInput", "ActionExtraction", "ActionExtractionSample", "ResponseRequest",
                          "ResponseText", "ResponseSample"} <= records)

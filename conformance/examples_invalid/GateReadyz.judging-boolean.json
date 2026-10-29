@@ -4,7 +4,7 @@
   "gate_policy_version": "human-approval-1",
   "judging": true,
   "awaiting_approval": 0,
-  "turn_engine_version": "0.4.2",
+  "action_rules_version": "2",
   "model_runtime_version": "0.7.7",
   "retention": {
     "releases": 0,

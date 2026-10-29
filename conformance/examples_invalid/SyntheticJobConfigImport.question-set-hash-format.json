@@ -22,5 +22,5 @@
     "max_invalid_rate": 0.0,
     "max_invalid_rows": 0
   },
-  "turn_engine_version": "0.0.0-unpinned"
+  "action_rules_version": "2"
 }

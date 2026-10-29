@@ -1,5 +1,5 @@
 {
-  "pipeline_schema_version": "2.0",
+  "pipeline_schema_version": "3.0",
   "sample_id": "rs-1",
   "scenario_id": "c_Q1.D03_P03_partial_0010_v3",
   "split": "VALIDATION",

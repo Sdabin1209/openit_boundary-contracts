@@ -15,7 +15,7 @@
   "error": {
     "code": "UNAVAILABLE",
     "message": "저장소에 연결할 수 없다",
-    "pipeline_schema_version": "2.0",
+    "pipeline_schema_version": "3.0",
     "retryable": true
   },
   "first_invalid_line": {},

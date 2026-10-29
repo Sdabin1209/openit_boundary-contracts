@@ -27,7 +27,7 @@
 | `reason_accuracy` | ACCURACY | 신설 | `reason` 일치율(reason이 있는 행만). 분리 기준 `REASON` |
 | `status_accuracy` | ACCURACY | 신설 | `values[].status` 일치율 |
 | `next_item_accuracy` | ACCURACY | 신설 | `next_item` 일치율. **action별 분모로 낸다**(`slice` kind=`ACTION`). CONFIRM은 현재 문항이 아니라 충돌 대상 문항인 경우가 많다 `[기본값]` |
-| `semantic_violation_rate` | ACCURACY | 신설(D97) | turn-engine `validate_extraction`이 위반을 하나 이상 낸 출력의 비율(낮을수록 좋음). 정답과 비교하지 않는다. 위반 코드별 비율은 `slice`(kind=`VIOLATION_CODE`, value=코드)로 낸다. **기준 시험**: 학습 데이터 A 출력 전수가 위반 0이어야 하며 0이 아니면 검증기나 데이터의 문제다. 평가가 turn-engine(순수 함수 라이브러리, 버전 고정)에 의존하는 것을 허용한다 |
+| `semantic_violation_rate` | ACCURACY | 신설(D97) | 계약 `action_rules.check_action_extraction`이 위반을 하나 이상 낸 출력의 비율(낮을수록 좋음). 정답과 비교하지 않는다. 위반 코드별 비율은 `slice`(kind=`VIOLATION_CODE`, value=코드)로 낸다. **기준 시험**: 학습 데이터 A 출력 전수가 위반 0이어야 하며 0이 아니면 검증기나 데이터의 문제다. 평가가 turn-engine(순수 함수 라이브러리, 버전 고정)에 의존하는 것을 허용한다 |
 | `schema_valid_raw` | PROTECTION | 유지(뜻 좁힘) | 출력 보호 전 `ActionExtraction` 스키마 통과율. **제약 디코딩을 켠 값과 끈 값을 모두 보고한다**(`slice` kind=`CONSTRAINED_DECODING`, value=`on`/`off`) `[기본값]`. 켠 값은 100% 근처라 변별력이 낮다 |
 | `output_invalid_rate` | PROTECTION | 신설(D75) | 재시도 후에도 형식을 못 지켜 `OUTPUT_INVALID`가 된 비율(낮을수록 좋음). 보조로 재시도 횟수(`X-Openit-Attempts`) 분포는 `output_attempts_mean`(`unit=count`)으로 낸다. 서빙 쪽 지표이므로 평가 백엔드가 같은 경로를 쓰는지 `evaluation_backend`로 구분한다 |
 <!-- END GENERATED metrics:A -->

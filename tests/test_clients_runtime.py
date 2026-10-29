@@ -1,6 +1,6 @@
 import json
+import re
 import sys
-import json
 import unittest
 from pathlib import Path
 
@@ -12,6 +12,28 @@ from _fixtures import READ, TOKENS, WRITE, example  # noqa: E402
 from boundary_contracts import BoundaryError  # noqa: E402
 from boundary_contracts.clients import HttpModelRuntime, is_output_invalid  # noqa: E402
 from conformance.servers import RuntimeReferenceServer  # noqa: E402
+
+
+# 3.0.0: extract 본문은 ExtractRequest{input, flow, fields}만. ActionExtractionInput.next(Q10, 출력 NEXT/END)에 맞는 흐름표와 칸 규격
+FLOW = {"order": ["Q9_2", "Q10"], "skips": []}
+FIELDS = {"fields": [{"slot": "Q10.days", "data_type": "integer", "unit": "day/week", "minimum": 0, "maximum": 7}]}
+CTX = {"flow": FLOW, "fields": FIELDS}
+
+
+def fields_of(out):
+    """출력 값의 칸마다 자료형만 적은 규격(값 규칙이 끼어들지 않게 범위는 두지 않는다)."""
+    kind = lambda v: "boolean" if isinstance(v, bool) else "integer" if isinstance(v, int) else "number" if isinstance(v, float) else "option"
+    out_fields, seen = [], set()
+    for v in out["values"]:
+        slot = re.sub(r"\[[^]]*\]", "", v["key"])
+        if slot in seen:
+            continue
+        seen.add(slot)
+        f = {"slot": slot, "data_type": kind(v["value"]) if v["value"] is not None else "option"}
+        if f["data_type"] == "option":
+            f["options"] = [v["value"]] if isinstance(v["value"], str) else ["x"]
+        out_fields.append(f)
+    return {"fields": out_fields}
 
 
 class Runtime(unittest.TestCase):
@@ -45,7 +67,7 @@ class Runtime(unittest.TestCase):
     # ---- extract (LoRA-A) ----
     def test_extract는_ActionExtraction을_돌려준다(self):
         self.c.load_release("rel-0001")
-        r = self.c.extract("rel-0001", example("ActionExtractionInput.next"))
+        r = self.c.extract("rel-0001", example("ActionExtractionInput.next"), **CTX)
         self.assertEqual(r.output, example("ActionExtraction.next"))
         self.assertEqual((r.outcome, r.attempts, r.protections, r.is_fallback), ("ok", 1, {}, False))
 
@@ -59,14 +81,12 @@ class Runtime(unittest.TestCase):
         items = [inp["question_id"]] + [item_of(v["key"]) for v in good["values"]] + [item_of(t) for t in good.get("targets", [])]
         flow = {"order": list(dict.fromkeys(items)) + ["Q99"], "skips": []}
         self.srv.extract_fn = lambda req: good
-        self.assertEqual(self.c.extract("rel-0001", inp, flow=flow).output, good)
+        self.assertEqual(self.c.extract("rel-0001", inp, flow=flow, fields=fields_of(good)).output, good)
         bad = dict(good, next_item="Q99")               # REASK인데 다른 문항: 규칙 위반 -> 서버가 내지 않는다
         self.srv.extract_fn = lambda req: bad
         with self.assertRaises(BoundaryError) as cm:
-            self.c.extract("rel-0001", inp, flow=flow)
+            self.c.extract("rel-0001", inp, flow=flow, fields=fields_of(good))
         self.assertTrue(is_output_invalid(cm.exception))
-        # flow 없는 호환 본문은 규칙을 보지 않는다(형식만)
-        self.assertEqual(self.c.extract("rel-0001", inp).output["next_item"], "Q99")
 
     def test_fields를_주면_서버가_값_규칙을_보증한다(self):
         # 기대: 계약 2.4.1 — fields는 ExtractRequest.fields로 실린다. 기준 서버는 apply_value_rules를 적용한다.
@@ -87,33 +107,33 @@ class Runtime(unittest.TestCase):
         with self.assertRaises(BoundaryError) as cm:
             self.c.extract("rel-0001", inp, flow=flow, fields=fields)
         self.assertTrue(is_output_invalid(cm.exception))
-        # fields 없이 보내면 2.4.0 이전과 같다(값 규칙 없음)
-        self.srv.extract_fn = lambda req: wrong
-        self.assertEqual(self.c.extract("rel-0001", inp, flow=flow).output["next_item"], "END")
 
-    def test_fields는_flow_없이_보낼_수_없다(self):
+
+    def test_3_0_서버는_ExtractRequest_밖의_본문을_거부한다(self):
+        # 기대: 3.0.0 — 옛 본문(ActionExtractionInput 그대로)과 fields 없는 ExtractRequest는 400 INVALID_RECORD
         self.c.load_release("rel-0001")
-        n = len(self.srv.requests)
-        fields = {"fields": [{"slot": "Q10.days", "data_type": "integer"}]}
-        self.assertEqual(self.code(self.c.extract, "rel-0001", example("ActionExtractionInput.next"), fields=fields), "INVALID_RECORD")
-        self.assertEqual(len(self.srv.requests), n)
+        inp = example("ActionExtractionInput.next")
+        for body in (inp, {"input": inp, "flow": FLOW}):
+            with self.assertRaises(BoundaryError) as cm:
+                self.c._json("POST", "/v1/releases/rel-0001/extract", body=body)
+            self.assertEqual(cm.exception.code, "INVALID_RECORD")
 
     def test_flow가_계약을_어기면_보내지_않는다(self):
         self.c.load_release("rel-0001")
         n = len(self.srv.requests)
         er = example("ExtractRequest")
-        self.assertEqual(self.code(self.c.extract, "rel-0001", er["input"], flow={"order": []}), "INVALID_RECORD")
+        self.assertEqual(self.code(self.c.extract, "rel-0001", er["input"], flow={"order": []}, fields=FIELDS), "INVALID_RECORD")
         self.assertEqual(len(self.srv.requests), n)
 
     def test_적재되지_않은_릴리스는_404(self):
-        self.assertEqual(self.code(self.c.extract, "rel-0001", example("ActionExtractionInput.next")), "NOT_FOUND")
+        self.assertEqual(self.code(self.c.extract, "rel-0001", example("ActionExtractionInput.next"), **CTX), "NOT_FOUND")
         self.assertEqual(self.code(self.c.respond, "rel-0001", example("ResponseRequest.start")), "NOT_FOUND")
 
     def test_extract_입력은_보내기_전에_검증한다(self):
         self.c.load_release("rel-0001")
         n = len(self.srv.requests)
-        self.assertEqual(self.code(self.c.extract, "rel-0001", {"question_id": "Q1.D01"}), "INVALID_RECORD")
-        self.assertEqual(self.code(self.c.extract, "rel-0001", example("ResponseRequest.start")), "INVALID_RECORD")
+        self.assertEqual(self.code(self.c.extract, "rel-0001", {"question_id": "Q1.D01"}, **CTX), "INVALID_RECORD")
+        self.assertEqual(self.code(self.c.extract, "rel-0001", example("ResponseRequest.start"), **CTX), "INVALID_RECORD")
         self.assertEqual(len(self.srv.requests), n)
 
     def test_서버도_입력을_검증한다(self):
@@ -129,13 +149,13 @@ class Runtime(unittest.TestCase):
         bad["reason"] = "MISSING"  # NEXT에는 reason이 없다
         self.srv.extract_fn = lambda req: bad
         with self.assertRaises(BoundaryError) as cm:
-            self.c.extract("rel-0001", example("ActionExtractionInput.next"))
+            self.c.extract("rel-0001", example("ActionExtractionInput.next"), **CTX)
         self.assertEqual(cm.exception.code, "UNAVAILABLE")
         self.assertTrue(cm.exception.retryable)
         self.assertEqual(cm.exception.details["reason"], "OUTPUT_INVALID")
         self.assertTrue(is_output_invalid(cm.exception))
         self.srv.extract_fn = lambda req: example("ActionExtraction.next")  # 다음 호출은 정상(상태가 남지 않는다)
-        self.assertEqual(self.c.extract("rel-0001", example("ActionExtractionInput.next")).outcome, "ok")
+        self.assertEqual(self.c.extract("rel-0001", example("ActionExtractionInput.next"), **CTX).outcome, "ok")
 
     def test_다른_UNAVAILABLE은_OUTPUT_INVALID가_아니다(self):
         self.assertFalse(is_output_invalid(BoundaryError("UNAVAILABLE", "x")))
@@ -150,7 +170,7 @@ class Runtime(unittest.TestCase):
         bad2["unknown_field"] = 1  # 모델 출력은 읽기 모드 완화를 하지 않는다
         for body in (bad, bad2):
             self.srv.overrides[path] = (200, "application/json", json.dumps(body).encode(), {"X-Openit-Outcome": "ok"})
-            self.assertEqual(self.code(self.c.extract, "rel-0001", example("ActionExtractionInput.next")), "INTEGRITY_ERROR")
+            self.assertEqual(self.code(self.c.extract, "rel-0001", example("ActionExtractionInput.next"), **CTX), "INTEGRITY_ERROR")
 
     # ---- respond (LoRA-B) ----
     def test_respond는_문장_그대로를_돌려준다(self):
@@ -197,13 +217,13 @@ class Runtime(unittest.TestCase):
 
     def test_읽기_토큰은_추론은_되지만_적재는_안_된다(self):
         self.c.load_release("rel-0001")
-        r = self.reader.extract("rel-0001", example("ActionExtractionInput.next"))
+        r = self.reader.extract("rel-0001", example("ActionExtractionInput.next"), **CTX)
         self.assertEqual(r.outcome, "ok")
 
     def test_추론은_부작용이_없다(self):
         self.c.load_release("rel-0001")
-        a = self.c.extract("rel-0001", example("ActionExtractionInput.next"))
-        b = self.c.extract("rel-0001", example("ActionExtractionInput.next"))
+        a = self.c.extract("rel-0001", example("ActionExtractionInput.next"), **CTX)
+        b = self.c.extract("rel-0001", example("ActionExtractionInput.next"), **CTX)
         self.assertEqual(a, b)
 
 

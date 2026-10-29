@@ -1,7 +1,7 @@
 {
   "items": [
     {
-      "pipeline_schema_version": "2.0",
+      "pipeline_schema_version": "3.0",
       "release_id": "rel-0004",
       "created_at": "2026-10-08T00:00:00Z",
       "gate_decision_id": "gd-0004",
@@ -21,7 +21,7 @@
         "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
       },
       "runtime_contract_version": 1,
-      "turn_engine_version": "0.1.0",
+      "action_rules_version": "2",
       "model_runtime_version": "0.1.0",
       "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
       "adapters": {
@@ -50,7 +50,7 @@
       }
     },
     {
-      "pipeline_schema_version": "2.0",
+      "pipeline_schema_version": "3.0",
       "release_id": "rel-0003",
       "created_at": "2026-10-06T00:00:00Z",
       "gate_decision_id": "gd-0003",
@@ -70,7 +70,7 @@
         "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
       },
       "runtime_contract_version": 1,
-      "turn_engine_version": "0.1.0",
+      "action_rules_version": "2",
       "model_runtime_version": "0.1.0",
       "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
       "adapters": {

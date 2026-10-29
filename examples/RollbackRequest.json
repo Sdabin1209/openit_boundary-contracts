@@ -1,5 +1,5 @@
 {
-  "pipeline_schema_version": "2.0",
+  "pipeline_schema_version": "3.0",
   "request_id": "rb-1",
   "requested_at": "2026-10-15T00:00:00Z",
   "from_release_id": "rel-0002",

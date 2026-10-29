@@ -507,21 +507,16 @@ class RuntimeReferenceServer(ReferenceServer):
         if rid not in self.loaded:
             raise BoundaryError("NOT_FOUND", "적재되지 않은 릴리스")
         if op == "/extract":
-            # 2.2.0: 본문은 ExtractRequest{input, flow} 또는 2.x 호환 ActionExtractionInput. 어느 쪽인지는 스키마로 판정한다
+            # 3.0.0: 본문은 ExtractRequest{input, flow, fields}만(옛 ActionExtractionInput 본문은 400 INVALID_RECORD)
             from boundary_contracts import validator
-            parsed = self._body(body)
-            flow = fields = None
-            if isinstance(parsed, dict) and "flow" in parsed:
-                full = self._checked(body, "ExtractRequest")
-                req, flow, fields = full["input"], full["flow"], full.get("fields")
-            else:
-                req = self._checked(body, "ActionExtractionInput")
+            full = self._checked(body, "ExtractRequest")
+            req, flow, fields = full["input"], full["flow"], full["fields"]
             out = self.extract_fn(req)
             bad = bool(list(validator("ActionExtraction").iter_errors(out)))
-            if not bad and flow is not None:
+            if not bad:
                 from boundary_contracts.action_rules import check_action_extraction
                 bad = bool(check_action_extraction(req, out, flow))   # flow가 있으면 규칙 보증(HTTP.md I9)
-                if not bad and fields is not None:
+                if not bad:
                     from boundary_contracts.action_rules import apply_value_rules
                     out, viol, _ = apply_value_rules(req, out, fields, flow)   # 2.4.0 값 규칙: 걸리면 데이터셋 정답 모양으로 바꾼다
                     bad = bool(viol)

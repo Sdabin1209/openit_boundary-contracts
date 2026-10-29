@@ -11,7 +11,7 @@
     "survey_schema_dir",
     "question_sets",
     "source_label",
-    "turn_engine_version",
+    "action_rules_version",
     "tolerance",
     "output"
   ],
@@ -44,9 +44,9 @@
       "pattern": "\\S",
       "description": "데이터 출처 표시. generator_version에 들어간다. 비어 있거나 공백뿐이면 거부."
     },
-    "turn_engine_version": {
+    "action_rules_version": {
       "type": "string",
-      "description": "매니페스트 turn_engine_version으로 그대로 기록된다(SD-06은 이 CR 범위 밖)."
+      "description": "계약 ActionExtractionRules.rules_version(LoRA-A 출력 규칙의 세대). 3.0.0에서 turn_engine_version을 대체(D109): 규칙의 정본은 계약 데이터다."
     },
     "tolerance": {
       "type": "object",

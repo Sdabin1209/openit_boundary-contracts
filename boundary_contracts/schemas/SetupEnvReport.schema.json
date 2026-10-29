@@ -54,7 +54,7 @@
         "path"
       ],
       "additionalProperties": false,
-      "description": "준비된 시험 환경(2.6.0 확정, OPEN_GAPS U43). path는 영역 리포 루트 기준 상대 경로. test_command는 리포 루트에서 영역 시험 전체를 돌리는 argv(예: [\".venv/bin/python\",\"-m\",\"pytest\",\"-q\"], [\"npm\",\"test\"]). deploy는 이것만 읽고 이웃의 .venv·node_modules 경로나 시험 도구를 짐작하지 않는다(구조 규칙 1). 2.x에서는 선택이고 없으면 deploy는 그 영역을 '검증 안 함'으로 둔다. 3.0.0에서 필수."
+      "description": "준비된 시험 환경(2.6.0 확정, OPEN_GAPS U43). path는 영역 리포 루트 기준 상대 경로. test_command는 리포 루트에서 영역 시험 전체를 돌리는 argv(예: [\".venv/bin/python\",\"-m\",\"pytest\",\"-q\"], [\"npm\",\"test\"]). deploy는 이것만 읽고 이웃의 .venv·node_modules 경로나 시험 도구를 짐작하지 않는다(구조 규칙 1). 3.0.0: status가 ok면 필수(영역이 준비한 환경과 시험 명령을 반드시 선언한다). 실패·스크립트 없음·폴더 없음 보고에는 없다."
     }
   },
   "required": [
@@ -63,5 +63,24 @@
     "exit_code",
     "seconds"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "environment"
+        ]
+      }
+    }
+  ]
 }

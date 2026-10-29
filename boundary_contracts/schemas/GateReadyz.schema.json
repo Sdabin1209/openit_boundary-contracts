@@ -13,7 +13,7 @@
         "gate_policy_version",
         "judging",
         "awaiting_approval",
-        "turn_engine_version",
+        "action_rules_version",
         "model_runtime_version"
       ],
       "properties": {
@@ -42,9 +42,10 @@
           "type": "integer",
           "minimum": 0
         },
-        "turn_engine_version": {
+        "action_rules_version": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "계약 ActionExtractionRules.rules_version(LoRA-A 출력 규칙의 세대). 3.0.0에서 turn_engine_version을 대체(D109): 규칙의 정본은 계약 데이터다."
         },
         "model_runtime_version": {
           "type": "string",

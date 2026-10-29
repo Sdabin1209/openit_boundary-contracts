@@ -2,6 +2,16 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.0.0 (MAJOR, 깨지는 변경. `PIPELINE_SCHEMA_VERSION` "3.0". 2.x 레코드는 클라이언트가 UNSUPPORTED_VERSION으로 거부한다)
+2.x에서 하위 호환 때문에 미룬 변경을 한 번에 낸다(헤드 `docs/proposals/계약-3.0.0-후보.md`).
+1. **`turn_engine_version` → `action_rules_version`(D109).** ReleaseManifest·DatasetManifest·ModelPackageManifest·GateReadyz·SyntheticJobConfigRun/Import. 값은 계약 `ActionExtractionRules.rules_version`(지금 "2"). 계보 일치 검사는 이 값으로 한다. `BuildImageRequest.versions.turn_engine`과 이미지 라벨 `io.openit.turn-engine` 제거(라벨이 남아 있으면 ImageLabels가 거부).
+2. **I9 extract 본문은 `ExtractRequest{input, flow, fields}`만**(D108, D115). 옛 `ActionExtractionInput` 그대로의 본문과 fields 없는 요청은 400 INVALID_RECORD. 클라이언트 `HttpModelRuntime.extract(release_id, request, flow, fields)`는 flow·fields가 필수 인자다. 서버가 흐름 규칙과 값 규칙을 항상 보증하므로 받는 쪽은 다시 검사하지 않는다(R7).
+3. **`SetupEnvReport`: status가 ok면 `environment`(test_command 포함) 필수**(U43).
+4. **`sdk.ReleaseReader` Protocol에 `get_release_question_bank`**(U47, 2.7.0에서 미룸).
+5. **`OpsFeedbackJobConfig.deid`에서 계약 밖 출력을 내던 선택지 제거**(U25, ops-feedback CR-008 안 2): `scrub_string_keys`·`scrub_patterns`, `unlisted_string_action: drop`(이제 `mask`만), `count_map_key_pattern`.
+6. **`StaticImageInterface` 제거**(U47): port·user·env는 OCI 이미지 설정(EXPOSE·USER·ENV)이 표준으로 담고 경로는 `Exposure` 라벨이 담는다.
+- 영역 이행: 저장된 2.x 레코드(매니페스트 등)는 3.0 클라이언트가 읽지 않는다. 시연·시험 저장소는 3.0으로 다시 만든다(운영 데이터 없음, 2026-10-30 기준).
+
 ## 2.8.0 (MINOR, 추가형. `PIPELINE_SCHEMA_VERSION` "2.8". 클라이언트는 MAJOR만 비교)
 - **`SurveyRiskRulesFile`(OPEN_GAPS U48, 구조 규칙 1).** survey-service 위험 감지 규칙 파일(`SURVEY_RISK_RULES_FILE`)의 형식을 계약으로 둔다. deploy E2E가 시험용 규칙 파일을 만들어 주입하고(deploy CR-U48 안 A), 영역 내부 `risk_rules.py`를 읽지 않는다. 스키마로 표현 못 하는 id 중복·정규식 유효성은 survey-service가 시작 때 거부한다.
 

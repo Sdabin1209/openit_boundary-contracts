@@ -131,7 +131,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 
   - **2.4.0 `fields`(선택, QuestionFieldSpec):** 요청에 칸 규격이 있으면 서버는 `check_action_extraction` 뒤에 `apply_value_rules`를 적용해 값 규칙(범위·R1~R3)을 보증한다. 규칙에 걸린 출력은 데이터셋 정답 모양으로 바뀌어 200으로 나가고, 바꿀 수 없는 위반(`VALUE_TYPE_MISMATCH`, `VALUE_BELOW_MINIMUM`)은 다시 생성해도 남으면 503 `UNAVAILABLE`(`details.reason="OUTPUT_INVALID"`)이다. 호출자(survey-service)는 통과한 출력을 다시 검사하지 않는다(R7).
 
-## I8 turn-engine
+## I8 turn-engine (3.0.0 폐기, D109 — 출력 규칙은 계약 action_rules가 정본, model-runtime 서버가 보증)
 라이브러리라서 HTTP 면이 없다(INTERFACES.md I8).
 
 ## I10 공개 API — 소유: survey-service, 소비: kiosk-frontend

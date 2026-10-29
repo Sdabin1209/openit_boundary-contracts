@@ -4,7 +4,7 @@
   "error": {
     "code": "INVALID_RECORD",
     "message": "비식별되지 않은 실패 사례를 받았다: fc-x",
-    "pipeline_schema_version": "2.0",
+    "pipeline_schema_version": "3.0",
     "retryable": false
   },
   "job_version": "0.2.0",

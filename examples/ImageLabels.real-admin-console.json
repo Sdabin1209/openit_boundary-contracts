@@ -3,6 +3,5 @@
   "io.openit.contracts.survey-schema": "n/a",
   "io.openit.model-runtime": "n/a",
   "io.openit.revision": "982bd58",
-  "io.openit.service": "admin-console",
-  "io.openit.turn-engine": "n/a"
+  "io.openit.service": "admin-console"
 }

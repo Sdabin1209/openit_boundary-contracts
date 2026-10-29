@@ -1,1 +1,0 @@
-{"port": 8080, "env": {}, "routes": [{"path": "/healthz", "kind": "health"}, {"path": "/readyz", "kind": "ready"}], "not_served_prefixes": ["/staff/"], "user": "node"}
