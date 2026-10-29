@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "SurveyRiskRulesFile.schema.json",
+  "title": "SurveyRiskRulesFile",
+  "description": "survey-service 위험 감지 규칙 파일(설정 SURVEY_RISK_RULES_FILE이 가리키는 JSON). 2.8.0, OPEN_GAPS U48. 만드는 쪽: 병원 운영(임상 검토)·deploy(E2E 시험용 규칙). 읽는 쪽: survey-service. 형식의 정본을 계약에 두는 이유: deploy가 시험용 규칙 파일을 만들 때 survey-service 내부 파일(risk_rules.py)을 읽지 않게 한다(구조 규칙 1). 스키마로 표현하지 못하는 규칙은 survey-service가 시작 때 따로 거부한다: 규칙 id 중복, regex가 올바른 정규식이 아님. 규칙은 파일 순서로 보고 처음 걸린 규칙 하나만 쓴다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "rules"
+  ],
+  "properties": {
+    "_comment": {
+      "type": "string",
+      "description": "설명용(무시). JSON에 주석이 없어 하나만 허용"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "description",
+          "match"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "match": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "any_of"
+            ],
+            "properties": {
+              "any_of": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "contains"
+                      ],
+                      "properties": {
+                        "contains": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500,
+                          "pattern": "\\S"
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "regex"
+                      ],
+                      "properties": {
+                        "regex": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500,
+                          "pattern": "\\S"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -2,6 +2,9 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.8.0 (MINOR, 추가형. `PIPELINE_SCHEMA_VERSION` "2.8". 클라이언트는 MAJOR만 비교)
+- **`SurveyRiskRulesFile`(OPEN_GAPS U48, 구조 규칙 1).** survey-service 위험 감지 규칙 파일(`SURVEY_RISK_RULES_FILE`)의 형식을 계약으로 둔다. deploy E2E가 시험용 규칙 파일을 만들어 주입하고(deploy CR-U48 안 A), 영역 내부 `risk_rules.py`를 읽지 않는다. 스키마로 표현 못 하는 id 중복·정규식 유효성은 survey-service가 시작 때 거부한다.
+
 ## 2.7.0 (MINOR, 추가형. `PIPELINE_SCHEMA_VERSION` "2.7". 클라이언트는 MAJOR만 비교)
 - **I4 `get_release_question_bank`(OPEN_GAPS U47, SurveyQuestionBankRead).** `GET /v1/releases/{id}/question-bank` → `{release_id, content_hash, question_bank}`. 어댑터 없이 릴리스에 묶인 문항 세트만 준다(survey-service가 문항 세트를 얻으려고 어댑터까지 받던 SV-16). PASS가 아닌 릴리스는 412, 클라이언트가 문항 세트 해시를 검증한다. 기준 서버 구현 포함.
 - `sdk.ReleaseReader` Protocol에는 아직 넣지 않는다(release-gate 구현이 생기기 전에 넣으면 isinstance 검사가 깨진다). 3.0.0에서 넣는다.
