@@ -12,6 +12,7 @@ import json
 import re
 import tarfile
 import threading
+from pathlib import Path
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, unquote, urlsplit
@@ -474,8 +475,9 @@ class RuntimeReferenceServer(ReferenceServer):
     def _route(self, method, path, q, body, role):
         J = self._j
         if path == "/v1/info" and method == "GET":
-            return J({"service": "model-runtime-reference", "runtime_version": "0.0.0", "supported_contract_versions": [1],
-                      "backend": "fake", "loaded": sorted(self.loaded), "serving_config_hash": {}})
+            # 계약 RuntimeInfo의 예시를 바탕으로 적재 목록만 바꾼다(U45: 클라이언트가 스키마로 검증한다)
+            info = json.loads((Path(__file__).resolve().parent.parent / "examples" / "RuntimeInfo.json").read_text(encoding="utf-8"))
+            return J(dict(info, loaded=sorted(self.loaded)))
         g = re.fullmatch(r"/v1/releases/([^/]+)(|/extract|/respond)", path)
         if not g:
             raise BoundaryError("NOT_FOUND", "경로가 없다")

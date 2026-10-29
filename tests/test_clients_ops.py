@@ -50,7 +50,7 @@ class Ops(unittest.TestCase):
         self.assertEqual(len(self.f.list_cases(latest_only=False, cursor=cur, limit=2)[0]), 1)
 
     def test_비식별_trace(self):
-        self.assertEqual(self.f.get_trace("tr-1")["turn_id"], "t-1")
+        self.assertEqual(self.f.get_trace("tr-1"), example("OpsFeedbackDeidentifiedTrace"))   # 비식별 turn_id는 p-<hex>
         self.assertEqual(self.code(self.f.get_trace, "nope"), "NOT_FOUND")
 
     def test_publish_case는_열지_않는다(self):

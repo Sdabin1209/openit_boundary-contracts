@@ -36,7 +36,5 @@ class HttpFailureStore(HttpClientBase):
         return self._page("/v1/cases", cursor, limit, q, schema="FailureCase")
 
     def get_trace(self, deidentified_trace_ref: str) -> dict:
-        t = self._json("GET", "/v1/deidentified-traces/" + self._q(deidentified_trace_ref))
-        if not isinstance(t, dict):
-            raise integrity("비식별 Trace 응답이 객체가 아니다")
-        return t
+        # U45(2.5.1): 객체인지만 보던 것을 계약 스키마로(비식별 결과가 계약을 어기면 받는 쪽이 원문 조각을 쓰지 않게)
+        return check_record("OpsFeedbackDeidentifiedTrace", self._json("GET", "/v1/deidentified-traces/" + self._q(deidentified_trace_ref)))

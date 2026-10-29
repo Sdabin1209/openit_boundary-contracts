@@ -76,5 +76,5 @@ def make_server():
         s.release_order.append(rid)
     s.decisions = [decision(1, "sub-1"), decision(2, "sub-2"), decision(3, "sub-1")]
     s.cases = [case("fc-1", 1), case("fc-1", 2, "CONFIRMED"), case("fc-2", 1)]
-    s.deid_traces["tr-1"] = {"turn_id": "t-1", "events": []}
+    s.deid_traces["tr-1"] = example("OpsFeedbackDeidentifiedTrace")   # 계약을 지키는 비식별 Trace(U45: 클라이언트가 스키마로 검증)
     return s

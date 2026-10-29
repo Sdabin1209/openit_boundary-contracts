@@ -42,19 +42,13 @@ class HttpModelRuntime(HttpClientBase):
 
     @staticmethod
     def _state(body, release_id: str) -> dict:
-        if (not isinstance(body, dict) or body.get("release_id") != release_id
-                or body.get("state") not in ("ABSENT", "LOADING", "LOADED", "FAILED")):
-            raise integrity("적재 상태 응답이 형식에 맞지 않는다")
-        err = body.get("error")
-        if err is not None:
-            check_record("BoundaryError", err)
+        check_record("ReleaseLoadStatus", body)          # U45(2.5.1): 손 검사 대신 계약 스키마(error 안의 BoundaryError까지)
+        if body["release_id"] != release_id:
+            raise integrity("적재 상태 응답의 release_id가 요청과 다르다")
         return body
 
     def info(self) -> dict:
-        body = self._json("GET", "/v1/info")
-        if not isinstance(body, dict) or not isinstance(body.get("loaded"), list):
-            raise integrity("info 응답이 형식에 맞지 않는다")
-        return body
+        return check_record("RuntimeInfo", self._json("GET", "/v1/info"))
 
     # ---- 추론 ----
     def extract(self, release_id: str, request: dict, flow: dict | None = None, fields: dict | None = None) -> RuntimeResult:

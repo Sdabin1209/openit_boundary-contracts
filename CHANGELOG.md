@@ -2,6 +2,13 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.5.1 (PATCH, 와이어 스키마 변경 없음, `PIPELINE_SCHEMA_VERSION` "2.5" 그대로)
+- 고침(OPEN_GAPS U45, U23 감사): 계약 클라이언트가 응답을 손 검사 대신 계약 스키마로 검증한다.
+  - `HttpModelRuntime` 적재 상태(`ReleaseLoadStatus`)와 `info()`(`RuntimeInfo`).
+  - ops `get_trace`가 객체인지만 보던 것을 `OpsFeedbackDeidentifiedTrace`로(비식별 결과가 계약을 어기면 받는 쪽이 원문 조각을 쓰지 않게).
+- 기준 서버·시험 고정값이 계약을 어기던 것을 고쳤다: 기준 runtime `/v1/info`에 `system_prompt_sha256` 등 빠진 필드(이제 계약 예시를 바탕으로 낸다), 시험의 비식별 Trace가 `session_id`도 없고 `turn_id`도 가명 형식이 아니었다.
+- 남김: 목록 `ListEnvelope`는 스키마가 `items`를 객체로만 두지만 ID 문자열 목록을 내는 API가 있다(질문 세트·데이터셋·어댑터 목록). 스키마를 넓히는 것은 와이어 변경이라 다음 MINOR로 미루고, 그때까지 같은 규칙을 손으로 본다.
+
 ## 2.5.0 (MINOR, 와이어 스키마 변경. `PIPELINE_SCHEMA_VERSION` "2.5". 클라이언트는 MAJOR만 비교)
 - **영역 빌드 진입점 확정(OPEN_GAPS U42, 구조 규칙 1).** `BuildImageRequest`/`BuildImageResult`의 '[제안]'을 뗀다. deploy는 요청 JSON 파일 하나로 영역 `scripts/build-image.sh <요청 파일>`을 부르고, 영역은 Dockerfile 인자 이름·빌드 컨텍스트·라벨 값을 스스로 정해 표준 출력 마지막 줄에 결과 JSON 한 줄을 낸다. 지금까지 deploy `build-images.sh`가 영역마다 다른 인자 이름과 빌드 산출 파일을 직접 알았다.
 - `BuildImageRequest` 바뀐 점(제안을 쓰는 곳이 없어 깨지는 소비자 없음):
