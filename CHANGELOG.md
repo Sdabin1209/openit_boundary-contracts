@@ -2,6 +2,10 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.4.2 (PATCH, 와이어 스키마 변경 없음, `PIPELINE_SCHEMA_VERSION` "2.4" 그대로)
+- 고침(OPEN_GAPS U29): 계약 클라이언트가 본문을 쓰다 연결이 끊겨도(EPIPE·ECONNRESET) 서버가 먼저 보낸 응답을 읽는다. waitress는 본문 상한을 넘은 업로드에 본문을 읽지 않고 413을 보낸 뒤 닫아, 2.4.1까지는 경쟁 조건에서 413 대신 `UNAVAILABLE`(재시도)이 나왔다(2.2.2 규칙 위반). 이제 `INVALID_RECORD`(`details.http_status` 413)다. 쓰기가 끊긴 뒤 받은 성공 응답(2xx·3xx)은 잘린 요청이 처리됐을 수 있어 믿지 않고 `UNAVAILABLE`로 낸다. 응답도 못 읽으면 전처럼 `UNAVAILABLE`. 근거: RFC 9112 9.5(본문을 보내는 클라이언트는 오류 응답을 살핀다). `Expect: 100-continue`는 waitress 3.0.2가 상한 초과에도 100을 먼저 보내 해결이 안 됨을 측정했다(2026-10-30 gpu-dev, 30/30).
+- 추가(OPEN_GAPS U21): HTTP 오류 응답에서 만든 `BoundaryError`는 `details.http_status`에 원래 상태를 남긴다. 401(토큰 오류)과 403(권한 오류)이 같은 `PERMISSION_DENIED`라 운영 로그에서 구분할 수 없었다. 서버가 준 `details`의 다른 키는 그대로다. 추가형이라 PATCH로 둔다(MAJOR.MINOR는 와이어 스키마 버전과 같게 두는 규칙, 이 파일 머리).
+
 ## 2.4.1 (PATCH, 와이어 스키마 변경 없음, `PIPELINE_SCHEMA_VERSION` "2.4" 그대로)
 - 고침: 계약 클라이언트 `HttpModelRuntime.extract(release_id, request, flow=None, fields=None)`. 2.4.0은 `ExtractRequest.fields`를 정했지만 클라이언트가 보낼 수 없었다(survey-service CR-020). fields는 flow와 함께만 보낼 수 있다(아니면 INVALID_RECORD, 보내지 않음).
 - 기준 서버(`RuntimeReferenceServer`)가 fields가 오면 `apply_value_rules`를 적용한다(영역 시험용).

@@ -175,6 +175,48 @@ def build_tar(entries: dict[str, bytes | Path]) -> tempfile._TemporaryFileWrappe
     return out
 
 
+class _ReadAfterWriteFailure:
+    """본문을 쓰다 연결이 끊겨도(EPIPE·ECONNRESET) 서버가 먼저 보낸 응답을 읽는다(U29, 2.5.0).
+    waitress 같은 서버는 본문 상한을 넘은 요청에 본문을 읽지 않고 413을 보낸 뒤 닫는다. 표준 라이브러리 클라이언트는
+    쓰기 오류에서 바로 멈춰 413을 못 보고 UNAVAILABLE(재시도)로 읽었다. RFC 9112 9.5: 본문을 보내는 클라이언트는
+    보내는 동안 오류 응답을 살펴야 한다. Expect: 100-continue는 waitress 3.0.2가 상한 초과에도 100을 먼저 보내
+    소용없음을 측정했다(2026-10-30 gpu-dev, 30회 중 30회)."""
+    _send_error: Optional[BaseException] = None
+
+    def send(self, data):
+        if self._send_error is not None:
+            return                       # 이미 끊겼다: 나머지 본문은 버리고 응답 읽기로 간다
+        try:
+            super().send(data)
+        except (BrokenPipeError, ConnectionResetError) as e:
+            self._send_error = e
+
+    def getresponse(self):
+        r = super().getresponse()        # 응답도 못 읽으면 여기서 OSError가 나고 UNAVAILABLE이 된다
+        if self._send_error is not None and r.status < 400:
+            r.close()                    # 본문을 다 못 보냈는데 성공이라면 잘린 요청이 처리됐을 수 있다: 믿지 않는다
+            raise self._send_error
+        return r
+
+
+class _HTTPConnection(_ReadAfterWriteFailure, http.client.HTTPConnection):
+    pass
+
+
+class _HTTPSConnection(_ReadAfterWriteFailure, http.client.HTTPSConnection):
+    pass
+
+
+class _HTTPHandler(urllib.request.HTTPHandler):
+    def http_open(self, req):
+        return self.do_open(_HTTPConnection, req)
+
+
+class _HTTPSHandler(urllib.request.HTTPSHandler):
+    def https_open(self, req):
+        return self.do_open(_HTTPSConnection, req, context=self._context)
+
+
 class HttpClientBase:
     """생성자는 base_url, token, timeout만 받는다. 환경 변수는 읽지 않는다. 재시도는 호출자가 UNAVAILABLE일 때만 한다."""
     max_tar_bytes = 8 * 2**30      # 풀기 전 총 크기 상한(인스턴스나 서브클래스에서 바꾼다)
@@ -188,7 +230,7 @@ class HttpClientBase:
         self._headers: dict[str, str] = {}   # 하위 클래스가 더하는 고정 헤더(예: 내부망의 X-Openit-Device, 2.3.0)
         self._timeout = timeout
         # ProxyHandler({}): 환경 변수의 프록시를 읽지 않는다
-        self._opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect)
+        self._opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect, _HTTPHandler, _HTTPSHandler)
 
     # ---- 요청 ----
     def _scrub(self, text: str) -> str:
@@ -249,7 +291,9 @@ class HttpClientBase:
             code = body["code"] if body["code"] in ("UNSUPPORTED_VERSION", "INTEGRITY_ERROR") else "INTEGRITY_ERROR"
         if code is None:
             return self._unavailable(f"예상 밖의 상태 {status}", status=status)
-        details = body.get("details") if isinstance(body.get("details"), dict) else None
+        # U21(2.5.0): 원래 HTTP 상태를 남긴다. 401(토큰 오류)과 403(권한 오류)이 같은 PERMISSION_DENIED라 운영 로그에서 구분하려면 필요하다
+        details = dict(body["details"]) if isinstance(body.get("details"), dict) else {}
+        details["http_status"] = status
         return BoundaryError(code, self._scrub(body["message"]), details)
 
     def _read(self, resp, limit: int) -> bytes:

@@ -204,3 +204,67 @@ class TransportLimitTest(unittest.TestCase):
             err = _B._map_error(object.__new__(_B), e)
             self.assertEqual(err.code, "INVALID_RECORD", st)
             self.assertFalse(err.retryable, st)
+
+
+class _EarlyRejectServer:
+    """본문을 읽지 않고 헤더만 본 뒤 413(또는 주어진 상태)을 보내고 닫는 서버. waitress가 본문 상한을 넘은 업로드에 하는 일과 같다(U29)."""
+    def __init__(self, status=b"413 Request Entity Too Large", body=b"Request Entity Too Large"):
+        self.sock = socket.socket(); self.sock.bind(("127.0.0.1", 0)); self.sock.listen(8)
+        self.url = "http://127.0.0.1:%d" % self.sock.getsockname()[1]
+        self.status, self.body = status, body
+        threading.Thread(target=self._run, daemon=True).start()
+
+    def _run(self):
+        while True:
+            try:
+                c, _ = self.sock.accept()
+            except OSError:
+                return
+            buf = b""
+            while b"\r\n\r\n" not in buf:
+                buf += c.recv(4096)
+            c.sendall(b"HTTP/1.1 " + self.status + b"\r\nContent-Type: text/plain\r\nContent-Length: %d\r\nConnection: close\r\n\r\n" % len(self.body) + self.body)
+            c.close()   # 읽지 않은 본문이 남은 채 닫으면 커널이 RST를 보낸다
+
+    def close(self):
+        self.sock.close()
+
+
+class WriteFailureTest(unittest.TestCase):
+    """U29(2.5.0): 본문을 쓰다 연결이 끊겨도 서버가 먼저 보낸 응답을 읽는다. 413이면 INVALID_RECORD(재시도 안 함)."""
+    def _post_big(self, url):
+        from boundary_contracts.clients._http import HttpClientBase
+        c = HttpClientBase(url, WRITE, timeout=5)
+        with self.assertRaises(BoundaryError) as cm:
+            c._json("POST", "/v1/x", body={"pad": "x" * (8 * 2**20)})
+        return cm.exception
+
+    def test_큰_본문의_413은_경쟁_없이_INVALID_RECORD(self):
+        srv = _EarlyRejectServer()
+        try:
+            for _ in range(20):   # 경쟁 조건이라 여러 번 본다(옛 코드는 대부분 UNAVAILABLE)
+                e = self._post_big(srv.url)
+                self.assertEqual((e.code, e.details.get("http_status")), ("INVALID_RECORD", 413))
+        finally:
+            srv.close()
+
+    def test_쓰기_실패_뒤_성공_응답은_믿지_않는다(self):
+        srv = _EarlyRejectServer(status=b"200 OK", body=b"{}")
+        try:
+            e = self._post_big(srv.url)
+            self.assertEqual(e.code, "UNAVAILABLE")   # 본문을 다 못 보냈는데 성공이라면 잘린 요청이 처리됐을 수 있다
+        finally:
+            srv.close()
+
+
+class HttpStatusDetailTest(unittest.TestCase):
+    """U21(2.5.0): HTTP 오류 응답에서 만든 오류는 details.http_status에 원래 상태를 남긴다(401 토큰 오류와 403 권한 오류 구분)."""
+    def test_401과_403을_details로_구분한다(self):
+        import io, json, urllib.error
+        from boundary_contracts.clients._http import HttpClientBase as _B
+        for st in (401, 403):
+            body = json.dumps({"code": "PERMISSION_DENIED", "message": "no", "details": {"reason": "r"}}).encode()
+            e = urllib.error.HTTPError("http://x/", st, "x", {}, io.BytesIO(body))
+            b = object.__new__(_B); b._token = None
+            err = _B._map_error(b, e)
+            self.assertEqual((err.code, err.details["http_status"], err.details["reason"]), ("PERMISSION_DENIED", st, "r"))
