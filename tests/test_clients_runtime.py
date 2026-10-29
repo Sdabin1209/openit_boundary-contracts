@@ -1,5 +1,6 @@
 import json
 import sys
+import json
 import unittest
 from pathlib import Path
 
@@ -66,6 +67,36 @@ class Runtime(unittest.TestCase):
         self.assertTrue(is_output_invalid(cm.exception))
         # flow 없는 호환 본문은 규칙을 보지 않는다(형식만)
         self.assertEqual(self.c.extract("rel-0001", inp).output["next_item"], "Q99")
+
+    def test_fields를_주면_서버가_값_규칙을_보증한다(self):
+        # 기대: 계약 2.4.1 — fields는 ExtractRequest.fields로 실린다. 기준 서버는 apply_value_rules를 적용한다.
+        # 범위 밖(Q10.days 8)은 데이터셋 정답 모양(REASK/OUT_OF_RANGE, 값 null)으로 바뀌어 200, 최소값 미만은 503 OUTPUT_INVALID
+        self.c.load_release("rel-0001")
+        inp = {"question_id": "Q10", "current_question": "질문", "user_utterance": "여덟 일", "state": {}}
+        flow = {"order": ["Q9_2", "Q10"], "skips": []}
+        fields = {"fields": [{"slot": "Q10.days", "data_type": "integer", "unit": "day/week", "minimum": 0, "maximum": 7}]}
+        wrong = {"action": "NEXT", "next_item": "END",
+                 "values": [{"key": "Q10.days", "value": 8, "status": "ANSWERED", "save": True, "precision": "exact"}]}
+        self.srv.extract_fn = lambda req: wrong
+        n = len(self.srv.requests)
+        out = self.c.extract("rel-0001", inp, flow=flow, fields=fields).output
+        self.assertEqual((out["action"], out["reason"], out["targets"], out["next_item"]), ("REASK", "OUT_OF_RANGE", ["Q10.days"], "Q10"))
+        self.assertEqual(out["values"][0]["value"], None)
+        neg = json.loads(json.dumps(wrong)); neg["values"][0]["value"] = -1
+        self.srv.extract_fn = lambda req: neg
+        with self.assertRaises(BoundaryError) as cm:
+            self.c.extract("rel-0001", inp, flow=flow, fields=fields)
+        self.assertTrue(is_output_invalid(cm.exception))
+        # fields 없이 보내면 2.4.0 이전과 같다(값 규칙 없음)
+        self.srv.extract_fn = lambda req: wrong
+        self.assertEqual(self.c.extract("rel-0001", inp, flow=flow).output["next_item"], "END")
+
+    def test_fields는_flow_없이_보낼_수_없다(self):
+        self.c.load_release("rel-0001")
+        n = len(self.srv.requests)
+        fields = {"fields": [{"slot": "Q10.days", "data_type": "integer"}]}
+        self.assertEqual(self.code(self.c.extract, "rel-0001", example("ActionExtractionInput.next"), fields=fields), "INVALID_RECORD")
+        self.assertEqual(len(self.srv.requests), n)
 
     def test_flow가_계약을_어기면_보내지_않는다(self):
         self.c.load_release("rel-0001")

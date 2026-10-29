@@ -36,7 +36,7 @@ def v(key, value, status="ANSWERED", save=True, precision="exact"):
 
 
 def nxt(values, next_item):
-    return {"action": "NEXT", "reason": None, "targets": [], "values": values, "next_item": next_item}
+    return {"action": "NEXT", "values": values, "next_item": next_item}  # NEXT에는 reason·targets 칸이 없다(ActionExtraction 스키마)
 
 
 def apply(i, o):
@@ -139,6 +139,7 @@ class NotRewritten(unittest.TestCase):
 
     def test_values_within_spec_are_untouched(self):
         o = nxt([v("Q10.days", 7)], "END")
+        self.assertEqual(list(validator("ActionExtraction").iter_errors(o)), [])
         got, viol, applied = apply(inp("Q10"), o)
         self.assertEqual((got, viol, applied), (o, [], []))
 

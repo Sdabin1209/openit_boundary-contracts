@@ -57,17 +57,23 @@ class HttpModelRuntime(HttpClientBase):
         return body
 
     # ---- 추론 ----
-    def extract(self, release_id: str, request: dict, flow: dict | None = None) -> RuntimeResult:
+    def extract(self, release_id: str, request: dict, flow: dict | None = None, fields: dict | None = None) -> RuntimeResult:
         """LoRA-A. 입력은 ActionExtractionInput. 출력은 ActionExtraction이며 서버가 형식 검증을 마친 것이다.
         `flow`(QuestionFlowTable)를 주면 본문은 ExtractRequest{input, flow}이고, 서버는 출력이 LoRA-A 출력 규칙
         (boundary_contracts.action_rules)을 지키는 것까지 보증한다(2.2.0, ADR 0010). 호출자는 그 값을 다시 검사하지 않는다(R7).
         flow가 없으면 2.x 호환 본문(ActionExtractionInput 그대로)이며 규칙 보증은 없다.
         모델 출력이 끝내 깨지면 서버는 대체 출력을 만들지 않고 503 UNAVAILABLE(details.reason=OUTPUT_INVALID, D75 확정)을 낸다.
-        클라이언트는 이를 그대로 BoundaryError(UNAVAILABLE, retryable)로 던지며 `is_output_invalid(err)`로 구분한다."""
+        클라이언트는 이를 그대로 BoundaryError(UNAVAILABLE, retryable)로 던지며 `is_output_invalid(err)`로 구분한다.
+        `fields`(QuestionFieldSpec, 2.4.1)를 주면 본문의 ExtractRequest.fields로 싣고, 서버는 값 규칙(apply_value_rules)까지 보증한다.
+        fields는 flow와 함께만 보낼 수 있다(ExtractRequest는 flow가 필수다)."""
         check_outgoing("ActionExtractionInput", request)
         body = request
+        if fields is not None and flow is None:
+            raise BoundaryError("INVALID_RECORD", "fields는 flow와 함께만 보낼 수 있다(ExtractRequest)")
         if flow is not None:
             body = {"input": request, "flow": flow}
+            if fields is not None:
+                body["fields"] = fields
             check_outgoing("ExtractRequest", body)
         resp = self._open("POST", self._infer_path(release_id, "extract"), None, self._dump(body),
                           "application/json", "application/json")

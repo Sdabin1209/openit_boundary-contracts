@@ -2,6 +2,10 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.4.1 (PATCH, 와이어 스키마 변경 없음, `PIPELINE_SCHEMA_VERSION` "2.4" 그대로)
+- 고침: 계약 클라이언트 `HttpModelRuntime.extract(release_id, request, flow=None, fields=None)`. 2.4.0은 `ExtractRequest.fields`를 정했지만 클라이언트가 보낼 수 없었다(survey-service CR-020). fields는 flow와 함께만 보낼 수 있다(아니면 INVALID_RECORD, 보내지 않음).
+- 기준 서버(`RuntimeReferenceServer`)가 fields가 오면 `apply_value_rules`를 적용한다(영역 시험용).
+
 ## 2.4.0 (MINOR, 추가형. `PIPELINE_SCHEMA_VERSION` "2.4". 클라이언트는 MAJOR만 비교)
 - **LoRA-A 출력 값 규칙(OPEN_GAPS U32·U33, 헤드 초안 `head/docs/proposals/2026-10-29-계약-2.4.0-칸-규격과-값-규칙.md`).** 새 스키마 `QuestionFieldSpec`(칸 자료형·단위·범위·선택지·반복 키, 값은 데이터셋 `docs/SQL.md` question_fields와 같게). I9 `ExtractRequest`에 선택 필드 `fields`.
 - 규칙 데이터 `action_extraction_rules.json` `rules_version` "2": `value_rules`(범위 밖 → `REASK/OUT_OF_RANGE`, 기간보다 많은 횟수 → `REASK/COUNT_EXCEEDS_DAYS`, 최대량<평소량 mL 비교 → `CONFIRM/CONFLICT_MAX_BELOW_USUAL`, 안 마심+횟수 → '마심'으로 정정, 안 마심+양 → `CONFIRM/CONFLICT_DOES_NOT_DRINK`). 값과 환산표는 정규화기 `openit-normalizer`(normalize.py R1~R3, mappings.VOLUME_ML·PERIOD_MAX·MAX_MINUTES_PER_DAY)에서 옮겼다.
