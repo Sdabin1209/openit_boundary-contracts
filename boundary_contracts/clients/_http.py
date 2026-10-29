@@ -180,11 +180,12 @@ class HttpClientBase:
     max_tar_bytes = 8 * 2**30      # 풀기 전 총 크기 상한(인스턴스나 서브클래스에서 바꾼다)
     max_body_bytes = 256 * 2**20   # JSON·바이트 응답 상한
 
-    def __init__(self, base_url: str, token: str, timeout: float = 10.0):
+    def __init__(self, base_url: str, token: Optional[str], timeout: float = 10.0):
         if urllib.parse.urlsplit(base_url).scheme not in ("http", "https"):
             raise ValueError("base_url은 http:// 또는 https://로 시작해야 한다")
         self._base = base_url.rstrip("/")
         self._token = token
+        self._headers: dict[str, str] = {}   # 하위 클래스가 더하는 고정 헤더(예: 내부망의 X-Openit-Device, 2.3.0)
         self._timeout = timeout
         # ProxyHandler({}): 환경 변수의 프록시를 읽지 않는다
         self._opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect)
@@ -205,7 +206,9 @@ class HttpClientBase:
     def _open(self, method: str, path: str, query: Optional[dict], data, ctype: Optional[str], accept: str):
         q = {k: v for k, v in (query or {}).items() if v is not None}
         url = self._base + path + ("?" + urllib.parse.urlencode(q) if q else "")
-        headers = {"Authorization": "Bearer " + self._token, "Accept": accept}
+        headers = {"Accept": accept, **self._headers}
+        if self._token:
+            headers["Authorization"] = "Bearer " + self._token
         if ctype:
             headers["Content-Type"] = ctype
         if hasattr(data, "read"):

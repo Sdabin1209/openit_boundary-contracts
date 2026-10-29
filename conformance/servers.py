@@ -135,6 +135,10 @@ class ReferenceServer:
             time.sleep(self.delay)
         auth = h.headers.get("Authorization", "")
         role = self.tokens.get(auth[7:]) if auth.startswith("Bearer ") else None
+        dev = h.headers.get("X-Openit-Device")
+        if role is None and dev and getattr(self, "trust_device_header", False) and _DEVICE_ID.match(dev):
+            # 2.3.0(ADR 0012): 게이트웨이가 클라이언트 인증서로 확인한 기기 ID. 서비스는 이 헤더를 믿는다(게이트웨이 뒤 내부망 전제)
+            role = "kiosk:" + dev
         self.requests.append((h.command, h.path, role))
         try:
             if u.path in self.overrides:
@@ -600,6 +604,7 @@ class StaffCallReferenceServer(ReferenceServer):
         return self._j(resp)
 
 
+_DEVICE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 _SESSION_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 _SUBJECT_REF = re.compile(r"^[A-Za-z0-9._:/#=+-]{1,128}$")
 
@@ -617,6 +622,7 @@ class PublicApiReferenceServer(StaffCallReferenceServer):
     def __init__(self, tokens: dict[str, str], retry_after_s: int = 30, max_retries: int = 10):
         super().__init__(tokens, retry_after_s, max_retries)
         self.states: dict[str, dict] = {}
+        self.trust_device_header = True   # 2.3.0: 키오스크는 X-Openit-Device(게이트웨이 mTLS)로도 식별된다
         self.turn_fn = lambda utterance: ("다음 질문입니다.", True, False)
         self.processed: list[str] = []   # 실제로 처리한 turn_id(멱등 시험용)
 

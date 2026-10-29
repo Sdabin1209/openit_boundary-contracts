@@ -2,6 +2,11 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.3.0 (MINOR, 추가형. `PIPELINE_SCHEMA_VERSION` "2.3". 클라이언트는 MAJOR만 비교)
+- **키오스크 기기 인증을 게이트웨이 클라이언트 인증서(mTLS)로(ADR 0012, D113).** 게이트웨이가 확인한 기기 ID를 `X-Openit-Device`로 넘기고 서비스는 그 값을 믿는다(PUBLIC_API.md F절). 기기 토큰(`Authorization: Bearer`)과 `DeviceConfig.device_token`은 폐기 예정(3.0.0에서 제거).
+- `HttpPublicApi(base_url, token=None, timeout, device_id=None)`: 토큰은 선택, 내부망 직접 호출은 `device_id`로 헤더를 싣는다. `HttpClientBase`는 토큰이 없으면 `Authorization`을 싣지 않는다.
+- 기준 서버 `PublicApiReferenceServer`가 `X-Openit-Device`로 키오스크를 식별한다(`trust_device_header`).
+
 ## 2.2.2 (PATCH, 와이어 스키마 변경 없음, `PIPELINE_SCHEMA_VERSION` "2.2" 그대로)
 - 고침: `boundary_contracts.clients`가 전송 계층 한도 응답(413·414·431)을 본문과 무관하게 `INVALID_RECORD`(재시도 안 함, `details.http_status`)로 읽는다. 2.2.1까지는 예상 밖 상태로 보고 `UNAVAILABLE`(재시도)로 바꿔, 너무 큰 본문을 다시 보낼 수 있었다(waitress 교체 중 synthetic-data 보고, 2026-10-29). CONVENTIONS 9절에 규칙 추가.
 - 문서: `GateJobResult` 설명의 종료 코드 문장을 표와 맞췄다(설정 오류 1, 예기치 못한 예외 75; OPEN_GAPS U27).

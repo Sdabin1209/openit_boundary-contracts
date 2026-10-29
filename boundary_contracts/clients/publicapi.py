@@ -16,6 +16,9 @@ _SESSION_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 _SUBJECT_REF = re.compile(r"^[A-Za-z0-9._:/#=+-]{1,128}$")
 
 
+_DEVICE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")   # 인증서 주체 CN에서 온 기기 ID(ADR 0012)
+
+
 def _sid(session_id) -> str:
     if not isinstance(session_id, str) or not _SESSION_ID.match(session_id):
         raise BoundaryError("INVALID_RECORD", "session_id는 영문·숫자·-_ 1~64자여야 한다")
@@ -42,6 +45,16 @@ def check_frontend_input(rec) -> dict:
 
 
 class HttpPublicApi(HttpClientBase):
+    def __init__(self, base_url: str, token: Optional[str] = None, timeout: float = 10.0, device_id: Optional[str] = None):
+        """2.3.0: 키오스크 기기 인증은 게이트웨이의 클라이언트 인증서(mTLS, ADR 0012)다. 게이트웨이를 거치면 token도 device_id도 주지 않는다.
+        게이트웨이 뒤 내부망에서 서비스를 직접 부를 때(시험·운영 도구)는 device_id로 `X-Openit-Device`를 싣는다(서비스는 이 헤더를 믿는다).
+        token(기기 토큰 Bearer)은 2.x 호환으로만 남고 3.0.0에서 없어진다."""
+        super().__init__(base_url, token, timeout)
+        if device_id is not None:
+            if not _DEVICE_ID.match(device_id):
+                raise ValueError("device_id 형식이 아니다")
+            self._headers["X-Openit-Device"] = device_id
+
     def start_session(self, session_id: str, subject_ref: Optional[str] = None) -> dict:
         """`POST /v1/sessions`. 첫 안내 문장이 든 FrontendInput."""
         body = {"session_id": _sid(session_id), "kind": "SESSION_START"}

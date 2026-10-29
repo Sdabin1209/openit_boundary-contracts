@@ -134,6 +134,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 ## I10 공개 API — 소유: survey-service, 소비: kiosk-frontend
 
 **정본은 `PUBLIC_API.md`**(경로, 본문, 응답, 상태 코드와 재시도, 인증, 직원 콘솔, 2.1.0 추가)이고 이 절은 그것을 복사하지 않는다. HTTP 규약만 적는다.
+- **2.3.0:** 키오스크 경로는 게이트웨이 mTLS로 인증하고 서비스는 `X-Openit-Device`를 믿는다(PUBLIC_API.md F절). `HttpPublicApi(base_url, token=None, device_id=None)`.
 - 클라이언트 `boundary_contracts.clients.HttpPublicApi`(`start_session`, `send_utterance`, `end_session`, `get_state`, `intervene`, `healthz`)와 `HttpStaffCall`(`retry`, `report`). 토큰은 키오스크 기기 토큰이고 `intervene`은 staff 토큰이다.
 - `turn_id`는 API 봉투 필드다. 본문 스키마(`FrontendMessage`, `FrontendInput`)는 문진 스키마라 클라이언트는 필수 필드와 타입만 확인하고(위반은 `INTEGRITY_ERROR`), `SessionState`는 이 패키지 스키마로 검증한다.
 - `/healthz`, `/readyz`는 인증이 없다. 429·503은 `UNAVAILABLE`이고 `details.reason`을 먼저 본다(PUBLIC_API.md G절).

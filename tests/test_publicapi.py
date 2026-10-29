@@ -101,3 +101,34 @@ class PublicApi(unittest.TestCase):
         self.c.send_utterance("s1", "x", "t1")
         r = HttpStaffCall(self.srv.url, K1).retry("s1", "r1")
         self.assertEqual(r["alert_id"], "al-s1")
+
+
+class DeviceHeader(unittest.TestCase):
+    """2.3.0(ADR 0012): 키오스크는 게이트웨이가 확인한 X-Openit-Device로 식별된다. 기대값은 PUBLIC_API.md F절."""
+    def setUp(self):
+        self.srv = PublicApiReferenceServer({STAFF: "staff"}).start()
+        self.a = HttpPublicApi(self.srv.url, device_id="kiosk-a")
+        self.b = HttpPublicApi(self.srv.url, device_id="kiosk-b")
+
+    def tearDown(self):
+        self.srv.stop()
+
+    def test_기기_헤더로_세션을_쓴다(self):
+        self.a.start_session("s1")
+        self.assertEqual(self.a.get_state("s1")["state"], "ACTIVE")
+        self.assertEqual(self.srv.requests[-1][2], "kiosk:kiosk-a")   # 토큰 없이 기기 헤더로 식별됐다
+
+    def test_다른_기기는_404(self):
+        self.a.start_session("s1")
+        with self.assertRaises(BoundaryError) as cm:
+            self.b.get_state("s1")
+        self.assertEqual(cm.exception.code, "NOT_FOUND")
+
+    def test_자격이_없으면_거부(self):
+        with self.assertRaises(BoundaryError) as cm:
+            HttpPublicApi(self.srv.url).start_session("s1")
+        self.assertEqual(cm.exception.code, "PERMISSION_DENIED")
+
+    def test_기기_ID_형식(self):
+        with self.assertRaises(ValueError):
+            HttpPublicApi(self.srv.url, device_id="bad id")

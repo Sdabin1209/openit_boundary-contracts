@@ -8,7 +8,8 @@
     "device_token": {
       "type": "string",
       "pattern": "^[\\x21-\\x7e]{1,512}$",
-      "description": "기기 토큰. /v1/sessions* 요청에 `Authorization: Bearer`로 그대로 실린다. 헤더에 넣을 수 있는 보이는 ASCII 1~512자(공백·한글 불가). 비밀 값."
+      "description": "(폐기 예정, 2.3.0) 기기 토큰. 2.3.0부터 키오스크 기기 인증은 게이트웨이의 클라이언트 인증서(mTLS, ADR 0012)라 이 값이 필요 없다. 2.x 호환으로만 남고 3.0.0에서 없어진다. 있으면 /v1/sessions* 요청에 `Authorization: Bearer`로 실린다. 비밀 값.",
+      "deprecated": true
     },
     "subject_ref": {
       "type": "string",
