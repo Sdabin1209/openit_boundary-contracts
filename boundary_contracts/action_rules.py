@@ -150,3 +150,153 @@ def check_action_extraction(input: dict, output: dict, flow: dict, rules: dict |
                                          f"{action}의 next_item이 문항 순서·건너뛰기 규칙과 다르다"))
         break
     return out
+
+
+# ---------------------------------------------------------------- 2.4.0 값 규칙(U32·U33)
+_FLOW_ACTIONS = ("NEXT", "CORRECT", "HOLD", "SKIP")
+
+
+def _is_type(value, data_type: str, options) -> bool:
+    if data_type == "boolean":
+        return isinstance(value, bool)
+    if data_type == "option":
+        return isinstance(value, str) and (not options or value in options)
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    return data_type == "number" or float(value).is_integer()
+
+
+def _key(item: str, field: str, kind: str = "") -> str:
+    return f"{item}[{kind}].{field}" if kind else f"{item}.{field}"
+
+
+def _kind_of(key: str) -> str:
+    m = re.search(r"\[([^\]]*)\]", key)
+    return m.group(1) if m else ""
+
+
+def apply_value_rules(input: dict, output: dict, fields: dict, flow: dict | None = None,
+                      rules: dict | None = None) -> tuple[dict, list[Violation], list[str]]:
+    """칸 규격(QuestionFieldSpec)과 값 규칙(rules.value_rules)을 출력에 적용한다.
+
+    돌려주는 것: (바뀐 출력, 바꿀 수 없는 위반 목록, 적용한 규칙 사유 목록).
+    규칙에 걸리면 데이터셋 정규화기가 같은 상황에서 낸 정답 모양으로 바꾼다(D74: 서비스를 데이터셋에 맞춘다).
+    값을 맞히지 않는다: 범위 밖 값은 버리고(value null) 다시 묻고, 충돌은 환자에게 확인한다.
+    데이터셋에 정답이 없는 위반(자료형 불일치, 최소값 미만)은 바꾸지 않고 위반으로 돌려준다(호출자는 OUTPUT_INVALID).
+    """
+    rules = rules or load_rules()
+    vr = rules.get("value_rules")
+    out = json.loads(json.dumps(output))  # 깊은 사본: 받은 출력을 고치지 않는다
+    if not vr or not isinstance(out.get("values"), list):
+        return out, [], []
+    spec = {f["slot"]: f for f in fields.get("fields", [])}
+    qid = input["question_id"]
+    vals = out["values"]
+    view = {k: s.get("value") for k, s in (input.get("state") or {}).items() if isinstance(s, dict)}
+    for v in vals:
+        if v.get("save") is True and isinstance(v.get("key"), str):
+            view[v["key"]] = v.get("value")
+
+    def entry(key):
+        for v in vals:
+            if v.get("key") == key:
+                return v
+        v = {"key": key, "value": view.get(key), "status": "ANSWERED", "save": True}
+        vals.append(v)  # 상태(이전 턴)에만 있던 칸을 대상으로 삼을 때는 출력에 칸을 더한다(정규화기와 같음)
+        return v
+
+    def unclear(key):
+        e = entry(key)
+        e.update(value=None, status="UNCLEAR", save=False, precision="unspecified")
+
+    def conflict(key):
+        e = entry(key)
+        e.update(status="CONFLICT", save=False)
+
+    def finish(rewrite, targets, next_item):
+        out.update(action=rewrite["action"], reason=rewrite["reason"], targets=targets, next_item=next_item)
+        return out, [], [rewrite["reason"]]
+
+    # 1) 자료형·범위(정규화기 _store: DB 정의로 타입·범위 검증)
+    viol, above = [], []
+    am = vr["above_maximum"]
+    for i, v in enumerate(vals):
+        k = v.get("key")
+        if v.get("save") is not True or not isinstance(k, str) or v.get("value") is None:
+            continue
+        f = spec.get(slot_of(k))
+        if f is None:
+            continue
+        x = v["value"]
+        if not _is_type(x, f["data_type"], f.get("options")):
+            viol.append(Violation(vr["type_mismatch_code"], f"values/{i}/value", "값이 칸 자료형과 다르다"))
+            continue
+        if f["data_type"] in ("integer", "number"):
+            if ("minimum" in f and x < f["minimum"]) or ("exclusive_minimum" in f and x <= f["exclusive_minimum"]):
+                viol.append(Violation(vr["below_minimum_code"], f"values/{i}/value", "값이 칸 최소값보다 작다"))
+                continue
+            mx = f.get("maximum", am["unit_maximum"].get(f.get("unit", "")))
+            if mx is not None and x > mx:
+                above.append(k)
+    if viol:
+        return out, viol, []
+    if above:
+        for k in above:
+            unclear(k)
+        return finish(am["rewrite"], above, qid)
+
+    # 2) R2 기간보다 많은 횟수(정규화기 R2, PERIOD_MAX)
+    ce = vr["count_exceeds_days"]
+    freq, unit = view.get(ce["frequency_slot"]), view.get(ce["unit_slot"])
+    if isinstance(freq, (int, float)) and not isinstance(freq, bool) and unit in ce["period_max"] and freq > ce["period_max"][unit]:
+        ks = [ce["frequency_slot"], ce["unit_slot"]]
+        for k in ks:
+            unclear(k)
+        return finish(ce["rewrite"], ks, qid)
+
+    # 3) R1 술을 안 마신다면서 횟수·양이 있음(정규화기 R1)
+    dn = vr["does_not_drink"]
+    if view.get(dn["flag_slot"]) is True:
+        if view.get(dn["frequency_slot"]):  # 횟수가 있으면 충돌로 묻지 않고 '마심'으로 고친다(정규화기 set_value(..., False, "R1"))
+            e = entry(dn["flag_slot"])
+            e.update(value=False, status="CORRECTION", save=True, precision="approximate")
+            view[dn["flag_slot"]] = False
+            if flow is not None and out.get("action") in _FLOW_ACTIONS:
+                fl = _Flow(flow)
+                keys = [v["key"] for v in vals if isinstance(v.get("key"), str)]
+                saved = {slot_of(v["key"]): v.get("value") for v in vals if v.get("save") is True and isinstance(v.get("key"), str)}
+                base = max((item_of(k) for k in keys if fl.index(item_of(k)) is not None), key=fl.order.index, default=qid)
+                out["next_item"] = fl.next_item(base, saved)
+            return out, [], ["R1_CORRECTED"]
+        amounts = [k for k in view if item_of(k) in dn["amount_items"] and slot_of(k).endswith("." + dn["amount_field"])]
+        if amounts:
+            ks = [dn["flag_slot"]]
+            for k in amounts:
+                ks += [k, _key(item_of(k), dn["unit_field"], _kind_of(k))]
+            for k in ks:
+                conflict(k)
+            return finish(dn["rewrite"], ks, item_of(dn["flag_slot"]))
+
+    # 4) R3 최대 음주량 < 평소 음주량(정규화기 R3, 단위가 달라도 mL로 비교)
+    mb = vr["max_below_usual"]
+
+    def ml(item, kind):
+        a, u = view.get(_key(item, mb["amount_field"], kind)), view.get(_key(item, mb["unit_field"], kind))
+        if a is None or u is None or isinstance(a, bool):
+            return None
+        per = mb["per_unit_ml"].get(u, mb["volume_ml"].get(kind, {}).get(u))
+        return None if per is None else a * per
+
+    ks = []
+    for v in vals:
+        k = v.get("key")
+        if v.get("save") is True and isinstance(k, str) and item_of(k) == mb["max_item"] and slot_of(k).endswith("." + mb["amount_field"]):
+            kind = _kind_of(k)
+            usual, most = ml(mb["usual_item"], kind), ml(mb["max_item"], kind)
+            if usual is not None and most is not None and most < usual:
+                ks += [k, _key(mb["max_item"], mb["unit_field"], kind)]
+    if ks:
+        for k in ks:
+            conflict(k)
+        return finish(mb["rewrite"], ks, mb["max_item"])
+    return out, [], []

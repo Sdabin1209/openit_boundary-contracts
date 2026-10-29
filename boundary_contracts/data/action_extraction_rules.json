@@ -1,9 +1,17 @@
 {
-  "rules_version": "1",
+  "rules_version": "2",
   "description": "LoRA-A 출력(ActionExtraction)이 지켜야 하는 의미 규칙(ADR 0010, D104). 형식은 ActionExtraction 스키마가 보고, 이 파일은 스키마로 표현할 수 없는 규칙을 데이터로 정한다. 해석은 boundary_contracts.action_rules.check_action_extraction이 한다. 출력이 이 규칙을 어기면 LoRA-A 컴포넌트(model-runtime)의 책임이고, 다른 컴포넌트는 통과한 값을 다시 검사하지 않는다(R7).",
   "statuses": {
-    "saved": ["ANSWERED", "CORRECTION"],
-    "null": ["MISSING", "UNCLEAR", "UNKNOWN", "REJECTED"]
+    "saved": [
+      "ANSWERED",
+      "CORRECTION"
+    ],
+    "null": [
+      "MISSING",
+      "UNCLEAR",
+      "UNKNOWN",
+      "REJECTED"
+    ]
   },
   "save_rule": {
     "code": "SAVE_RULE",
@@ -17,17 +25,123 @@
   },
   "unknown_item": {
     "code": "UNKNOWN_ITEM",
-    "every_item_in_flow": ["values.key", "targets", "input.question_id", "next_item"],
+    "every_item_in_flow": [
+      "values.key",
+      "targets",
+      "input.question_id",
+      "next_item"
+    ],
     "end_marker": "END"
   },
   "next_item": {
     "mismatch_code": "NEXT_ITEM_MISMATCH",
     "skip_order_code": "SKIP_ORDER_MISMATCH",
     "by_action": [
-      {"actions": ["REASK", "REDIRECT"], "next_item_is": "input.question_id"},
-      {"actions": ["CONFIRM"], "next_item_is": "item_of_targets"},
-      {"actions": ["NEXT", "CORRECT", "HOLD", "SKIP"], "next_item_is": "flow_next", "base_item": "last_in_flow_order_among_values_and_targets", "also_allowed": "item_of_values"}
+      {
+        "actions": [
+          "REASK",
+          "REDIRECT"
+        ],
+        "next_item_is": "input.question_id"
+      },
+      {
+        "actions": [
+          "CONFIRM"
+        ],
+        "next_item_is": "item_of_targets"
+      },
+      {
+        "actions": [
+          "NEXT",
+          "CORRECT",
+          "HOLD",
+          "SKIP"
+        ],
+        "next_item_is": "flow_next",
+        "base_item": "last_in_flow_order_among_values_and_targets",
+        "also_allowed": "item_of_values"
+      }
     ]
   },
-  "key_syntax": "values.key는 `<문항>.<칸>` 또는 `<문항>[<종류>].<칸>`이다. 문항 ID는 마지막 `.` 앞에서 `[` 앞까지, 칸 이름은 종류 괄호를 뺀 문자열이다."
+  "key_syntax": "values.key는 `<문항>.<칸>` 또는 `<문항>[<종류>].<칸>`이다. 문항 ID는 마지막 `.` 앞에서 `[` 앞까지, 칸 이름은 종류 괄호를 뺀 문자열이다.",
+  "value_rules": {
+    "type_mismatch_code": "VALUE_TYPE_MISMATCH",
+    "below_minimum_code": "VALUE_BELOW_MINIMUM",
+    "above_maximum": {
+      "rewrite": {
+        "action": "REASK",
+        "reason": "OUT_OF_RANGE"
+      },
+      "unit_maximum": {
+        "minute": 1440
+      }
+    },
+    "count_exceeds_days": {
+      "frequency_slot": "Q7.frequency",
+      "unit_slot": "Q7.unit",
+      "period_max": {
+        "week": 7,
+        "month": 31,
+        "year": 366
+      },
+      "rewrite": {
+        "action": "REASK",
+        "reason": "COUNT_EXCEEDS_DAYS"
+      }
+    },
+    "max_below_usual": {
+      "usual_item": "Q7_1",
+      "max_item": "Q7_2",
+      "amount_field": "amount",
+      "unit_field": "unit",
+      "volume_ml": {
+        "soju": {
+          "glass": 50,
+          "bottle": 360,
+          "can": null
+        },
+        "beer": {
+          "glass": 200,
+          "bottle": 500,
+          "can": 355
+        },
+        "makgeolli": {
+          "glass": 250,
+          "bottle": 750,
+          "can": null
+        },
+        "wine": {
+          "glass": 150,
+          "bottle": 750,
+          "can": null
+        },
+        "spirits": {
+          "glass": 30,
+          "bottle": 750,
+          "can": null
+        }
+      },
+      "per_unit_ml": {
+        "cc": 1
+      },
+      "rewrite": {
+        "action": "CONFIRM",
+        "reason": "CONFLICT_MAX_BELOW_USUAL"
+      }
+    },
+    "does_not_drink": {
+      "flag_slot": "Q7.does_not_drink",
+      "frequency_slot": "Q7.frequency",
+      "amount_items": [
+        "Q7_1",
+        "Q7_2"
+      ],
+      "amount_field": "amount",
+      "unit_field": "unit",
+      "rewrite": {
+        "action": "CONFIRM",
+        "reason": "CONFLICT_DOES_NOT_DRINK"
+      }
+    }
+  }
 }

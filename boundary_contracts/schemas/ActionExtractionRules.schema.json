@@ -4,70 +4,395 @@
   "title": "ActionExtractionRules",
   "description": "LoRA-A 출력 의미 규칙 명세(ADR 0010). 규칙은 데이터이고, 해석기는 boundary_contracts.action_rules 하나다.",
   "type": "object",
-  "required": ["rules_version", "statuses", "save_rule", "targets", "unknown_item", "next_item"],
+  "required": [
+    "rules_version",
+    "statuses",
+    "save_rule",
+    "targets",
+    "unknown_item",
+    "next_item"
+  ],
   "properties": {
-    "rules_version": {"type": "string", "minLength": 1},
-    "description": {"type": "string"},
-    "key_syntax": {"type": "string"},
+    "rules_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "key_syntax": {
+      "type": "string"
+    },
     "statuses": {
       "type": "object",
-      "required": ["saved", "null"],
+      "required": [
+        "saved",
+        "null"
+      ],
       "properties": {
-        "saved": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
-        "null": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true}
+        "saved": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "null": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
       },
       "additionalProperties": false
     },
     "save_rule": {
       "type": "object",
-      "required": ["code", "save_true_iff_status_in", "value_null_iff_status_in", "saved_value_non_null"],
+      "required": [
+        "code",
+        "save_true_iff_status_in",
+        "value_null_iff_status_in",
+        "saved_value_non_null"
+      ],
       "properties": {
-        "code": {"const": "SAVE_RULE"},
-        "save_true_iff_status_in": {"const": "saved"},
-        "value_null_iff_status_in": {"const": "null"},
-        "saved_value_non_null": {"type": "boolean"}
+        "code": {
+          "const": "SAVE_RULE"
+        },
+        "save_true_iff_status_in": {
+          "const": "saved"
+        },
+        "value_null_iff_status_in": {
+          "const": "null"
+        },
+        "saved_value_non_null": {
+          "type": "boolean"
+        }
       },
       "additionalProperties": false
     },
     "targets": {
       "type": "object",
-      "required": ["code", "each_target_is_a_values_key"],
-      "properties": {"code": {"const": "TARGET_NOT_IN_VALUES"}, "each_target_is_a_values_key": {"type": "boolean"}},
+      "required": [
+        "code",
+        "each_target_is_a_values_key"
+      ],
+      "properties": {
+        "code": {
+          "const": "TARGET_NOT_IN_VALUES"
+        },
+        "each_target_is_a_values_key": {
+          "type": "boolean"
+        }
+      },
       "additionalProperties": false
     },
     "unknown_item": {
       "type": "object",
-      "required": ["code", "every_item_in_flow", "end_marker"],
+      "required": [
+        "code",
+        "every_item_in_flow",
+        "end_marker"
+      ],
       "properties": {
-        "code": {"const": "UNKNOWN_ITEM"},
-        "every_item_in_flow": {"type": "array", "items": {"enum": ["values.key", "targets", "input.question_id", "next_item"]}, "uniqueItems": true},
-        "end_marker": {"type": "string"}
+        "code": {
+          "const": "UNKNOWN_ITEM"
+        },
+        "every_item_in_flow": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "values.key",
+              "targets",
+              "input.question_id",
+              "next_item"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "end_marker": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "next_item": {
       "type": "object",
-      "required": ["mismatch_code", "skip_order_code", "by_action"],
+      "required": [
+        "mismatch_code",
+        "skip_order_code",
+        "by_action"
+      ],
       "properties": {
-        "mismatch_code": {"const": "NEXT_ITEM_MISMATCH"},
-        "skip_order_code": {"const": "SKIP_ORDER_MISMATCH"},
+        "mismatch_code": {
+          "const": "NEXT_ITEM_MISMATCH"
+        },
+        "skip_order_code": {
+          "const": "SKIP_ORDER_MISMATCH"
+        },
         "by_action": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "object",
-            "required": ["actions", "next_item_is"],
+            "required": [
+              "actions",
+              "next_item_is"
+            ],
             "properties": {
-              "actions": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
-              "next_item_is": {"enum": ["input.question_id", "item_of_targets", "flow_next"]},
-              "base_item": {"const": "last_in_flow_order_among_values_and_targets"},
-              "also_allowed": {"const": "item_of_values"}
+              "actions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "next_item_is": {
+                "enum": [
+                  "input.question_id",
+                  "item_of_targets",
+                  "flow_next"
+                ]
+              },
+              "base_item": {
+                "const": "last_in_flow_order_among_values_and_targets"
+              },
+              "also_allowed": {
+                "const": "item_of_values"
+              }
             },
             "additionalProperties": false
           }
         }
       },
       "additionalProperties": false
+    },
+    "value_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "2.4.0(U32·U33): 칸 규격(QuestionFieldSpec)과 값 사이 규칙. 데이터셋 정규화기(openit-normalizer normalize.py)의 범위 판정과 교차 규칙 R1~R3을 데이터로 옮긴 것. 규칙에 걸린 출력은 데이터셋이 같은 상황에서 낸 정답 모양으로 바뀐다(apply_value_rules). 데이터셋에 정답이 없는 위반(예: 최소값 미만)은 바꾸지 않고 위반으로 남긴다(OUTPUT_INVALID).",
+      "required": [
+        "type_mismatch_code",
+        "below_minimum_code",
+        "above_maximum",
+        "count_exceeds_days",
+        "max_below_usual",
+        "does_not_drink"
+      ],
+      "properties": {
+        "type_mismatch_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "below_minimum_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "above_maximum": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rewrite",
+            "unit_maximum"
+          ],
+          "properties": {
+            "rewrite": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "action",
+                "reason"
+              ],
+              "properties": {
+                "action": {
+                  "enum": [
+                    "REASK",
+                    "CONFIRM"
+                  ]
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "unit_maximum": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "칸 규격에 maximum이 없을 때 단위로 정하는 상한(정규화기 MAX_MINUTES_PER_DAY 등)"
+            }
+          }
+        },
+        "count_exceeds_days": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "frequency_slot",
+            "unit_slot",
+            "period_max",
+            "rewrite"
+          ],
+          "properties": {
+            "frequency_slot": {
+              "type": "string"
+            },
+            "unit_slot": {
+              "type": "string"
+            },
+            "period_max": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            },
+            "rewrite": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "action",
+                "reason"
+              ],
+              "properties": {
+                "action": {
+                  "enum": [
+                    "REASK",
+                    "CONFIRM"
+                  ]
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        "max_below_usual": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "usual_item",
+            "max_item",
+            "amount_field",
+            "unit_field",
+            "volume_ml",
+            "per_unit_ml",
+            "rewrite"
+          ],
+          "properties": {
+            "usual_item": {
+              "type": "string"
+            },
+            "max_item": {
+              "type": "string"
+            },
+            "amount_field": {
+              "type": "string"
+            },
+            "unit_field": {
+              "type": "string"
+            },
+            "volume_ml": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "description": "술 종류 × 단위 → mL(정규화기 mappings.VOLUME_ML). null이면 비교하지 않는다"
+            },
+            "per_unit_ml": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "술 종류와 무관한 단위의 mL(예: cc=1)"
+            },
+            "rewrite": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "action",
+                "reason"
+              ],
+              "properties": {
+                "action": {
+                  "enum": [
+                    "REASK",
+                    "CONFIRM"
+                  ]
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        "does_not_drink": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "flag_slot",
+            "frequency_slot",
+            "amount_items",
+            "amount_field",
+            "unit_field",
+            "rewrite"
+          ],
+          "properties": {
+            "flag_slot": {
+              "type": "string"
+            },
+            "frequency_slot": {
+              "type": "string"
+            },
+            "amount_items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "amount_field": {
+              "type": "string"
+            },
+            "unit_field": {
+              "type": "string"
+            },
+            "rewrite": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "action",
+                "reason"
+              ],
+              "properties": {
+                "action": {
+                  "enum": [
+                    "REASK",
+                    "CONFIRM"
+                  ]
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "additionalProperties": false

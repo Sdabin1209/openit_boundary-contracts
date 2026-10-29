@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "boundary-contracts"
-version = "2.3.0"
+version = "2.4.0"
 requires-python = ">=3.10"
 description = "영역 사이 계약의 스키마와 기준 구현. 버전 MAJOR.MINOR는 pipeline_schema_version과 같다."
 dependencies = ["jsonschema>=4.10"]

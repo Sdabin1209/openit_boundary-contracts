@@ -33,7 +33,7 @@ def codes(i, o):
 
 class RulesSpecTest(unittest.TestCase):
     def test_spec_matches_its_schema(self):
-        self.assertEqual(load_rules()["rules_version"], "1")
+        self.assertEqual(load_rules()["rules_version"], "2")
 
     def test_key_helpers(self):
         self.assertEqual(item_of("Q7[soju].amount"), "Q7")

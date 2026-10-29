@@ -2,6 +2,12 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.4.0 (MINOR, 추가형. `PIPELINE_SCHEMA_VERSION` "2.4". 클라이언트는 MAJOR만 비교)
+- **LoRA-A 출력 값 규칙(OPEN_GAPS U32·U33, 헤드 초안 `head/docs/proposals/2026-10-29-계약-2.4.0-칸-규격과-값-규칙.md`).** 새 스키마 `QuestionFieldSpec`(칸 자료형·단위·범위·선택지·반복 키, 값은 데이터셋 `docs/SQL.md` question_fields와 같게). I9 `ExtractRequest`에 선택 필드 `fields`.
+- 규칙 데이터 `action_extraction_rules.json` `rules_version` "2": `value_rules`(범위 밖 → `REASK/OUT_OF_RANGE`, 기간보다 많은 횟수 → `REASK/COUNT_EXCEEDS_DAYS`, 최대량<평소량 mL 비교 → `CONFIRM/CONFLICT_MAX_BELOW_USUAL`, 안 마심+횟수 → '마심'으로 정정, 안 마심+양 → `CONFIRM/CONFLICT_DOES_NOT_DRINK`). 값과 환산표는 정규화기 `openit-normalizer`(normalize.py R1~R3, mappings.VOLUME_ML·PERIOD_MAX·MAX_MINUTES_PER_DAY)에서 옮겼다.
+- 해석기 `apply_value_rules(input, output, fields, flow=None, rules=None) -> (출력, 위반, 적용 사유)`: 규칙에 걸리면 데이터셋이 같은 상황에서 낸 정답 모양으로 바꾼다. 데이터셋에 정답이 없는 위반(자료형 불일치 `VALUE_TYPE_MISMATCH`, 최소값 미만 `VALUE_BELOW_MINIMUM`)은 바꾸지 않고 돌려준다(서버는 `OUTPUT_INVALID`).
+- 이 판의 규칙은 선택지 칸으로 바뀐 숫자(예: Q6_1 '32일' → `days_10_29`)를 잡지 못한다(원래 숫자가 출력에 없다).
+
 ## 2.3.0 (MINOR, 추가형. `PIPELINE_SCHEMA_VERSION` "2.3". 클라이언트는 MAJOR만 비교)
 - **키오스크 기기 인증을 게이트웨이 클라이언트 인증서(mTLS)로(ADR 0012, D113).** 게이트웨이가 확인한 기기 ID를 `X-Openit-Device`로 넘기고 서비스는 그 값을 믿는다(PUBLIC_API.md F절). 기기 토큰(`Authorization: Bearer`)과 `DeviceConfig.device_token`은 폐기 예정(3.0.0에서 제거).
 - `HttpPublicApi(base_url, token=None, timeout, device_id=None)`: 토큰은 선택, 내부망 직접 호출은 `device_id`로 헤더를 싣는다. `HttpClientBase`는 토큰이 없으면 `Authorization`을 싣지 않는다.

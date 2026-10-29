@@ -128,6 +128,8 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 - 서비스의 실패 처리(재시도, 읽기 타임아웃은 재시도 없음, 404면 적재 요청 등)는 survey-service의 `inference-server-spec.md` 5절을 따른다. 이것은 서비스 내부 동작이라 계약이 아니다.
 - 서버의 헤더 이름이 model-runtime의 현행(`X-Model-Runtime-*`)과 다르므로 model-runtime이 이 이름으로 바꾼다.
 
+  - **2.4.0 `fields`(선택, QuestionFieldSpec):** 요청에 칸 규격이 있으면 서버는 `check_action_extraction` 뒤에 `apply_value_rules`를 적용해 값 규칙(범위·R1~R3)을 보증한다. 규칙에 걸린 출력은 데이터셋 정답 모양으로 바뀌어 200으로 나가고, 바꿀 수 없는 위반(`VALUE_TYPE_MISMATCH`, `VALUE_BELOW_MINIMUM`)은 다시 생성해도 남으면 503 `UNAVAILABLE`(`details.reason="OUTPUT_INVALID"`)이다. 호출자(survey-service)는 통과한 출력을 다시 검사하지 않는다(R7).
+
 ## I8 turn-engine
 라이브러리라서 HTTP 면이 없다(INTERFACES.md I8).
 

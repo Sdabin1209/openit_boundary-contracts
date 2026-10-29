@@ -1,0 +1,29 @@
+{
+  "fields": [
+    {
+      "slot": "Q10.days",
+      "data_type": "integer",
+      "unit": "day/week",
+      "minimum": 0,
+      "maximum": 7
+    },
+    {
+      "slot": "Q4.answer",
+      "data_type": "boolean"
+    },
+    {
+      "slot": "Q4_1.daily_count",
+      "data_type": "number",
+      "unit": "개비",
+      "minimum": 0
+    },
+    {
+      "slot": "Q4_1.status",
+      "data_type": "option",
+      "options": [
+        "current",
+        "past"
+      ]
+    }
+  ]
+}
