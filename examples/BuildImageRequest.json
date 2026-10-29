@@ -1,10 +1,15 @@
 {
-  "source_dir": "/work/survey-service",
-  "revision": "85b3552",
+  "source_dir": "/srv/build/ctx/model-runtime",
+  "revision": "bad876c",
   "versions": {
-    "boundary": "v2.1.1",
-    "turn_engine": "v0.4.2",
-    "model_runtime": "v0.7.6"
+    "boundary": "v2.5.0",
+    "model_runtime": "v0.10.0",
+    "survey_schema": "v1.2.0"
   },
-  "image_tag": "deploy-build/survey-service:85b3552"
+  "dependency_sources": {
+    "boundary": "/srv/build/ctx/src/boundary-contracts-v2.5.0",
+    "survey_schema": "/srv/build/ctx/src/survey-schema-v1.2.0/schema"
+  },
+  "variant": "gpu",
+  "image_tag": "deploy-build/model-serving-gpu:bad876c"
 }

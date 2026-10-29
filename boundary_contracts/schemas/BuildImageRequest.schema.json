@@ -2,52 +2,89 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "BuildImageRequest.schema.json",
   "title": "BuildImageRequest",
-  "description": "[제안] 영역 빌드 진입점 입력 (deploy -> 영역 scripts/build-image.sh). 제안이다(현재 영역에 이 진입점이 없다). 지금 deploy 의 build-images.sh 는 영역마다 다른 Dockerfile 인자 이름(COMMIT/REVISION, BOUNDARY_TAG/BC_VERSION/BOUNDARY_VERSION/BOUNDARY_CONTRACT 등)과 빌드 컨텍스트를 직접 안다. 진입점이 생기면 deploy 는 이 JSON 한 벌만 넘기고 인자 이름은 영역이 안다. 파일 경로 하나를 인자로 받는다.",
+  "description": "영역 빌드 진입점 입력(2.5.0, OPEN_GAPS U42). deploy가 이 JSON을 파일로 쓰고 영역 리포 루트에서 `bash scripts/build-image.sh <요청 파일>`을 부른다. 영역은 Dockerfile 인자 이름·빌드 컨텍스트·라벨 값을 스스로 정하고(구조 규칙 1), 결과를 표준 출력 마지막 줄에 BuildImageResult JSON 한 줄로 낸다(진행 기록은 표준 오류). 종료 코드 0 성공, 0이 아니면 실패. 도커 실행 파일은 표준 환경 변수 DOCKER(없으면 docker)로만 바꾼다. 비밀 값을 받지도 이미지에 넣지도 않는다. 같은 요청은 같은 이미지를 낸다(멱등).",
   "type": "object",
-  "properties": {
-    "source_dir": {
-      "type": "string",
-      "minLength": 1,
-      "description": "영역 소스 트리(영역 자신의 리포 루트)"
-    },
-    "revision": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{7,40}$"
-    },
-    "versions": {
-      "type": "object",
-      "properties": {
-        "boundary": {
-          "type": "string",
-          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
-        },
-        "turn_engine": {
-          "type": "string",
-          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
-        },
-        "model_runtime": {
-          "type": "string",
-          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
-        }
-      },
-      "required": [
-        "boundary",
-        "turn_engine",
-        "model_runtime"
-      ],
-      "additionalProperties": false
-    },
-    "image_tag": {
-      "type": "string",
-      "pattern": "^[a-z0-9./_-]+:[A-Za-z0-9._-]+$",
-      "description": "만들 로컬 이미지 참조"
-    }
-  },
+  "additionalProperties": false,
   "required": [
     "source_dir",
     "revision",
     "versions",
     "image_tag"
   ],
-  "additionalProperties": false
+  "properties": {
+    "source_dir": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^/",
+      "description": "영역 소스 트리(영역 자신의 리포 루트, 절대 경로). 진입점은 이 트리만 빌드 컨텍스트로 쓴다"
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{7,40}$",
+      "description": "소스 커밋. 라벨 io.openit.revision"
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "boundary"
+      ],
+      "description": "배포 기준표(deploy lib.sh)의 버전. 영역이 쓰지 않는 키는 무시한다. 영역이 쓰는 키가 없으면 실패한다(기본값을 영역이 따로 두지 않는다: 기준표와 어긋나지 않게)",
+      "properties": {
+        "boundary": {
+          "type": "string",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "description": "boundary-contracts 태그. 라벨 io.openit.contracts.boundary"
+        },
+        "model_runtime": {
+          "type": "string",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "description": "model-runtime 태그. 라벨 io.openit.model-runtime"
+        },
+        "survey_schema": {
+          "type": "string",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "description": "문진 스키마 버전(태그 survey-schema-vX.Y.Z의 vX.Y.Z). 라벨 io.openit.contracts.survey-schema"
+        },
+        "turn_engine": {
+          "type": "string",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "description": "폐기(D109). 받기만 하고 쓰지 않는다. 3.0.0에서 뺀다"
+        }
+      }
+    },
+    "dependency_sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "공유 라이브러리의 해당 버전 소스 트리(절대 경로, deploy가 태그에서 꺼내 준다). 영역은 이웃 리포 경로(../model-runtime 등)나 빌드 중 네트워크 대신 이것을 쓴다. 영역이 쓰는 라이브러리 키가 없으면 실패한다",
+      "properties": {
+        "boundary": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^/"
+        },
+        "model_runtime": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^/"
+        },
+        "survey_schema": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^/",
+          "description": "문진 스키마 패키지 디렉터리(survey-service 리포의 schema/)"
+        }
+      }
+    },
+    "variant": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "한 리포가 이미지를 여럿 낼 때 고른다(예: model-runtime의 gpu). 없으면 기본 이미지. 영역이 모르는 값이면 실패한다"
+    },
+    "image_tag": {
+      "type": "string",
+      "pattern": "^[a-z0-9./_-]+:[A-Za-z0-9._-]+$",
+      "description": "만들 로컬 이미지 참조"
+    }
+  }
 }

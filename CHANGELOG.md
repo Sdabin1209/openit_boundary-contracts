@@ -2,6 +2,15 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.5.0 (MINOR, 와이어 스키마 변경. `PIPELINE_SCHEMA_VERSION` "2.5". 클라이언트는 MAJOR만 비교)
+- **영역 빌드 진입점 확정(OPEN_GAPS U42, 구조 규칙 1).** `BuildImageRequest`/`BuildImageResult`의 '[제안]'을 뗀다. deploy는 요청 JSON 파일 하나로 영역 `scripts/build-image.sh <요청 파일>`을 부르고, 영역은 Dockerfile 인자 이름·빌드 컨텍스트·라벨 값을 스스로 정해 표준 출력 마지막 줄에 결과 JSON 한 줄을 낸다. 지금까지 deploy `build-images.sh`가 영역마다 다른 인자 이름과 빌드 산출 파일을 직접 알았다.
+- `BuildImageRequest` 바뀐 점(제안을 쓰는 곳이 없어 깨지는 소비자 없음):
+  - `versions.turn_engine` 필수 해제(D109 폐기, 받기만 함, 3.0.0에서 뺀다). `versions.survey_schema` 추가(vX.Y.Z). `versions`는 `boundary`만 필수이고 모르는 키는 거부.
+  - `dependency_sources` 추가: 공유 라이브러리(boundary, model_runtime, survey_schema)의 해당 버전 소스 트리 절대 경로. 영역이 이웃 리포 경로(`../model-runtime`)나 빌드 중 네트워크(SSH) 대신 쓴다.
+  - `variant` 추가: 한 리포가 이미지를 여럿 낼 때(예: model-runtime `gpu`).
+  - 최상위 모르는 키 거부(deploy가 인자 이름을 넘기는 길을 막는다).
+- `BuildImageResult`: 설명만 확정(필드 그대로).
+
 ## 2.4.2 (PATCH, 와이어 스키마 변경 없음, `PIPELINE_SCHEMA_VERSION` "2.4" 그대로)
 - 고침(OPEN_GAPS U29): 계약 클라이언트가 본문을 쓰다 연결이 끊겨도(EPIPE·ECONNRESET) 서버가 먼저 보낸 응답을 읽는다. waitress는 본문 상한을 넘은 업로드에 본문을 읽지 않고 413을 보낸 뒤 닫아, 2.4.1까지는 경쟁 조건에서 413 대신 `UNAVAILABLE`(재시도)이 나왔다(2.2.2 규칙 위반). 이제 `INVALID_RECORD`(`details.http_status` 413)다. 쓰기가 끊긴 뒤 받은 성공 응답(2xx·3xx)은 잘린 요청이 처리됐을 수 있어 믿지 않고 `UNAVAILABLE`로 낸다. 응답도 못 읽으면 전처럼 `UNAVAILABLE`. 근거: RFC 9112 9.5(본문을 보내는 클라이언트는 오류 응답을 살핀다). `Expect: 100-continue`는 waitress 3.0.2가 상한 초과에도 100을 먼저 보내 해결이 안 됨을 측정했다(2026-10-30 gpu-dev, 30/30).
 - 추가(OPEN_GAPS U21): HTTP 오류 응답에서 만든 `BoundaryError`는 `details.http_status`에 원래 상태를 남긴다. 401(토큰 오류)과 403(권한 오류)이 같은 `PERMISSION_DENIED`라 운영 로그에서 구분할 수 없었다. 서버가 준 `details`의 다른 키는 그대로다. 추가형이라 PATCH로 둔다(MAJOR.MINOR는 와이어 스키마 버전과 같게 두는 규칙, 이 파일 머리).
