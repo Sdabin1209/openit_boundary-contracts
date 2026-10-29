@@ -2,6 +2,12 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 2.6.0 (MINOR, 추가·완화형. `PIPELINE_SCHEMA_VERSION` "2.6". 클라이언트는 MAJOR만 비교)
+- **U43(구조 규칙 1): 영역이 시험 환경과 잡 설정을 선언한다.** deploy가 이웃의 `.venv`·`node_modules`·시험 도구·잡 설정 파일 모양을 짐작하지 않게 한다(deploy CR-D30).
+  - `SetupEnvReport.environment`: '[제안]'을 떼고 `test_command`(리포 루트에서 영역 시험 전체를 돌리는 argv) 추가. 2.x에서는 선택(없으면 deploy가 '검증 안 함'), 3.0.0에서 필수. 영역 `scripts/setup-env.sh`가 표준 출력 마지막 줄에 이 한 줄을 낸다.
+  - `JobsDeclaration` 잡에 `env`(비밀이 아닌 설정 환경 변수 이름 목록) 추가. 비밀은 `secret_files`(NAME_FILE)로만(D84). 설정은 환경 변수로 받는다는 12-factor 관행을 따른다.
+- **U45 나머지:** `ListEnvelope.items` 원소를 객체로만 두던 제한을 푼다(ID 문자열 목록 API가 있다). 계약 클라이언트의 목록 손 검사를 계약 스키마 검증으로 바꾼다.
+
 ## 2.5.1 (PATCH, 와이어 스키마 변경 없음, `PIPELINE_SCHEMA_VERSION` "2.5" 그대로)
 - 고침(OPEN_GAPS U45, U23 감사): 계약 클라이언트가 응답을 손 검사 대신 계약 스키마로 검증한다.
   - `HttpModelRuntime` 적재 상태(`ReleaseLoadStatus`)와 `info()`(`RuntimeInfo`).

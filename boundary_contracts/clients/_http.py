@@ -332,11 +332,7 @@ class HttpClientBase:
     def _page(self, path: str, cursor: Optional[str], limit: int, extra: Optional[dict] = None, schema: Optional[str] = None,
               item_check=None) -> tuple[list, Optional[str]]:
         body = self._json("GET", path, {**(extra or {}), "cursor": cursor, "limit": limit})
-        # ListEnvelope 스키마는 items를 객체로만 두지만 ID 문자열 목록을 내는 API가 있다(U45 조사, 2026-10-30). 스키마를 넓히는 것은
-        # 와이어 변경이라 다음 MINOR에서 하고, 그때까지는 같은 규칙(items 목록, next_cursor 문자열/null)을 여기서 본다.
-        if (not isinstance(body, dict) or not isinstance(body.get("items"), list)
-                or not (body.get("next_cursor") is None or isinstance(body.get("next_cursor"), str))):
-            raise integrity("목록 형식이 아니다")
+        check_record("ListEnvelope", body)              # U45(2.6.0): 손 검사 대신 계약 스키마(items 원소 모양은 호출별 스키마가 본다)
         items = body["items"]
         for it in items:
             if schema:

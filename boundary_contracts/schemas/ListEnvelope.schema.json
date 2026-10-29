@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "ListEnvelope.schema.json",
   "title": "ListEnvelope",
-  "description": "HTTP.md 공통 목록 봉투 {items, next_cursor}. 만드는 쪽: release-gate(I5 submissions, I4 releases), ops-feedback(I7 cases). 읽는 쪽: admin-console. items 원소는 객체 배열로만 정하고 원소는 호출별 계약 스키마(SubmissionView, ReleaseManifest, FailureCase)로 따로 검증한다. 쿼리: cursor(불투명 문자열), limit(기본 100, 최대 500). 모르는 키는 허용한다(읽기 쪽 관용).",
+  "description": "HTTP.md 공통 목록 봉투 {items, next_cursor}. 만드는 쪽: release-gate(I5 submissions, I4 releases), ops-feedback(I7 cases). 읽는 쪽: admin-console. items 원소의 모양은 정하지 않고(2.6.0) 원소는 호출별 계약 스키마(SubmissionView, ReleaseManifest, FailureCase)로 따로 검증한다. 쿼리: cursor(불투명 문자열), limit(기본 100, 최대 500). 모르는 키는 허용한다(읽기 쪽 관용).",
   "type": "object",
   "additionalProperties": true,
   "required": [
@@ -12,9 +12,7 @@
   "properties": {
     "items": {
       "type": "array",
-      "items": {
-        "type": "object"
-      }
+      "description": "원소 모양은 호출별 계약(객체 스키마 또는 ID 문자열)이 정하고 클라이언트가 따로 검증한다. 2.6.0(U45): 객체로만 두던 것을 풀었다(질문 세트·데이터셋·어댑터 목록은 ID 문자열을 낸다)"
     },
     "next_cursor": {
       "type": [

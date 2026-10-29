@@ -75,6 +75,18 @@
             ]
           },
           "description": "잡이 닿아야 하는 자원(이름은 deploy 가 정한 집합)"
+        },
+        "env": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "not": {
+              "pattern": "_FILE$"
+            }
+          },
+          "description": "2.6.0(U43): 잡이 읽는 비밀이 아닌 설정 환경 변수 이름(예: 이웃 서비스 URL). 값은 deploy가 정한다. 비밀은 여기 두지 않고 secret_files(NAME_FILE)로(D84). 설정 파일의 모양을 deploy가 알지 않게 한다"
         }
       },
       "required": [

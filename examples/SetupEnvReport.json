@@ -5,6 +5,12 @@
   "seconds": 41,
   "environment": {
     "kind": "python-venv",
-    "path": ".venv"
+    "path": ".venv",
+    "test_command": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "-q"
+    ]
   }
 }
