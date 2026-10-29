@@ -23,7 +23,7 @@
     "io.openit.contracts.survey-schema": {
       "type": "string",
       "pattern": "^([0-9]+|n/a)$",
-      "description": "문진 스키마 주 버전. 쓰지 않는 영역은 n/a"
+      "description": "문진 스키마 패키지(openit-survey-schema) 버전의 주 번호(예: survey-schema-v2.0.0 → \"2\"). 이미지에 실제로 들어간 패키지의 버전에서 찍는다(U50). 문진 스키마의 정수 CONTRACT_VERSION(모델 런타임 호환 번호, survey-service ADR-0044)이 아니다. deploy는 기준표 태그의 주 번호와 비교한다. 쓰지 않는 영역은 n/a"
     },
     "io.openit.model-runtime": {
       "type": "string",

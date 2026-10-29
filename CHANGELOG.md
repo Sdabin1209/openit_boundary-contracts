@@ -2,6 +2,9 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.0.1 (PATCH, 와이어 스키마 변경 없음, 설명만)
+- `ImageLabels`의 `io.openit.contracts.survey-schema` 뜻을 정한다: 문진 스키마 **패키지 버전의 주 번호**(survey-schema-v2.0.0 → "2"), 이미지에 실제로 들어간 패키지에서 찍는다(U50). 문진 스키마의 정수 `CONTRACT_VERSION`(모델 런타임 호환 번호, survey-service ADR-0044)과 다르다. 3.0.0 전환 때 영역마다 두 값 중 하나를 찍어 라벨이 엇갈렸다(synthetic-data "2", ops-feedback "1").
+
 ## 3.0.0 (MAJOR, 깨지는 변경. `PIPELINE_SCHEMA_VERSION` "3.0". 2.x 레코드는 클라이언트가 UNSUPPORTED_VERSION으로 거부한다)
 2.x에서 하위 호환 때문에 미룬 변경을 한 번에 낸다(헤드 `docs/proposals/계약-3.0.0-후보.md`).
 1. **`turn_engine_version` → `action_rules_version`(D109).** ReleaseManifest·DatasetManifest·ModelPackageManifest·GateReadyz·SyntheticJobConfigRun/Import. 값은 계약 `ActionExtractionRules.rules_version`(지금 "2"). 계보 일치 검사는 이 값으로 한다. `BuildImageRequest.versions.turn_engine`과 이미지 라벨 `io.openit.turn-engine` 제거(라벨이 남아 있으면 ImageLabels가 거부).
