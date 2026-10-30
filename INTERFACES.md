@@ -88,7 +88,7 @@ find_decisions(*, question_set: Ref | None = None, lora_a: Ref | None = None, lo
 list_releases(*, cursor=None, limit=100) -> Page[ReleaseManifest]   # 최신부터
 ```
 
-서비스가 지키는 것: 포인터가 바뀌면 **새 세션부터** 새 릴리스를 쓴다(O13). 적재를 거부하는 경우는 둘이다: (1) `runtime_contract_version`이 지원 버전이 아님, (2) 릴리스의 `turn_engine_version` 또는 `model_runtime_version`의 MAJOR.MINOR가 이미지에 설치된 것과 다름(게이트가 승인한 동작과 달라질 수 있기 때문이다. PATCH 차이는 경고만 하고 적재한다). 거부하면 이전 릴리스를 유지하고 이유를 `/readyz`에 낸다. `runtime_contract_version`을 지원하지 않는 릴리스는 `load_bundle` 결과를 적재하지 않고 이전 릴리스를 유지한다.
+서비스가 지키는 것: 포인터가 바뀌면 **새 세션부터** 새 릴리스를 쓴다(O13). 적재를 거부하는 경우는 둘이다: (1) `runtime_contract_version`이 지원 버전이 아님, (2) 릴리스의 `action_rules_version`(3.0.0, 이전 `turn_engine_version`)이 다르거나 `model_runtime_version`의 MAJOR.MINOR가 이미지에 설치된 것과 다름(게이트가 승인한 동작과 달라질 수 있기 때문이다. PATCH 차이는 경고만 하고 적재한다). 거부하면 이전 릴리스를 유지하고 이유를 `/readyz`에 낸다. `runtime_contract_version`을 지원하지 않는 릴리스는 `load_bundle` 결과를 적재하지 않고 이전 릴리스를 유지한다.
 
 ## I5. GateService (release-gate)
 
@@ -145,6 +145,8 @@ get_trace(deidentified_trace_ref: str) -> dict         # 비식별 TurnTrace(Dei
 
 `normalize`, `judge`, `write_record`, `plan`은 이 계약에서 없어졌다. 이 함수들은 파서 출력을 정규화·판정하고 다음 문항을 계획하는 단계였는데, 학습 데이터셋 v2에서는 LoRA-A가 값 정규화·절차(`action`)·다음 문항(`next_item`)을 한 번에 낸다(`ActionExtraction`). 서비스에는 정규화기·판정기·Plan 코드가 없다. v1.3.3은 태그로 남는다.
 
+> 3.0.0 갱신: 아래 '의미 검증'은 turn-engine이 아니라 계약 `boundary_contracts.action_rules`의 규칙 데이터로 model-runtime 서버가 보증한다(ADR 0010, R7, D109). survey-service는 다시 검증하지 않는다. 아래는 D75 당시의 서술로 남긴다.
+
 turn-engine은 폐기하지 않고 **A 출력의 의미 검증 안전망**으로 남는다(D75). 의료 문진 기록에 틀린 값이 들어가는 것보다 다시 묻는 편이 안전하기 때문이다. 검증은 둘로 나뉜다.
 - **형식(스키마)**: model-runtime이 `ActionExtraction` 스키마로 검증한다(I9). 어기면 재시도하고 끝내 못 지키면 503 `OUTPUT_INVALID`.
 - **의미**: turn-engine의 순수 함수가 검증하고 survey-service가 호출한다. 스키마로 표현할 수 없는 규칙이다: (a) `targets`가 같은 출력 `values`의 `key` 부분집합, (b) `next_item` 규칙(REASK·REDIRECT는 입력 `question_id`와 같다. CONFIRM은 `targets` 칸의 문항이다. NEXT·CORRECT·HOLD·SKIP은 문항 순서와 건너뛰기 규칙의 다음 문항이다. 한 말에 여러 문항의 값이 나오면 가장 뒤 문항이 기준이다), (c) 건너뛰기 순서, (d) `save` 규칙(`save`는 status가 ANSWERED 또는 CORRECTION일 때만 true이고, 나머지 status의 `value`는 null).
@@ -177,7 +179,8 @@ load(adapters: Mapping["LORA_A"|"LORA_B", Path], serving_configs: Mapping["LORA_
     #   SUPPORTED_RUNTIME_CONTRACT_VERSION과 다르면 ContractVersionMismatch.
     # 역할마다 serving_config_hash(serving_configs[role]) != expected_serving_config_hashes[role] 이면 ServingConfigMismatch.
     # 지원하지 않는 프롬프트 템플릿·디코딩 버전이면 UnsupportedServingConfig.
-ModelSession.extract(input: ActionExtractionInput) -> ActionExtraction   # LoRA-A. 항상 스키마를 통과하는 값. 아래 '출력 검증'
+ModelSession.extract(input: ActionExtractionInput, flow: QuestionFlowTable, fields: {fields: [QuestionFieldSpec]}) -> ActionExtraction   # 3.0.0: flow·fields 필수
+# (이전 서명) ModelSession.extract(input: ActionExtractionInput) -> ActionExtraction   # LoRA-A. 항상 스키마를 통과하는 값. 아래 '출력 검증'
 ModelSession.respond(input: ResponseRequest) -> ResponseResult         # LoRA-B. ResponseResult(text: str, is_fallback: bool). 아래 '출력 검증'
 ModelSession.extract_raw(input) -> RawResult    # 평가용: 검증 전 모델 출력과 유효 여부. RawResult(output: dict | str | None, valid: bool, errors: list[str])
 ModelSession.respond_raw(input) -> RawResult

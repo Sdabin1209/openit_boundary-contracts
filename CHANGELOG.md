@@ -2,6 +2,11 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.1.1 (PATCH, 와이어 형식 변경 없음. 이 버전에서 계약을 고정한다)
+- `SurveyServiceEnv`: `SURVEY_RELEASE_READER`·`SURVEY_TRACE_INGEST` 값 형식('http' 또는 '모듈:함수')과 'http'일 때 `*_URL` 필수, `SURVEY_INFERENCE_URL` 형식을 스키마로 적는다(survey-service가 설정에서 이미 거부하던 조건, deploy 설정은 이미 지킨다).
+- 참조 서버: 토큰 오류 401+`WWW-Authenticate`(D106), 승인에 `X-Openit-User`가 없으면 401, 승인 멱등(200 / 409 `ALREADY_DECIDED`), packages·submissions·traces 요청을 계약으로 검증.
+- 문서를 실제와 맞춘다: HTTP.md I9(extract 본문 셋 다 필수, `/v1/info`=`RuntimeInfo`), 검토 게시에 사람 머리글이 없으면 401(서버 실제 동작), INTERFACES.md의 turn-engine·`turn_engine_version`·`extract` 서명, README, PUBLIC_API.md 기기 토큰은 호환용으로 남긴다(3.0.0 제거 약속 철회).
+
 ## 3.1.0 (MINOR, 추가만. 기존 영역의 레코드·호출은 그대로 통과한다)
 독립 검토(2026-10-30)가 찾은 계약 결함을 와이어 형식을 깨지 않는 범위에서 고친다.
 - 새 스키마 `GateSubmissionRequest`(POST /v1/submissions 본문, 그동안 HTTP.md에 글로만 있었다). `submit_candidate()`가 보내기 전에 검사한다.

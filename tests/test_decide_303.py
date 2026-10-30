@@ -11,7 +11,7 @@ class Decide303(unittest.TestCase):
     def setUp(self):
         self.srv = make_server().start()
         self.addCleanup(self.srv.stop)
-        self.a = HttpGateService(self.srv.url, APPROVER)
+        self.a = HttpGateService(self.srv.url, APPROVER, user="approver-1")   # 3.1.1: 승인은 X-Openit-User가 있어야 한다
 
     def _sub(self):
         g = HttpGateService(self.srv.url, WRITE)

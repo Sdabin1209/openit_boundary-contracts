@@ -93,6 +93,7 @@ class ReferenceServer:
         self.receipts: dict[str, dict] = {}
         self.traces: dict[tuple, dict] = {}
         self.cases: list[dict] = []
+        self.approvals: dict[str, dict] = {}   # submission_id -> GateApproval(3.1.1 멱등)
         self.deid_traces: dict[str, dict] = {}
         self.requests: list[tuple] = []                  # (method, path+query, role)
         self._server = None
@@ -160,11 +161,14 @@ class ReferenceServer:
             elif u.path in ("/healthz", "/readyz"):
                 status, ctype, data, extra = 200, "application/json", b'{"ok":true}', []
             else:
-                if role is None:
-                    raise BoundaryError("PERMISSION_DENIED", "토큰이 없거나 틀리다")
+                if role is None:   # D106(CONVENTIONS 6절): 토큰이 없거나 틀리면 401 + WWW-Authenticate, 권한 부족만 403
+                    raise BoundaryError("PERMISSION_DENIED", "토큰이 없거나 틀리다", {"http_status": 401})
                 status, ctype, data, *extra = self._route(h.command, unquote(u.path), query, body, role)
         except BoundaryError as e:
-            status, ctype, data, extra = STATUS[e.code], "application/json", json.dumps(e.to_record(V)).encode(), []
+            st = (e.details or {}).get("http_status") if isinstance(getattr(e, "details", None), dict) else None
+            status, ctype, data, extra = st or STATUS[e.code], "application/json", json.dumps(e.to_record(V)).encode(), []
+            if status == 401:
+                extra = [{"WWW-Authenticate": "Bearer"}]
         h.send_response(status)
         h.send_header("Content-Type", ctype)
         for k, v in (extra[0] if extra else {}).items():  # 선택: 네 번째 요소 = 추가 응답 헤더
@@ -335,6 +339,7 @@ class ReferenceServer:
             return self._publish_dataset(body)
         if path == "/v1/submissions":
             b = jb()
+            _check_request("GateSubmissionRequest", b)
             self._same_role(b, role)
             key = sha256_hash(b["subject"])
             if key not in self.submissions:
@@ -354,10 +359,19 @@ class ReferenceServer:
                 raise BoundaryError("INVALID_RECORD", "반려에는 사유가 필요하다")
             if b["report_hash"] != sha256_hash(_review_report(b["submission_id"])):
                 raise BoundaryError("CONFLICT", "본 보고서가 지금 보고서와 다르다", {"reason": "STALE_REPORT"})
+            user = getattr(self._local, "user", None)
+            if not user:   # HTTP.md I5: 사람 행위자 머리글이 없으면 인증되지 않은 요청이다
+                raise BoundaryError("PERMISSION_DENIED", "X-Openit-User가 없다", {"http_status": 401})
+            prev = self.approvals.get(b["submission_id"])
+            if prev is not None:   # 멱등: 같은 결정이면 같은 결과(200), 다른 결정이면 409 ALREADY_DECIDED
+                if prev["decision"] == b["decision"]:
+                    return J(prev, 200)
+                raise BoundaryError("CONFLICT", "이미 다른 결정이 있다", {"reason": "ALREADY_DECIDED"})
             a = dict(_example("GateApproval"), submission_id=b["submission_id"], decision=b["decision"],
-                     approver_id=getattr(self._local, "user", None) or role, approver_role=role)   # 승인자 ID는 X-Openit-User(없으면 토큰 역할)
+                     approver_id=user, approver_role=role)
             if b.get("reason"):
                 a["reason"] = b["reason"]
+            self.approvals[b["submission_id"]] = a
             return J(a, 201)
         if path == "/v1/activate":
             b = jb()
@@ -392,6 +406,7 @@ class ReferenceServer:
             return J(self.receipts[b["request_id"]])
         if path == "/v1/traces":
             b = jb()
+            _check_request("TraceEnvelope", b)
             key = (b["session_id"], b["turn_id"])
             status = "DUPLICATE" if key in self.traces else "ACCEPTED"
             self.traces.setdefault(key, b)
@@ -420,6 +435,7 @@ class ReferenceServer:
             manifest = json.loads(files["manifest.json"])
         except (tarfile.TarError, KeyError, ValueError):
             raise BoundaryError("INVALID_RECORD", "publish 본문이 잘못됐다") from None
+        _check_request("ModelPackageManifest", manifest)   # 3.1.1: 참조 서버도 계약으로 받는다
         adapter = {n[len("adapter/"):]: d for n, d in files.items() if n.startswith("adapter/")}
         if adapter_digest(adapter) != manifest.get("adapter_hash"):
             raise BoundaryError("INTEGRITY_ERROR", "어댑터 해시가 맞지 않는다")

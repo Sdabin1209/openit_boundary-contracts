@@ -102,7 +102,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 | `list_cases` | `GET /v1/cases?review_status=&failure_type=&source_release_id=&updated_since=&latest_only=true\|false` | 목록(`FailureCase`) |
 | `get_trace` | `GET /v1/deidentified-traces/{ref}` | 비식별 TurnTrace JSON |
 | `publish_case` | (HTTP로 열지 않는다. ops-feedback 내부 잡이 로컬 저장소에 쓴다) | |
-| (검토 게시, 사람/검토 화면용. Protocol 밖) | `POST /v1/cases/{case_id}/review` (쓰기 역할 `reviewer`, 읽기 토큰은 403) 본문 `{review_status: "CONFIRMED"\|"DISMISSED"\|"PENDING", expected?: 객체 또는 문자열, expected_kind?: "LORA_A"\|"LORA_B", reviewed_input?: 객체}` | 새 `version`의 `FailureCase`(201). 같은 검토를 다시 보내면 같은 결과(200). `expected`가 있으면 `expected_kind`가 필수이고 그 값에 맞는 모델 출력이어야 한다: `LORA_A`면 `ActionExtraction`(객체), `LORA_B`면 `ResponseText`(문자열)이며 아니면 INVALID_RECORD다. `reviewed_input`은 검토자가 개인정보 없이 고쳐 쓴 입력이며 `LORA_A`면 `ActionExtractionInput`, `LORA_B`면 `ResponseRequest`여야 한다(D55). 존재하지 않는 사례는 404  사람 검토자 식별: I5 승인과 같은 방식이다. 게이트웨이가 사람 인증을 마친 뒤 `X-Openit-User: <인증된 사용자 ID>`를 붙이고(클라이언트가 보낸 같은 이름의 헤더는 지운다), 서버는 `reviewer` 토큰의 요청에서 이 헤더 값을 검토자로 기록한다. 헤더가 없으면 403이다. |
+| (검토 게시, 사람/검토 화면용. Protocol 밖) | `POST /v1/cases/{case_id}/review` (쓰기 역할 `reviewer`, 읽기 토큰은 403) 본문 `{review_status: "CONFIRMED"\|"DISMISSED"\|"PENDING", expected?: 객체 또는 문자열, expected_kind?: "LORA_A"\|"LORA_B", reviewed_input?: 객체}` | 새 `version`의 `FailureCase`(201). 같은 검토를 다시 보내면 같은 결과(200). `expected`가 있으면 `expected_kind`가 필수이고 그 값에 맞는 모델 출력이어야 한다: `LORA_A`면 `ActionExtraction`(객체), `LORA_B`면 `ResponseText`(문자열)이며 아니면 INVALID_RECORD다. `reviewed_input`은 검토자가 개인정보 없이 고쳐 쓴 입력이며 `LORA_A`면 `ActionExtractionInput`, `LORA_B`면 `ResponseRequest`여야 한다(D55). 존재하지 않는 사례는 404  사람 검토자 식별: I5 승인과 같은 방식이다. 게이트웨이가 사람 인증을 마친 뒤 `X-Openit-User: <인증된 사용자 ID>`를 붙이고(클라이언트가 보낸 같은 이름의 헤더는 지운다), 서버는 `reviewer` 토큰의 요청에서 이 헤더 값을 검토자로 기록한다. 헤더가 없으면 401이다(인증되지 않은 사람 요청, CONVENTIONS 6절·D106; release-gate·ops-feedback 서버의 실제 동작). |
 
 ## I9 ModelRuntime 추론 서버 — 소유: model-runtime (서버), 소비: survey-service (D62)
 
@@ -112,9 +112,9 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 | --- | --- | --- |
 | 릴리스 적재 신호 | `PUT /v1/releases/{release_id}` (본문 없음, **멱등**) | 200 `{"release_id","state":"LOADED","error":null}` / 202 `{"state":"LOADING"}`. 실패: 412 `FAILED_PRECONDITION`(승인 없음·해시·설정 해시 불일치·어댑터 사전 검사 실패), 422 `INTEGRITY_ERROR`·`UNSUPPORTED_VERSION`, 503 `UNAVAILABLE`. 서버가 I4에서 번들을 **스스로 읽어** 적재한다(서비스는 어댑터를 보내지 않는다) |
 | 적재 상태 | `GET /v1/releases/{release_id}` | 200 `{"release_id","state":"ABSENT"\|"LOADING"\|"LOADED"\|"FAILED","error":BoundaryError\|null}` |
-| extract (LoRA-A) | `POST /v1/releases/{release_id}/extract` 본문 `ExtractRequest`(`input`: `ActionExtractionInput`, `flow`: `QuestionFlowTable`). 2.x에서는 본문이 `ActionExtractionInput` 그대로인 옛 형식도 받으며, 이때는 아래 규칙 보증이 없다. 3.0.0에서 `ExtractRequest`만 남는다 | 200 `ActionExtraction` (`application/json`) |
+| extract (LoRA-A) | `POST /v1/releases/{release_id}/extract` 본문 `ExtractRequest`(`input`: `ActionExtractionInput`, `flow`: `QuestionFlowTable`, `fields`: `{fields: [QuestionFieldSpec]}`). 셋 다 필수다(3.0.0). 옛 `ActionExtractionInput` 본문이나 `flow`·`fields`가 없는 요청은 400 `INVALID_RECORD` | 200 `ActionExtraction` (`application/json`) |
 | respond (LoRA-B) | `POST /v1/releases/{release_id}/respond` 본문 `ResponseRequest` | 200 응답 문장 그대로(`text/plain; charset=utf-8`, JSON으로 감싸지 않는다. `ResponseText`) |
-| 정보 | `GET /v1/info` | `{"service","runtime_version","supported_contract_versions":[1],"backend","loaded":[release_id...],"serving_config_hash":{"LORA_A":…,"LORA_B":…}}` |
+| 정보 | `GET /v1/info` | 계약 `RuntimeInfo`(필수 9개: service, runtime_version, supported_contract_versions, backend, loaded, serving_config_hash, system_prompt_sha256, serving_config_expectation, test_hooks) |
 | 상태 | `GET /healthz`, `GET /readyz`(인증 없음) | 200. readyz는 요청을 받을 수 있을 때 200, 아니면 503 |
 
 - 인증은 Bearer 토큰(서버 `MODEL_RUNTIME_TOKENS`, 서비스 `SURVEY_INFERENCE_TOKEN_ENV`). 오류는 `BoundaryError` 본문과 9절 상태 코드(400 입력 계약 위반, 403, 404, 412, 422, 503).
@@ -129,7 +129,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 - 서비스의 실패 처리(재시도, 읽기 타임아웃은 재시도 없음, 404면 적재 요청 등)는 survey-service의 `inference-server-spec.md` 5절을 따른다. 이것은 서비스 내부 동작이라 계약이 아니다.
 - 서버의 헤더 이름이 model-runtime의 현행(`X-Model-Runtime-*`)과 다르므로 model-runtime이 이 이름으로 바꾼다.
 
-  - **2.4.0 `fields`(선택, QuestionFieldSpec):** 요청에 칸 규격이 있으면 서버는 `check_action_extraction` 뒤에 `apply_value_rules`를 적용해 값 규칙(범위·R1~R3)을 보증한다. 규칙에 걸린 출력은 데이터셋 정답 모양으로 바뀌어 200으로 나가고, 바꿀 수 없는 위반(`VALUE_TYPE_MISMATCH`, `VALUE_BELOW_MINIMUM`)은 다시 생성해도 남으면 503 `UNAVAILABLE`(`details.reason="OUTPUT_INVALID"`)이다. 호출자(survey-service)는 통과한 출력을 다시 검사하지 않는다(R7).
+  - **`fields`(QuestionFieldSpec, 3.0.0부터 필수):** 서버는 `check_action_extraction` 뒤에 `apply_value_rules`를 적용해 값 규칙(범위·R1~R3)을 보증한다. 규칙에 걸린 출력은 데이터셋 정답 모양으로 바뀌어 200으로 나가고, 바꿀 수 없는 위반(`VALUE_TYPE_MISMATCH`, `VALUE_BELOW_MINIMUM`)은 다시 생성해도 남으면 503 `UNAVAILABLE`(`details.reason="OUTPUT_INVALID"`)이다. 호출자(survey-service)는 통과한 출력을 다시 검사하지 않는다(R7).
 
 ## I8 turn-engine (3.0.0 폐기, D109 — 출력 규칙은 계약 action_rules가 정본, model-runtime 서버가 보증)
 라이브러리라서 HTTP 면이 없다(INTERFACES.md I8).

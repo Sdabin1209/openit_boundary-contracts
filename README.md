@@ -103,7 +103,7 @@ pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@<�
 | G11 | 문진 스키마 정수 버전 1 안의 비호환 변경. `TraceEnvelope.trace`가 이것을 담는다 | 다른 영역 의존(survey-service, ops-feedback 동시 배포) |
 | H2 | 학습된 LoRA-A/B로 한 턴 통과 시험 | GPU (U07, U14와 연결) |
 
-`V2_DRAFT.md` 10절에도 아직 정해지지 않은 것 7건(예: 제약 디코딩용 평면 스키마를 따로 낼지, `DatasetManifest.turn_engine_version` 필수 유지)이 있다. 대장 ID는 아직 없다.
+`V2_DRAFT.md` 10절에도 아직 정해지지 않은 것 7건(예: 제약 디코딩용 평면 스키마를 따로 낼지, `DatasetManifest.turn_engine_version` 필수 유지)이 있다. 대장 ID는 아직 없다. (3.0.0 갱신: `turn_engine_version`은 `action_rules_version`으로 바뀌어 결론이 났다.)
 
 ## 6. 더 자세한 문서
 

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "SurveyServiceEnv.schema.json",
   "title": "SurveyServiceEnv",
-  "description": "배포(deploy)가 survey-service 컨테이너에 주는 환경 변수 집합. 만드는 쪽: deploy(compose). 읽는 쪽: survey_service/settings.py. 값은 모두 문자열. 비밀(SECRETS)은 NAME_FILE(파일 경로)로 준다(D84); 값 NAME은 개발·시험용 호환. 알려진 SURVEY_ 키 목록은 survey_service/settings.py와 read_secret이 읽는 이름과 같아야 한다(자체 스크립트가 코드에서 읽는 이름을 정적으로 대조한다). SURVEY_OUTBOX_DB는 더 쓰지 않으나(ADR-0023) 옛 배포가 주어도 거부하지 않도록 목록에 남긴다. 3.0.2: 추론 연결은 SURVEY_INFERENCE_URL(원격 추론 서버, 운영) 또는 SURVEY_MODEL_BACKEND(내장 백엔드, 지금은 fake만) 중 하나가 있으면 된다(D62부터의 survey-service 동작). 3.0.0까지 SURVEY_MODEL_BACKEND만 필수로 적은 것은 계약 결함이었다(원격 추론 배포가 계약 위반이 됐다).",
+  "description": "배포(deploy)가 survey-service 컨테이너에 주는 환경 변수 집합. 만드는 쪽: deploy(compose). 읽는 쪽: survey_service/settings.py. 값은 모두 문자열. 비밀(SECRETS)은 NAME_FILE(파일 경로)로 준다(D84); 값 NAME은 개발·시험용 호환. 알려진 SURVEY_ 키 목록은 survey_service/settings.py와 read_secret이 읽는 이름과 같아야 한다(자체 스크립트가 코드에서 읽는 이름을 정적으로 대조한다). SURVEY_OUTBOX_DB는 더 쓰지 않으나(ADR-0023) 옛 배포가 주어도 거부하지 않도록 목록에 남긴다. 3.0.2: 추론 연결은 SURVEY_INFERENCE_URL(원격 추론 서버, 운영) 또는 SURVEY_MODEL_BACKEND(내장 백엔드, 지금은 fake만) 중 하나가 있으면 된다(D62부터의 survey-service 동작). 3.0.0까지 SURVEY_MODEL_BACKEND만 필수로 적은 것은 계약 결함이었다(원격 추론 배포가 계약 위반이 됐다). 3.1.1: SURVEY_RELEASE_READER·SURVEY_TRACE_INGEST의 값 형식과 'http'일 때 *_URL 필수를 스키마로 적는다(survey-service가 설정에서 거부하던 조건; 계약이 표현하지 못해 deploy의 설정 검증이 잡지 못했다).",
   "type": "object",
   "required": [
     "SURVEY_RELEASE_READER",
@@ -182,6 +182,31 @@
       "type": "string",
       "pattern": "^/",
       "description": "비밀이 든 파일의 절대 경로. 값 자체가 아니다."
+    },
+    "SURVEY_RELEASE_READER": {
+      "type": "string",
+      "pattern": "^(http|[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*)$",
+      "description": "3.1.1: 'http'(계약 HTTP 클라이언트 기본 조립) 또는 '모듈:함수'(시험·개발 주입). 'http'이면 짝이 되는 *_URL이 필수다."
+    },
+    "SURVEY_TRACE_INGEST": {
+      "type": "string",
+      "pattern": "^(http|[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*)$",
+      "description": "3.1.1: 'http'(계약 HTTP 클라이언트 기본 조립) 또는 '모듈:함수'(시험·개발 주입). 'http'이면 짝이 되는 *_URL이 필수다."
+    },
+    "SURVEY_RELEASE_READER_URL": {
+      "type": "string",
+      "pattern": "^https?://[^\\s]+$",
+      "description": "SURVEY_RELEASE_READER=http일 때 release-gate 읽기 면 주소"
+    },
+    "SURVEY_TRACE_INGEST_URL": {
+      "type": "string",
+      "pattern": "^https?://[^\\s]+$",
+      "description": "SURVEY_TRACE_INGEST=http일 때 ops-feedback 수집 주소"
+    },
+    "SURVEY_INFERENCE_URL": {
+      "type": "string",
+      "pattern": "^https?://[^\\s]+$",
+      "description": "원격 추론 서버(model-serving) 주소. SURVEY_MODEL_BACKEND와 둘 중 하나 필수(3.0.2)"
     }
   },
   "allOf": [
@@ -303,6 +328,40 @@
           }
         }
       ]
+    },
+    {
+      "if": {
+        "properties": {
+          "SURVEY_RELEASE_READER": {
+            "const": "http"
+          }
+        },
+        "required": [
+          "SURVEY_RELEASE_READER"
+        ]
+      },
+      "then": {
+        "required": [
+          "SURVEY_RELEASE_READER_URL"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "SURVEY_TRACE_INGEST": {
+            "const": "http"
+          }
+        },
+        "required": [
+          "SURVEY_TRACE_INGEST"
+        ]
+      },
+      "then": {
+        "required": [
+          "SURVEY_TRACE_INGEST_URL"
+        ]
+      }
     }
   ],
   "anyOf": [
