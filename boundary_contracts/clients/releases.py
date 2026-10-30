@@ -101,16 +101,20 @@ class HttpGateService(HttpClientBase):
         check_id(submission_id)
         return check_record("ReviewReport", self._json("GET", f"/v1/submissions/{submission_id}/review-report"))
 
-    def decide(self, submission_id: str, decision: str, *, approver_id: str, approver_role: str,
+    def decide(self, submission_id: str, decision: str, *, approver_role: str, approver_id: Optional[str] = None,
                reason: Optional[str] = None, report_hash: Optional[str] = None) -> dict:
-        """출고 결정(D53). decision은 APPROVE 또는 REJECT(반려는 reason 필수). report_hash를 주면 그 보고서를 본 것으로 대조한다."""
+        """출고 결정(D53). 본문은 계약 ApprovalRequest{submission_id, decision, approver_role, report_hash, reason?}.
+        승인자 신원은 본문이 아니라 X-Openit-User 머리글로만 간다(D88, HTTP.md I5) — approver_id 인자는 3.0.3부터 보내지 않는다(호환용으로만 받는다).
+        report_hash를 주지 않으면 GET /v1/submissions/{id}/review-report의 X-Openit-Report-Hash 값을 그대로 쓴다(해시를 계산하지 않는다, HTTP.md I5)."""
         check_id(submission_id)
-        body = {"submission_id": submission_id, "decision": decision, "approver_id": approver_id,
-                "approver_role": approver_role}
+        if report_hash is None:
+            resp = self._open("GET", f"/v1/submissions/{self._q(submission_id)}/review-report", None, None, None, "application/json")
+            report_hash = resp.headers.get("X-Openit-Report-Hash") or ""
+            self._read(resp, self.max_body_bytes)
+        body = {"submission_id": submission_id, "decision": decision, "approver_role": approver_role, "report_hash": report_hash}
         if reason is not None:
             body["reason"] = reason
-        if report_hash is not None:
-            body["report_hash"] = report_hash
+        check_outgoing("ApprovalRequest", body)
         return check_record("GateApproval", self._json("POST", "/v1/approvals", body=body))
 
     def list_submissions(self, *, status: Optional[str] = None, cursor: Optional[str] = None, limit: int = 100):

@@ -17,7 +17,7 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, unquote, urlsplit
 
-from boundary_contracts import PIPELINE_SCHEMA_VERSION as V, BoundaryError, content_hash, sha256_hash
+from boundary_contracts import PIPELINE_SCHEMA_VERSION as V, BoundaryError, content_hash, sha256_hash, validator
 from boundary_contracts.clients.datasets import check_publish  # 서버가 클라이언트와 같은 검증 규칙을 쓴다
 
 STATUS = {"INVALID_RECORD": 400, "PERMISSION_DENIED": 403, "NOT_FOUND": 404, "CONFLICT": 409,
@@ -64,9 +64,14 @@ def sealed(rec: dict) -> dict:
     return rec
 
 
+
+def _review_report(submission_id: str) -> dict:
+    return dict(_example("ReviewReport"), submission_id=submission_id)
+
 class ReferenceServer:
     def __init__(self, tokens: dict[str, str]):
         self.tokens = tokens
+        self._local = threading.local()   # 요청 스레드별 X-Openit-User
         self.overrides: dict[str, tuple] = {}
         self.delay = 0.0
         self.question_sets: dict[str, list[dict]] = {}   # id -> [{"bank", "ref", "reviews", "change"}]
@@ -137,6 +142,7 @@ class ReferenceServer:
         auth = h.headers.get("Authorization", "")
         role = self.tokens.get(auth[7:]) if auth.startswith("Bearer ") else None
         dev = h.headers.get("X-Openit-Device")
+        self._local.user = h.headers.get("X-Openit-User")   # D88·HTTP.md I5: 행위자 신원은 이 머리글로만 온다. 요청 스레드마다 따로 둔다(하위 클래스 _route 시그니처 유지)
         if role is None and dev and getattr(self, "trust_device_header", False) and _DEVICE_ID.match(dev):
             # 2.3.0(ADR 0012): 게이트웨이가 클라이언트 인증서로 확인한 기기 ID. 서비스는 이 헤더를 믿는다(게이트웨이 뒤 내부망 전제)
             role = "kiosk:" + dev
@@ -292,7 +298,8 @@ class ReferenceServer:
             if g := m(r"/v1/submissions/([^/]+)/review-report"):
                 if not any(x["submission_id"] == g[1] for x in self.submissions.values()):
                     raise nf("제출")
-                return J(dict(_example("ReviewReport"), submission_id=g[1]))
+                rep = _review_report(g[1])
+                return (*J(rep), {"X-Openit-Report-Hash": sha256_hash(rep)})   # HTTP.md I5: 결정 요청은 이 값을 report_hash로 그대로 보낸다
             if path == "/v1/cases":
                 cs = self.cases
                 for k in ("review_status", "failure_type", "source_release_id"):
@@ -329,14 +336,19 @@ class ReferenceServer:
             return J(self.submissions[key], 202)
         if path == "/v1/approvals":
             b = jb()
+            errs = [e.message for e in validator("ApprovalRequest").iter_errors(b)]   # 3.0.3: 서버도 계약 ApprovalRequest로 받는다(approver_id 같은 계약 밖 키는 거부)
+            if errs:
+                raise BoundaryError("INVALID_RECORD", "ApprovalRequest 위반: " + errs[0][:200])
             if role != "release-approver":
                 raise BoundaryError("PERMISSION_DENIED", "release-approver만 결정할 수 있다")
-            if not any(x["submission_id"] == b.get("submission_id") for x in self.submissions.values()):
+            if not any(x["submission_id"] == b["submission_id"] for x in self.submissions.values()):
                 raise nf("제출")
-            if b.get("decision") == "REJECT" and not b.get("reason"):
+            if b["decision"] == "REJECT" and not b.get("reason"):
                 raise BoundaryError("INVALID_RECORD", "반려에는 사유가 필요하다")
+            if b["report_hash"] != sha256_hash(_review_report(b["submission_id"])):
+                raise BoundaryError("CONFLICT", "본 보고서가 지금 보고서와 다르다", {"reason": "STALE_REPORT"})
             a = dict(_example("GateApproval"), submission_id=b["submission_id"], decision=b["decision"],
-                     approver_id=b["approver_id"], approver_role=role)
+                     approver_id=getattr(self._local, "user", None) or role, approver_role=role)   # 승인자 ID는 X-Openit-User(없으면 토큰 역할)
             if b.get("reason"):
                 a["reason"] = b["reason"]
             return J(a, 201)

@@ -131,7 +131,7 @@ class Approval(unittest.TestCase):
 
     def test_보고서와_결정(self):
         self.assertEqual(self.a.get_review_report(self.sub)["submission_id"], self.sub)
-        ok = self.a.decide(self.sub, "APPROVE", approver_id="trainer-1", approver_role="release-approver")
+        ok = self.a.decide(self.sub, "APPROVE", approver_role="release-approver")
         self.assertEqual(ok["decision"], "APPROVE")
 
     def test_제출_목록과_조회(self):
@@ -145,10 +145,10 @@ class Approval(unittest.TestCase):
 
     def test_반려는_사유가_필요하고_권한이_있어야_한다(self):
         with self.assertRaises(BoundaryError) as cm:
-            self.a.decide(self.sub, "REJECT", approver_id="trainer-1", approver_role="release-approver")
+            self.a.decide(self.sub, "REJECT", approver_role="release-approver")
         self.assertEqual(cm.exception.code, "INVALID_RECORD")
         with self.assertRaises(BoundaryError) as cm:
-            self.g.decide(self.sub, "APPROVE", approver_id="x", approver_role="operator")
+            self.g.decide(self.sub, "APPROVE", approver_role="release-approver")   # 본문은 계약대로, 토큰이 operator라 서버가 거부
         self.assertEqual(cm.exception.code, "PERMISSION_DENIED")
         with self.assertRaises(BoundaryError) as cm:
             self.a.get_review_report("sub-99")

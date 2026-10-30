@@ -2,6 +2,11 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.0.3 (PATCH, 클라이언트·참조 서버 결함 수정, 와이어 스키마 변경 없음)
+- `HttpGateService.decide()`가 계약 `ApprovalRequest`를 어기던 것을 고친다(U53): 본문에 `approver_id`를 싣지 않는다(D88: 승인자 신원은 `X-Openit-User`로만, HTTP.md I5). `report_hash`는 필수이므로 주지 않으면 `GET /v1/submissions/{id}/review-report`의 `X-Openit-Report-Hash` 값을 그대로 쓴다(해시를 계산하지 않는다). 보내기 전에 `ApprovalRequest`로 검사한다. `approver_id` 인자는 호환을 위해 받기만 하고 쓰지 않는다(4.0에서 제거 후보).
+- 참조 서버(`conformance/servers.py`): `/v1/approvals`를 `ApprovalRequest`로 검증하고, 승인자 ID를 `X-Openit-User`(없으면 토큰 역할)에서 정하며, 보고서 해시가 다르면 CONFLICT(`STALE_REPORT`). review-report 응답에 `X-Openit-Report-Hash`를 싣는다. 이전에는 참조 서버가 본문 `approver_id`를 요구해 계약 시험이 클라이언트 결함을 잡지 못했다.
+- 영향: Python 계약 클라이언트의 `decide()`를 부르는 영역은 없다(2026-10-30 확인: admin-console은 자기 TS 클라이언트, deploy E2E는 계약대로 직접 보낸다). 영역 고정을 올릴 필요는 없다.
+
 ## 3.0.2 (PATCH, 계약 결함 수정)
 - `SurveyServiceEnv`: 추론 연결 필수 조건을 `SURVEY_MODEL_BACKEND` 단독에서 "`SURVEY_INFERENCE_URL` 또는 `SURVEY_MODEL_BACKEND` 중 하나"로 바로잡는다(D62부터의 survey-service 동작: 운영은 원격 추론 URL, 내장 백엔드는 fake뿐). 3.0.0 전환에서 survey-service가 이 계약으로 설정을 엄격히 검증하자 원격 추론 배포가 '필수 환경 변수가 없다: SURVEY_MODEL_BACKEND'로 기동하지 못했다(E2E 2026-10-30 11:01). 받던 설정을 더 받는 완화라 깨지는 소비자 없음.
 
