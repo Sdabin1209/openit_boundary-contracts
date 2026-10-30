@@ -2,6 +2,9 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.0.2 (PATCH, 계약 결함 수정)
+- `SurveyServiceEnv`: 추론 연결 필수 조건을 `SURVEY_MODEL_BACKEND` 단독에서 "`SURVEY_INFERENCE_URL` 또는 `SURVEY_MODEL_BACKEND` 중 하나"로 바로잡는다(D62부터의 survey-service 동작: 운영은 원격 추론 URL, 내장 백엔드는 fake뿐). 3.0.0 전환에서 survey-service가 이 계약으로 설정을 엄격히 검증하자 원격 추론 배포가 '필수 환경 변수가 없다: SURVEY_MODEL_BACKEND'로 기동하지 못했다(E2E 2026-10-30 11:01). 받던 설정을 더 받는 완화라 깨지는 소비자 없음.
+
 ## 3.0.1 (PATCH, 와이어 스키마 변경 없음, 설명만)
 - `ImageLabels`의 `io.openit.contracts.survey-schema` 뜻을 정한다: 문진 스키마 **패키지 버전의 주 번호**(survey-schema-v2.0.0 → "2"), 이미지에 실제로 들어간 패키지에서 찍는다(U50). 문진 스키마의 정수 `CONTRACT_VERSION`(모델 런타임 호환 번호, survey-service ADR-0044)과 다르다. 3.0.0 전환 때 영역마다 두 값 중 하나를 찍어 라벨이 엇갈렸다(synthetic-data "2", ops-feedback "1").
 

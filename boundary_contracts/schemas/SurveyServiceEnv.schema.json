@@ -2,12 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "SurveyServiceEnv.schema.json",
   "title": "SurveyServiceEnv",
-  "description": "배포(deploy)가 survey-service 컨테이너에 주는 환경 변수 집합. 만드는 쪽: deploy(compose). 읽는 쪽: survey_service/settings.py. 값은 모두 문자열. 비밀(SECRETS)은 NAME_FILE(파일 경로)로 준다(D84); 값 NAME은 개발·시험용 호환. 알려진 SURVEY_ 키 목록은 survey_service/settings.py와 read_secret이 읽는 이름과 같아야 한다(자체 스크립트가 코드에서 읽는 이름을 정적으로 대조한다). SURVEY_OUTBOX_DB는 더 쓰지 않으나(ADR-0023) 옛 배포가 주어도 거부하지 않도록 목록에 남긴다.",
+  "description": "배포(deploy)가 survey-service 컨테이너에 주는 환경 변수 집합. 만드는 쪽: deploy(compose). 읽는 쪽: survey_service/settings.py. 값은 모두 문자열. 비밀(SECRETS)은 NAME_FILE(파일 경로)로 준다(D84); 값 NAME은 개발·시험용 호환. 알려진 SURVEY_ 키 목록은 survey_service/settings.py와 read_secret이 읽는 이름과 같아야 한다(자체 스크립트가 코드에서 읽는 이름을 정적으로 대조한다). SURVEY_OUTBOX_DB는 더 쓰지 않으나(ADR-0023) 옛 배포가 주어도 거부하지 않도록 목록에 남긴다. 3.0.2: 추론 연결은 SURVEY_INFERENCE_URL(원격 추론 서버, 운영) 또는 SURVEY_MODEL_BACKEND(내장 백엔드, 지금은 fake만) 중 하나가 있으면 된다(D62부터의 survey-service 동작). 3.0.0까지 SURVEY_MODEL_BACKEND만 필수로 적은 것은 계약 결함이었다(원격 추론 배포가 계약 위반이 됐다).",
   "type": "object",
   "required": [
     "SURVEY_RELEASE_READER",
-    "SURVEY_TRACE_INGEST",
-    "SURVEY_MODEL_BACKEND"
+    "SURVEY_TRACE_INGEST"
   ],
   "propertyNames": {
     "anyOf": [
@@ -303,6 +302,18 @@
             ]
           }
         }
+      ]
+    }
+  ],
+  "anyOf": [
+    {
+      "required": [
+        "SURVEY_MODEL_BACKEND"
+      ]
+    },
+    {
+      "required": [
+        "SURVEY_INFERENCE_URL"
       ]
     }
   ]
