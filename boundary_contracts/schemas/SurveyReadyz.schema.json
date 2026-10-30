@@ -209,6 +209,31 @@
           "unset"
         ]
       }
+    },
+    "reask_limit": {
+      "type": "object",
+      "description": "3.1.0: 되묻기 연속 상한(G12). active=서비스 설정이 켜짐, max_consecutive=서비스 설정 값(SURVEY_MAX_CONSECUTIVE_REASK), effective=활성 문항 세트까지 반영해 지금 실제로 적용하는 값(활성 릴리스가 없거나 꺼져 있으면 null). 이웃은 effective만 읽는다(구조 규칙 4: 서비스의 계산 규칙을 알지 않는다).",
+      "required": [
+        "active",
+        "max_consecutive"
+      ],
+      "properties": {
+        "active": {
+          "type": "boolean"
+        },
+        "max_consecutive": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "effective": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
     }
   },
   "allOf": [

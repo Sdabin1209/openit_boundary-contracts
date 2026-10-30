@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GateSubmissionRequest",
+  "description": "3.1.0: POST /v1/submissions 요청 본문(HTTP.md I5 submit_candidate). 응답은 GateSubmission(202). 그동안 HTTP.md 표에 글로만 있던 모양을 스키마로 옮겼다(와이어 형식은 같다).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "subject",
+    "requested_by_role"
+  ],
+  "properties": {
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "question_set",
+        "lora_a",
+        "lora_b"
+      ],
+      "properties": {
+        "question_set": {
+          "$ref": "_common.schema.json#/$defs/ArtifactRef"
+        },
+        "lora_a": {
+          "$ref": "_common.schema.json#/$defs/ArtifactRef"
+        },
+        "lora_b": {
+          "$ref": "_common.schema.json#/$defs/ArtifactRef"
+        }
+      }
+    },
+    "requested_by_role": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

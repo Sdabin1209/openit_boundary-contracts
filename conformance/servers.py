@@ -17,7 +17,7 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, unquote, urlsplit
 
-from boundary_contracts import PIPELINE_SCHEMA_VERSION as V, BoundaryError, content_hash, sha256_hash, validator
+from boundary_contracts import PIPELINE_SCHEMA_VERSION as V, BoundaryError, content_hash, sha256_hash, validator, validator
 from boundary_contracts.clients.datasets import check_publish  # 서버가 클라이언트와 같은 검증 규칙을 쓴다
 
 STATUS = {"INVALID_RECORD": 400, "PERMISSION_DENIED": 403, "NOT_FOUND": 404, "CONFLICT": 409,
@@ -63,6 +63,13 @@ def sealed(rec: dict) -> dict:
     rec["content_hash"] = content_hash(rec)
     return rec
 
+
+
+def _check_request(name: str, body) -> None:
+    """3.1.0: 참조 서버도 받는 요청을 계약 스키마로 검증한다(클라이언트가 계약을 어기면 시험이 잡는다). 위반은 400 INVALID_RECORD."""
+    errs = [e.message for e in validator(name).iter_errors(body)]
+    if errs:
+        raise BoundaryError("INVALID_RECORD", f"{name} 위반: " + errs[0][:200])
 
 
 def _review_report(submission_id: str) -> dict:
@@ -354,6 +361,7 @@ class ReferenceServer:
             return J(a, 201)
         if path == "/v1/activate":
             b = jb()
+            _check_request("ActivateRequest", b)
             self._same_role(b, role)
             r = self.releases.get(b.get("release_id"))
             if r is None:
@@ -367,6 +375,7 @@ class ReferenceServer:
             return J(self.pointer)
         if path == "/v1/rollback":
             b = jb()
+            _check_request("RollbackRequest", b)
             self._same_role(b, role)
             if b["request_id"] not in self.receipts:
                 ok = (self.pointer and self.pointer["release_id"] == b["from_release_id"]

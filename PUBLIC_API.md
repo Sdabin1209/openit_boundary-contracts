@@ -21,7 +21,7 @@
 ## 호출
 | 목적 | 요청 | 응답 |
 | --- | --- | --- |
-| 세션 시작 | `POST /v1/sessions` 본문 `{"session_id": "...", "kind": "SESSION_START"}` | `FrontendInput` (`response_text`: 첫 안내 문장) |
+| 세션 시작 | `POST /v1/sessions` 본문 `{"kind": "SESSION_START"}`(`session_id`는 생략한다: 서버가 발급해 응답의 `session_id`로 돌려준다, 위 7행·D106) | `FrontendInput` (`response_text`: 첫 안내 문장) |
 | 환자 발화 | `POST /v1/sessions/{session_id}/turns` 본문 `{"session_id", "kind": "UTTERANCE", "utterance": "STT 텍스트", "turn_id": "..."}` | `FrontendInput` |
 | 세션 종료 | `POST /v1/sessions/{session_id}/end` 본문 `{"session_id", "kind": "SESSION_END"}` | `FrontendInput` (`response_text`는 null일 수 있음) |
 | 세션 상태 (D66) | `GET /v1/sessions/{session_id}/state` | `SessionState`. 키오스크가 위험 정지 중에 2초 간격으로 폴링한다. 직원이 재개하면 `state=ACTIVE`와 `resume_text`(이어서 할 안내 문장)가 오고, 다음 발화 턴이 접수되면 `resume_text`는 null이 된다. 직원이 종료하면 `ENDED` |

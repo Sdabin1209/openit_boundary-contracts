@@ -104,9 +104,10 @@ class Releases(unittest.TestCase):
         self.assertEqual(self.code(self.g.request_rollback, {"request_id": "x"}), "INVALID_RECORD")
 
     def test_역할_불일치와_읽기_토큰은_PERMISSION_DENIED(self):
-        self.assertEqual(self.code(self.g.activate, "rel-0001", requested_by_role="model-lab"), "PERMISSION_DENIED")
+        # 3.1.0: 계약 ActivateRequest의 requested_by_role은 operator만이라, 다른 역할은 보내기 전에 INVALID_RECORD다
+        self.assertEqual(self.code(self.g.activate, "rel-0001", requested_by_role="model-lab"), "INVALID_RECORD")
         ro = HttpGateService(self.srv.url, READ)
-        self.assertEqual(self.code(ro.activate, "rel-0001", requested_by_role="reader"), "PERMISSION_DENIED")
+        self.assertEqual(self.code(ro.activate, "rel-0001", requested_by_role="operator"), "PERMISSION_DENIED")   # 읽기 토큰은 서버가 거부
         subj = example("GateSubmission")["subject"]
         self.assertEqual(self.code(ro.submit_candidate, subj, requested_by_role="reader"), "PERMISSION_DENIED")
         req = example("RollbackRequest")
@@ -131,7 +132,8 @@ class Approval(unittest.TestCase):
 
     def test_보고서와_결정(self):
         self.assertEqual(self.a.get_review_report(self.sub)["submission_id"], self.sub)
-        ok = self.a.decide(self.sub, "APPROVE", approver_role="release-approver")
+        _, h = self.a.get_review_report_with_hash(self.sub)
+        ok = self.a.decide(self.sub, "APPROVE", approver_role="release-approver", report_hash=h)
         self.assertEqual(ok["decision"], "APPROVE")
 
     def test_제출_목록과_조회(self):
@@ -145,10 +147,10 @@ class Approval(unittest.TestCase):
 
     def test_반려는_사유가_필요하고_권한이_있어야_한다(self):
         with self.assertRaises(BoundaryError) as cm:
-            self.a.decide(self.sub, "REJECT", approver_role="release-approver")
+            self.a.decide(self.sub, "REJECT", approver_role="release-approver", report_hash=self.a.get_review_report_with_hash(self.sub)[1])
         self.assertEqual(cm.exception.code, "INVALID_RECORD")
         with self.assertRaises(BoundaryError) as cm:
-            self.g.decide(self.sub, "APPROVE", approver_role="release-approver")   # 본문은 계약대로, 토큰이 operator라 서버가 거부
+            self.g.decide(self.sub, "APPROVE", approver_role="release-approver", report_hash=self.a.get_review_report_with_hash(self.sub)[1])   # 본문은 계약대로, 토큰이 operator라 서버가 거부
         self.assertEqual(cm.exception.code, "PERMISSION_DENIED")
         with self.assertRaises(BoundaryError) as cm:
             self.a.get_review_report("sub-99")

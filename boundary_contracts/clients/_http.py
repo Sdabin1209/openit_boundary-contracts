@@ -222,12 +222,17 @@ class HttpClientBase:
     max_tar_bytes = 8 * 2**30      # 풀기 전 총 크기 상한(인스턴스나 서브클래스에서 바꾼다)
     max_body_bytes = 256 * 2**20   # JSON·바이트 응답 상한
 
-    def __init__(self, base_url: str, token: Optional[str], timeout: float = 10.0):
+    def __init__(self, base_url: str, token: Optional[str], timeout: float = 10.0, *, user: Optional[str] = None):
+        """user: 사람 행위자의 인증된 ID를 `X-Openit-User`로 싣는다(3.1.0, D88·HTTP.md I5). 게이트웨이를 거치면 게이트웨이가 인증 계정으로 덮어쓰고,
+        게이트웨이 뒤 내부망에서 서비스를 직접 부르는 도구(시험·운영)만 이 값을 쓴다. 이 헤더가 필요한 쓰기(승인·활성화·롤백·검토)가 비공개 속성 없이 부를 수 있게 한다."""
         if urllib.parse.urlsplit(base_url).scheme not in ("http", "https"):
             raise ValueError("base_url은 http:// 또는 https://로 시작해야 한다")
         self._base = base_url.rstrip("/")
         self._token = token
         self._headers: dict[str, str] = {}   # 하위 클래스가 더하는 고정 헤더(예: 내부망의 X-Openit-Device, 2.3.0)
+        if user is not None:
+            check_id(user, "user")
+            self._headers["X-Openit-User"] = user
         self._timeout = timeout
         # ProxyHandler({}): 환경 변수의 프록시를 읽지 않는다
         self._opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect, _HTTPHandler, _HTTPSHandler)

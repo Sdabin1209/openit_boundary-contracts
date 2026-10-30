@@ -55,9 +55,12 @@ class HttpPublicApi(HttpClientBase):
                 raise ValueError("device_id 형식이 아니다")
             self._headers["X-Openit-Device"] = device_id
 
-    def start_session(self, session_id: str, subject_ref: Optional[str] = None) -> dict:
-        """`POST /v1/sessions`. 첫 안내 문장이 든 FrontendInput."""
-        body = {"session_id": _sid(session_id), "kind": "SESSION_START"}
+    def start_session(self, session_id: Optional[str] = None, subject_ref: Optional[str] = None) -> dict:
+        """`POST /v1/sessions`. 첫 안내 문장이 든 FrontendInput. session_id는 생략한다: 서버가 발급해 응답에 돌려준다(D106, PUBLIC_API.md 7행).
+        주는 것은 2.x 호환으로만 받는다."""
+        body = {"kind": "SESSION_START"}
+        if session_id is not None:
+            body["session_id"] = _sid(session_id)
         if subject_ref is not None:
             if not isinstance(subject_ref, str) or not _SUBJECT_REF.match(subject_ref):
                 raise BoundaryError("INVALID_RECORD", "subject_ref 형식이 아니다")

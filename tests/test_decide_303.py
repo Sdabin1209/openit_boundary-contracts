@@ -1,4 +1,4 @@
-"""3.0.3(U53): HttpGateService.decide()는 계약 ApprovalRequest 그대로 보낸다.
+"""3.0.3(U53), 3.1.0: HttpGateService.decide()는 계약 ApprovalRequest 그대로 보낸다.
 본문에 approver_id가 없고(D88: 신원은 X-Openit-User로만), report_hash는 review-report의 X-Openit-Report-Hash 값을 그대로 쓴다."""
 import unittest
 
@@ -22,17 +22,24 @@ class Decide303(unittest.TestCase):
         sent = []
         orig = self.a._json
         self.a._json = lambda m, p, query=None, body=None: (sent.append((m, p, body)), orig(m, p, query, body))[1]
-        ok = self.a.decide(sub, "APPROVE", approver_role="release-approver")
+        rep, h = self.a.get_review_report_with_hash(sub)
+        self.assertEqual(h, sha256_hash(rep))
+        ok = self.a.decide(sub, "APPROVE", approver_role="release-approver", report_hash=h)
         self.assertEqual(ok["decision"], "APPROVE")
         body = [b for m, p, b in sent if p == "/v1/approvals"][0]
         self.assertNotIn("approver_id", body)
         self.assertEqual(list(validator("ApprovalRequest").iter_errors(body)), [])
         self.assertEqual(body["report_hash"], sha256_hash(self.a.get_review_report(sub)))
 
-    def test_approver_id_인자는_본문에_싣지_않는다(self):
+    def test_승인자는_user_머리글로(self):
         sub = self._sub()
-        ok = self.a.decide(sub, "APPROVE", approver_role="release-approver", approver_id="body-claim")
-        self.assertNotEqual(ok["approver_id"], "body-claim")
+        a = HttpGateService(self.srv.url, APPROVER, user="approver-kim")
+        ok = a.decide(sub, "APPROVE", approver_role="release-approver", report_hash=a.get_review_report_with_hash(sub)[1])
+        self.assertEqual(ok["approver_id"], "approver-kim")
+
+    def test_report_hash_없이는_결정할_수_없다(self):
+        with self.assertRaises(TypeError):
+            self.a.decide(self._sub(), "APPROVE", approver_role="release-approver")
 
     def test_낡은_보고서_해시는_CONFLICT(self):
         sub = self._sub()

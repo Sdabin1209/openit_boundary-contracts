@@ -2,6 +2,16 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.1.0 (MINOR, 추가만. 기존 영역의 레코드·호출은 그대로 통과한다)
+독립 검토(2026-10-30)가 찾은 계약 결함을 와이어 형식을 깨지 않는 범위에서 고친다.
+- 새 스키마 `GateSubmissionRequest`(POST /v1/submissions 본문, 그동안 HTTP.md에 글로만 있었다). `submit_candidate()`가 보내기 전에 검사한다.
+- `SurveyReadyz.reask_limit`{active, max_consecutive, effective?}를 정의한다. 이웃은 서비스의 한도 계산 규칙을 흉내 내지 않고 `effective`만 읽는다(구조 규칙 4).
+- `SetupEnvReport.environment.test_command`를 필수로 둔다(3.0.0 CHANGELOG가 선언했으나 스키마에 빠졌던 것. 생산자 10곳 모두 이미 낸다).
+- 클라이언트: `user=` 인자로 `X-Openit-User`를 싣는다(비공개 속성 없이). `activate()`가 `ActivateRequest`로 검사한다. `get_review_report_with_hash()`가 보고서와 `X-Openit-Report-Hash`를 함께 준다. `decide()`는 `report_hash`를 필수로 받고 스스로 다시 받지 않는다(3.0.3의 자동 채움은 STALE_REPORT 검사를 무력화했다). `get_release_question_bank()`가 content_hash 없는 응답을 KeyError 대신 INTEGRITY_ERROR로. `HttpStaffCall`이 서버 발급 세션 ID(첫 글자 -·_ 가능)를 거부하지 않는다. `start_session()`의 session_id는 선택(서버 발급, D106).
+- 참조 서버: activate·rollback 요청을 계약으로 검증한다.
+- 문서: HTTP.md I5 승인 본문을 `ApprovalRequest`대로(approver_id 없음, report_hash 필수), PUBLIC_API.md 세션 시작 본문의 모순 정리.
+- 시험 `test_client_outgoing_schemas`: 쓰기 메서드가 본문을 계약 스키마로 검사하지 않으면 실패한다(예외는 이유와 함께 목록에).
+
 ## 3.0.3 (PATCH, 클라이언트·참조 서버 결함 수정, 와이어 스키마 변경 없음)
 - `HttpGateService.decide()`가 계약 `ApprovalRequest`를 어기던 것을 고친다(U53): 본문에 `approver_id`를 싣지 않는다(D88: 승인자 신원은 `X-Openit-User`로만, HTTP.md I5). `report_hash`는 필수이므로 주지 않으면 `GET /v1/submissions/{id}/review-report`의 `X-Openit-Report-Hash` 값을 그대로 쓴다(해시를 계산하지 않는다). 보내기 전에 `ApprovalRequest`로 검사한다. `approver_id` 인자는 호환을 위해 받기만 하고 쓰지 않는다(4.0에서 제거 후보).
 - 참조 서버(`conformance/servers.py`): `/v1/approvals`를 `ApprovalRequest`로 검증하고, 승인자 ID를 `X-Openit-User`(없으면 토큰 역할)에서 정하며, 보고서 해시가 다르면 CONFLICT(`STALE_REPORT`). review-report 응답에 `X-Openit-Report-Hash`를 싣는다. 이전에는 참조 서버가 본문 `approver_id`를 요구해 계약 시험이 클라이언트 결함을 잡지 못했다.
