@@ -125,7 +125,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
   - `extract`: 서버가 대신 만들 수 있는 대체 출력이 없다. 모델 출력이 끝내 깨지면 503 `UNAVAILABLE`(`details.reason="OUTPUT_INVALID"`, `details.attempts`는 선택)이고, 정상이면 `X-Openit-Outcome: ok`다. **확정(D75).** 값을 지어내지 않는다. 호출자(survey-service)는 같은 요청을 한 번 다시 보내고, 그래도 안 되면 그 턴을 `turn_failure_signal`로 처리하며 세션 상태를 바꾸지 않는다(INTERFACES.md I9 '서비스가 지키는 것').
   - `ActionExtraction`과 `ResponseText`는 레코드가 아니라 모델 출력이어서 `pipeline_schema_version`·`ext`가 없다. 클라이언트는 읽기 모드 완화 없이 엄격하게 검증하고 위반은 `INTEGRITY_ERROR`다.
   - 시스템 프롬프트는 모델 패키지의 일부다(D75). 서버는 적재한 릴리스의 `ReleaseManifest.adapters[role].system_prompt`가 가리키는 파일(어댑터 디렉터리 안)의 문장만 쓴다. `serving_config`의 프롬프트 템플릿 버전은 조립 규칙이고 시스템 프롬프트와 별개다(INTERFACES.md I9).
-- 서로 다른 세션의 호출은 동시에 들어온다. 서버는 병렬로 처리하거나 짧은 대기열 뒤에서 처리하되, 대기가 호출 타임아웃(서비스 기본 4초)을 넘을 것 같으면 큐에 쌓지 말고 503으로 거절한다. 추론 호출은 부작용이 없다.
+- 서로 다른 세션의 호출은 동시에 들어온다. 서버는 병렬로 처리하거나 짧은 대기열 뒤에서 처리하되, 대기가 호출 상한(CONVENTIONS 시간 상한 사슬: extract 3.0초·respond 5.0초)을 넘을 것 같으면 큐에 쌓지 말고 503으로 거절한다. 추론 호출은 부작용이 없다.
 - 서비스의 실패 처리(재시도, 읽기 타임아웃은 재시도 없음, 404면 적재 요청 등)는 survey-service의 `inference-server-spec.md` 5절을 따른다. 이것은 서비스 내부 동작이라 계약이 아니다.
 - 서버의 헤더 이름이 model-runtime의 현행(`X-Model-Runtime-*`)과 다르므로 model-runtime이 이 이름으로 바꾼다.
 

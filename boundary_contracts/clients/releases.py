@@ -130,14 +130,9 @@ class HttpGateService(HttpClientBase):
 
     def list_submissions(self, *, status: Optional[str] = None, cursor: Optional[str] = None, limit: int = 100):
         """제출 목록(D68). 승인 대기 건은 status="AWAITING_APPROVAL"."""
-        q = {"limit": limit}
-        if status:
-            q["status"] = status
-        if cursor:
-            q["cursor"] = cursor
-        r = self._json("GET", "/v1/submissions", query=q)
-        return [check_record("SubmissionView", x) for x in r.get("items", [])], r.get("next_cursor")
+        # 3.1.2: 다른 목록과 같이 봉투(ListEnvelope)와 원소를 계약으로 본다(이전엔 r.get("items")를 그대로 써 응답이 객체가 아니면 BoundaryError가 아닌 AttributeError)
+        return self._page("/v1/submissions", cursor, limit, extra={"status": status} if status else None, schema="SubmissionView")
 
     def get_submission(self, submission_id: str) -> dict:
         check_id(submission_id)
-        return check_record("SubmissionView", self._json("GET", f"/v1/submissions/{submission_id}"))
+        return check_record("SubmissionView", self._json("GET", f"/v1/submissions/{self._q(submission_id)}"))

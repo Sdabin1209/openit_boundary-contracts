@@ -2,6 +2,12 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.1.2 (PATCH, 스키마·와이어 형식 변경 없음 — 클라이언트 결함과 문서만)
+- 클라이언트: 409·429·503 응답의 `Retry-After` 머리글(초)을 `BoundaryError.details.retry_after_s`로 넘긴다(PUBLIC_API "Retry-After를 따른다"; 이전엔 읽지 않았다). 날짜 형식·범위 밖은 무시.
+- 클라이언트: `HttpGateService.list_submissions`가 다른 목록처럼 봉투(`ListEnvelope`)와 원소(`SubmissionView`)를 계약으로 본다(이전엔 응답이 객체가 아니면 AttributeError). `get_submission` 경로 인용을 다른 호출과 같게.
+- 문서: CONVENTIONS 시간표의 모델 행(합 8.0초, 턴 9초), PUBLIC_API 키오스크 대기 12초·재시도 예산 약 24초, HTTP.md 호출 상한, README 개수를 D119에 맞춤. CONVENTIONS 3절에 생산자 출력 검증(R7)과 계약 출력 위반 처리.
+- 시험: `tests/test_client_312.py`.
+
 ## 3.1.1 (PATCH, 와이어 형식 변경 없음. 이 버전에서 계약을 고정한다)
 - `SurveyServiceEnv`: `SURVEY_RELEASE_READER`·`SURVEY_TRACE_INGEST` 값 형식('http' 또는 '모듈:함수')과 'http'일 때 `*_URL` 필수, `SURVEY_INFERENCE_URL` 형식을 스키마로 적는다(survey-service가 설정에서 이미 거부하던 조건, deploy 설정은 이미 지킨다).
 - 참조 서버: 토큰 오류 401+`WWW-Authenticate`(D106), 승인에 `X-Openit-User`가 없으면 401, 승인 멱등(200 / 409 `ALREADY_DECIDED`), packages·submissions·traces 요청을 계약으로 검증.

@@ -299,6 +299,9 @@ class HttpClientBase:
         # U21(2.5.0): 원래 HTTP 상태를 남긴다. 401(토큰 오류)과 403(권한 오류)이 같은 PERMISSION_DENIED라 운영 로그에서 구분하려면 필요하다
         details = dict(body["details"]) if isinstance(body.get("details"), dict) else {}
         details["http_status"] = status
+        ra = _retry_after(e.headers.get("Retry-After") if e.headers else None)
+        if ra is not None and status in (409, 429, 503):   # 3.1.2: PUBLIC_API 23~32행 "Retry-After를 따른다" — 머리글 값을 details.retry_after_s로 호출자에게 넘긴다(이전엔 읽지 않았다)
+            details["retry_after_s"] = ra
         return BoundaryError(code, self._scrub(body["message"]), details)
 
     def _read(self, resp, limit: int) -> bytes:
@@ -406,3 +409,12 @@ def verify_system_prompt(adapter_dir: Path, ref: dict) -> None:
     f = adapter_dir.joinpath(*ref["path"].split("/"))
     if not f.is_file() or file_hash(f) != ref["sha256"]:
         raise integrity("시스템 프롬프트 파일이 없거나 system_prompt.sha256과 다르다")
+
+
+def _retry_after(v) -> Optional[int]:
+    """Retry-After 머리글(RFC 9110 10.2.3)의 초 값. HTTP 날짜 형식은 시계에 기대므로 받지 않는다(서버들은 초로 낸다). 0~3600초 밖·형식 오류는 무시."""
+    try:
+        n = int(str(v).strip())
+    except (TypeError, ValueError):
+        return None
+    return n if 0 <= n <= 3600 else None

@@ -2,7 +2,7 @@
 
 문진 시스템의 영역 사이에 오가는 데이터의 형식(계약)과, 그 계약을 지키는지 확인하는 공유 파이썬 패키지다. 소유자는 헤드다.
 
-이 리포지토리는 **서비스가 아니다**. 실행되는 서버가 없고 이미지도 없다. 하는 일은 (1) 영역 사이 레코드의 JSON Schema 31개와 예시를 정하고, (2) 영역 사이 HTTP 호출의 경로·요청·응답을 문서로 정하고, (3) 그 호출을 하는 클라이언트(`boundary_contracts.clients`)와 시험용 참조 서버(`conformance/`)를 제공하고, (4) 해시 계산과 비밀 읽기 같은 공통 코드를 한 곳에 두는 것이다. 하지 않는 것: 문진 내부 계약(`../survey-service/schema`, survey-service 소유)의 수정, 서버 구현(각 소유 영역), 모델·데이터 처리.
+이 리포지토리는 **서비스가 아니다**. 실행되는 서버가 없고 이미지도 없다. 하는 일은 (1) 영역 사이 레코드의 JSON Schema(85개 + `_common`)와 예시를 정하고, (2) 영역 사이 HTTP 호출의 경로·요청·응답을 문서로 정하고, (3) 그 호출을 하는 클라이언트(`boundary_contracts.clients`)와 시험용 참조 서버(`conformance/`)를 제공하고, (4) 해시 계산과 비밀 읽기 같은 공통 코드를 한 곳에 두는 것이다. 하지 않는 것: 문진 내부 계약(`../survey-service/schema`, survey-service 소유)의 수정, 서버 구현(각 소유 영역), 모델·데이터 처리.
 
 > 이 README는 2026-10-27 기준 리포지토리 안의 파일을 읽고 쓴 것이다. 이 리포지토리에는 `CLAUDE.md`가 없다(미확인이 아니라 확인한 사실). 문서는 루트의 `*.md`에 있고, `docs/`에는 구조 선택의 근거(ADR)만 있다(아래 7절). 워크스페이스 공통 규칙은 `../CLAUDE.md`.
 
@@ -29,16 +29,16 @@
 
 | 경로 | 역할 |
 | --- | --- |
-| `schemas/` | JSON Schema(Draft 2020-12) 31개 + `_common.schema.json`. 실체는 `boundary_contracts/schemas/`의 링크 |
-| `examples/` | 스키마마다 통과해야 하는 예시(45개 파일) |
+| `schemas/` | JSON Schema(Draft 2020-12) 85개 + `_common.schema.json`(개수는 `ls boundary_contracts/schemas`가 정본). 실체는 `boundary_contracts/schemas/`의 링크 |
+| `examples/` | 스키마마다 통과해야 하는 예시(거부 예시는 `conformance/examples_invalid/`) |
 | `verify.py` | 스키마 유효성, 예시 통과, 위반 예시 거부 검사 |
 | `boundary_contracts/canonical.py` | JCS 정규화와 SHA-256 해시의 기준 구현 |
 | `boundary_contracts/errors.py` | 모든 경계 호출이 던지는 `BoundaryError` |
 | `boundary_contracts/sdk.py` | I1~I7의 `typing.Protocol` |
 | `boundary_contracts/secrets.py` | `read_secret(NAME)`, `secret_source(NAME)` (D84) |
 | `boundary_contracts/clients/` | HTTP 클라이언트(표준 라이브러리만): questions, datasets(I2), models, releases, ops, runtime, staffcall(직원 호출 재알림) |
-| `conformance/servers.py` | HTTP.md대로 응답하는 참조 서버(패키지에는 안 들어감) |
-| `tests/` | unittest 시험 13개 파일(+ `_fixtures.py`) |
+| `conformance/servers.py` | HTTP.md대로 응답하는 참조 서버(설치 패키지에 들어 있다: pyproject packages) |
+| `tests/` | unittest 시험(+ `_fixtures.py`) |
 | `tools/` | 학습 데이터셋 v2 검증(`validate_dataset_v2.py`), 거부 변형 목록(`negatives_v2.py`) |
 핵심 흐름(소비 영역이 계약을 쓰는 방식):
 
@@ -77,7 +77,7 @@ pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@<�
 ## 4. 현재 상태
 확인한 것:
 - 패키지 버전은 `pyproject.toml`, 태그는 `git tag`가 정본이다(여기에 값을 복사하지 않는다). 원격 태그는 `git ls-remote --tags origin`으로 본다.
-- `schemas/`에 스키마 31개 + `_common`. 변경 이력은 `CHANGELOG.md`.
+- `schemas/`에 스키마 85개 + `_common`. 변경 이력은 `CHANGELOG.md`.
 확인하지 못한 것:
 - 깨끗한 두 번째 환경(다른 머신)에서의 통과. 같은 머신의 새 폴더 clone 은 별도 에이전트가 확인했고(보고만 있고 이 리포에 기록하지 않는다), 다른 머신은 이전 후에 한다. OPEN_GAPS U12도 같은 취지.
 - 참조 서버(`conformance/`)와 실제 서비스 서버들의 적합성은 각 영역이 돌린다. 여기서는 확인하지 않았다.
