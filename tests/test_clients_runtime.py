@@ -82,7 +82,10 @@ class Runtime(unittest.TestCase):
         flow = {"order": list(dict.fromkeys(items)) + ["Q99"], "skips": []}
         self.srv.extract_fn = lambda req: good
         self.assertEqual(self.c.extract("rel-0001", inp, flow=flow, fields=fields_of(good)).output, good)
-        bad = dict(good, next_item="Q99")               # REASK인데 다른 문항: 규칙 위반 -> 서버가 내지 않는다
+        wrong_next = dict(good, next_item="Q99")        # 3.1.3: next_item은 서버가 정한다(ADR 0014) -> REASK 규칙대로 입력 문항으로 채워 200
+        self.srv.extract_fn = lambda req: wrong_next
+        self.assertEqual(self.c.extract("rel-0001", inp, flow=flow, fields=fields_of(good)).output, good)
+        bad = dict(good, targets=["Q77.answer"])        # targets가 values의 key에 없다: 서버가 채울 수 없는 규칙 위반 -> 서버가 내지 않는다
         self.srv.extract_fn = lambda req: bad
         with self.assertRaises(BoundaryError) as cm:
             self.c.extract("rel-0001", inp, flow=flow, fields=fields_of(good))
