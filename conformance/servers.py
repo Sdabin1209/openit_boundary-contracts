@@ -551,7 +551,8 @@ class RuntimeReferenceServer(ReferenceServer):
             out = self.extract_fn(req)
             bad = bool(list(validator("ActionExtraction").iter_errors(out)))
             if not bad:
-                from boundary_contracts.action_rules import check_action_extraction
+                from boundary_contracts.action_rules import check_action_extraction, fill_next_item
+                out = fill_next_item(req, out, flow)                  # 3.1.3: next_item은 서버가 정한다(ADR 0014)
                 bad = bool(check_action_extraction(req, out, flow))   # flow가 있으면 규칙 보증(HTTP.md I9)
                 if not bad:
                     from boundary_contracts.action_rules import apply_value_rules
