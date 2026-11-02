@@ -152,6 +152,40 @@ def check_action_extraction(input: dict, output: dict, flow: dict, rules: dict |
     return out
 
 
+def fill_next_item(input: dict, output: dict, flow: dict, rules: dict | None = None) -> dict:
+    """next_item을 규칙(next_item.by_action)과 문항 순서표로 정해 채운 출력 사본을 돌려준다(3.1.3, U74).
+    왜: 다음 문항 선택은 문진의 항법(순서·건너뛰기)이지 발화 이해가 아니다. 모델에게 맡기면 학습 안 된 모델은 없는 문항을 내고,
+    학습된 모델도 순서표가 바뀌면 틀린다. 그래서 서버가 같은 규칙으로 정하고, check_action_extraction은 그 결과를 확인만 한다.
+    정할 수 없는 경우(문항 순서표 밖의 문항, CONFIRM인데 targets 없음)는 손대지 않고 검사기가 위반으로 돌린다."""
+    rules = rules or load_rules()
+    out = dict(output)
+    action, qid = out.get("action"), input.get("question_id")
+    fl = _Flow(flow)
+    values = out.get("values") if isinstance(out.get("values"), list) else []
+    targets = out.get("targets") if isinstance(out.get("targets"), list) else []
+    keys = [v.get("key") for v in values if isinstance(v, dict) and isinstance(v.get("key"), str)]
+    tkeys = [t for t in targets if isinstance(t, str)]
+    if fl.index(qid) is None or any(fl.index(item_of(k)) is None for k in keys + tkeys):
+        return out
+    for rule in rules["next_item"]["by_action"]:
+        if action not in rule["actions"]:
+            continue
+        kind = rule["next_item_is"]
+        if kind == "input.question_id":
+            out["next_item"] = qid
+        elif kind == "item_of_targets":
+            if tkeys:
+                out["next_item"] = item_of(tkeys[0])
+        elif kind == "flow_next":
+            if rule.get("also_allowed") == "item_of_values" and out.get("next_item") in {item_of(k) for k in keys}:
+                break   # 같은 말에서 이미 채운 문항으로 넘어가는 것은 계약이 인정한다(데이터 확인)
+            saved = {slot_of(v["key"]): v.get("value") for v in values if isinstance(v, dict) and v.get("save") is True and isinstance(v.get("key"), str)}
+            base = max((item_of(k) for k in keys + tkeys), key=fl.order.index) if (keys or tkeys) else qid
+            out["next_item"] = fl.next_item(base, saved)
+        break
+    return out
+
+
 # ---------------------------------------------------------------- 2.4.0 값 규칙(U32·U33)
 _FLOW_ACTIONS = ("NEXT", "CORRECT", "HOLD", "SKIP")
 

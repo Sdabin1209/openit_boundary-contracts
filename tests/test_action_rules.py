@@ -131,3 +131,34 @@ class ExtractRequestTest(unittest.TestCase):
         self.assertEqual(list(validator("ExtractRequest").iter_errors(ex)), [])
         out = {"action": "REASK", "values": [], "next_item": ex["input"]["question_id"]}
         self.assertEqual(check_action_extraction(ex["input"], out, ex["flow"]), [])
+
+
+class FillNextItem(unittest.TestCase):
+    """3.1.3(U74): next_item은 서버가 규칙과 순서표로 채운다. 기대값은 규칙 문장(REASK·REDIRECT=입력 문항, CONFIRM=targets 문항, 그 밖은 순서표의 다음)."""
+
+    def _out(self, action, nxt, key="Q4.answer", value=False, save=True, targets=None):
+        o = {"action": action, "next_item": nxt, "values": [{"key": key, "value": value, "precision": "exact", "status": "ANSWERED", "save": save}]}
+        if targets is not None:
+            o["targets"] = targets
+        return o
+
+    def test_rules_declare_server_derivation(self):
+        self.assertEqual(load_rules()["next_item"]["derived_by"], "server")
+
+    def test_next_follows_flow_and_skips_regardless_of_model_value(self):
+        from boundary_contracts.action_rules import fill_next_item
+        filled = fill_next_item(inp("Q4"), self._out("NEXT", "Q99"), FLOW)      # 모델이 없는 문항을 냈다
+        self.assertEqual(filled["next_item"], "Q5")                            # Q4=False면 Q4_1을 건너뛴다
+        self.assertEqual(check_action_extraction(inp("Q4"), filled, FLOW), [])
+        self.assertEqual(fill_next_item(inp("Q9"), self._out("NEXT", "Q1", key="Q9.answer"), FLOW)["next_item"], "END")
+
+    def test_reask_and_confirm(self):
+        from boundary_contracts.action_rules import fill_next_item
+        self.assertEqual(fill_next_item(inp("Q4"), self._out("REASK", "Q9", save=False), FLOW)["next_item"], "Q4")
+        self.assertEqual(fill_next_item(inp("Q5"), self._out("CONFIRM", "Q9", targets=["Q4.answer"]), FLOW)["next_item"], "Q4")
+
+    def test_unknown_item_is_left_for_the_checker(self):
+        from boundary_contracts.action_rules import fill_next_item
+        o = self._out("NEXT", "Q9", key="Q77.answer")
+        self.assertEqual(fill_next_item(inp("Q4"), o, FLOW), o)
+        self.assertTrue(any(v.code == "UNKNOWN_ITEM" for v in check_action_extraction(inp("Q4"), o, FLOW)))

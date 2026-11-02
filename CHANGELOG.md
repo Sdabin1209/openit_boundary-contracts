@@ -2,6 +2,11 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.1.3 (PATCH, 와이어 형식 변경 없음 — `next_item`의 책임을 서버로)
+- `ActionExtraction.next_item`은 추론 서버가 `action`·`targets`·`values`와 문항 순서표(flow)로 정해 채운다(규칙 데이터 `next_item.derived_by: "server"`, 기준 구현 `fill_next_item`). 모델이 낸 값은 덮어쓴다. 왜: 다음 문항 선택은 문진의 항법이지 발화 이해가 아니다. 모델에게 맡기면 학습 안 된 모델은 없는 문항을 내고(UNKNOWN_ITEM, 2026-11-02 데모), 학습된 모델도 순서표가 바뀌면 틀린다(U74).
+- `check_action_extraction`은 그대로다: 채운 값이 규칙에 맞는지 확인만 한다(기준 구현끼리의 교차 검사).
+- 시험: `tests/test_action_rules.py` FillNextItem.
+
 ## 3.1.2 (PATCH, 스키마·와이어 형식 변경 없음 — 클라이언트 결함과 문서만)
 - 클라이언트: 409·429·503 응답의 `Retry-After` 머리글(초)을 `BoundaryError.details.retry_after_s`로 넘긴다(PUBLIC_API "Retry-After를 따른다"; 이전엔 읽지 않았다). 날짜 형식·범위 밖은 무시.
 - 클라이언트: `HttpGateService.list_submissions`가 다른 목록처럼 봉투(`ListEnvelope`)와 원소(`SubmissionView`)를 계약으로 본다(이전엔 응답이 객체가 아니면 AttributeError). `get_submission` 경로 인용을 다른 호출과 같게.
