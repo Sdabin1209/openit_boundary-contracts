@@ -188,8 +188,8 @@
     "1",
     "0"
    ],
-   "description": "저자 != 검수자(4-eyes, D92). false 면 /readyz warnings 에 two_person_disabled",
-   "default": "true"
+   "description": "저자 != 검수자(4-eyes, D92). 3.2.0: 기본 false(사용자 결정 2026-11-03, L13: 문항 구조가 학습 데이터에 고정되고 저자가 바꾸는 것은 문장뿐이라 2인 승인의 효용이 작다). true 로 켜면 1인 운영처는 승인이 막힌다. false 면 /readyz warnings 에 two_person_disabled",
+   "default": "false"
   },
   "QA_HOST": {
    "type": "string",
