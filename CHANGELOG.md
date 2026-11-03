@@ -2,6 +2,10 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.4.2 (PATCH, 와이어 변경 없음 — 서버 바인드 주소 설정, U99)
+왜: TLS 사이드카가 앱과 같은 네트워크 공간에서 HTTPS 를 끝내도, 앱이 0.0.0.0 에 고정으로 붙으면 같은 망의 다른 컨테이너가 앱 포트로 평문 접속할 수 있었다. 표준 사이드카 구성은 앱이 loopback 에만 붙는 것이다. QA_HOST·MODEL_RUNTIME_HOST·MODEL_REGISTRY_HOST·DATASET_STORE_HOST 는 이미 있었고 세 서버만 없었다.
+- `SurveyServiceEnv.SURVEY_HOST`, `GateEnv.GATE_HOST`, `OpsFeedbackServerEnv.env.OPS_HOST`(선택, 기본 `0.0.0.0`). 배포는 사이드카 뒤에서 `127.0.0.1` 을 준다.
+
 ## 3.4.1 (PATCH, 와이어 변경 없음 — 영역 사이 호출 TLS 전용, U99; 사용자 원칙 2026-11-03 "모든 영역은 배치와 무관, 통신은 공통으로 안전")
 왜: 클라이언트가 `http://상대` 를 받아, 서버를 나누거나 설정을 손으로 바꾸면 영역 사이 통신이 평문이 될 수 있었다.
 - `boundary_contracts.clients` 의 모든 HTTP 클라이언트는 `https://` 만 받는다. 같은 기계 안(loopback: `localhost`, `127.0.0.0/8`, `::1`)만 `http://` 허용. 그 밖은 생성 시 `ValueError`(fail fast). 허용 스위치는 없다.
