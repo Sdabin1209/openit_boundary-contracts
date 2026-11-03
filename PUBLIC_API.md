@@ -40,7 +40,7 @@
 | 목적 | 요청 | 응답 |
 | --- | --- | --- |
 | 알림 목록 | `GET /v1/staff/alerts?status=OPEN\|RESOLVED&limit=&cursor=` | `StaffAlertPage`(`limit` 기본 50, 최대 200, 최신부터, `next_cursor`는 불투명 문자열 또는 null) |
-| 알림 실시간 구독 | `GET /v1/staff/alerts/stream` (`text/event-stream`) | 이벤트 이름 `alert`(새 알림)와 `resolved`(해결), `id:`는 이벤트 순번(알림과 해결 이벤트가 각각 증가하는 번호를 받는다), `data:`는 `StaffAlert` JSON이다. 15초마다 `: ping` 주석 줄을 보낸다. 끊기면 `Last-Event-ID`로 이어 받는다. 추가 이벤트(하위 호환, 모르는 클라이언트는 무시한다, `id:`가 없어 `Last-Event-ID`를 바꾸지 않는다): `heartbeat`(`data: {"ts": "<UTC ISO>"}`, 연결 직후 한 번과 이후 주기마다 — 브라우저 `EventSource`는 주석 줄을 보여 주지 않으므로 앱이 연결 생존을 알 수 있게 한다)와 `resync`(`data: {"reason": "EVENTS_NOT_RESUMABLE"}`, `Last-Event-ID`로 이어 받을 수 없는 재연결에 한 번 — 클라이언트는 `GET /v1/staff/alerts?status=OPEN`으로 다시 맞춘다) |
+| 알림 실시간 구독 | `GET /v1/staff/alerts/stream` (`text/event-stream`) | 이벤트 이름 `alert`(새 알림), `resolved`(해결), `result_ready`(문진 결과 도착, 3.2.0 U83; B절), `id:`는 이벤트 순번(알림과 해결 이벤트가 각각 증가하는 번호를 받는다), `data:`는 `StaffAlert` JSON이다. 15초마다 `: ping` 주석 줄을 보낸다. 끊기면 `Last-Event-ID`로 이어 받는다. 추가 이벤트(하위 호환, 모르는 클라이언트는 무시한다, `id:`가 없어 `Last-Event-ID`를 바꾸지 않는다): `heartbeat`(`data: {"ts": "<UTC ISO>"}`, 연결 직후 한 번과 이후 주기마다 — 브라우저 `EventSource`는 주석 줄을 보여 주지 않으므로 앱이 연결 생존을 알 수 있게 한다)와 `resync`(`data: {"reason": "EVENTS_NOT_RESUMABLE"}`, `Last-Event-ID`로 이어 받을 수 없는 재연결에 한 번 — 클라이언트는 `GET /v1/staff/alerts?status=OPEN`으로 다시 맞춘다) |
 | 푸시 설정 | `GET /v1/staff/push-config` | `PushConfig`(웹 푸시 공개키). `vapid_public_key`가 null이면 푸시는 꺼져 있고 SSE만 동작한다 |
 | 푸시 구독 등록 | `POST /v1/staff/push-subscriptions` 본문 웹 푸시 구독 객체(`endpoint`, `keys`) | 201. 같은 `endpoint`는 갱신(멱등). 해지는 `POST /v1/staff/push-subscriptions/unsubscribe` 본문 `{"endpoint": "..."}`(2.2.0, 204. 푸시 엔드포인트 URL은 그 자체가 푸시 권한을 주는 값이라 URL에 싣지 않는다). `DELETE /v1/staff/push-subscriptions?endpoint=`는 2.x에서만 허용하는 폐기 예정 방식이고 3.0.0에서 제거한다 |
 | 개입 결정 | `POST /v1/sessions/{session_id}/intervention` 본문 `{"session_id", "decision": "RESUME"\|"END", "turn_id": "..."}` | `FrontendInput` (RESUME이면 이어서 할 안내 문장, END면 종료) |
@@ -71,13 +71,17 @@
 - 서비스는 세션별로 저장한다(세션 문서 스키마를 바꾸지 않고 세션 메타로). 설정 `SURVEY_REQUIRE_SUBJECT_REF`가 켜져 있으면 없을 때 400(`INVALID_RECORD`). 기본은 꺼짐(데모용).
 - `subject_ref`는 환자를 식별하는 값이다: 로그·알림 본문·푸시에 넣지 않고, 아래 조회 API와 접근 기록(세션 ID 기준)에서만 다룬다.
 
-## B. 결과 조회 API (병원/의사 시스템용, 읽기 전용)
-역할 `result-reader` 토큰. 호출마다 접근 기록(시각, 역할 이름, 게이트웨이가 인증한 행위자 `X-Openit-User`가 있으면 그 계정 ID, session_id 또는 조회 조건, 결과; 토큰·발화 제외)을 남기고, 기록을 못 남기면 데이터를 주지 않는다(503).
+## B. 결과 조회 API (병원/의사 시스템용)
+3.2.0(U83, 사용자 결정 2026-11-03): 문진 결과는 **의사가 본다**. 게이트웨이는 아래 읽기 두 경로와 확인 표시 경로를 역할 `clinician`(사람 계정, Exposure kind account)에 열고, 상류에는 `result-reader` 토큰을 붙이고 `X-Openit-User`(인증 계정)를 넘긴다. 다른 역할·무인증은 403/401. 결과 화면은 admin-console 의 "문진 결과" 탭(목록·상세·인쇄·확인 표시). FHIR `QuestionnaireResponse` 내보내기는 EMR 연동 옵션으로 다음 판.
+- 확인 표시: `POST /v1/results/{session_id}/ack` 본문 `{}` → `SessionResult`(갱신본). 결과에 `acknowledged_by`(계정 ID, 게이트웨이의 X-Openit-User)·`acknowledged_at`(ISO)이 채워진다(문진 스키마 SessionResult 의 선택 필드, 정수 버전 1 호환 추가). 두 번째 호출은 멱등(처음 값 유지).
+- 도착 알림: 세션이 `ENDED_*` 로 끝나면 직원·의사 콘솔 SSE(`GET /v1/staff/alerts/stream`)에 이벤트 `result_ready`(본문 `{"session_id", "status", "ended_at"}`; subject_ref 는 넣지 않는다)를 보낸다. 웹 푸시로는 보내지 않는다(결과는 화면에서 본다).
+- 접근 기록: 결과 읽기·확인 표시마다 아래 접근 기록(계정 ID 포함)을 남기고 보존 365일(감사 기록).
+역할 `result-reader` 토큰(상류·기계용). 호출마다 접근 기록(시각, 역할 이름, 게이트웨이가 인증한 행위자 `X-Openit-User`가 있으면 그 계정 ID, session_id 또는 조회 조건, 결과; 토큰·발화 제외)을 남기고, 기록을 못 남기면 데이터를 주지 않는다(503).
 - `GET /v1/results/{session_id}` → `SessionResult`: `{"session_id", "subject_ref": str|null, "status": "IN_PROGRESS|PAUSED_RISK|ENDED_COMPLETE|ENDED_STAFF|ENDED_LEFT|ENDED_USER_STOP", "started_at": ISO|null, "ended_at": ISO|null, "release_id": str|null, "question_bank_version": str|null, "answers": [{"key","value","status","precision"}], "skipped": [str]}`. 끝나지 않은 세션과 직원·이탈로 끝난 세션의 **부분 결과도 상태와 함께** 돌려준다. 환자 발화 원문과 대화 로그는 포함하지 않는다(직원 세션 조회에만 있다).
 - **`status`의 뜻** (survey-service CR-014 반영): `ENDED_COMPLETE` 문진을 끝까지 마침(**완료는 이것뿐**). `ENDED_LEFT` 환자가 끝나기 전에 떠남(키오스크 종료 요청 또는 유휴 만료). `ENDED_STAFF` 직원이 종료. `ENDED_USER_STOP` 예약된 값으로 지금 만들어지지 않는다. `IN_PROGRESS`·`PAUSED_RISK` 아직 끝나지 않음. 완료가 아닌 상태의 `answers`는 그때까지 저장된 부분 결과이고, `skipped`는 건너뛴 문항 ID일 뿐 미응답 문항 목록이 아니다. 완료 여부는 `status == "ENDED_COMPLETE"`로만 판단한다.
 - `GET /v1/results?subject_ref=&status=&updated_after=&limit=&cursor=` → `{"items": [SessionResult], "next_cursor": str|null}` (`limit` 기본 50 최대 200).
 - 오류: 401/403(`PERMISSION_DENIED`), 404(`NOT_FOUND`), 400(`INVALID_RECORD`), 503(`UNAVAILABLE`).
-- 결과를 병원으로 **밀어 넣는** 전달기(Result Dispatcher)는 수신처가 정해질 때까지 붙이지 않는다. `/readyz`의 `result_dispatcher`는 `attached:false, status:NO_TARGET`.
+- 결과를 EMR 로 **밀어 넣는** 전달기(FHIR QuestionnaireResponse push)는 연동 옵션이며 수신처가 정해지면 붙인다(다음 판). `/readyz`의 `result_dispatcher`는 그때까지 `attached:false, status:NO_TARGET`.
 
 ## C. 직원 세션 조회 (CR-013 반영)
 `GET /v1/staff/sessions/{session_id}` (역할 staff) → `StaffSessionView`. 모양과 의미는 survey-service `docs/change-requests/CR-013-staff-session-view-public-api.md`의 문구 그대로이고, 아래 두 가지를 더한다: 응답 최상위에 `"subject_ref": str|null`, `alerts[]`에 `"resolved_by": str|null`(해결한 직원 ID). 시각·turn_id가 null일 수 있고 `values[].status`는 `ANSWERED|CORRECTION`이라는 CR-013의 제안을 채택한다.

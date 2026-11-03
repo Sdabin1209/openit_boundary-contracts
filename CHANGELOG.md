@@ -12,6 +12,7 @@
 - **CR-012·L07** `OpsFeedbackJobConfig.rollback.counted_review_statuses` 는 `CONFIRMED` 만(자동 탐지만으로 롤백 요청 금지).
 - OpsFeedbackServerEnv 설명 정정(OPS_DEID_SALT 이름 고정, OPS_FAILURE_DB 와 읽기 토큰). GateEnv: GATE_SUPPORTED_RUNTIME_CONTRACT_VERSION 필수. QuestionAuthoringEnv: 운영 구성은 저자 토큰 또는 게이트웨이 토큰(코드와 일치), 기본값 보강.
 - **L13** `QuestionAuthoringEnv.QA_REQUIRE_TWO_PERSON` 기본 false(사용자 결정 2026-11-03).
+- **U83 결과 전달**(사용자 결정 2026-11-03): PUBLIC_API B절 — 결과 읽기 경로를 역할 `clinician` 에 열고(게이트웨이), `POST /v1/results/{id}/ack`(확인 표시, SessionResult 에 acknowledged_by/at 선택 필드), SSE `result_ready` 이벤트, 결과 접근 기록 365일. FHIR 내보내기는 다음 판 옵션.
 - 3.1.3 의 변경(next_item 은 서버가 정한다, ADR 0014)을 포함한다. 3.1.3 태그는 배포되지 않았다.
 
 ## 3.1.3 (PATCH, 와이어 형식 변경 없음 — `next_item`의 책임을 서버로)
