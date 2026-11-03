@@ -6,6 +6,9 @@
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 
+## 3.4.7 이후 문서 보충(패키지·와이어 변경 없음, 태그 없음)
+- RUNTIME R10.11: 정적 화면 서버(kiosk-frontend·admin-console)는 `/metrics` 를 두지 않고 감시는 `/readyz` 탐침으로 본다(kiosk-frontend 담당이 찾은 빈칸).
+
 ## 3.4.7 (PATCH, 와이어 변경 없음 — Exposure 경로의 본문 상한·영역 안 상류, machine-token 정정)
 왜: platform 담당이 공개 입구·영역 게이트웨이 설정을 Exposure 선언에서 만들려다 찾은 빈칸 3건(헤드 누락): 경로별 본문 상한이 선언에 없었고, 영역 안 컴포넌트가 여럿일 때 상류를 정할 값이 없었고, machine-token 경로의 토큰 대조 주체가 3.4.5 와 스키마 설명이 달랐다.
 - `Exposure.routes[].max_body_bytes`(없으면 8MiB), `upstream_port`(선택). R3.5 가 이 값을 가리킨다.
