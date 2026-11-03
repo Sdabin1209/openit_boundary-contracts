@@ -1,0 +1,584 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "OpsFeedbackReviewTrace.schema.json",
+ "title": "OpsFeedbackReviewTrace",
+ "description": "I7 `GET /v1/review-traces/{ref}`(reviewer 역할 전용)가 돌려주는 검토용 trace(3.2.0, L12, 사용자 결정 2026-11-03). OpsFeedbackDeidentifiedTrace 와 같은 모양이되 환자 발화 두 칸(frontend_message.utterance, extract_input.user_utterance)만 원문 문자열(최대 1000자, 문진 스키마 UtteranceBody 상한)을 허용한다. 왜: 발화 없이는 검토자가 실패 원인을 볼 수 없다. 조건: reviewer 역할만 읽고, 읽을 때마다 접근 기록을 남기며(보존 365일, 감사 기록), 확정 사례와 같은 보존(180일), 외부 전송 없음. 기존 get_trace 는 그대로 마스킹된 뷰를 낸다.",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "session_id",
+  "turn_id",
+  "contract_version",
+  "frontend_message",
+  "intervention_decision",
+  "orchestrator_input",
+  "extract_input",
+  "extract_output",
+  "extract_attempts",
+  "extract_status",
+  "extract_protections",
+  "validation_ok",
+  "validation_violations",
+  "response_input",
+  "response_output",
+  "response_outcome",
+  "response_protections",
+  "frontend_input",
+  "staff_console_input",
+  "dispatch_input",
+  "dispatch_output",
+  "orchestrator_output",
+  "session_before",
+  "session_after",
+  "log_entry",
+  "persistence_load_request",
+  "persistence_load_result",
+  "persistence_commit_request",
+  "persistence_commit_result"
+ ],
+ "properties": {
+  "session_id": {
+   "$ref": "#/$defs/Pseudonym"
+  },
+  "turn_id": {
+   "$ref": "#/$defs/Pseudonym"
+  },
+  "contract_version": {
+   "type": "integer",
+   "minimum": 1
+  },
+  "turn_index": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "frontend_message": {
+   "oneOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "object",
+     "required": [
+      "session_id",
+      "kind"
+     ],
+     "properties": {
+      "session_id": {
+       "$ref": "#/$defs/Pseudonym"
+      },
+      "kind": {
+       "enum": [
+        "SESSION_START",
+        "UTTERANCE",
+        "SESSION_END"
+       ]
+      },
+      "utterance": {
+       "$ref": "#/$defs/UtteranceOrRedacted"
+      }
+     },
+     "additionalProperties": false
+    }
+   ]
+  },
+  "extract_input": {
+   "oneOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "object",
+     "required": [
+      "question_id",
+      "current_question",
+      "user_utterance",
+      "state"
+     ],
+     "properties": {
+      "question_id": {
+       "$ref": "#/$defs/Ident"
+      },
+      "current_question": {
+       "$ref": "#/$defs/Redacted"
+      },
+      "user_utterance": {
+       "$ref": "#/$defs/UtteranceOrRedacted"
+      },
+      "state": {
+       "type": "object"
+      }
+     }
+    }
+   ]
+  },
+  "extract_output": {
+   "oneOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "object",
+     "properties": {
+      "values": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "key": {
+          "$ref": "#/$defs/Redacted"
+         },
+         "value": {
+          "$ref": "#/$defs/Redacted"
+         },
+         "precision": {
+          "$ref": "#/$defs/Redacted"
+         },
+         "status": {
+          "$ref": "#/$defs/Redacted"
+         },
+         "save": {
+          "type": "boolean"
+         }
+        }
+       }
+      },
+      "action": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]{0,31}$|^\\[MASKED\\]$"
+      },
+      "next_item": {
+       "oneOf": [
+        {
+         "type": "null"
+        },
+        {
+         "$ref": "#/$defs/Ident"
+        }
+       ]
+      },
+      "reason": {
+       "$ref": "#/$defs/Redacted"
+      },
+      "note": {
+       "$ref": "#/$defs/Redacted"
+      },
+      "targets": {
+       "type": "array"
+      }
+     }
+    }
+   ]
+  },
+  "extract_attempts": {
+   "oneOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 2
+    }
+   ]
+  },
+  "extract_status": {
+   "enum": [
+    "OK",
+    "OUTPUT_INVALID",
+    "VIOLATION",
+    "ERROR",
+    null
+   ]
+  },
+  "extract_protections": {
+   "$ref": "#/$defs/CountMap"
+  },
+  "validation_ok": {
+   "type": [
+    "boolean",
+    "null"
+   ]
+  },
+  "validation_violations": {
+   "type": [
+    "array",
+    "null"
+   ]
+  },
+  "response_input": {
+   "oneOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "object",
+     "required": [
+      "action",
+      "topic",
+      "next"
+     ],
+     "properties": {
+      "action": {
+       "type": "string"
+      },
+      "topic": {
+       "$ref": "#/$defs/Redacted"
+      },
+      "next": {
+       "type": "object"
+      }
+     }
+    }
+   ]
+  },
+  "response_output": {
+   "oneOf": [
+    {
+     "type": "null"
+    },
+    {
+     "$ref": "#/$defs/Redacted"
+    }
+   ]
+  },
+  "response_outcome": {
+   "enum": [
+    "ok",
+    "fallback",
+    "fixed",
+    null
+   ]
+  },
+  "response_protections": {
+   "$ref": "#/$defs/CountMap"
+  },
+  "intervention_decision": {
+   "type": [
+    "object",
+    "null"
+   ]
+  },
+  "orchestrator_input": {
+   "type": [
+    "object",
+    "null"
+   ]
+  },
+  "frontend_input": {
+   "oneOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "object",
+     "properties": {
+      "turn_failure_signal": {
+       "oneOf": [
+        {
+         "type": "null"
+        },
+        {
+         "$ref": "#/$defs/TurnFailureSignal"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "staff_console_input": {
+   "type": [
+    "object",
+    "null"
+   ]
+  },
+  "dispatch_input": {
+   "type": [
+    "object",
+    "null"
+   ]
+  },
+  "dispatch_output": {
+   "type": [
+    "object",
+    "null"
+   ]
+  },
+  "orchestrator_output": {
+   "oneOf": [
+    {
+     "type": "null"
+    },
+    {
+     "$ref": "#/$defs/OrchestratorOutputView"
+    }
+   ]
+  },
+  "session_before": {
+   "type": [
+    "object",
+    "null"
+   ]
+  },
+  "session_after": {
+   "type": [
+    "object",
+    "null"
+   ]
+  },
+  "log_entry": {
+   "oneOf": [
+    {
+     "type": "null"
+    },
+    {
+     "$ref": "#/$defs/LogEntryView"
+    }
+   ]
+  },
+  "persistence_load_request": {
+   "type": [
+    "object",
+    "null"
+   ]
+  },
+  "persistence_load_result": {
+   "type": [
+    "object",
+    "null"
+   ]
+  },
+  "persistence_commit_request": {
+   "type": [
+    "object",
+    "null"
+   ]
+  },
+  "persistence_commit_result": {
+   "oneOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "object",
+     "properties": {
+      "session_id": {
+       "$ref": "#/$defs/Pseudonym"
+      },
+      "status": {
+       "enum": [
+        "OK",
+        "REVISION_CONFLICT",
+        "DB_ERROR"
+       ]
+      },
+      "write_outcome": {
+       "enum": [
+        "APPLIED",
+        "NOT_APPLIED",
+        "UNKNOWN"
+       ]
+      }
+     }
+    }
+   ]
+  }
+ },
+ "$defs": {
+  "Pseudonym": {
+   "type": "string",
+   "pattern": "^p-[0-9a-f]{32}$",
+   "description": "HMAC-SHA256(키=salt, 메시지=JCS({key,value}))의 앞 128비트 16진 32자(ADR 0016). 같은 salt·키·값이면 같다. salt는 이 영역만 안다. 소비자는 원 값으로 되돌릴 수 없고 되돌리려 해서도 안 된다. salt를 바꾸면 값이 모두 달라진다(ADR 0017)."
+  },
+  "Redacted": {
+   "enum": [
+    "[MASKED]",
+    "[DROPPED]"
+   ],
+   "description": "자유 문자열 잎의 비식별 결과. 정책 unlisted_string_action이 mask면 [MASKED], drop이면 키를 지우거나 [DROPPED]. 제안: 소비자는 이 값을 내용으로 쓰지 않는다."
+  },
+  "Ident": {
+   "type": "string",
+   "pattern": "^([A-Za-z0-9][A-Za-z0-9_.\\-]{0,63}|\\[MASKED\\])$",
+   "description": "keep 키의 식별자 모양 값(문항 ID 등). 패턴에 맞지 않으면 마스킹된다."
+  },
+  "CountMap": {
+   "oneOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "object",
+     "propertyNames": {
+      "pattern": "^[A-Z][A-Z0-9_]{0,31}$"
+     },
+     "additionalProperties": {
+      "type": "integer",
+      "minimum": 0
+     }
+    }
+   ],
+   "description": "규칙 코드 -> 건수. 정책이 keep_count_map_keys로 허용하지 않으면 {} 또는 제거"
+  },
+  "TurnFailureSignal": {
+   "type": "object",
+   "description": "정지·알림 신호. pause_reason은 계약 2.1.0 이후 optional(없으면 미상, 모르는 값은 읽는 쪽이 OTHER로 취급). 비식별 정책 keep_pause_reason이 꺼져 있으면 없다.",
+   "properties": {
+    "session_id": {
+     "$ref": "#/$defs/Pseudonym"
+    },
+    "write_committed": {
+     "enum": [
+      "COMMITTED",
+      "NOT_COMMITTED"
+     ]
+    },
+    "staff_alert": {
+     "enum": [
+      "NONE",
+      "DELIVERED",
+      "DELIVERY_FAILED"
+     ]
+    },
+    "pause_reason": {
+     "enum": [
+      "RISK",
+      "REASK_LIMIT",
+      "OTHER"
+     ]
+    }
+   }
+  },
+  "LogEntryView": {
+   "type": "object",
+   "description": "log_entry의 일부. 나머지 키는 검사하지 않는다.",
+   "properties": {
+    "turn_result": {
+     "oneOf": [
+      {
+       "const": "COMMITTED"
+      },
+      {
+       "const": "NOT_APPLICABLE"
+      },
+      {
+       "type": "object",
+       "required": [
+        "failed_steps"
+       ],
+       "properties": {
+        "failed_steps": {
+         "type": "array",
+         "minItems": 1,
+         "items": {
+          "type": "object",
+          "required": [
+           "phase",
+           "step"
+          ],
+          "properties": {
+           "phase": {
+            "enum": [
+             "BEFORE_COMMIT",
+             "AFTER_COMMIT"
+            ]
+           },
+           "step": {
+            "enum": [
+             "LoRA-A",
+             "VALIDATE",
+             "COMMIT",
+             "DELIVER_STAFF",
+             "LoRA-B",
+             "DELIVER_FRONT"
+            ]
+           }
+          }
+         }
+        }
+       }
+      }
+     ]
+    },
+    "staff_alert_delivery": {
+     "enum": [
+      "SUCCESS",
+      "FAILURE",
+      "NOT_APPLICABLE"
+     ]
+    },
+    "turn_failure_signal": {
+     "oneOf": [
+      {
+       "type": "null"
+      },
+      {
+       "$ref": "#/$defs/TurnFailureSignal"
+      }
+     ]
+    }
+   }
+  },
+  "OrchestratorOutputView": {
+   "type": "object",
+   "description": "orchestrator_output의 일부. 나머지 키는 검사하지 않는다.",
+   "properties": {
+    "turn_failure_signal": {
+     "oneOf": [
+      {
+       "type": "null"
+      },
+      {
+       "$ref": "#/$defs/TurnFailureSignal"
+      }
+     ]
+    },
+    "intervention_result": {
+     "oneOf": [
+      {
+       "type": "null"
+      },
+      {
+       "type": "object",
+       "properties": {
+        "session_id": {
+         "$ref": "#/$defs/Pseudonym"
+        },
+        "result": {
+         "enum": [
+          "APPLIED",
+          "IGNORED",
+          "FAILED"
+         ]
+        }
+       }
+      }
+     ]
+    },
+    "log_entry": {
+     "oneOf": [
+      {
+       "type": "null"
+      },
+      {
+       "$ref": "#/$defs/LogEntryView"
+      }
+     ]
+    }
+   }
+  },
+  "UtteranceOrRedacted": {
+   "oneOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 1000
+    }
+   ],
+   "description": "검토 사본에서는 원문, 정책이 끄면 마스킹 토큰"
+  }
+ }
+}

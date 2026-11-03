@@ -46,7 +46,7 @@
     "OPS_FAILURE_DB": {
      "type": "string",
      "minLength": 1,
-     "description": "SQLite 경로. 없고 FAILURE_DATABASE_URL도 없으면 읽기·검토 면이 꺼진다"
+     "description": "실패 사례 SQLite 경로. 읽기·검토 면이 켜지려면 이 경로(또는 OPS_FAILURE_DATABASE_URL)와 OPS_READ_TOKENS 가 모두 필요하다(검토 토큰만으로는 켜지지 않는다, 코드 api/__main__.py)"
     },
     "OPS_LOG_DATABASE_URL_FILE": {
      "$ref": "#/$defs/Path",
@@ -68,7 +68,7 @@
     },
     "OPS_DEID_SALT_FILE": {
      "$ref": "#/$defs/Path",
-     "description": "잡과 admin이 읽는다(서버는 읽지 않는다). 이름은 잡 설정 deid.salt_env로 바뀔 수 있다"
+     "description": "비밀(D84): 가명화 salt 파일. 잡과 admin 이 읽는다(서버는 읽지 않는다). 잡 설정 deid.salt_env 는 이 이름(OPS_DEID_SALT)이어야 한다 — OPS_ 접두의 다른 이름은 선언에 없어 기동 때 거부된다"
     },
     "OPS_DEID_SALT": {
      "type": "string",

@@ -199,7 +199,7 @@
   },
   "QA_PORT": {
    "$ref": "#/$defs/Port",
-   "description": "바인드 포트. 주의: Dockerfile HEALTHCHECK 는 8080 고정",
+   "description": "바인드 포트. Dockerfile HEALTHCHECK 도 이 값을 쓴다(3.2.0)",
    "default": "8080"
   },
   "QA_MAX_CONCURRENT_REQUESTS": {
@@ -209,11 +209,13 @@
   },
   "QA_DRAFT_RETENTION_DAYS": {
    "$ref": "#/$defs/PosInt",
-   "description": "purge 의 초안 보존 일수(무기한 불가)"
+   "description": "purge 의 초안 보존 일수(무기한 불가)",
+   "default": "30"
   },
   "QA_SOURCE_RETENTION_DAYS": {
    "$ref": "#/$defs/PosInt",
-   "description": "purge 의 원본 자료 보존 일수(무기한 불가)"
+   "description": "purge 의 원본 자료 보존 일수(무기한 불가)",
+   "default": "30"
   },
   "QA_DB_CONNECT_TIMEOUT_SECONDS": {
    "$ref": "#/$defs/Seconds",
@@ -242,15 +244,17 @@
   },
   "QA_REQUEST_DEADLINE_SECONDS": {
    "$ref": "#/$defs/Seconds",
-   "description": "사람용 요청 하나의 서버 쪽 전체 마감. 넘기면 저장하지 않고 503(D125 사람 화면 사슬)"
+   "description": "사람용 요청 하나의 서버 쪽 전체 마감. 넘기면 저장하지 않고 503(D125 사람 화면 사슬)",
+   "default": "110.0"
   },
   "QA_SHUTDOWN_GRACE_SECONDS": {
    "$ref": "#/$defs/Seconds",
-   "description": "종료 신호 뒤 진행 중 요청을 기다리는 시간"
+   "description": "종료 신호 뒤 진행 중 요청을 기다리는 시간",
+   "default": "8"
   },
   "QA_SCHEMA_DIR": {
    "$ref": "#/$defs/Path",
-   "description": "영역 내부 스키마 디렉터리 덮어쓰기(개발용). 기본은 패키지 안"
+   "description": "영역 내부 스키마 디렉터리 덮어쓰기. 기본은 리포 루트 schemas/, 이미지는 /app/schemas"
   }
  },
  "allOf": [
@@ -297,6 +301,16 @@
         "required": [
          "QA_AUTHOR_TOKENS"
         ]
+       },
+       {
+        "required": [
+         "QA_GATEWAY_TOKENS_FILE"
+        ]
+       },
+       {
+        "required": [
+         "QA_GATEWAY_TOKENS"
+        ]
        }
       ]
      }
@@ -304,5 +318,5 @@
    }
   }
  ],
- "x-note": "QA_*_SECONDS 값은 코드가 0 초과 600 이하를 검사한다(스키마는 형식만)"
+ "x-note": "QA_*_SECONDS 값은 코드가 0 초과 600 이하를 검사한다(스키마는 형식만). 운영 구성(QA_DEV_MODE 아님)은 DB URL 과 저자 토큰 또는 게이트웨이 토큰(게이트웨이 경유 계정) 중 하나가 필요하다(코드 _require_production_config 와 같다, question-authoring 담당 확인 2026-11-03)"
 }
