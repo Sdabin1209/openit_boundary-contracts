@@ -2,6 +2,11 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.4.0 (MINOR, 와이어 추가 — 결과 도착 웹 푸시, U92; 사용자 결정 2026-11-03 "도착 알림")
+왜: 3.2.0은 결과 도착을 의사 화면이 열려 있을 때(SSE)만 알렸다. 화면을 닫은 의사는 결과가 와도 몰랐다.
+- `StaffPushPayload.kind`에 `RESULT_READY`(본문 session_id·kind만, tag `result-`+session_id).
+- PUBLIC_API: 푸시 구독 본문에 선택 `topics`(`alerts`=staff, `results`=clinician, 기본 `alerts`). 세션이 `ENDED_*`면 `results` 구독자에게 웹 푸시. B절의 "웹 푸시로는 보내지 않는다" 삭제.
+
 ## 3.3.0 (MINOR, 와이어 형식 변경 — 문진표 여러 개와 세션별 선택; 사용자 결정 2026-11-03)
 왜: 배포에 문진표가 하나뿐이었고, 세션이 문진표를 고를 길이 없었고, 순서·건너뛰기가 문진표가 아닌 고정 파일(survey-service `question_flow.json`)에서 왔다. 제품의 핵심 흐름(저자가 올린 문진표로 환자마다 문진한다)이 성립하지 않았다.
 - `_common.QuestionSetRef`(ArtifactRef + `title`) 신설. `ReleaseManifest.question_sets[]`(1개 이상, QuestionSetRef)가 단수 `question_set`을 대체. `GateSubmissionRequest`·`GateSubmission`·`GateDecision`·`ReviewReport`의 `subject.question_sets[]`(ArtifactRef)가 단수를 대체. `find_decisions`의 문진표 질의는 목록 중 하나와 맞으면 반환.
