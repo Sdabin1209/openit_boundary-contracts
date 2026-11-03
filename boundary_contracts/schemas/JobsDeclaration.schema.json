@@ -93,7 +93,7 @@
         "timeout_seconds": {
           "type": "integer",
           "minimum": 1,
-          "description": "3.4.4(RUNTIME R9.2): 잡 한 번 실행의 시간 상한(초). 잡의 실행 시간은 잡을 가진 영역이 안다. 넘기면 deploy 가 띄운 잡을 멈추고 그 실행은 실패다(다음 주기에 다시 한 번, RUNTIME R10.12). 없으면 deploy 의 기본 상한(deploy ADR)을 쓴다 — 선택 필드인 이유: 기존 선언과 하위 호환(CONVENTIONS 1절 3)."
+          "description": "3.4.4(RUNTIME R9.2): 잡 한 번 실행의 시간 상한(초). 잡의 실행 시간은 잡을 가진 영역이 안다. 넘기면 deploy 가 띄운 잡을 멈추고 그 실행은 실패다(다음 주기에 다시 한 번, RUNTIME R10.12). 없으면 RUNTIME R9.3 의 기본 상한 3600초(시작값, 측정 안 함)를 쓴다(검토 P4 모순 정정) — 선택 필드인 이유: 기존 선언과 하위 호환(CONVENTIONS 1절 3)."
         }
       },
       "required": [

@@ -45,3 +45,11 @@ def test_corrupt_tar_is_integrity_error(tmp_path):
 def test_good_tar_extracts(tmp_path):
     _http.extract_tar(_tar({"d/a.txt": b"hello"}), tmp_path / "out", 1 << 20)
     assert (tmp_path / "out" / "d" / "a.txt").read_bytes() == b"hello"
+
+
+def test_stream_cap_leaves_room_for_headers_of_max_entries():
+    """R3.26: 항목 상한만큼의 빈 파일 tar(헤더·채움만) + 내용 상한이 스트림 상한 안에 든다."""
+    import tarfile as _t
+    per_entry = 512 + 511 + 1024   # ustar 헤더 + 최대 채움 + PAX 확장 헤더
+    assert _http.tar_stream_cap(0) >= _http.MAX_TAR_ENTRIES * per_entry + 1024
+    assert _http.tar_stream_cap(8 * 2**30) - 8 * 2**30 == _http.tar_stream_cap(0)

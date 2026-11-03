@@ -22,6 +22,7 @@
   - 출력이 없던 입력: 활성 릴리스 없음 503 `NO_ACTIVE_RELEASE`, 배치 문진표가 목록에 없음, 제출 해시 422·구조 `REJECTED_AUTO`, `lineage.question_sets` 없으면 FAIL, 키오스크의 NOT_COMMITTED·4xx 화면 동작, SSE 역할 필터·최대 수명(`SURVEY_SSE_MAX_SECONDS`)·상태 확인 탐침, 추론 서버 404 재적재, 비 /v1 미인증 401.
   - 낡은 문장 정정: INTERFACES I4·I5·I8·I10, PUBLIC_API 인증·폐기 예정·REASK_LIMIT·"아직 정하지 않은 것", HTTP.md 저작 API 지위·I1 목록 경로·approver_id·(ADR 0010 R7), CONVENTIONS 6·9·10절·시간 사슬(56초 행 서버 마감 50초, 이웃 호출 10초 행, 근거 표기), 3.3.0 MAJOR 예외 기록, RFC 9110 9.2.2 인용 정정, CELLS 의 R10.3 인용·감시/스케줄러 표기·머리 주석.
   - 호출 표: C30 인증 없음, C34 정의, C37~C42 추가(칸 162개는 같은 인터페이스·같은 호출자 종류의 기존 칸에서 옮김).
+- 전수 대조(945칸, 2026-11-04 05:00, P1~P6) 결함 반영: 저장소 실패는 R3.10(턴의 NOT_COMMITTED 는 마감·모델 실패만), SSE 끊김은 R3.25 밖, deploy 예외에 OUT-FILE, 출구 허용 목록 정본은 `Exposure.egress`, `gateway` 역할은 `*_TOKENS` 안, 승인자 식별은 gateway 토큰 + `X-Openit-Roles`, I9 소비자 범위(model-lab·release-gate 는 info·readyz), 중복 제출 202·활성화 멱등, 웹 푸시 시간 한도 3초·재시도 3번/60초·endpoint IP 리터럴 거부(RFC 6890), `/metrics` 수집 실패 출력, 쿠키 401 챌린지 근거, machine-token 대조는 받는 서비스, 처음 적재 때 기기 인증서 거절, R3.12 범위, SSE 탐침 경로, tar 스트림 상한을 형식에서 계산(클라이언트 `tar_stream_cap`, 시험·변이 확인), `HumanUserInfo.groups` 관대 읽기, `ResultReadyEvent` 소비자, EXTERNAL_SCHEMAS 에 InterventionDecision·RiskSignal, `lineage` 재게시, JobsDeclaration 기본 상한 문장.
 - 클라이언트 `extract_tar`: 호출자 쪽 쓰기 실패(OSError)는 `UNAVAILABLE`(전에는 `INTEGRITY_ERROR` 로 재시도를 막았다, R3.27). 시험 test_extract_tar_disk_344.py(변이 확인).
 - `JobsDeclaration.job.timeout_seconds`(선택, 정수 ≥ 1): 잡 한 번 실행의 시간 상한. 선택인 이유는 기존 선언과의 하위 호환. 3.4.2 의 Env 선택 필드처럼 레코드 와이어가 아니라 선언이라 PATCH.
 

@@ -124,6 +124,16 @@ def safe_member_path(name: str) -> tuple[str, ...]:
     return tuple(p for p in name.split("/") if p not in ("", "."))
 
 
+MAX_TAR_ENTRIES = 200_000   # 풀기 전 항목 수 상한(RUNTIME R3.26, 시작값·측정 안 함)
+
+
+def tar_stream_cap(max_bytes: int) -> int:
+    """받는 tar 스트림의 최대 크기(RUNTIME R3.26, 3.4.4 검토 P6-R6-4). 파일 내용 상한에 항목마다의 형식 여유를 더한다.
+    왜 2KiB/항목: POSIX.1-2001 pax 의 항목 하나는 ustar 헤더 512B + 내용 채움 최대 511B + PAX 확장 헤더(헤더 512B + 레코드 최대 512B)다.
+    끝 블록 1KiB 와 기록 단위(10KiB) 채움을 더한다. 이전 값(16MiB 고정)은 항목 200,000개의 헤더(약 98~195MiB)보다 작아 정상 tar 를 거부할 수 있었다."""
+    return max_bytes + MAX_TAR_ENTRIES * 2048 + 10240
+
+
 def extract_tar(src, dest: Path, max_bytes: int) -> None:
     """src(파일 객체)의 비압축 tar를 dest에 푼다. 일반 파일과 디렉터리만 허용한다. 내용 위반은 INTEGRITY_ERROR, 호출자 쪽 쓰기 실패는 UNAVAILABLE(R3.27)."""
     dest.mkdir(parents=True, exist_ok=True)
@@ -142,7 +152,7 @@ def extract_tar(src, dest: Path, max_bytes: int) -> None:
                     raise integrity("tar에 중복된 경로가 있다")
                 seen.add(parts)
                 total += m.size if m.isreg() else 0
-                if total > max_bytes or len(members) >= 200_000:
+                if total > max_bytes or len(members) >= MAX_TAR_ENTRIES:
                     raise integrity("tar가 크기 상한을 넘는다")
                 members.append((m, parts))
             for m, parts in members:
@@ -432,7 +442,7 @@ class HttpClientBase:
         resp = self._open("GET", path, None, None, None, TAR_TYPE)
         try:
             with tempfile.TemporaryFile(dir=tmp_root) as spool:
-                n, cap = 0, self.max_tar_bytes + (16 << 20)
+                n, cap = 0, tar_stream_cap(self.max_tar_bytes)
                 try:
                     for chunk in iter(lambda: resp.read(1 << 20), b""):
                         n += len(chunk)

@@ -3,11 +3,89 @@
   "package": "openit-survey-schema",
   "owner": "survey-service",
   "schemas": [
-    {"name": "QuestionBank", "x-producers": ["question-authoring"], "x-consumers": ["release-gate", "synthetic-data", "model-lab", "survey-service"], "where": "HTTP.md I1·I4 번들"},
-    {"name": "FrontendMessage", "x-producers": ["kiosk-frontend"], "x-consumers": ["survey-service"], "where": "PUBLIC_API 세션·발화"},
-    {"name": "FrontendInput", "x-producers": ["survey-service"], "x-consumers": ["kiosk-frontend"], "where": "PUBLIC_API 세션·발화 응답(TurnFailureSignal 포함, RUNTIME R3.20)"},
-    {"name": "SessionResult", "x-producers": ["survey-service"], "x-consumers": ["admin-console"], "where": "PUBLIC_API B절"},
-    {"name": "StaffSessionView", "x-producers": ["survey-service"], "x-consumers": ["kiosk-frontend", "admin-console"], "where": "PUBLIC_API C절"},
-    {"name": "TurnTrace", "x-producers": ["survey-service"], "x-consumers": ["ops-feedback"], "where": "TraceEnvelope.trace(HTTP.md I6)"}
+    {
+      "name": "QuestionBank",
+      "x-producers": [
+        "question-authoring"
+      ],
+      "x-consumers": [
+        "release-gate",
+        "synthetic-data",
+        "model-lab",
+        "survey-service"
+      ],
+      "where": "HTTP.md I1·I4 번들"
+    },
+    {
+      "name": "FrontendMessage",
+      "x-producers": [
+        "kiosk-frontend"
+      ],
+      "x-consumers": [
+        "survey-service"
+      ],
+      "where": "PUBLIC_API 세션·발화"
+    },
+    {
+      "name": "FrontendInput",
+      "x-producers": [
+        "survey-service"
+      ],
+      "x-consumers": [
+        "kiosk-frontend"
+      ],
+      "where": "PUBLIC_API 세션·발화 응답(TurnFailureSignal 포함, RUNTIME R3.20)"
+    },
+    {
+      "name": "SessionResult",
+      "x-producers": [
+        "survey-service"
+      ],
+      "x-consumers": [
+        "admin-console"
+      ],
+      "where": "PUBLIC_API B절"
+    },
+    {
+      "name": "StaffSessionView",
+      "x-producers": [
+        "survey-service"
+      ],
+      "x-consumers": [
+        "kiosk-frontend",
+        "admin-console"
+      ],
+      "where": "PUBLIC_API C절"
+    },
+    {
+      "name": "TurnTrace",
+      "x-producers": [
+        "survey-service"
+      ],
+      "x-consumers": [
+        "ops-feedback"
+      ],
+      "where": "TraceEnvelope.trace(HTTP.md I6)"
+    },
+    {
+      "name": "InterventionDecision",
+      "x-producers": [
+        "kiosk-frontend"
+      ],
+      "x-consumers": [
+        "survey-service"
+      ],
+      "where": "PUBLIC_API 직원 개입(직원 콘솔 → 서비스)"
+    },
+    {
+      "name": "RiskSignal",
+      "x-producers": [
+        "external:install-site"
+      ],
+      "x-consumers": [
+        "survey-service"
+      ],
+      "where": "PUBLIC_API risk-signals(설치처의 위험 감지기, 역할 risk-source 토큰)"
+    }
   ]
 }

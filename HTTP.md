@@ -73,7 +73,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 
 | 호출 | 요청 | 응답 |
 | --- | --- | --- |
-| `submit_candidate` | `POST /v1/submissions` 본문 `GateSubmissionRequest`{subject{question_sets[], lora_a, lora_b}, requested_by_role} (3.1.0에서 스키마로; 3.3.0: 문진표 목록, 서버는 세트마다 구조 대조·해시 검증을 하고 하나라도 어긋나면 전체를 거절) | `GateSubmission` (202). 문진표·모델 참조의 ID·버전·해시를 읽을 수 없거나 해시가 다르면 202 를 내지 않고 422 `INTEGRITY_ERROR`(재시도 안 함)다. 문진표 구조가 모델과 맞지 않는 것은 접수(202) 뒤 자동 검사에서 가려진다: 상태 `REJECTED_AUTO`, `GateDecision.checks` 의 `QUESTION_MODEL_COMPAT`=FAIL, `reject_codes` 에 `CHECK_FAILED`, 어긋난 세트 ID 는 그 검사의 `detail` 에 적는다. 세트 하나라도 어긋나면 제출 전체가 `REJECTED_AUTO` 다(3.4.4, 검토 B-03) |
+| `submit_candidate` | `POST /v1/submissions` 본문 `GateSubmissionRequest`{subject{question_sets[], lora_a, lora_b}, requested_by_role} (3.1.0에서 스키마로; 3.3.0: 문진표 목록, 서버는 세트마다 구조 대조·해시 검증을 하고 하나라도 어긋나면 전체를 거절) | `GateSubmission` (202). 같은 대상의 중복 제출은 기존 접수를 202 로 돌려준다(RUNTIME R10.8). 문진표·모델 참조의 ID·버전·해시를 읽을 수 없거나 해시가 다르면 202 를 내지 않고 422 `INTEGRITY_ERROR`(재시도 안 함)다. 문진표 구조가 모델과 맞지 않는 것은 접수(202) 뒤 자동 검사에서 가려진다: 상태 `REJECTED_AUTO`, `GateDecision.checks` 의 `QUESTION_MODEL_COMPAT`=FAIL, `reject_codes` 에 `CHECK_FAILED`, 어긋난 세트 ID 는 그 검사의 `detail` 에 적는다. 세트 하나라도 어긋나면 제출 전체가 `REJECTED_AUTO` 다(3.4.4, 검토 B-03) |
 | `activate` | `POST /v1/activate` 본문 `{release_id, requested_by_role}` | `ActivePointer`. 이미 활성인 같은 `release_id` 면 200 으로 현재 포인터를 그대로 돌려준다(새 포인터·버전을 만들지 않는다, RUNTIME R10.8) |
 | `request_rollback` | `POST /v1/rollback` 본문 `RollbackRequest` | 200 `RollbackReceipt`. 선행 조건 위반(`from_release_id` 가 현재 활성이 아님, `to_release_id` 가 PASS·해시 검증을 통과하지 못함, 둘이 같음)도 412 가 아니라 200 `status:"REJECTED"` + `reason`(거부도 영수증으로 남는다). 같은 `request_id` 는 같은 영수증(R10.8) |
 | `list_submissions` (D68) | `GET /v1/submissions?status=&limit=&cursor=` | 목록(`SubmissionView`, 최신부터, `status`로 거름). 승인 화면이 `status=AWAITING_APPROVAL`로 대기 건을 본다 |
@@ -84,7 +84,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 **승인 요청의 해시·충돌·승인자 (D69).**
 - `GET /v1/submissions/{id}/review-report`의 응답 헤더 `X-Openit-Report-Hash`가 그 보고서의 해시다. 클라이언트는 해시를 **계산하지 않고** 받은 값을 `POST /v1/approvals`의 `report_hash`로 그대로 돌려보낸다(해시 구현은 서버 한 곳, `boundary_contracts.canonical`).
 - 409의 사유는 `BoundaryError.details.reason`으로 구분한다: `STALE_REPORT`(승인자가 본 보고서가 이미 바뀜), `ALREADY_DECIDED`(이 제출에 이미 다른 결정이 있음). `code`는 `CONFLICT` 그대로다.
-- 승인자 식별: 게이트웨이가 사람 인증을 마친 뒤 요청에 `X-Openit-User: <인증된 사용자 ID>` 헤더를 붙인다(클라이언트가 보낸 같은 이름의 헤더는 게이트웨이가 지운다). 서버는 `release-approver` 토큰의 요청에서 이 헤더 값을 승인자로 쓴다. 본문에 `approver_id` 를 넣으면 400 `INVALID_RECORD` 다(`ApprovalRequest` 는 닫힌 스키마, 3.4.4 문장 정정). **헤더가 없으면 401로 거부한다**(D88 U7, 활성화·롤백과 같은 규칙: 승인자는 항상 개인으로 식별되어야 하고, 본문 값은 위조할 수 있다). 시험도 게이트웨이(platform 공개 입구 역할의 `gateway` 토큰)를 거쳐 호출한다(CONVENTIONS 6절, 검토 A-25).
+- 승인자 식별: 게이트웨이가 사람 인증을 마친 뒤 요청에 `X-Openit-User: <인증된 사용자 ID>` 헤더를 붙인다(클라이언트가 보낸 같은 이름의 헤더는 게이트웨이가 지운다). 서버는 platform 공개 입구의 `gateway` 역할 토큰이 붙은 요청에서 `X-Openit-Roles` 에 `release-approver` 가 있으면 `X-Openit-User` 값을 승인자로 쓴다(CONVENTIONS 6절, 검토 P6-R6-1). 본문에 `approver_id` 를 넣으면 400 `INVALID_RECORD` 다(`ApprovalRequest` 는 닫힌 스키마, 3.4.4 문장 정정). **헤더가 없으면 401로 거부한다**(D88 U7, 활성화·롤백과 같은 규칙: 승인자는 항상 개인으로 식별되어야 하고, 본문 값은 위조할 수 있다). 시험도 게이트웨이(platform 공개 입구 역할의 `gateway` 토큰)를 거쳐 호출한다(CONVENTIONS 6절, 검토 A-25).
 
 사람의 반려는 `GateDecision.reject_codes`에 `CHECK_FAILED`를 쓰고, `checks`의 `HUMAN_APPROVAL`이 FAIL이면 사람이 반려한 것이다(코드를 새로 만들지 않는다, D58). 요청 본문의 `report_hash`는 필수다(3.0.0 `ApprovalRequest`): 승인자가 본 보고서의 `X-Openit-Report-Hash` 값을 그대로 보내고, 현재 보고서와 다르면 409 `STALE_REPORT`.
 
@@ -105,7 +105,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 | `publish_case` | (HTTP로 열지 않는다. ops-feedback 내부 잡이 로컬 저장소에 쓴다) | |
 | (검토 게시, 사람/검토 화면용. Protocol 밖) | `POST /v1/cases/{case_id}/review` (쓰기 역할 `reviewer`, 읽기 토큰은 403) 본문 `{review_status: "CONFIRMED"\|"DISMISSED"\|"PENDING", expected?: 객체 또는 문자열, expected_kind?: "LORA_A"\|"LORA_B", reviewed_input?: 객체}` | 새 `version`의 `FailureCase`(201). 같은 검토를 다시 보내면 같은 결과(200). `expected`가 있으면 `expected_kind`가 필수이고 그 값에 맞는 모델 출력이어야 한다: `LORA_A`면 `ActionExtraction`(객체), `LORA_B`면 `ResponseText`(문자열)이며 아니면 INVALID_RECORD다. `reviewed_input`은 검토자가 개인정보 없이 고쳐 쓴 입력이며 `LORA_A`면 `ActionExtractionInput`, `LORA_B`면 `ResponseRequest`여야 한다(D55). 존재하지 않는 사례는 404  사람 검토자 식별: I5 승인과 같은 방식이다. 게이트웨이가 사람 인증을 마친 뒤 `X-Openit-User: <인증된 사용자 ID>`를 붙이고(클라이언트가 보낸 같은 이름의 헤더는 지운다), 서버는 `reviewer` 토큰의 요청에서 이 헤더 값을 검토자로 기록한다. 헤더가 없으면 401이다(인증되지 않은 사람 요청, CONVENTIONS 6절·D106; release-gate·ops-feedback 서버의 실제 동작). |
 
-## I9 ModelRuntime 추론 서버 — 소유: model-runtime (서버), 소비: survey-service (D62)
+## I9 ModelRuntime 추론 서버 — 소유: model-runtime (서버), 소비: survey-service(적재·extract·respond·정보·준비), model-lab·release-gate(`GET /v1/info`·`/readyz` 만, 호환 확인) (D62; 3.4.4 검토 P6-R6-9·P5-G4: model-lab 의 후보 평가는 이 HTTP 면이 아니라 model-runtime 라이브러리를 자기 파이프라인 안에서 쓴다 — 영역이 의존할 수 있는 라이브러리, 워크스페이스 규칙)
 
 서비스는 모델을 직접 적재하거나 호출하지 않고 이 면으로만 부른다. 서버는 vLLM 컨테이너(서빙 서버)다. 이 면은 survey-service의 `docs/inference-server-spec.md`(제안 v1)와 model-runtime CR-003을 하나로 합친 것이며, 이 문서가 기준이다(D62). 어느 쪽이든 어긋나면 이 문서에 맞춘다.
 

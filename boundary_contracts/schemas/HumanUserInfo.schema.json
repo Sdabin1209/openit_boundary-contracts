@@ -25,9 +25,9 @@
     "groups": {
       "type": "array",
       "items": {
-        "type": "string",
-        "pattern": "^/?[a-z][a-z-]*$"
-      }
+        "type": "string"
+      },
+      "description": "역할 이름(CONVENTIONS 6절 목록). 앞에 '/' 가 붙을 수 있다(그룹 경로 매퍼). 모르는 이름은 무시한다(읽기 관대, CONVENTIONS 1절 3; 검토 P6-R6-7)"
     }
   }
 }
