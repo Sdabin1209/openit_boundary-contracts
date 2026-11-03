@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import http.client
 import io
+import ipaddress
 import json
 import os
 import re
@@ -217,6 +218,27 @@ class _HTTPSHandler(urllib.request.HTTPSHandler):
         return self.do_open(_HTTPSConnection, req, context=self._context)
 
 
+def require_tls_url(base_url: str) -> None:
+    """영역 사이 호출은 TLS만 받는다(3.4.1, U99: 모든 영역 사이 통신 TLS, 배치 무관 — head OPEN_GAPS U98·U99).
+    왜: 서비스는 어느 서버에든 놓일 수 있어 `http://상대` 는 서버를 나누는 순간 평문이 된다. 설정을 손으로 바꿔도
+    평문이 들어가지 않게 시작 시점에 거부한다(fail fast). 같은 기계 안(loopback: localhost, 127.0.0.0/8, ::1)은
+    네트워크를 나가지 않으므로 평문을 허용한다(영역 단독 시험·컨테이너 안 프로브). 허용 스위치는 두지 않는다(시험용 문 금지)."""
+    parts = urllib.parse.urlsplit(base_url)
+    if parts.scheme == "https":
+        return
+    if parts.scheme != "http":
+        raise ValueError("base_url은 https:// 로 시작해야 한다(같은 기계 안 loopback 만 http:// 허용)")
+    host = (parts.hostname or "").lower()
+    if host == "localhost":
+        return
+    try:
+        if ipaddress.ip_address(host).is_loopback:
+            return
+    except ValueError:
+        pass
+    raise ValueError(f"평문 http:// 는 같은 기계 안(loopback)만 허용한다: {parts.scheme}://{host} — https:// 주소를 쓴다(U99)")
+
+
 class HttpClientBase:
     """생성자는 base_url, token, timeout만 받는다. 환경 변수는 읽지 않는다. 재시도는 호출자가 UNAVAILABLE일 때만 한다."""
     max_tar_bytes = 8 * 2**30      # 풀기 전 총 크기 상한(인스턴스나 서브클래스에서 바꾼다)
@@ -225,8 +247,7 @@ class HttpClientBase:
     def __init__(self, base_url: str, token: Optional[str], timeout: float = 10.0, *, user: Optional[str] = None):
         """user: 사람 행위자의 인증된 ID를 `X-Openit-User`로 싣는다(3.1.0, D88·HTTP.md I5). 게이트웨이를 거치면 게이트웨이가 인증 계정으로 덮어쓰고,
         게이트웨이 뒤 내부망에서 서비스를 직접 부르는 도구(시험·운영)만 이 값을 쓴다. 이 헤더가 필요한 쓰기(승인·활성화·롤백·검토)가 비공개 속성 없이 부를 수 있게 한다."""
-        if urllib.parse.urlsplit(base_url).scheme not in ("http", "https"):
-            raise ValueError("base_url은 http:// 또는 https://로 시작해야 한다")
+        require_tls_url(base_url)
         self._base = base_url.rstrip("/")
         self._token = token
         self._headers: dict[str, str] = {}   # 하위 클래스가 더하는 고정 헤더(예: 내부망의 X-Openit-Device, 2.3.0)

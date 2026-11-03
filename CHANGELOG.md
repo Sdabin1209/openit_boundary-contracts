@@ -2,6 +2,13 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.4.1 (PATCH, 와이어 변경 없음 — 영역 사이 호출 TLS 전용, U99; 사용자 원칙 2026-11-03 "모든 영역은 배치와 무관, 통신은 공통으로 안전")
+왜: 클라이언트가 `http://상대` 를 받아, 서버를 나누거나 설정을 손으로 바꾸면 영역 사이 통신이 평문이 될 수 있었다.
+- `boundary_contracts.clients` 의 모든 HTTP 클라이언트는 `https://` 만 받는다. 같은 기계 안(loopback: `localhost`, `127.0.0.0/8`, `::1`)만 `http://` 허용. 그 밖은 생성 시 `ValueError`(fail fast). 허용 스위치는 없다.
+- 같은 규칙을 공개 함수 `boundary_contracts.clients.require_tls_url(url)` 로 낸다. 클라이언트를 거치지 않는 직접 호출(`/healthz` 도달성 확인, 추론 호출 등)도 호출 전에 이 함수를 거친다.
+- 루트 신뢰는 표준 `SSL_CERT_FILE`(urllib 기본 컨텍스트). 검증 끄기 경로 없음(기존과 같음).
+- 영향: 설정에 loopback 밖 `http://` 를 둔 배포는 기동 시 실패한다. 배포 설정은 전부 `https://` 로(deploy U98·U99).
+
 ## 3.4.0 (MINOR, 와이어 추가 — 결과 도착 웹 푸시, U92; 사용자 결정 2026-11-03 "도착 알림")
 왜: 3.2.0은 결과 도착을 의사 화면이 열려 있을 때(SSE)만 알렸다. 화면을 닫은 의사는 결과가 와도 몰랐다.
 - `StaffPushPayload.kind`에 `RESULT_READY`(본문 session_id·kind만, tag `result-`+session_id).
