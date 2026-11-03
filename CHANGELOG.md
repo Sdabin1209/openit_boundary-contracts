@@ -10,7 +10,7 @@
 - `DeviceConfig.question_set_id`, `KioskStartFragment.question_set_id`(기기 배치, 조각이 먼저).
 - I10(PUBLIC_API I절): `GET /v1/question-sets` 활성 문진표 목록, `SESSION_START.question_set_id`(하나면 생략 가능, 둘 이상이면 필수, 없는 ID 400 INVALID_RECORD/UNKNOWN_QUESTION_SET), `SessionResult.question_set_id`·`question_set_title`. 클라이언트 `HttpPublicApi.list_question_sets()`, `start_session(question_set_id=)`. 참조 서버 모사.
 - `ResponseRequest` START의 `next.question_id`를 `Q1.D01` 고정에서 임의 문항 ID로(문진표마다 첫 문항이 다르다).
-- 문진 스키마(survey-service 소유) 4.0.0과 짝: `QuestionBank.question_set_id`·`title` 필수, `Prerequisite{slot, op, value}`, `SessionResult`·`StaffSessionView`·`SESSION_START` 필드, `QuestionFlow`·`question_flow.json` 삭제, 정수 runtime_contract_version 2(CONVENTIONS 12절).
+- 문진 스키마(survey-service 소유) 4.0.0과 짝: `QuestionBank.question_set_id`·`title` 필수, `Prerequisite{slot, op, value}`, `SessionResult`·`StaffSessionView`·`SESSION_START` 필드, `QuestionFlow`·`question_flow.json` 삭제. 정수 runtime_contract_version 은 1 유지 — 모델 입출력이 바뀌지 않았다. CONVENTIONS 12절을 개정해 정수(모델 입출력 계약 번호)와 문진 스키마 패키지 semver 를 분리했다.
 
 ## 3.2.0 (MINOR, 와이어 형식 추가·선언 강화 — 영역 사이 이름을 전부 스키마 안으로)
 - **U73 영역 사이 설정 이름 선언**: 서비스별 환경 변수 선언 스키마 신설 `ModelServingEnv`(40) `GateEnv`(39) `ModelRegistryEnv`(16) `DatasetStoreEnv`(19) `KioskFrontendEnv`(3), 개정 `SurveyServiceEnv`(모든 이름에 뜻·형식·기본값, 91) `OpsFeedbackServerEnv`(설명 채움, `OPS_GATE_*` 선언, 퇴역 `TURN_ENGINE_VERSION` 삭제) `QuestionAuthoringEnv`(독립 스키마 31, DeployInterface 의 Environment 는 $ref). 규칙: deploy 는 선언된 이름만 주고, 서비스는 기동 때 자기 environ 을 자기 선언으로 검증한다(접두사 이름 중 미선언은 거부). 뜻은 각 영역의 설정 로더·runbook 에서 옮겼고 모르는 것은 "미정"으로 표시했다(GateEnv 2건).

@@ -113,8 +113,9 @@ HTTP 층의 보충 규칙(PUBLIC_API.md의 표가 공개 API의 정본이다):
 ## 11. 모델 입력 `state` 의 키 순서 (3.2.0, U80)
 `ActionExtractionInput.state` 는 JSON 객체이지만 **키 순서가 모델 입력의 일부**다(학습 데이터 규칙, D77 글자 일치). 순서는 (1) 지금 문항에 이미 저장된 값 → (2) 직전 문항(건너뛴 문항 제외)과 참조 원천 문항의 저장 값 → (3) 지금 문항의 비어 있는 칸(MISSING·UNCLEAR, value null). 같은 묶음 안에서는 문진 스키마 slot_order. 직렬화는 삽입 순서를 보존하는 JSON 으로만 하고, 키를 정렬하는 직렬화(sort_keys)는 금지한다. 서비스는 이 순서를 시험으로 고정한다. 알려진 한계: 학습 데이터 val 549행 중 13행(2.4%)이 이 규칙과 다르다(G13, 데이터셋 담당 확인 대기).
 
-## 12. 문진 스키마 정수 버전 (3.2.0, G11)
-문진 스키마(`survey-service/schema`)의 `runtime_contract_version`(정수)은 **읽는 쪽이 깨지는 변경**(키 삭제·이름 변경·enum 축소·필수 추가)이 있으면 반드시 올린다. 같은 정수 안에서는 추가만 허용한다. 올리면 survey-service 와 ops-feedback 은 같은 정수를 설치해야 하고(두 영역이 TurnTrace 를 쓰고 읽는다), release-gate 는 `GATE_SUPPORTED_RUNTIME_CONTRACT_VERSION` 으로 지원 정수를 선언한다. 정수 1 안에서 있었던 비호환 변경(SessionStore·TurnTrace·v1 모델 계약 삭제)은 이 규칙 이전의 일로 기록만 남긴다(G11).
+## 12. 문진 스키마 정수 버전 (3.2.0 G11; 3.3.0 개정 2026-11-03)
+문진 스키마(`survey-service/schema`)의 정수 `CONTRACT_VERSION`은 **모델 입출력 계약 번호**다: `ReleaseManifest.runtime_contract_version`, `ModelPackageManifest.runtime_contract_version`, `ServingConfig.output_contract`, 게이트의 `GATE_SUPPORTED_RUNTIME_CONTRACT_VERSION`, model-runtime 의 지원 값이 모두 이 하나의 정수를 든다. 따라서 이 정수는 **모델이 읽고 쓰는 모양**(TurnTrace·ActionExtractionInput 에 실리는 문진 스키마 값, 모델 출력 규칙)이 깨질 때만 올린다. 올리면 모델 패키지는 그 번호로 다시 게시되어야 하고 survey-service·ops-feedback·release-gate·model-runtime 이 같은 정수를 지원해야 한다.
+문진 스키마 **패키지 버전**(`openit-survey-schema` X.Y.Z)은 그와 별개로 semver 를 따른다: 읽는 쪽이 깨지는 변경(키 삭제·이름 변경·enum 축소·필수 추가)은 MAJOR 를 올린다. 예: 4.0.0 (QuestionBank 에 `question_set_id`·`title` 필수, Prerequisite `op`) 은 모델 입출력을 바꾸지 않아 정수는 1 그대로다. 3.2.0 의 이 절은 두 번호를 섞어 "필수 추가면 정수를 올린다"고 적었고, 그대로 따르면 모델 입출력이 그대로인데 LoRA 패키지를 전부 다시 게시해야 했다(2026-11-03 survey-service 담당의 지적). 그래서 고쳤다.
 
 ## 상태 확인 응답 시간 (2.1.0, FAULT_POLICY 5)
 - 서비스의 `/healthz`는 의존과 무관하게 200으로 즉시 답한다(살아 있음).
