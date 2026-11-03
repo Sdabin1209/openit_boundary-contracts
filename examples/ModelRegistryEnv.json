@@ -1,0 +1,5 @@
+{
+ "MODEL_REGISTRY_READ_TOKENS_FILE": "/run/secrets/model-registry-read-tokens",
+ "MODEL_REGISTRY_WRITE_TOKENS_FILE": "/run/secrets/model-registry-write-tokens",
+ "MODEL_REGISTRY_ROOT": "/data"
+}

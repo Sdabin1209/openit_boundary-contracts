@@ -2,6 +2,14 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.2.0 (MINOR, 와이어 형식 추가·선언 강화 — 영역 사이 이름을 전부 스키마 안으로)
+- **U73 영역 사이 설정 이름 선언**: 서비스별 환경 변수 선언 스키마 신설 `ModelServingEnv`(40) `GateEnv`(39) `ModelRegistryEnv`(16) `DatasetStoreEnv`(19) `KioskFrontendEnv`(3), 개정 `SurveyServiceEnv`(모든 이름에 뜻·형식·기본값, 91) `OpsFeedbackServerEnv`(설명 채움, `OPS_GATE_*` 선언, 퇴역 `TURN_ENGINE_VERSION` 삭제) `QuestionAuthoringEnv`(독립 스키마 31, DeployInterface 의 Environment 는 $ref). 규칙: deploy 는 선언된 이름만 주고, 서비스는 기동 때 자기 environ 을 자기 선언으로 검증한다(접두사 이름 중 미선언은 거부). 뜻은 각 영역의 설정 로더·runbook 에서 옮겼고 모르는 것은 "미정"으로 표시했다(GateEnv 2건).
+- **U67** `Exposure.auth.kind` 에 `machine-token` 추가(D122 추론 서버 → release-gate 읽기 경로).
+- **U71** `METRICS.md` 운영 소요 시간 지표 절(턴·모델 호출·엔진·큐 대기, next_item 덮어쓰기 횟수).
+- **U80** CONVENTIONS 11절: 모델 입력 `state` 키 순서 규칙. **G11** CONVENTIONS 12절: 문진 스키마 정수 버전 규칙.
+- **L11** 위험 감지 미사용: `SurveyServiceEnv.SURVEY_RISK_DEFAULT_RULES` 기본값 off(사용자 결정 2026-11-03). 위험 신호 스키마·API 는 유지하되 제품은 입력원을 설정하지 않는다.
+- 3.1.3 의 변경(next_item 은 서버가 정한다, ADR 0014)을 포함한다. 3.1.3 태그는 배포되지 않았다.
+
 ## 3.1.3 (PATCH, 와이어 형식 변경 없음 — `next_item`의 책임을 서버로)
 - `ActionExtraction.next_item`은 추론 서버가 `action`·`targets`·`values`와 문항 순서표(flow)로 정해 채운다(규칙 데이터 `next_item.derived_by: "server"`, 기준 구현 `fill_next_item`). 모델이 낸 값은 덮어쓴다. 왜: 다음 문항 선택은 문진의 항법이지 발화 이해가 아니다. 모델에게 맡기면 학습 안 된 모델은 없는 문항을 내고(UNKNOWN_ITEM, 2026-11-02 데모), 학습된 모델도 순서표가 바뀌면 틀린다(U74).
 - `check_action_extraction`은 그대로다: 채운 값이 규칙에 맞는지 확인만 한다(기준 구현끼리의 교차 검사).

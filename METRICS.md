@@ -59,6 +59,17 @@
 | `regression_fixed`, `regression_broken` | REGRESSION | 유지(입력 형식 변경) | 수집된 실패 사례(검토 확정, `reviewed_input` 사용)의 회귀 평가에서 고쳐진/다시 틀린 건수. 회귀 평가가 읽는 TurnTrace 키는 `extract_input`, `extract_output`, `response_input`, `response_output`이다(D98, 문진 스키마 `TurnTrace`가 정본) |
 <!-- END GENERATED metrics:COMMON -->
 
+## 운영 소요 시간 지표 (3.2.0, U71·D125)
+목표(SLO)는 실패 판정이 아니다(CONVENTIONS 시간 상한 사슬). 아래 지표로 목표 달성 여부를 재고, 넘으면 경보를 낸다. 단위는 초, 분포는 히스토그램(p50·p95·p99)이다. 이름은 Prometheus 관례(단위 접미사 `_seconds`)를 따른다.
+| name | 내는 영역 | 뜻 | 라벨 | 목표 |
+| --- | --- | --- | --- | --- |
+| `openit_turn_duration_seconds` | survey-service | 환자 발화 접수부터 응답 확정까지(서버 쪽) | `outcome`(ok, failed, paused) | p95 ≤ 2.0 |
+| `openit_model_call_duration_seconds` | survey-service | 모델 호출 하나의 클라이언트 쪽 소요(요청 전송~응답 수신) | `op`(extract, respond), `outcome`(ok, invalid, timeout, unavailable) | 합(extract+respond) p95 ≤ 1.5 |
+| `openit_model_engine_duration_seconds` | model-runtime | 서버 쪽 호출 하나(대기+추론+재시도) | `op`, `outcome`, `attempts` | — |
+| `openit_model_queue_wait_seconds` | model-runtime | 엔진 큐 대기 | `op` | p95 ≤ 0.3 |
+| `openit_next_item_overridden_total` | model-runtime | 모델이 낸 next_item 과 서버가 채운 값이 다른 횟수(카운터, ADR 0014 과도기 신호) | `op` | 추세 관찰 |
+노출 방식과 수집은 deploy 의 감시 배선 소관이다(이름만 계약). 목표 값은 D125 의 2초 목표에서 나눈 것이며 실측 뒤 조정한다(측정 전).
+
 ## v1 지표 처분 요약
 v1의 `risk_signal_recall`, `risk_signal_false_alarm`, `intent_accuracy`, `item_precision`, `item_recall`, `target_accuracy`, `risk_notice_verbatim_rate`, `slot_coverage`는 **폐기 또는 대체**이며 새 보고서에 쓰지 않는다. 지표 이름은 자유 문자열이므로 v1 보고서는 그대로 읽힌다.
 

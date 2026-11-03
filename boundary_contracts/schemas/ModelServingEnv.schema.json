@@ -1,0 +1,364 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://openit.example/schemas/ModelServingEnv.schema.json",
+ "title": "ModelServingEnv",
+ "description": "추론 서버(model-runtime, 이미지 model-serving) 컨테이너의 환경 변수 선언 (3.2.0, U73: 영역 사이 설정 이름은 이 선언에만 있다. deploy 는 여기 있는 이름만 주고, 서비스는 기동 때 자기 environ 을 이 스키마로 검증한다. 접두사가 붙은 이름 중 여기 없는 것은 거부, 접두사 없는 다른 변수(PATH 등)는 보지 않는다.)",
+ "type": "object",
+ "$defs": {
+  "Port": {
+   "type": "string",
+   "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
+   "description": "TCP 포트 1~65535"
+  },
+  "Int": {
+   "type": "string",
+   "pattern": "^[0-9]+$",
+   "description": "0 이상 정수"
+  },
+  "PosInt": {
+   "type": "string",
+   "pattern": "^[1-9][0-9]*$",
+   "description": "1 이상 정수"
+  },
+  "Seconds": {
+   "type": "string",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "description": "초(소수 허용, 0 이상)"
+  },
+  "Flag1": {
+   "type": "string",
+   "enum": [
+    "1"
+   ],
+   "description": "켜려면 정확히 '1'. 없음 = 꺼짐"
+  },
+  "Path": {
+   "type": "string",
+   "minLength": 1,
+   "description": "컨테이너 안 절대 경로"
+  },
+  "Url": {
+   "type": "string",
+   "pattern": "^https?://",
+   "description": "전체 URL(스킴 포함)"
+  },
+  "RoleTokenList": {
+   "type": "string",
+   "minLength": 1,
+   "description": "'역할=토큰,역할=토큰'"
+  },
+  "CsvRoles": {
+   "type": "string",
+   "pattern": "^[a-z0-9-]+(,[a-z0-9-]+)*$",
+   "description": "쉼표로 구분한 역할 이름 목록"
+  }
+ },
+ "propertyNames": {
+  "anyOf": [
+   {
+    "not": {
+     "pattern": "^(MODEL_RUNTIME_|HF_)"
+    }
+   },
+   {
+    "enum": [
+     "HF_HOME",
+     "HF_HUB_OFFLINE",
+     "HOME",
+     "MODEL_RUNTIME_ALLOW_FAKE",
+     "MODEL_RUNTIME_ALLOW_NO_AUTH",
+     "MODEL_RUNTIME_BACKEND",
+     "MODEL_RUNTIME_BACKEND_RETRY_S",
+     "MODEL_RUNTIME_BASE_MODEL",
+     "MODEL_RUNTIME_BUNDLE_DIR",
+     "MODEL_RUNTIME_CONN_TIMEOUT_S",
+     "MODEL_RUNTIME_EXTRACT_DEADLINE_S",
+     "MODEL_RUNTIME_FAKE_EXTRACTION",
+     "MODEL_RUNTIME_FAKE_FLOW_FILE",
+     "MODEL_RUNTIME_HOST",
+     "MODEL_RUNTIME_MAX_CONNECTIONS",
+     "MODEL_RUNTIME_MAX_INPUT_CHARS",
+     "MODEL_RUNTIME_MAX_LOADING",
+     "MODEL_RUNTIME_MAX_RELEASES",
+     "MODEL_RUNTIME_MIMIC_FLOW_FILE",
+     "MODEL_RUNTIME_MIMIC_RULES_FILE",
+     "MODEL_RUNTIME_PORT",
+     "MODEL_RUNTIME_PROFILE",
+     "MODEL_RUNTIME_PUT_ROLES",
+     "MODEL_RUNTIME_PUT_WAIT_S",
+     "MODEL_RUNTIME_QUEUE_WAIT_S",
+     "MODEL_RUNTIME_READY_PROBE_TTL_S",
+     "MODEL_RUNTIME_RELEASE_READ_TIMEOUT_S",
+     "MODEL_RUNTIME_RELEASE_TOKEN",
+     "MODEL_RUNTIME_RELEASE_TOKEN_FILE",
+     "MODEL_RUNTIME_RELEASE_URL",
+     "MODEL_RUNTIME_RESPOND_DEADLINE_S",
+     "MODEL_RUNTIME_SCHEMA_DIR",
+     "MODEL_RUNTIME_SHUTDOWN_GRACE_S",
+     "MODEL_RUNTIME_TOKENS",
+     "MODEL_RUNTIME_TOKENS_FILE",
+     "TORCHINDUCTOR_CACHE_DIR",
+     "TORCH_HOME",
+     "TRITON_CACHE_DIR",
+     "VLLM_CACHE_ROOT",
+     "XDG_CACHE_HOME"
+    ]
+   }
+  ]
+ },
+ "properties": {
+  "MODEL_RUNTIME_BACKEND": {
+   "type": "string",
+   "enum": [
+    "vllm",
+    "fake",
+    "mimic"
+   ],
+   "description": "추론 백엔드. vllm=실제 모델(운영). fake·mimic 은 개발·시험·데모용이며 MODEL_RUNTIME_ALLOW_FAKE=1 이 없으면 시작을 거부한다(ADR 0009·0018)",
+   "default": "vllm"
+  },
+  "MODEL_RUNTIME_PROFILE": {
+   "$ref": "#/$defs/Path",
+   "description": "vllm 프로파일 JSON 경로(base_model, engine 인자, env). vllm 이면 필수"
+  },
+  "MODEL_RUNTIME_BASE_MODEL": {
+   "type": "string",
+   "minLength": 1,
+   "description": "프로파일의 base_model 을 덮어쓴다. 어댑터의 기반 모델과 같아야 한다"
+  },
+  "MODEL_RUNTIME_SCHEMA_DIR": {
+   "$ref": "#/$defs/Path",
+   "description": "문진 스키마 디렉터리. 이미지에 내장(/opt/survey-schema)돼 있으면 필요 없다(D72)"
+  },
+  "MODEL_RUNTIME_RELEASE_URL": {
+   "$ref": "#/$defs/Url",
+   "description": "I4(release-gate) 서버 전체 주소. 번들을 여기서 읽어 적재한다. 없으면 서버는 뜨지만 /readyz 가 503"
+  },
+  "MODEL_RUNTIME_RELEASE_TOKEN_FILE": {
+   "$ref": "#/$defs/Path",
+   "description": "비밀(D84): I4 읽기 토큰(기계 토큰). 파일 경로"
+  },
+  "MODEL_RUNTIME_RELEASE_TOKEN": {
+   "type": "string",
+   "minLength": 1,
+   "description": "개발·시험 호환: I4 읽기 토큰(기계 토큰). 운영 금지(운영은 MODEL_RUNTIME_RELEASE_TOKEN_FILE)"
+  },
+  "MODEL_RUNTIME_TOKENS_FILE": {
+   "$ref": "#/$defs/Path",
+   "description": "비밀(D84): 이 서버를 부르는 호출자 토큰 목록(역할=토큰). 없으면 시작 거부(개발용 MODEL_RUNTIME_ALLOW_NO_AUTH=1 제외). 파일 경로"
+  },
+  "MODEL_RUNTIME_TOKENS": {
+   "$ref": "#/$defs/RoleTokenList",
+   "description": "개발·시험 호환: 이 서버를 부르는 호출자 토큰 목록(역할=토큰). 없으면 시작 거부(개발용 MODEL_RUNTIME_ALLOW_NO_AUTH=1 제외). 운영 금지(운영은 MODEL_RUNTIME_TOKENS_FILE)"
+  },
+  "MODEL_RUNTIME_ALLOW_NO_AUTH": {
+   "$ref": "#/$defs/Flag1",
+   "description": "개발용: 토큰 없이 시작. 운영 금지(ADR 0012)"
+  },
+  "MODEL_RUNTIME_ALLOW_FAKE": {
+   "$ref": "#/$defs/Flag1",
+   "description": "fake·mimic 백엔드 허용 표시. 운영 금지"
+  },
+  "MODEL_RUNTIME_PUT_ROLES": {
+   "$ref": "#/$defs/CsvRoles",
+   "description": "적재 PUT 을 허용할 역할 목록. 없으면 인증된 모든 역할"
+  },
+  "MODEL_RUNTIME_BUNDLE_DIR": {
+   "$ref": "#/$defs/Path",
+   "description": "받은 번들을 푸는 곳. 쓸 수 없으면 /readyz 503",
+   "default": "/var/lib/model-runtime/bundles"
+  },
+  "MODEL_RUNTIME_READY_PROBE_TTL_S": {
+   "$ref": "#/$defs/Seconds",
+   "description": "/readyz 의 I4 도달성 확인 캐시 시간",
+   "default": "5"
+  },
+  "MODEL_RUNTIME_EXTRACT_DEADLINE_S": {
+   "$ref": "#/$defs/Seconds",
+   "description": "extract 호출 하나의 총 상한(대기+추론+재시도). 넘기면 503 ENGINE_TIMEOUT. 계약 CONVENTIONS 시간표(D125)",
+   "default": "20.0"
+  },
+  "MODEL_RUNTIME_RESPOND_DEADLINE_S": {
+   "$ref": "#/$defs/Seconds",
+   "description": "respond 호출 하나의 총 상한. 계약 CONVENTIONS 시간표(D125)",
+   "default": "25.0"
+  },
+  "MODEL_RUNTIME_QUEUE_WAIT_S": {
+   "$ref": "#/$defs/Seconds",
+   "description": "예상 대기가 이보다 길면 큐에 넣지 않고 503",
+   "default": "3.0"
+  },
+  "MODEL_RUNTIME_PUT_WAIT_S": {
+   "$ref": "#/$defs/Seconds",
+   "description": "PUT 응답이 적재 완료를 기다리는 시간. 넘으면 202 LOADING",
+   "default": "3.0"
+  },
+  "MODEL_RUNTIME_MAX_RELEASES": {
+   "$ref": "#/$defs/PosInt",
+   "description": "동시에 적재해 두는 릴리스 수",
+   "default": "4"
+  },
+  "MODEL_RUNTIME_MAX_INPUT_CHARS": {
+   "$ref": "#/$defs/PosInt",
+   "description": "입력(JSON 직렬화) 문자 수 상한, 초과 400. 추정값(ADR 0012)",
+   "default": "2500"
+  },
+  "MODEL_RUNTIME_MAX_CONNECTIONS": {
+   "$ref": "#/$defs/PosInt",
+   "description": "동시 연결 상한",
+   "default": "32"
+  },
+  "MODEL_RUNTIME_MAX_LOADING": {
+   "$ref": "#/$defs/PosInt",
+   "description": "동시 적재 상한",
+   "default": "2"
+  },
+  "MODEL_RUNTIME_CONN_TIMEOUT_S": {
+   "$ref": "#/$defs/Seconds",
+   "description": "연결 소켓 timeout",
+   "default": "15"
+  },
+  "MODEL_RUNTIME_SHUTDOWN_GRACE_S": {
+   "$ref": "#/$defs/Seconds",
+   "description": "종료 신호 뒤 진행 중 요청을 기다리는 시간",
+   "default": "5"
+  },
+  "MODEL_RUNTIME_BACKEND_RETRY_S": {
+   "$ref": "#/$defs/Seconds",
+   "description": "백엔드 기동 실패 후 재시도 간격. 0이면 재시도 없음",
+   "default": "30"
+  },
+  "MODEL_RUNTIME_RELEASE_READ_TIMEOUT_S": {
+   "$ref": "#/$defs/Seconds",
+   "description": "I4 번들 읽기 소켓 timeout",
+   "default": "120"
+  },
+  "MODEL_RUNTIME_HOST": {
+   "type": "string",
+   "minLength": 1,
+   "description": "바인드 주소. 이미지는 0.0.0.0",
+   "default": "0.0.0.0"
+  },
+  "MODEL_RUNTIME_PORT": {
+   "$ref": "#/$defs/Port",
+   "description": "바인드 포트",
+   "default": "8080"
+  },
+  "MODEL_RUNTIME_FAKE_FLOW_FILE": {
+   "$ref": "#/$defs/Path",
+   "description": "fake·mimic 전용: 문항 흐름 파일(RuntimeFlowFile). 운영 금지"
+  },
+  "MODEL_RUNTIME_FAKE_EXTRACTION": {
+   "type": "string",
+   "minLength": 2,
+   "description": "fake 전용: LORA_A 고정 출력 JSON 문자열. 운영 금지"
+  },
+  "MODEL_RUNTIME_MIMIC_FLOW_FILE": {
+   "$ref": "#/$defs/Path",
+   "description": "mimic 전용: 문항 흐름 파일(없으면 FAKE_FLOW_FILE). 운영 금지"
+  },
+  "MODEL_RUNTIME_MIMIC_RULES_FILE": {
+   "$ref": "#/$defs/Path",
+   "description": "mimic 전용: 모방 규칙표. 운영 금지"
+  },
+  "HF_HOME": {
+   "$ref": "#/$defs/Path",
+   "description": "Hugging Face 표준: 모델 캐시 위치(vLLM 이 읽는다)",
+   "default": "/var/lib/model-runtime/hf"
+  },
+  "HF_HUB_OFFLINE": {
+   "type": "string",
+   "enum": [
+    "0",
+    "1",
+    "true",
+    "false",
+    "yes",
+    "no"
+   ],
+   "description": "Hugging Face 표준: 오프라인 모드"
+  },
+  "HOME": {
+   "$ref": "#/$defs/Path",
+   "description": "홈 디렉터리. 이미지 ENV 가 정하고 서버는 쓰기 가능 여부를 /readyz 에서 보장한다"
+  },
+  "XDG_CACHE_HOME": {
+   "$ref": "#/$defs/Path",
+   "description": "캐시 루트 디렉터리. 이미지 ENV 가 정하고 서버는 쓰기 가능 여부를 /readyz 에서 보장한다"
+  },
+  "VLLM_CACHE_ROOT": {
+   "$ref": "#/$defs/Path",
+   "description": "vLLM 캐시 디렉터리. 이미지 ENV 가 정하고 서버는 쓰기 가능 여부를 /readyz 에서 보장한다"
+  },
+  "TORCHINDUCTOR_CACHE_DIR": {
+   "$ref": "#/$defs/Path",
+   "description": "TorchInductor 캐시 디렉터리. 이미지 ENV 가 정하고 서버는 쓰기 가능 여부를 /readyz 에서 보장한다"
+  },
+  "TRITON_CACHE_DIR": {
+   "$ref": "#/$defs/Path",
+   "description": "Triton 캐시 디렉터리. 이미지 ENV 가 정하고 서버는 쓰기 가능 여부를 /readyz 에서 보장한다"
+  },
+  "TORCH_HOME": {
+   "$ref": "#/$defs/Path",
+   "description": "Torch 캐시 디렉터리. 이미지 ENV 가 정하고 서버는 쓰기 가능 여부를 /readyz 에서 보장한다"
+  }
+ },
+ "required": [
+  "MODEL_RUNTIME_RELEASE_URL"
+ ],
+ "allOf": [
+  {
+   "if": {
+    "properties": {
+     "MODEL_RUNTIME_BACKEND": {
+      "const": "vllm"
+     }
+    }
+   },
+   "then": {
+    "required": [
+     "MODEL_RUNTIME_PROFILE"
+    ]
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "MODEL_RUNTIME_BACKEND": {
+      "enum": [
+       "fake",
+       "mimic"
+      ]
+     }
+    },
+    "required": [
+     "MODEL_RUNTIME_BACKEND"
+    ]
+   },
+   "then": {
+    "required": [
+     "MODEL_RUNTIME_ALLOW_FAKE"
+    ]
+   }
+  },
+  {
+   "anyOf": [
+    {
+     "required": [
+      "MODEL_RUNTIME_TOKENS_FILE"
+     ]
+    },
+    {
+     "required": [
+      "MODEL_RUNTIME_TOKENS"
+     ]
+    },
+    {
+     "required": [
+      "MODEL_RUNTIME_ALLOW_NO_AUTH"
+     ]
+    }
+   ]
+  }
+ ]
+}

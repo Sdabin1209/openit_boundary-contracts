@@ -1,0 +1,88 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://openit.example/schemas/KioskFrontendEnv.schema.json",
+ "title": "KioskFrontendEnv",
+ "description": "kiosk-frontend 컨테이너(Caddy 정적 서버)의 환경 변수 선언 (3.2.0, U73: 영역 사이 설정 이름은 이 선언에만 있다. deploy 는 여기 있는 이름만 주고, 서비스는 기동 때 자기 environ 을 이 스키마로 검증한다. 접두사가 붙은 이름 중 여기 없는 것은 거부, 접두사 없는 다른 변수(PATH 등)는 보지 않는다.)",
+ "type": "object",
+ "$defs": {
+  "Port": {
+   "type": "string",
+   "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
+   "description": "TCP 포트 1~65535"
+  },
+  "Int": {
+   "type": "string",
+   "pattern": "^[0-9]+$",
+   "description": "0 이상 정수"
+  },
+  "PosInt": {
+   "type": "string",
+   "pattern": "^[1-9][0-9]*$",
+   "description": "1 이상 정수"
+  },
+  "Seconds": {
+   "type": "string",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "description": "초(소수 허용, 0 이상)"
+  },
+  "Flag1": {
+   "type": "string",
+   "enum": [
+    "1"
+   ],
+   "description": "켜려면 정확히 '1'. 없음 = 꺼짐"
+  },
+  "Path": {
+   "type": "string",
+   "minLength": 1,
+   "description": "컨테이너 안 절대 경로"
+  },
+  "Url": {
+   "type": "string",
+   "pattern": "^https?://",
+   "description": "전체 URL(스킴 포함)"
+  },
+  "RoleTokenList": {
+   "type": "string",
+   "minLength": 1,
+   "description": "'역할=토큰,역할=토큰'"
+  },
+  "CsvRoles": {
+   "type": "string",
+   "pattern": "^[a-z0-9-]+(,[a-z0-9-]+)*$",
+   "description": "쉼표로 구분한 역할 이름 목록"
+  }
+ },
+ "propertyNames": {
+  "anyOf": [
+   {
+    "not": {
+     "pattern": "^(PORT$|STATIC_DIR$|CONFIG_FILE$)"
+    }
+   },
+   {
+    "enum": [
+     "CONFIG_FILE",
+     "PORT",
+     "STATIC_DIR"
+    ]
+   }
+  ]
+ },
+ "properties": {
+  "PORT": {
+   "$ref": "#/$defs/Port",
+   "description": "정적 서버 바인드 포트. Dockerfile HEALTHCHECK 가 같은 값을 쓴다",
+   "default": "8080"
+  },
+  "STATIC_DIR": {
+   "$ref": "#/$defs/Path",
+   "description": "빌드 산출물 디렉터리",
+   "default": "/app/dist"
+  },
+  "CONFIG_FILE": {
+   "$ref": "#/$defs/Path",
+   "description": "기기 설정 파일 경로(내용 형식은 계약 DeviceConfig). 없으면 /config.json 은 404. 중앙 kiosk-frontend 는 마운트하지 않는다(기기마다 자기 정적 서버가 낸다)"
+  }
+ }
+}

@@ -1,0 +1,11 @@
+{
+ "GATE_READ_TOKENS_FILE": "/run/secrets/gate-read-tokens",
+ "GATE_WRITE_TOKENS_FILE": "/run/secrets/gate-write-tokens",
+ "GATE_DATABASE_URL_FILE": "/run/secrets/gate-database-url",
+ "GATE_I1_URL": "http://question-authoring:8080",
+ "GATE_I1_TOKEN_FILE": "/run/secrets/gate-i1-token",
+ "GATE_I3_URL": "http://model-registry:8080",
+ "GATE_I3_TOKEN_FILE": "/run/secrets/gate-i3-token",
+ "GATE_REQUEST_DEADLINE_SECONDS": "170.0",
+ "PORT": "8080"
+}

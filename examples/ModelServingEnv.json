@@ -1,0 +1,11 @@
+{
+ "MODEL_RUNTIME_BACKEND": "vllm",
+ "MODEL_RUNTIME_PROFILE": "/app/profiles/rtx4090-24g.json",
+ "MODEL_RUNTIME_RELEASE_URL": "https://gateway:8443",
+ "MODEL_RUNTIME_RELEASE_TOKEN_FILE": "/run/secrets/gate-read-model-serving",
+ "MODEL_RUNTIME_TOKENS_FILE": "/run/secrets/model-runtime-tokens",
+ "MODEL_RUNTIME_EXTRACT_DEADLINE_S": "20.0",
+ "MODEL_RUNTIME_RESPOND_DEADLINE_S": "25.0",
+ "HF_HOME": "/var/lib/model-runtime/hf",
+ "HF_HUB_OFFLINE": "1"
+}

@@ -1,0 +1,5 @@
+{
+ "DATASET_STORE_READ_TOKENS_FILE": "/run/secrets/dataset-store-read-tokens",
+ "DATASET_STORE_WRITE_TOKENS_FILE": "/run/secrets/dataset-store-write-tokens",
+ "DATASET_STORE_ROOT": "/data"
+}
