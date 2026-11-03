@@ -61,7 +61,8 @@
         "base_item": "last_in_flow_order_among_values_and_targets",
         "also_allowed": "item_of_values"
       }
-    ]
+    ],
+    "derived_by": "server"
   },
   "key_syntax": "values.key는 `<문항>.<칸>` 또는 `<문항>[<종류>].<칸>`이다. 문항 ID는 마지막 `.` 앞에서 `[` 앞까지, 칸 이름은 종류 괄호를 뺀 문자열이다.",
   "value_rules": {

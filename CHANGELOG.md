@@ -2,6 +2,11 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.4.3 (PATCH, 와이어 변경 없음 — 정적 서버 바인드 주소, 예시 정정, U99)
+왜: 3.4.2 에서 세 서버만 보고 정적 서버(kiosk-frontend·admin-console)의 바인드 방식을 확인하지 않았다(헤드 누락). 둘 다 모든 인터페이스에 고정으로 붙었다.
+- `KioskFrontendEnv.KIOSK_HOST`(선택, 기본 0.0.0.0). 새 `AdminConsoleEnv`(`ADMIN_HOST`, 선택, 기본 0.0.0.0). 배포는 사이드카 뒤에서 127.0.0.1.
+- 예시 `ActionExtractionRules.json` 에 `next_item.derived_by: "server"`(3.1.3 에서 필수가 됐는데 예시가 낡아 verify 가 실패하고 있었다).
+
 ## 3.4.2 (PATCH, 와이어 변경 없음 — 서버 바인드 주소 설정, U99)
 왜: TLS 사이드카가 앱과 같은 네트워크 공간에서 HTTPS 를 끝내도, 앱이 0.0.0.0 에 고정으로 붙으면 같은 망의 다른 컨테이너가 앱 포트로 평문 접속할 수 있었다. 표준 사이드카 구성은 앱이 loopback 에만 붙는 것이다. QA_HOST·MODEL_RUNTIME_HOST·MODEL_REGISTRY_HOST·DATASET_STORE_HOST 는 이미 있었고 세 서버만 없었다.
 - `SurveyServiceEnv.SURVEY_HOST`, `GateEnv.GATE_HOST`, `OpsFeedbackServerEnv.env.OPS_HOST`(선택, 기본 `0.0.0.0`). 배포는 사이드카 뒤에서 `127.0.0.1` 을 준다.

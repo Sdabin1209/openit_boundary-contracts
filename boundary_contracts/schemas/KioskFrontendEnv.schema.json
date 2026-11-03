@@ -75,6 +75,12 @@
    "description": "정적 서버 바인드 포트. Dockerfile HEALTHCHECK 가 같은 값을 쓴다",
    "default": "8080"
   },
+  "KIOSK_HOST": {
+   "type": "string",
+   "minLength": 1,
+   "description": "바인드 주소(3.4.3, U99). TLS 사이드카 뒤에서는 127.0.0.1(같은 네트워크 공간의 사이드카만 닿는다). 기본 0.0.0.0(사이드카 없는 단독 실행)",
+   "default": "0.0.0.0"
+  },
   "STATIC_DIR": {
    "$ref": "#/$defs/Path",
    "description": "빌드 산출물 디렉터리",
