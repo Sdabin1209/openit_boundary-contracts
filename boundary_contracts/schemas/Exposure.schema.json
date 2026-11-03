@@ -55,11 +55,12 @@
        "enum": [
         "device-token",
         "account",
+        "authenticated",
         "machine-token",
         "none",
         "denied"
        ],
-       "description": "device-token: 키오스크 기기(mTLS/기기 토큰). account: 사람 계정(roles 필수). machine-token: 비사람 호출자가 보내는 고정 Bearer 토큰을 게이트웨이가 파일 토큰과 대조한다(3.2.0 U67, D122: 다른 호스트의 추론 서버가 release-gate 읽기 면을 읽는 경로). none: 인증 없음(/healthz 등). denied: 밖에서 닿을 수 없음"
+       "description": "device-token: 키오스크 기기(mTLS/기기 토큰). account: 사람 계정(roles 필수). authenticated: 로그인한 사람 계정이면 역할과 무관하게 연다(3.4.0, U82: 데이터 없는 화면 정적 파일 — 가입 승인 대기 계정에게 안내를 보이려면 화면이 열려야 한다; roles 를 쓰지 않는다). machine-token: 비사람 호출자가 보내는 고정 Bearer 토큰을 게이트웨이가 파일 토큰과 대조한다(3.2.0 U67, D122: 다른 호스트의 추론 서버가 release-gate 읽기 면을 읽는 경로). none: 인증 없음(/healthz 등). denied: 밖에서 닿을 수 없음"
       },
       "roles": {
        "type": "array",
