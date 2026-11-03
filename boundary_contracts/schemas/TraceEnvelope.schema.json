@@ -20,6 +20,11 @@
     "release_id": {
       "$ref": "_common.schema.json#/$defs/Id"
     },
+    "question_set_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+      "description": "3.3.0: 이 세션이 쓴 문진표 ID(ReleaseManifest.question_sets[].id). survey-service가 채운다. ops-feedback은 이 값으로 매니페스트 목록에서 FailureCase.question_set을 고른다(없고 목록이 하나면 그것, 둘 이상이면 question_set 생략). 왜: 릴리스에 문진표가 여럿이라 release_id만으로는 어느 문진표인지 알 수 없다."
+    },
     "runtime_contract_version": {
       "$ref": "_common.schema.json#/$defs/RuntimeContractVersion"
     },

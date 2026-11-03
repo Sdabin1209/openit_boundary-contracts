@@ -9,6 +9,7 @@
 - `QuestionFlowTable.skips[].op` 여섯 연산자(`==,!=,>,>=,<,<=`): 문진표 `prerequisite`(묻는 조건)의 부정을 표현한다. `action_rules.holds()` 평가, `fill_next_item`·`check_action_extraction` 반영. 표는 survey-service가 세션의 문진표(order·prerequisite)에서 만든다.
 - `DeviceConfig.question_set_id`, `KioskStartFragment.question_set_id`(기기 배치, 조각이 먼저).
 - I10(PUBLIC_API I절): `GET /v1/question-sets` 활성 문진표 목록, `SESSION_START.question_set_id`(하나면 생략 가능, 둘 이상이면 필수, 없는 ID 400 INVALID_RECORD/UNKNOWN_QUESTION_SET), `SessionResult.question_set_id`·`question_set_title`. 클라이언트 `HttpPublicApi.list_question_sets()`, `start_session(question_set_id=)`. 참조 서버 모사.
+- `TraceEnvelope.question_set_id`(선택): 세션이 쓴 문진표. 릴리스에 문진표가 여럿이라 ops-feedback이 FailureCase.question_set을 고르는 데 필요하다(흐름 명세 7단계에서 발견).
 - `ResponseRequest` START의 `next.question_id`를 `Q1.D01` 고정에서 임의 문항 ID로(문진표마다 첫 문항이 다르다).
 - 문진 스키마(survey-service 소유) 4.0.0과 짝: `QuestionBank.question_set_id`·`title` 필수, `Prerequisite{slot, op, value}`, `SessionResult`·`StaffSessionView`·`SESSION_START` 필드, `QuestionFlow`·`question_flow.json` 삭제. 정수 runtime_contract_version 은 1 유지 — 모델 입출력이 바뀌지 않았다. CONVENTIONS 12절을 개정해 정수(모델 입출력 계약 번호)와 문진 스키마 패키지 semver 를 분리했다.
 

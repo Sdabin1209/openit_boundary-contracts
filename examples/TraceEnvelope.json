@@ -1,6 +1,7 @@
 {
   "pipeline_schema_version": "3.0",
   "release_id": "rel-0001",
+  "question_set_id": "health-screening",
   "runtime_contract_version": 1,
   "session_id": "s-1",
   "turn_id": "t-1",
