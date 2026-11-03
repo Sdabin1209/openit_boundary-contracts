@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "CommonEnv.schema.json",
   "title": "CommonEnv",
-  "description": "3.4.4(검토 A-1): 모든 영역 컨테이너(서비스·잡)가 공통으로 받는 환경 변수. 각 영역의 `*Env` 스키마와 함께 지킨다(영역 Env 는 자기 접두사 이름만 검사하므로 OPENIT_ 이름과 겹치지 않는다). deploy 가 배포 때 준다(CONVENTIONS 13절 예외). SSL_CERT_FILE 은 표준 이름이라 여기서 다시 정하지 않는다(RUNTIME IN-ROOT).",
+  "description": "3.4.4(검토 A-1): 모든 영역 컨테이너(서비스·잡)가 공통으로 받는 환경 변수. 각 영역의 `*Env` 스키마와 함께 지킨다(영역 Env 는 자기 접두사 이름만 검사하므로 OPENIT_ 이름과 겹치지 않는다). deploy 가 배포 때 준다(CONVENTIONS 13절 예외). 3.4.5: 데이터베이스를 가진 영역의 백업 출력 이름(RUNTIME R10.1)을 더했다(ops-feedback 담당이 코드 단계에서 찾은 계약 빈칸). SSL_CERT_FILE 은 표준 이름이라 여기서 다시 정하지 않는다(RUNTIME IN-ROOT).",
   "x-producers": [
     "deploy"
   ],
@@ -18,6 +18,21 @@
       "type": "string",
       "pattern": "^http://(localhost|127\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}|\\[::1\\]):[0-9]{1,5}/?$",
       "description": "자기 영역 게이트웨이의 CONNECT 출구(RUNTIME IN-EGRESS·R1.8). 영역 배선 코드가 boundary_contracts.clients.egress_proxy_from(environ) 으로 꺼낸다"
+    },
+    "OPENIT_BACKUP_URL": {
+      "type": "string",
+      "pattern": "^https://[^/\\s]+/.+$",
+      "description": "3.4.5(RUNTIME R10.1): 이 영역의 백업 저장소 저장 위치. restic REST 서버 프로토콜(rest:https://… 의 https 부분, restic rest-server 표준). 영역마다 다른 경로. 영역 게이트웨이 출구(external:backup)로만 닿는다"
+    },
+    "OPENIT_BACKUP_CREDENTIALS_FILE": {
+      "type": "string",
+      "pattern": "^/",
+      "description": "3.4.5: 백업 저장소 HTTP 기본 인증 자격 파일 경로(내용 한 줄 '<사용자>:<암호>', RFC 7617; 비밀, D84). 값은 어떤 출력·로그에도 쓰지 않는다"
+    },
+    "OPENIT_BACKUP_REPO_PASSWORD_FILE": {
+      "type": "string",
+      "pattern": "^/",
+      "description": "3.4.5: restic 저장소 암호화 암호 파일 경로(restic --password-file 표준; 비밀, D84). 영역마다 다르다"
     }
   }
 }

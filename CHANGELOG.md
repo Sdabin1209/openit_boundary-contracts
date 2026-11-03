@@ -6,6 +6,12 @@
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 
+## 3.4.5 (PATCH, 와이어 변경 없음 — 백업 출력 이름)
+왜: 3.4.4 가 데이터베이스를 영역 컴포넌트로 하고 백업을 영역이 platform 백업 저장소로 보내게 했는데, 그 주소·자격을 받을 이름이 계약에 없었다(ops-feedback 담당이 코드 단계에서 찾음, 헤드 누락).
+- CONVENTIONS 6절: "게이트웨이 토큰" = 그 서비스의 Exposure upstream_token 으로 선언된 토큰 전부(3.4.4 의 '역할 이름 gateway' 정정; 서비스마다 토큰 파일 구성이 달라 맞지 않았다, survey-service 담당이 찾음). 관련 문장 HTTP.md I5·PUBLIC_API F절·INTERFACES I5·클라이언트 설명.
+- 준비 확인 스키마 `GateReadyz`·`OpsFeedbackReadyz`·`QuestionAuthoringDeployInterface.ReadyzResponse` 가 정본 `not_ready` 도 받는다(3.4.4 가 HealthStatus 에서 정본을 정했는데 영역 스키마가 옛 표기만 허용해 정본을 쓸 수 없었다, ops-feedback 담당이 찾음).
+- `CommonEnv`: `OPENIT_BACKUP_URL`·`OPENIT_BACKUP_CREDENTIALS_FILE`·`OPENIT_BACKUP_REPO_PASSWORD_FILE`(선택). RUNTIME R10.1 에 이름·프로토콜(restic REST)·실패 출력.
+
 ## 3.4.4 (PATCH, 와이어 변경 없음 — 실행 시 계약을 입출력 형식으로, 영역 사이만; 잡 시간 상한 선언)
 왜: RUNTIME.md 가 서술형이었고, 영역 사이 계약 리포에 deploy 영역 안 컴포넌트 사이의 구조(중계 재시작·인증서 갱신·감시 경보·배치 도구·백업)를 적고 있었다(구조 규칙 5·6 위반, 헤드 결함). 잡의 시간 상한·겹침 규칙은 영역 잡과 deploy 스케줄러 사이의 계약인데 deploy 문서에 두라고 적었다(반대 방향 위반).
 - `RUNTIME.md`: 0절에 입력(요청·실행 설정·비밀·루트·이름·시각·잡 실행·상황)과 출력(응답·클라이언트 결과·네트워크 오류·스트림·잡 출력·로그·내보내는 파일)을 정의하고, 모든 조항을 입력 → 출력 행으로 다시 썼다. deploy 내부만 정하던 R2.3·R4.2·R4.4·R4.5·R5.2·R5.3·R8.2·R10.7·R10.10 은 폐지(번호 재사용 안 함). R2.1 은 게이트웨이가 더할 수 있는 헤더 목록을 계약 안에 적었다(전에는 deploy 문서를 정본으로 가리켰다). R2.4 는 ping 15초(PUBLIC_API)를 출력으로 적었다. R9.2 는 잡 선언(`JobsDeclaration`)이 잡 입력·시간 상한의 정본이다. 끝 절은 deploy 컴포넌트 목록 대신 영역 일반의 대응 의무.

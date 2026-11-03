@@ -15,10 +15,7 @@
    "additionalProperties": false,
    "properties": {
     "status": {
-     "enum": [
-      "ready",
-      "not-ready"
-     ]
+     "enum": ["ready", "not_ready", "not-ready"]
     },
     "db": {
      "enum": [

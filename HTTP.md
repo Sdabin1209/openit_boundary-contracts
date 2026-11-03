@@ -84,7 +84,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 **승인 요청의 해시·충돌·승인자 (D69).**
 - `GET /v1/submissions/{id}/review-report`의 응답 헤더 `X-Openit-Report-Hash`가 그 보고서의 해시다. 클라이언트는 해시를 **계산하지 않고** 받은 값을 `POST /v1/approvals`의 `report_hash`로 그대로 돌려보낸다(해시 구현은 서버 한 곳, `boundary_contracts.canonical`).
 - 409의 사유는 `BoundaryError.details.reason`으로 구분한다: `STALE_REPORT`(승인자가 본 보고서가 이미 바뀜), `ALREADY_DECIDED`(이 제출에 이미 다른 결정이 있음). `code`는 `CONFLICT` 그대로다.
-- 승인자 식별: 게이트웨이가 사람 인증을 마친 뒤 요청에 `X-Openit-User: <인증된 사용자 ID>` 헤더를 붙인다(클라이언트가 보낸 같은 이름의 헤더는 게이트웨이가 지운다). 서버는 platform 공개 입구의 `gateway` 역할 토큰이 붙은 요청에서 `X-Openit-Roles` 에 `release-approver` 가 있으면 `X-Openit-User` 값을 승인자로 쓴다(CONVENTIONS 6절, 검토 P6-R6-1). 본문에 `approver_id` 를 넣으면 400 `INVALID_RECORD` 다(`ApprovalRequest` 는 닫힌 스키마, 3.4.4 문장 정정). **헤더가 없으면 401로 거부한다**(D88 U7, 활성화·롤백과 같은 규칙: 승인자는 항상 개인으로 식별되어야 하고, 본문 값은 위조할 수 있다). 시험도 게이트웨이(platform 공개 입구 역할의 `gateway` 토큰)를 거쳐 호출한다(CONVENTIONS 6절, 검토 A-25).
+- 승인자 식별: 게이트웨이가 사람 인증을 마친 뒤 요청에 `X-Openit-User: <인증된 사용자 ID>` 헤더를 붙인다(클라이언트가 보낸 같은 이름의 헤더는 게이트웨이가 지운다). 서버는 게이트웨이 토큰(CONVENTIONS 6절)이 붙은 요청에서 `X-Openit-Roles` 에 `release-approver` 가 있으면 `X-Openit-User` 값을 승인자로 쓴다(CONVENTIONS 6절, 검토 P6-R6-1). 본문에 `approver_id` 를 넣으면 400 `INVALID_RECORD` 다(`ApprovalRequest` 는 닫힌 스키마, 3.4.4 문장 정정). **헤더가 없으면 401로 거부한다**(D88 U7, 활성화·롤백과 같은 규칙: 승인자는 항상 개인으로 식별되어야 하고, 본문 값은 위조할 수 있다). 시험도 게이트웨이(게이트웨이 토큰, CONVENTIONS 6절)를 거쳐 호출한다(CONVENTIONS 6절, 검토 A-25).
 
 사람의 반려는 `GateDecision.reject_codes`에 `CHECK_FAILED`를 쓰고, `checks`의 `HUMAN_APPROVAL`이 FAIL이면 사람이 반려한 것이다(코드를 새로 만들지 않는다, D58). 요청 본문의 `report_hash`는 필수다(3.0.0 `ApprovalRequest`): 승인자가 본 보고서의 `X-Openit-Report-Hash` 값을 그대로 보내고, 현재 보고서와 다르면 409 `STALE_REPORT`.
 

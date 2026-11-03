@@ -148,7 +148,7 @@
       ],
       "properties": {
         "status": {
-          "const": "not ready"
+          "enum": ["not_ready", "not ready"]
         },
         "reason": {
           "type": "string"

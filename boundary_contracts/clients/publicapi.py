@@ -49,7 +49,7 @@ class HttpPublicApi(HttpClientBase):
     def __init__(self, base_url: str, token: Optional[str] = None, timeout: float = 10.0, device_id: Optional[str] = None,
                  *, egress_proxy: Optional[str] = None):
         """2.3.0: 키오스크 기기 인증은 게이트웨이의 클라이언트 인증서(mTLS, ADR 0012)다. 게이트웨이를 거치면 token도 device_id도 주지 않는다.
-        platform 공개 입구 역할(토큰 역할 `gateway`)로 부를 때만 device_id 로 `X-Openit-Device`를 싣는 것이 효과가 있다(CONVENTIONS 6절, 3.4.4; 서비스는 그때만 이 헤더를 믿는다).
+        게이트웨이 토큰(CONVENTIONS 6절)으로 부를 때만 device_id 로 `X-Openit-Device`를 싣는 것이 효과가 있다(CONVENTIONS 6절, 3.4.4; 서비스는 그때만 이 헤더를 믿는다).
         token(기기 토큰 Bearer)은 호환용으로 남긴다(3.1.1, PUBLIC_API.md F절)."""
         super().__init__(base_url, token, timeout, egress_proxy=egress_proxy)
         if device_id is not None:

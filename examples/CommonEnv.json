@@ -1,3 +1,6 @@
 {
-  "OPENIT_EGRESS_PROXY": "http://127.0.0.1:3128"
+  "OPENIT_EGRESS_PROXY": "http://127.0.0.1:3128",
+  "OPENIT_BACKUP_URL": "https://backup-target:8000/ops-feedback",
+  "OPENIT_BACKUP_CREDENTIALS_FILE": "/run/secrets/backup-credentials",
+  "OPENIT_BACKUP_REPO_PASSWORD_FILE": "/run/secrets/backup-repo-password"
 }

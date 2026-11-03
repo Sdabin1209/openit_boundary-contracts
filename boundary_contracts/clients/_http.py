@@ -292,7 +292,7 @@ class HttpClientBase:
     def __init__(self, base_url: str, token: Optional[str], timeout: float = 10.0, *, user: Optional[str] = None,
                  egress_proxy: Optional[str] = None):
         """user: 사람 행위자의 인증된 ID를 `X-Openit-User`로 싣는다(3.1.0, D88·HTTP.md I5). 게이트웨이를 거치면 게이트웨이가 인증 계정으로 덮어쓰고,
-        platform 공개 입구 역할(토큰 역할 `gateway`)과 함께일 때만 서비스가 이 값을 쓴다(그 밖의 토큰의 같은 헤더는 무시한다, CONVENTIONS 6절, 3.4.4 검토 A-25). 이 헤더가 필요한 쓰기(승인·활성화·롤백·검토)가 비공개 속성 없이 부를 수 있게 한다."""
+        게이트웨이 토큰(CONVENTIONS 6절)과 함께일 때만 서비스가 이 값을 쓴다(그 밖의 토큰의 같은 헤더는 무시한다, CONVENTIONS 6절, 3.4.4 검토 A-25). 이 헤더가 필요한 쓰기(승인·활성화·롤백·검토)가 비공개 속성 없이 부를 수 있게 한다."""
         require_tls_url(base_url)
         self._base = base_url.rstrip("/")
         self._token = token

@@ -28,3 +28,11 @@ def test_area_readyz_examples_also_pass_common_shape():
     assert len(names) >= 9
     for p in names:
         V.validate(json.loads(p.read_text(encoding="utf-8")))
+
+
+@pytest.mark.parametrize("schema", ["GateReadyz", "OpsFeedbackReadyz"])
+def test_area_readyz_accepts_canonical_not_ready(schema):
+    """3.4.5: 영역 준비 확인 스키마가 정본 not_ready 를 막지 않는다(R5.1 은 두 스키마를 함께 통과하라고 한다)."""
+    import json
+    s = json.dumps(validator(schema).schema)
+    assert "not_ready" in s

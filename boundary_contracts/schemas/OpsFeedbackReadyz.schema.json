@@ -91,7 +91,7 @@
       "additionalProperties": true,
       "properties": {
         "status": {
-          "const": "not-ready"
+          "enum": ["not_ready", "not-ready"]
         },
         "code": {
           "enum": [
