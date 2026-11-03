@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "GateDecision",
+  "x-producers": ["release-gate"],
+  "x-consumers": ["admin-console", "ops-feedback"],
   "type": "object",
   "additionalProperties": false,
   "required": [

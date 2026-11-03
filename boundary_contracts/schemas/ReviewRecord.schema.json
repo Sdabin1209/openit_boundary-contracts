@@ -2,6 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ReviewRecord",
   "description": "문항 세트 버전 하나에 대한 검수 결과. 불변이며 재검수는 새 레코드다. 임상 기준 승인 여부는 별도 필드로 둔다(O12).",
+  "x-producers": ["question-authoring"],
+  "x-consumers": ["release-gate", "synthetic-data", "admin-console"],
   "type": "object",
   "additionalProperties": false,
   "required": [

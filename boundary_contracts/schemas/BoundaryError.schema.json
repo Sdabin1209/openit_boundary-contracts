@@ -2,6 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "BoundaryError",
   "description": "경계 호출(SDK·서비스 API)의 모든 실패는 이 형식이다. 호출자는 code와 retryable만으로 다음 행동을 정할 수 있어야 한다.",
+  "x-producers": ["*"],
+  "x-consumers": ["*"],
   "type": "object",
   "additionalProperties": false,
   "required": [

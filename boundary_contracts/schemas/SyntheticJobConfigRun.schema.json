@@ -3,6 +3,8 @@
   "$id": "SyntheticJobConfigRun.schema.json",
   "title": "SyntheticJobConfigRun",
   "description": "계약 승격용(CR-008 초안에서 정리, 2026-10-29). `python -m synthetic_data run --config <파일>`의 설정. 만드는 쪽: deploy 스케줄러(e2e 설정) 또는 개발자. 읽는 쪽: synthetic_data/config.py parse_config. 모르는 키 정책: 거부(ADR 0014). 현재 코드는 최상위만 거부하고 중첩 객체의 모르는 키는 무시한다; 이 초안은 중첩도 거부하는 제안이다(안전 설정이 기본값으로 조용히 돌아가는 것을 막는다는 ADR 0014와 같은 이유).",
+  "x-producers": ["deploy"],
+  "x-consumers": ["synthetic-data"],
   "type": "object",
   "additionalProperties": false,
   "required": [

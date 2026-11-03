@@ -2,6 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ReviewReport",
   "description": "승인 요청 보고서. 게이트가 후보의 평가 보고서와 현재 활성 릴리스의 평가 보고서를 같은 지표끼리 맞대어 만든다. 승인자는 이것을 보고 결정한다.",
+  "x-producers": ["release-gate"],
+  "x-consumers": ["admin-console"],
   "type": "object",
   "additionalProperties": false,
   "required": [

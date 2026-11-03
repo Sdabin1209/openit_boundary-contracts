@@ -3,6 +3,8 @@
   "$id": "OpsFeedbackJobResult.schema.json",
   "title": "OpsFeedbackJobResult",
   "description": "`python -m ops_feedback.job` 한 번 실행의 stdout(JSON 한 줄)과 종료 코드. 만드는 쪽: ops-feedback 잡. 읽는 쪽: deploy 스케줄러. 종료 코드(코드 확인: job.py main): 0 = 오류 없음; 1 = 보고서 errors가 비어 있지 않음(일부 턴 실패, 롤백 평가 실패 포함; stdout 보고서는 있음); 2 = BoundaryError로 시작·접속 실패(stderr에 {\"error\":코드,\"message\":…} 한 줄, stdout 없음)이거나 argparse 사용 오류. 경고(warnings)는 stderr에 `경고: ` 접두로도 나가며 종료 코드에 영향이 없다. 확인된 어긋남(제안으로 고칠 것): 설정 파일 오류(ValueError)와 salt 없음은 잡히지 않아 파이썬 트레이스백과 종료 코드 1로 끝난다 -> 스케줄러가 '일부 실패(1)'와 '설정 오류'를 구별하지 못한다. 설정 오류는 2로 통일하자고 제안한다(코드는 아직 바꾸지 않음). 모르는 키: 읽는 쪽 무시(additionalProperties 허용), 쓰는 쪽은 아래 키만 쓴다.",
+  "x-producers": ["ops-feedback"],
+  "x-consumers": ["deploy"],
   "type": "object",
   "required": [
     "processed",

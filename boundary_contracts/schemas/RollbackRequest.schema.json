@@ -2,6 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "RollbackRequest",
   "description": "운영 관측이 게이트에 보내는 롤백 요청. 요청만 하며 활성 포인터는 게이트만 바꾼다.",
+  "x-producers": ["ops-feedback", "admin-console"],
+  "x-consumers": ["release-gate"],
   "type": "object",
   "additionalProperties": false,
   "required": [

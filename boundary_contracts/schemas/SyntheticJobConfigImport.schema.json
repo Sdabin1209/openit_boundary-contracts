@@ -3,6 +3,8 @@
   "$id": "SyntheticJobConfigImport.schema.json",
   "title": "SyntheticJobConfigImport",
   "description": "계약 승격용(CR-008 초안에서 정리, 2026-10-29). `python -m synthetic_data import --config <파일>`의 설정. 만드는 쪽: deploy 스케줄러 또는 개발자. 읽는 쪽: synthetic_data/importer.py parse_import_config. 모르는 키 정책: 거부(ADR 0014; 최상위는 이번 작업으로 코드에 반영됨). 중첩 객체(tolerance, output)의 모르는 키는 현재 코드가 무시하며 이 초안은 거부를 제안한다.",
+  "x-producers": ["deploy"],
+  "x-consumers": ["synthetic-data"],
   "type": "object",
   "additionalProperties": false,
   "required": [

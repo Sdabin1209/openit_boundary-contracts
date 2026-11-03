@@ -3,6 +3,8 @@
   "$id": "QuestionAuthoringExt.schema.json",
   "title": "QuestionAuthoringExt",
   "description": "ReviewRecord.ext[\"question-authoring\"]와 ChangeClassification.ext[\"question-authoring\"]. question-authoring이 쓰고, 게이트·합성 데이터·콘솔이 읽는다(보존하되 판단에 쓰지 않는다: 계약 ext 규칙). ReviewRecord.ext의 값은 $defs.ReviewExt, ChangeClassification.ext의 값은 $defs.ChangeExt. 모르는 키는 거부한다: 이 값은 임상 근거 승인의 출처 기록이라 조용히 늘어난 키를 허용하지 않는다(키가 늘면 이 스키마를 먼저 올린다).",
+  "x-producers": ["question-authoring"],
+  "x-consumers": ["release-gate", "synthetic-data", "admin-console"],
   "$defs": {
     "ReviewExt": {
       "oneOf": [

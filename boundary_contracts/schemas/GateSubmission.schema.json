@@ -2,6 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "GateSubmission",
   "description": "게이트에 판정을 요청한 기록. 판정은 비동기이며 결과는 GateDecision(submission_id로 연결)으로 조회한다.",
+  "x-producers": ["release-gate"],
+  "x-consumers": ["admin-console"],
   "type": "object",
   "additionalProperties": false,
   "required": [

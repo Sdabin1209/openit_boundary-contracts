@@ -3,6 +3,8 @@
  "$id": "ActionExtractionRules.schema.json",
  "title": "ActionExtractionRules",
  "description": "LoRA-A 출력 의미 규칙 명세(ADR 0010). 규칙은 데이터이고, 해석기는 boundary_contracts.action_rules 하나다.",
+ "x-producers": ["head"],
+ "x-consumers": ["model-runtime", "survey-service", "model-lab", "synthetic-data"],
  "type": "object",
  "required": [
   "rules_version",

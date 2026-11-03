@@ -3,6 +3,8 @@
  "$id": "OpsFeedbackReviewTrace.schema.json",
  "title": "OpsFeedbackReviewTrace",
  "description": "I7 `GET /v1/review-traces/{ref}`(reviewer 역할 전용)가 돌려주는 검토용 trace(3.2.0, L12, 사용자 결정 2026-11-03). OpsFeedbackDeidentifiedTrace 와 같은 모양이되 환자 발화 두 칸(frontend_message.utterance, extract_input.user_utterance)만 원문 문자열(최대 1000자, 문진 스키마 UtteranceBody 상한)을 허용한다. 왜: 발화 없이는 검토자가 실패 원인을 볼 수 없다. 조건: reviewer 역할만 읽고, 읽을 때마다 접근 기록을 남기며(보존 365일, 감사 기록), 확정 사례와 같은 보존(180일), 외부 전송 없음. 기존 get_trace 는 그대로 마스킹된 뷰를 낸다.",
+ "x-producers": ["ops-feedback"],
+ "x-consumers": ["admin-console"],
  "type": "object",
  "additionalProperties": false,
  "required": [

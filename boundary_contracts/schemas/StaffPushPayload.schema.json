@@ -3,6 +3,8 @@
   "$id": "StaffPushPayload.schema.json",
   "title": "StaffPushPayload",
   "description": "직원 콘솔 웹 푸시의 본문(암호 해제 뒤 JSON). 쓰는 쪽: 문진 서버(survey-service). 읽는 쪽: kiosk-frontend 직원 콘솔 서비스 워커, admin-console 결과 탭 서비스 워커(3.4.0, RESULT_READY). PUBLIC_API.md는 '푸시 본문에는 세션 ID와 종류만 넣는다'만 정하고 키 이름은 없다. 초안. 환자 발화·값 등 개인정보는 넣지 않는다.",
+  "x-producers": ["survey-service"],
+  "x-consumers": ["kiosk-frontend", "admin-console"],
   "type": "object",
   "required": [
     "session_id"

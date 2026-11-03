@@ -2,6 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ActionExtractionInput",
   "description": "LoRA-A 입력(2.0.0, D74). 환자 발화 1턴과 직전 문맥. 모델이 받는 JSON 그대로이며 학습 데이터의 user 메시지 내용이다. 시스템 프롬프트는 별도(serving_config의 프롬프트 템플릿 버전).",
+  "x-producers": ["survey-service", "synthetic-data"],
+  "x-consumers": ["model-runtime", "model-lab"],
   "type": "object",
   "additionalProperties": false,
   "required": [

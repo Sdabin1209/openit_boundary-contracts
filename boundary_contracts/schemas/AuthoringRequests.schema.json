@@ -3,6 +3,8 @@
   "$id": "AuthoringRequests.schema.json",
   "title": "AuthoringRequests",
   "description": "question-authoring 저작 API 요청 본문(JSON)과 쿼리. 사람(저자·검수자)·콘솔·gateway가 이 영역에 보내는 요청. 방향: 호출자 -> question-authoring. 각 $defs가 엔드포인트 하나의 요청이다. 모르는 키는 거부한다(additionalProperties:false): 오타 난 필드가 조용히 무시되어 저자가 보낸 값이 저장되지 않는 일을 막으려는 것이다.",
+  "x-producers": ["external:person"],
+  "x-consumers": ["question-authoring"],
   "$defs": {
     "CreateDraftRequest": {
       "description": "POST /v1/drafts",

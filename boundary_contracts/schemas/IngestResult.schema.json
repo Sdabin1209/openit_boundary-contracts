@@ -2,6 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "IngestResult",
   "description": "TraceEnvelope 수집 결과. 같은 (session_id, turn_id)를 다시 받으면 DUPLICATE이고 먼저 받은 것이 유지된다.",
+  "x-producers": ["ops-feedback"],
+  "x-consumers": ["survey-service"],
   "type": "object",
   "additionalProperties": false,
   "required": [

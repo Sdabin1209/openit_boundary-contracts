@@ -3,6 +3,8 @@
   "$id": "SignalsResponse.schema.json",
   "title": "SignalsResponse",
   "description": "GET /v1/signals 응답. question-authoring -> 저자(콘솔). ops-feedback의 I7 실패 사례에서 만든 읽기 전용 신호. 발화 문장·trace 본문은 담지 않는다. 불변식: cases_read = 읽은 사례 수(필터 전), 문항 세트 case_count의 합 + skipped.NO_QUESTION_SET <= cases_read, confirmed_count <= case_count.",
+  "x-producers": ["question-authoring"],
+  "x-consumers": ["external:person"],
   "oneOf": [
     {
       "title": "Disabled",

@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "파이프라인 계약 공통 타입",
+  "x-producers": ["head"],
+  "x-consumers": ["*"],
   "$defs": {
     "Id": {
       "type": "string",

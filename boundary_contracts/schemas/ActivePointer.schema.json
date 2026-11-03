@@ -2,6 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ActivePointer",
   "description": "지금 서비스가 써야 하는 릴리스. pointer_version은 변경마다 1씩 늘어나는 정수라 읽는 쪽이 값만 비교해 변경을 알아챈다.",
+  "x-producers": ["release-gate"],
+  "x-consumers": ["survey-service", "ops-feedback", "question-authoring", "model-lab", "admin-console"],
   "type": "object",
   "additionalProperties": false,
   "required": [

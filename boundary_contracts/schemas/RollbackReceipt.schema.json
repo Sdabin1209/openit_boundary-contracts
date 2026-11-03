@@ -2,6 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "RollbackReceipt",
   "description": "롤백 요청 처리 결과.",
+  "x-producers": ["release-gate"],
+  "x-consumers": ["ops-feedback", "admin-console"],
   "type": "object",
   "additionalProperties": false,
   "required": [

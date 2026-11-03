@@ -3,6 +3,8 @@
  "$id": "https://openit.example/schemas/AdminConsoleEnv.schema.json",
  "title": "AdminConsoleEnv",
  "description": "admin-console 컨테이너(Caddy 정적 서버)의 환경 변수 선언(3.4.3, U99). 만드는 쪽: deploy(compose). 읽는 쪽: admin-console serve/Caddyfile. 영역 사이 설정 이름은 이 선언에만 있다. 값은 모두 문자열.",
+ "x-producers": ["deploy"],
+ "x-consumers": ["admin-console"],
  "type": "object",
  "additionalProperties": {
   "type": "string"

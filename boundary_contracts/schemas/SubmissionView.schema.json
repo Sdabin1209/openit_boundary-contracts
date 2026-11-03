@@ -2,6 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "SubmissionView",
   "description": "게이트의 제출 한 건의 현재 상태(승인 화면용, D68). 제출 레코드 GateSubmission에 처리 상태를 더한 읽기용 뷰다.",
+  "x-producers": ["release-gate"],
+  "x-consumers": ["admin-console"],
   "type": "object",
   "additionalProperties": false,
   "required": [

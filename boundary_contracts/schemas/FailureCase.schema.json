@@ -2,6 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "FailureCase",
   "description": "비식별을 마친 실패 사례. 불변이며 검토 결과는 version을 올린 새 레코드로 낸다. 실패 유형 분류체계는 미정(O11)이라 문자열이다.",
+  "x-producers": ["ops-feedback"],
+  "x-consumers": ["synthetic-data", "model-lab", "question-authoring", "admin-console"],
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -3,6 +3,8 @@
   "$id": "GateExt.schema.json",
   "title": "GateExt",
   "description": "ActivePointer.ext와 RollbackReceipt.ext의 \"release-gate\" 키 값. release-gate가 쓰고, 소비자(운영 화면, ops-feedback)는 표시에만 쓰며 판단에 쓰지 않는다(ext 규칙). requested_by는 X-Openit-User(사람) 또는 서비스 역할의 'service:<역할>' 또는 'role:<역할>'.",
+  "x-producers": ["release-gate"],
+  "x-consumers": ["admin-console", "ops-feedback"],
   "type": "object",
   "additionalProperties": false,
   "required": [

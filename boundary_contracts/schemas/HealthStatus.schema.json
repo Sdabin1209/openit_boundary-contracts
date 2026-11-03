@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "HealthStatus.schema.json",
+  "title": "HealthStatus",
+  "description": "3.4.4(RUNTIME R5.1, OPEN_GAPS U101 닫음): 모든 영역 서비스의 GET /healthz·GET /readyz 본문이 지키는 공통 최소 모양. 판정은 상태 코드다(healthz 200 = 살아 있음, readyz 200 = 요청을 받을 수 있음, 503 = 아님). 본문은 비어 있지 않은 JSON 객체이고, status 가 있으면 아래 값 중 하나다. 영역별 준비 확인 스키마(SurveyReadyz·GateReadyz·OpsFeedbackReadyz·QuestionAuthoringDeployInterface.ReadyzResponse)가 있으면 그것도 함께 지킨다. 'not ready'(release-gate)·'not-ready'(ops-feedback·question-authoring)는 2026-11-04 이전 표기로 not_ready 와 같은 뜻이며, 생산자는 not_ready 로 옮기고 읽는 쪽은 셋을 같게 다룬다(CONVENTIONS 1절 3, 하위 호환).",
+  "x-producers": ["*"],
+  "x-consumers": ["platform", "deploy"],
+  "type": "object",
+  "minProperties": 1,
+  "properties": {
+    "status": {
+      "enum": ["ok", "ready", "not_ready", "shutting_down", "not ready", "not-ready"]
+    }
+  },
+  "additionalProperties": true
+}

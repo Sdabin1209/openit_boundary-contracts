@@ -3,6 +3,8 @@
   "$id": "SyntheticJobResult.schema.json",
   "title": "SyntheticJobResult",
   "description": "계약 승격용(CR-008 초안에서 정리, 2026-10-29). run과 import가 성공·거부 시 stdout에 JSON 한 줄(sort_keys)로 낸다. 읽는 쪽: deploy 스케줄러(deploy 코드는 읽지 못해 실제로 무엇을 읽는지는 미확인). 종료 코드(정본은 이 표; 코드는 __main__.py): 0 = 게시/이미 게시됨/할 일 없음, 2 = 설정 오류(stderr에 job-error 한 줄), 3 = 재시도 불가 경계 오류(stderr에 BoundaryError 레코드), 75 = 재시도 가능 경계 오류(스케줄러가 재실행, EX_TEMPFAIL), 4 = import가 허용치 초과 등으로 게시하지 않음(stdout에 status REJECTED). 모르는 키 정책: 읽는 쪽은 무시, 이 영역은 필드를 더할 수 있다. 불변식: 필드 7~8개는 항상 있다(값이 없으면 null); status가 PUBLISHED/ALREADY_PUBLISHED면 version, content_hash, dataset_digest가 null이 아니다.",
+  "x-producers": ["synthetic-data"],
+  "x-consumers": ["deploy"],
   "type": "object",
   "required": [
     "status",

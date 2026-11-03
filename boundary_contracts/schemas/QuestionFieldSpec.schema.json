@@ -3,6 +3,8 @@
   "$id": "QuestionFieldSpec.schema.json",
   "title": "QuestionFieldSpec",
   "description": "문항 칸 규격(2.4.0, OPEN_GAPS U32). 칸마다 자료형·단위·범위·선택지·반복 키. 값은 학습 데이터셋 `docs/SQL.md`의 question_fields·field_options와 같아야 한다(데이터셋 정답을 만든 정규화기가 이 규격으로 범위 밖을 판정했다). 정본은 문진 스키마(survey-service 소유)이고, survey-service가 I9 extract 요청의 `fields`로 LoRA-A 컴포넌트에 싣는다.",
+  "x-producers": ["survey-service"],
+  "x-consumers": ["model-runtime"],
   "type": "object",
   "additionalProperties": false,
   "required": ["fields"],

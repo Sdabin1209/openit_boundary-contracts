@@ -2,6 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "GateApproval",
   "description": "학습 담당자(출고 승인자)가 후보 조합에 내린 결정. 지표 통과 여부와 무관하게 사람이 정한다. 반려에는 사유가 필수다.",
+  "x-producers": ["release-gate"],
+  "x-consumers": ["admin-console"],
   "type": "object",
   "additionalProperties": false,
   "required": [
