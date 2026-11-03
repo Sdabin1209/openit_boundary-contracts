@@ -18,8 +18,7 @@
         "model-serving",
         "kiosk-frontend",
         "admin-console",
-        "model-serving-gpu"
-      ]
+        "model-serving-gpu", "area-gateway", "public-ingress", "monitoring", "backup-store", "step-ca"]
     },
     "image": {
       "type": "string",

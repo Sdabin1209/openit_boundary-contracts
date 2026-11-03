@@ -6,6 +6,10 @@
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 
+## 3.4.8 (PATCH, 와이어 변경 없음 — 게시할 수 있는 서비스 이름에 platform 이미지)
+왜: 3.4.4 에서 platform 영역을 만들었는데 PublishRequest.service 목록에 platform 이미지 이름이 없어 deploy 가 digest 잠금에 올릴 수 없었다(deploy 담당 CR-publish-platform-images, 헤드 누락).
+- `PublishRequest.service` 에 area-gateway·public-ingress·monitoring·backup-store·step-ca.
+
 ## 3.4.7 이후 문서 보충(패키지·와이어 변경 없음, 태그 없음)
 - RUNTIME R10.11: 정적 화면 서버(kiosk-frontend·admin-console)는 `/metrics` 를 두지 않고 감시는 `/readyz` 탐침으로 본다(kiosk-frontend 담당이 찾은 빈칸).
 
