@@ -117,8 +117,8 @@
       "apply",
       "verify"
      ],
-     "description": "기본 apply. verify면 앱 계정에 DDL 권한이 필요 없다",
-     "default": "apply"
+     "description": "기본 verify(3.4.0, L08): 서버·잡은 verify만 받고 스키마가 최신이 아니면 기동을 거부한다(apply는 거부). 스키마 변경은 `admin migrate` 잡만 하며 그 잡은 소유자 계정 접속 문자열 파일을, 서버·잡은 DML만 가진 앱 계정 접속 문자열 파일을 받는다(최소 권한).",
+     "default": "verify"
     },
     "OPS_GATE_READ_TOKEN_FILE": {
      "$ref": "#/$defs/Path",
