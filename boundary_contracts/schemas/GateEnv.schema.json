@@ -88,6 +88,7 @@
      "GATE_READ_TOKEN",
      "GATE_READ_TOKENS",
      "GATE_READ_TOKENS_FILE",
+     "GATE_READ_TOKEN_FILE",
      "GATE_REQUEST_DEADLINE_SECONDS",
      "GATE_REQUEST_TIMEOUT_SECONDS",
      "GATE_RETAIN_ATTEMPTS_DAYS",
@@ -142,7 +143,7 @@
   },
   "GATE_SUPPORTED_RUNTIME_CONTRACT_VERSION": {
    "$ref": "#/$defs/PosInt",
-   "description": "지원하는 문진 스키마 정수 버전. 미정: 문서는 '빌드 때 고정'이라 하나 Dockerfile 에 없고 코드 기본은 설치된 문진 스키마의 값이다(release-gate 담당 확인)"
+   "description": "지원하는 문진 스키마 정수 버전. 필수(3.2.0): 기본값으로 설치된 스키마의 값을 쓰면 CONTRACT_COMPAT 검사(지원 버전 == 배포 버전)가 항상 참이 되어 무력화된다(release-gate 담당 확인 2026-11-03). deploy 가 명시적으로 준다"
   },
   "GATE_MODEL_RUNTIME_VERSION": {
    "type": "string",
@@ -278,12 +279,16 @@
   "GATE_READ_TOKEN": {
    "type": "string",
    "minLength": 1,
-   "description": "미정: 코드에 이름만 있고 runbook 에 없다(release-gate 담당이 뜻 또는 폐기를 확인)"
+   "description": "이전 호환: 단일 읽기 토큰(역할 reader 로 등록). GATE_READ_TOKENS 가 있으면 필요 없다. 폐기 예정"
   },
   "PORT": {
    "$ref": "#/$defs/Port",
    "description": "바인드 포트",
    "default": "8080"
+  },
+  "GATE_READ_TOKEN_FILE": {
+   "$ref": "#/$defs/Path",
+   "description": "이전 호환: 단일 읽기 토큰 파일. 폐기 예정"
   }
  },
  "allOf": [
@@ -316,5 +321,8 @@
    ]
   }
  ],
- "x-note": "필수 두 조건은 serve 에만 해당한다. 잡(collect·judge·prune)은 토큰을 읽지 않으므로 잡 기동 검증은 propertyNames 와 형식만 적용한다"
+ "x-note": "필수 두 조건은 serve 에만 해당한다. 잡(collect·judge·prune)은 토큰을 읽지 않으므로 잡 기동 검증은 propertyNames 와 형식만 적용한다",
+ "required": [
+  "GATE_SUPPORTED_RUNTIME_CONTRACT_VERSION"
+ ]
 }

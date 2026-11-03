@@ -7,5 +7,6 @@
  "GATE_I3_URL": "http://model-registry:8080",
  "GATE_I3_TOKEN_FILE": "/run/secrets/gate-i3-token",
  "GATE_REQUEST_DEADLINE_SECONDS": "170.0",
- "PORT": "8080"
+ "PORT": "8080",
+ "GATE_SUPPORTED_RUNTIME_CONTRACT_VERSION": "1"
 }
