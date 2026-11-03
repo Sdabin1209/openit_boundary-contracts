@@ -6,6 +6,13 @@
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 
+## 3.4.6 (PATCH, 와이어 변경 없음 — 데이터 주인 표, ext 쓰기 규칙, 소비자 정정)
+왜: 사용자 지시 '여러 영역이 읽고 쓰는 데이터는 누가 갖는가 — 전부 확인'. 전수 확인에서 (1) `ext` 규칙이 남의 레코드에도 덧붙일 수 있는 것처럼 읽혀 '쓰는 영역은 하나'와 부딪혔고, (2) 3.4.4 에 헤드가 넣은 x-consumers 중 admin-console 이 실제로 읽지 않는 스키마 7개가 있었다(설명문만 보고 넣음; admin-console 코드의 호출 경로로 대조).
+- DATA_OWNERSHIP.md 신설: 영역 사이 데이터 전부의 주인·쓰기 경로·읽기 경로.
+- CONVENTIONS 1절 1항: `ext.<영역>` 은 그 레코드의 주인만 쓴다. 6절에서 DATA_OWNERSHIP.md 를 정본으로.
+- 호출 관계를 영역 코드와 대조: model-lab·release-gate 는 I9 HTTP 를 부르지 않는다(라이브러리) → 호출 C40·C42 뺌, RuntimeInfo 소비자 정정. model-lab·question-authoring 은 후보를 제출하지 않는다 → 제출 역할·생산자에서 뺌(최소 권한). model-lab·question-authoring 의 I4 판정 조회는 브리프에 있는 미구현 기능이라 남기고 소비자는 GateDecision 만(ActivePointer·ReleaseManifest 에서 뺌).
+- x-consumers 에서 admin-console 제거: ReviewRecord·ChangeClassification·QuestionAuthoringExt·GateDecision·GateSubmission·EvaluationReport·OpsFeedbackFailureCaseExt.
+
 ## 3.4.5 (PATCH, 와이어 변경 없음 — 백업 출력 이름)
 왜: 3.4.4 가 데이터베이스를 영역 컴포넌트로 하고 백업을 영역이 platform 백업 저장소로 보내게 했는데, 그 주소·자격을 받을 이름이 계약에 없었다(ops-feedback 담당이 코드 단계에서 찾음, 헤드 누락).
 - CONVENTIONS 6절: "게이트웨이 토큰" = 그 서비스의 Exposure upstream_token 으로 선언된 토큰 전부(3.4.4 의 '역할 이름 gateway' 정정; 서비스마다 토큰 파일 구성이 달라 맞지 않았다, survey-service 담당이 찾음). 관련 문장 HTTP.md I5·PUBLIC_API F절·INTERFACES I5·클라이언트 설명.

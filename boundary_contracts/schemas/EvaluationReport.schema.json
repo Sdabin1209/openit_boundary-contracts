@@ -3,7 +3,7 @@
   "title": "EvaluationReport",
   "description": "후보 모델 하나(역할 하나)의 평가 결과를 지표 체계(METRICS.md)로 낸 보고서. 합격 여부나 임계치는 담지 않는다. 출고는 학습 담당자가 이 보고서를 보고 사람이 정한다(D53).",
   "x-producers": ["model-lab"],
-  "x-consumers": ["release-gate", "admin-console"],
+  "x-consumers": ["release-gate"],
   "type": "object",
   "additionalProperties": false,
   "required": [

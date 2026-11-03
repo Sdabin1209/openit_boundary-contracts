@@ -20,7 +20,7 @@ Page[T]    = (items: list[T], next_cursor: str | None)
 | I6 TraceIngest | ops-feedback | survey-service | — |
 | I7 FailureStore | ops-feedback | ops-feedback | synthetic-data, model-lab, question-authoring, admin-console(사례 검토) |
 | I8 turn-engine (3.0.0 폐기: 출력 규칙은 계약 `action_rules`, 서버가 보증, D109·ADR 0010) | — | — | — |
-| I9 model-runtime | model-runtime | — | survey-service(전부), model-lab·release-gate(`/v1/info`·`/readyz` 만, HTTP.md I9) |
+| I9 model-runtime | model-runtime | — | survey-service. (model-lab 은 평가를, release-gate 는 버전 확인을 model-runtime **라이브러리**로 한다 — HTTP 호출 관계가 아니다, 3.4.6) |
 | I10 공개 API | survey-service | — | kiosk-frontend(환자 화면, 직원 콘솔), admin-console(문진 결과 탭·직원·의사 알림 SSE·푸시 구독, PUBLIC_API B절; 3.4.4 검토 A-14·B-15) |
 
 ## I1. QuestionReader (question-authoring)
@@ -93,7 +93,7 @@ list_releases(*, cursor=None, limit=100) -> Page[ReleaseManifest]   # 최신부�
 
 ## I5. GateService (release-gate)
 
-기계 호출의 역할(`requested_by_role`)은 **토큰에 묶여 있다**(사람 요청은 게이트웨이 토큰과 `X-Openit-Roles` 가 정한다, CONVENTIONS 6절). 호출자가 말한 역할이 토큰의 역할과 다르면 `PERMISSION_DENIED`이고, 인자는 기록용이다. 허용 역할: 접수 `operator`·`release-gate-collector`·`question-authoring`·`model-lab`, 활성화 `operator`, 롤백 `ops-feedback`·`operator`(설정으로 바꾼다), 승인 `release-approver`(D53, HTTP.md `decide`와 `X-Openit-User`). 같은 조합에 판정이 여러 개일 수 있다. 정책 버전이 바뀐 뒤의 재판정은 같은 `submission_id`에 새 `GateDecision`을 더하고 가장 최근 것이 현재 판정이다. `reject_codes`가 `POLICY_INCOMPLETE`이면 조합이 나쁘다는 뜻이 아니다.
+기계 호출의 역할(`requested_by_role`)은 **토큰에 묶여 있다**(사람 요청은 게이트웨이 토큰과 `X-Openit-Roles` 가 정한다, CONVENTIONS 6절). 호출자가 말한 역할이 토큰의 역할과 다르면 `PERMISSION_DENIED`이고, 인자는 기록용이다. 허용 역할: 접수 `operator`·`release-gate-collector`(3.4.6: question-authoring·model-lab 은 제출하지 않아 뺐다, 최소 권한), 활성화 `operator`, 롤백 `ops-feedback`·`operator`(설정으로 바꾼다), 승인 `release-approver`(D53, HTTP.md `decide`와 `X-Openit-User`). 같은 조합에 판정이 여러 개일 수 있다. 정책 버전이 바뀐 뒤의 재판정은 같은 `submission_id`에 새 `GateDecision`을 더하고 가장 최근 것이 현재 판정이다. `reject_codes`가 `POLICY_INCOMPLETE`이면 조합이 나쁘다는 뜻이 아니다.
 
 서비스 API다. 쓰기 권한은 게이트에만 있다.
 
@@ -221,8 +221,8 @@ SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 | --- | --- | --- |
 | question-authoring | 관리자 입력, I7(개선 신호), I4(판정 조회) | I1 |
 | synthetic-data | I1, I7 | I2 |
-| model-lab | I2, I1, I7, I4, I9 | I3 |
-| release-gate | I1, I3, I9, I5 요청 | I4, I5 |
+| model-lab | I2, I1, I7, I4(판정 조회), model-runtime 라이브러리 | I3 |
+| release-gate | I1, I3, model-runtime 라이브러리(버전), I5 요청 | I4, I5 |
 | survey-service | I4, I9 | I6, I10 |
 | ops-feedback | I6, I4, (롤백 요청은 I5 호출) | I7, I6 수집 |
 | model-runtime | 이 리포지토리의 모델 입출력 스키마, I4(번들) | I9 |

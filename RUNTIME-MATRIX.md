@@ -42,9 +42,9 @@ RUNTIME.md 의 조항은 이 표의 칸을 묶은 것이다. 칸이 비면 계�
 | C37 | model-lab 파이프라인(학습 서버, compose 밖) → question-authoring | I1 읽기 | 서비스 토큰 | 7 |
 | C38 | model-lab 파이프라인(compose 밖) → ops-feedback | I7 읽기 | 서비스 토큰 | 7 |
 | C39 | model-lab 파이프라인(compose 밖) → release-gate | I4 읽기(판정 조회) | 서비스 토큰 | 7 |
-| C40 | model-lab 파이프라인(compose 밖) → 추론 서버(model-runtime) | I9 정보·준비·평가 호출 | 서비스 토큰 | 7 |
+| C40 | (3.4.6 뺌: model-lab 은 I9 HTTP 를 부르지 않는다 — 평가는 model-runtime 라이브러리) | | | |
 | C41 | question-authoring → release-gate | I4 읽기(판정 조회) | 서비스 토큰 | 1·7 |
-| C42 | release-gate → 추론 서버(model-runtime) | I9 정보·준비(호환 검사) | 서비스 토큰 | 2 |
+| C42 | (3.4.6 뺌: release-gate 는 I9 HTTP 를 부르지 않는다 — 버전 확인은 model-runtime 라이브러리) | | | |
 
 ## B. 실패 종류 목록 (근거 표준)
 

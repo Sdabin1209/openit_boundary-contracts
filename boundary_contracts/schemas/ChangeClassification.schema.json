@@ -3,7 +3,7 @@
   "title": "ChangeClassification",
   "description": "문항 세트의 한 버전 변경이 무엇을 바꿨는지와 필요한 후속 작업. 문구 / 선택지·단위 / 슬롯 / 분기의 4종으로 시작한다(D17).",
   "x-producers": ["question-authoring"],
-  "x-consumers": ["release-gate", "synthetic-data", "admin-console"],
+  "x-consumers": ["release-gate", "synthetic-data"],
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ReleaseManifest",
   "x-producers": ["release-gate"],
-  "x-consumers": ["survey-service", "model-runtime", "ops-feedback", "question-authoring", "model-lab", "admin-console"],
+  "x-consumers": ["survey-service", "model-runtime", "ops-feedback", "admin-console"],
   "type": "object",
   "additionalProperties": false,
   "required": [

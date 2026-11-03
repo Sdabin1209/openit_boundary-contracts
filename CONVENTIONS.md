@@ -4,7 +4,7 @@
 
 ## 1. 계약이 다시 뜯기지 않게 하는 규칙
 
-1. **확장 필드.** 모든 레코드에는 선택 필드 `ext`가 있다. 영역은 새 정보를 `ext.<영역 이름>`에 계약 변경 없이 덧붙인다. 읽는 영역은 `ext`를 이해하지 못해도 **보존하고 전달**해야 하며(복사·재게시 때 지우지 않는다), 판단에 쓰지 않는다. 여러 영역이 판단에 필요로 하게 되면 정식 필드로 올린다(MINOR).
+1. **확장 필드.** 모든 레코드에는 선택 필드 `ext`가 있다. 영역은 자기가 쓰는(주인인) 레코드에 한해 새 정보를 `ext.<영역 이름>`에 계약 변경 없이 덧붙인다. 남의 레코드에는 `ext` 키를 더하지 않는다(쓰는 영역은 하나, 6절·DATA_OWNERSHIP.md; 3.4.6). 읽는 영역은 `ext`를 이해하지 못해도 **보존하고 전달**해야 하며(복사·재게시 때 지우지 않는다), 판단에 쓰지 않는다. 여러 영역이 판단에 필요로 하게 되면 정식 필드로 올린다(MINOR).
 2. **MINOR는 추가만 한다.** 선택 필드 추가, 열거값 추가, 허용 범위 확대만 MINOR다. 필수 필드 추가, 필드 삭제·이름·의미 변경, 허용 범위 축소는 MAJOR다. 의미를 바꾸려면 새 필드를 만들고 옛 필드는 유지한다.
 3. **쓸 때는 엄격하게, 읽을 때는 관대하게.** 레코드를 만드는 쪽은 자기가 아는 버전의 스키마(`additionalProperties: false`)로 검증한 뒤 쓴다. 읽는 쪽은 같은 MAJOR이면 모르는 필드를 무시하고, **모르는 열거값은 오류로 죽지 않고 '알 수 없음'으로 처리**한다. 읽는 쪽의 SDK는 이 관대한 읽기를 기본으로 제공한다.
 4. **MAJOR는 병행 기간을 둔다.** MAJOR를 올릴 때 소유자는 이전 MAJOR를 읽는 경로를 한 릴리스 주기 동안 유지한다. **예외: 2.0.0(D74)은 병행 없이 v1 형식을 폐기했다.** v1 계약이 기술하던 단계(파서·정규화기·판정기·Plan)가 없어졌고 학습된 모델은 v2 형식만 말하며 운영 데이터가 아직 없는 데모 단계이기 때문이다. v1.3.3은 Git 태그로 남는다. 클라이언트는 MAJOR 1의 레코드를 `UNSUPPORTED_VERSION`으로 거부한다. **3.3.0 도 같은 예외다(3.4.4 에 기록, 검토 B-13):** 필수 필드 추가(`ReleaseManifest.question_sets`)와 필드 삭제(`question_set`·`QuestionFlow`)를 포함해 이 절 2항으로는 MAJOR 였으나, 데모 단계(운영 데이터 없음)라 MINOR 로 냈고 병행 기간 없이 3.2.x 레코드를 읽지 않는다. 다음부터는 이 예외를 쓰지 않는다.
@@ -54,7 +54,7 @@ SDK는 `BoundaryError`를 예외로 던진다. 메모리 구현도 같은 예외
 ## 6. 인증과 권한 (단일 서버 기준)
 
 - 서비스 사이 호출은 `Authorization: Bearer <서비스 토큰>`이고 토큰은 파일로 받는다(D84: `NAME_FILE`에 경로를 주고 `boundary_contracts.secrets.read_secret(NAME)`으로 읽는다. 환경 변수 `NAME`은 개발·시험용 호환일 뿐이며 운영에서는 쓰지 않는다). 읽기 SDK는 읽기 전용 토큰, 쓰기는 소유 영역의 토큰만 쓴다.
-- 저장소의 쓰기 권한은 소유 영역 하나에만 있다(경계 규칙 1). 다른 영역의 DB 계정은 없다(13절, 3.4.4 검토 A-31).
+- 저장소의 쓰기 권한은 소유 영역 하나에만 있다(경계 규칙 1). 데이터마다 주인과 쓰기·읽기 경로는 DATA_OWNERSHIP.md 가 정본이다. 다른 영역의 DB 계정은 없다(13절, 3.4.4 검토 A-31).
 - 공개 API 의 인증은 PUBLIC_API.md F절(기기)·E절(사람)과 이 문서 6절·9절이 정한다(3.4.4 검토 A-32).
 - **사람 신원과 역할(3.4.0, U82, head ADR 0014).** 사람 인증은 게이트웨이가 표준 IdP(Keycloak, OIDC)로 끝낸다. 게이트웨이는 인증을 마친 요청에 `X-Openit-User: <사용자 ID>`와 `X-Openit-Roles: <역할 쉼표 목록>`을 붙이고, 클라이언트가 보낸 같은 이름의 헤더는 지운다. 역할 이름은 고정 목록 `staff`, `operator`, `release-approver`, `reviewer`, `author`, `clinical-reviewer`, `clinician`, `admin`이다(IdP 그룹 이름과 같다). 사용자별 역할이 필요한 서비스는 자체 설정(사용자→역할 표)을 두지 않고 `X-Openit-Roles`를 읽는다. 역할이 하나도 없는 인증 사용자(가입 승인 대기)는 `Exposure.auth.kind=authenticated` 경로와 계정 관리 화면을 뺀 모든 경로에서 게이트웨이가 403 으로 막는다. 본문은 `BoundaryError` 전체 필드(`pipeline_schema_version`·`code`=`PERMISSION_DENIED`·`message`·`retryable`=false)이고 `details.reason`=`ACCOUNT_PENDING_APPROVAL` 이다(RUNTIME R3.24). 게이트웨이는 모든 경로에서(인증 여부·`Exposure.auth.kind` 와 무관하게) 클라이언트가 보낸 `X-Openit-User`·`X-Openit-Roles`·`X-Openit-Device` 를 지운다. 사람 경로만 인증 뒤에 `X-Openit-User`·`X-Openit-Roles` 를, 기기 경로만 `X-Openit-Device` 를 붙인다(OWASP ASVS 4.1.3 신뢰 경계, 검토 B-19). 서비스는 `X-Openit-User`·`X-Openit-Roles`·`X-Openit-Device` 를 **게이트웨이 토큰**(platform 공개 입구가 그 서비스로 넘길 때 붙이는 토큰 = 그 서비스의 `Exposure.routes[].upstream_token` 으로 선언된 토큰 전부; 서비스는 자기 설정에서 어느 토큰이 그것인지 안다, 새 환경 변수는 없다; 3.4.5 정정 — 3.4.4 의 '역할 이름 gateway' 는 서비스마다 토큰 파일 구성이 달라 맞지 않았다, survey-service 담당이 찾음)이 붙은 요청에서만 쓰고, 그 밖의 토큰으로 온 요청의 같은 이름 헤더는 무시한다. 사람 요청의 권한은 `X-Openit-Roles` 가 정하고, 본문의 `requested_by_role` 은 기록용이며 헤더 역할과 다르면 `PERMISSION_DENIED` 다. 기계 호출(서비스 역할 토큰)의 권한은 토큰 역할이 정한다(검토 A-6·A-25). 계약 클라이언트의 `user=`·`device_id=` 인자는 이 `gateway` 역할 토큰과 함께일 때만 효과가 있다.
 
