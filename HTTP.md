@@ -74,8 +74,8 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 | 호출 | 요청 | 응답 |
 | --- | --- | --- |
 | `submit_candidate` | `POST /v1/submissions` 본문 `GateSubmissionRequest`{subject{question_sets[], lora_a, lora_b}, requested_by_role} (3.1.0에서 스키마로; 3.3.0: 문진표 목록, 서버는 세트마다 구조 대조·해시 검증을 하고 하나라도 어긋나면 전체를 거절) | `GateSubmission` (202) |
-| `activate` | `POST /v1/activate` 본문 `{release_id, requested_by_role}` | `ActivePointer` |
-| `request_rollback` | `POST /v1/rollback` 본문 `RollbackRequest` | `RollbackReceipt` |
+| `activate` | `POST /v1/activate` 본문 `{release_id, requested_by_role}` | `ActivePointer`. 이미 활성인 같은 `release_id` 면 200 으로 현재 포인터를 그대로 돌려준다(새 포인터·버전을 만들지 않는다, RUNTIME R10.8) |
+| `request_rollback` | `POST /v1/rollback` 본문 `RollbackRequest` | 200 `RollbackReceipt`. 선행 조건 위반(`from_release_id` 가 현재 활성이 아님, `to_release_id` 가 PASS·해시 검증을 통과하지 못함, 둘이 같음)도 412 가 아니라 200 `status:"REJECTED"` + `reason`(거부도 영수증으로 남는다). 같은 `request_id` 는 같은 영수증(R10.8) |
 | `list_submissions` (D68) | `GET /v1/submissions?status=&limit=&cursor=` | 목록(`SubmissionView`, 최신부터, `status`로 거름). 승인 화면이 `status=AWAITING_APPROVAL`로 대기 건을 본다 |
 | `get_submission` (D68) | `GET /v1/submissions/{id}` | `SubmissionView`. 없으면 404 |
 | `get_review_report` (D53) | `GET /v1/submissions/{id}/review-report` | `ReviewReport`. 후보의 `EvaluationReport`와 현재 활성 릴리스의 보고서를 같은 지표끼리 맞댄 것. 게이트가 자동 검사(계약·문항-모델 호환·보고서 형식)를 끝낸 제출만 있고, 아직이면 409 |
@@ -84,7 +84,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 **승인 요청의 해시·충돌·승인자 (D69).**
 - `GET /v1/submissions/{id}/review-report`의 응답 헤더 `X-Openit-Report-Hash`가 그 보고서의 해시다. 클라이언트는 해시를 **계산하지 않고** 받은 값을 `POST /v1/approvals`의 `report_hash`로 그대로 돌려보낸다(해시 구현은 서버 한 곳, `boundary_contracts.canonical`).
 - 409의 사유는 `BoundaryError.details.reason`으로 구분한다: `STALE_REPORT`(승인자가 본 보고서가 이미 바뀜), `ALREADY_DECIDED`(이 제출에 이미 다른 결정이 있음). `code`는 `CONFLICT` 그대로다.
-- 승인자 식별: 게이트웨이가 사람 인증을 마친 뒤 요청에 `X-Openit-User: <인증된 사용자 ID>` 헤더를 붙인다(클라이언트가 보낸 같은 이름의 헤더는 게이트웨이가 지운다). 서버는 `release-approver` 토큰의 요청에서 이 헤더 값을 `approver_id`로 쓰고 본문의 `approver_id`는 무시한다(본문 값이 헤더와 다르면 거부). **헤더가 없으면 401로 거부한다**(D88 U7, 활성화·롤백과 같은 규칙: 승인자는 항상 개인으로 식별되어야 하고, 본문 값은 위조할 수 있다). 개발·시험은 시험용 게이트웨이나 시험 헤더를 붙여 호출한다.
+- 승인자 식별: 게이트웨이가 사람 인증을 마친 뒤 요청에 `X-Openit-User: <인증된 사용자 ID>` 헤더를 붙인다(클라이언트가 보낸 같은 이름의 헤더는 게이트웨이가 지운다). 서버는 `release-approver` 토큰의 요청에서 이 헤더 값을 승인자로 쓴다. 본문에 `approver_id` 를 넣으면 400 `INVALID_RECORD` 다(`ApprovalRequest` 는 닫힌 스키마, 3.4.4 문장 정정). **헤더가 없으면 401로 거부한다**(D88 U7, 활성화·롤백과 같은 규칙: 승인자는 항상 개인으로 식별되어야 하고, 본문 값은 위조할 수 있다). 개발·시험은 시험용 게이트웨이나 시험 헤더를 붙여 호출한다.
 
 사람의 반려는 `GateDecision.reject_codes`에 `CHECK_FAILED`를 쓰고, `checks`의 `HUMAN_APPROVAL`이 FAIL이면 사람이 반려한 것이다(코드를 새로 만들지 않는다, D58). 요청 본문의 `report_hash`는 필수다(3.0.0 `ApprovalRequest`): 승인자가 본 보고서의 `X-Openit-Report-Hash` 값을 그대로 보내고, 현재 보고서와 다르면 409 `STALE_REPORT`.
 
@@ -92,7 +92,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 
 ## I6 TraceIngest — 소유: ops-feedback (현행)
 
-`POST /v1/traces` 본문 `TraceEnvelope` → `IngestResult`.
+`POST /v1/traces` 본문 `TraceEnvelope` → `IngestResult`. 같은 (session_id, turn_id)는 내용이 달라도 200 `DUPLICATE`, 먼저 받은 것을 유지(CONVENTIONS 4절 예외).
 
 ## I7 FailureStore — 소유: ops-feedback
 
@@ -118,7 +118,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 | 정보 | `GET /v1/info` | 계약 `RuntimeInfo`(필수 9개: service, runtime_version, supported_contract_versions, backend, loaded, serving_config_hash, system_prompt_sha256, serving_config_expectation, test_hooks) |
 | 상태 | `GET /healthz`, `GET /readyz`(인증 없음) | 200. readyz는 요청을 받을 수 있을 때 200, 아니면 503 |
 
-- 인증은 Bearer 토큰(서버 `MODEL_RUNTIME_TOKENS`, 서비스 `SURVEY_INFERENCE_TOKEN_ENV`). 오류는 `BoundaryError` 본문과 9절 상태 코드(400 입력 계약 위반, 403, 404, 412, 422, 503).
+- 인증은 Bearer 토큰(서버 `MODEL_RUNTIME_TOKENS`, 서비스 `SURVEY_INFERENCE_TOKEN_ENV`). 오류는 `BoundaryError` 본문과 9절 상태 코드(400 입력 계약 위반, 401 토큰 없음·틀림 + `WWW-Authenticate: Bearer`, 403, 404, 412, 422, 503). `/healthz`·`/readyz` 는 인증이 없다.
 - 적재되지 않은 릴리스에 extract/respond가 오면 **404 NOT_FOUND**(서버가 재시작해 잊은 경우 포함). 서비스는 `PUT`으로 적재를 요청한다.
 - **extract 출력 규칙 보증(2.2.0, ADR 0010, D104):** 요청에 `flow`가 있으면 서버는 출력이 `ActionExtraction` 스키마를 통과할 뿐 아니라 `boundary_contracts.action_rules.check_action_extraction(input, output, flow)`(규칙 명세 `ActionExtractionRules`)에 위반이 없는 값만 낸다. 위반이면 재시도하고, 끝내 안 되면 아래 `OUTPUT_INVALID`다. **호출자는 통과한 값을 다시 검사하지 않는다(R7).**
 - 출력 검증(D36)은 서버의 책임이다. 서버는 `extract`에는 항상 `ActionExtraction` 스키마를 통과하는 값을, `respond`에는 항상 비어 있지 않은 문장을 낸다. 응답 헤더(두 호출 모두): `X-Openit-Outcome: ok|fallback`, `X-Openit-Attempts: <횟수>`(선택), `X-Openit-Protections: G5:1,G2:2`(규칙 코드별 건수, 선택, 코드 값은 model-runtime이 정한다). 서비스는 세기만 한다.

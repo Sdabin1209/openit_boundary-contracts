@@ -125,7 +125,7 @@ def safe_member_path(name: str) -> tuple[str, ...]:
 
 
 def extract_tar(src, dest: Path, max_bytes: int) -> None:
-    """src(파일 객체)의 비압축 tar를 dest에 푼다. 일반 파일과 디렉터리만 허용한다. 위반은 INTEGRITY_ERROR."""
+    """src(파일 객체)의 비압축 tar를 dest에 푼다. 일반 파일과 디렉터리만 허용한다. 내용 위반은 INTEGRITY_ERROR, 호출자 쪽 쓰기 실패는 UNAVAILABLE(R3.27)."""
     dest.mkdir(parents=True, exist_ok=True)
     try:
         with tarfile.open(fileobj=src, mode="r:") as tf:
@@ -153,8 +153,12 @@ def extract_tar(src, dest: Path, max_bytes: int) -> None:
                 target.parent.mkdir(parents=True, exist_ok=True)
                 with tf.extractfile(m) as r, open(target, "xb") as w:
                     shutil.copyfileobj(r, w, 1 << 20)
-    except (tarfile.TarError, OSError, EOFError) as e:
+    except (tarfile.TarError, EOFError) as e:
         raise integrity("tar를 읽거나 풀 수 없다", reason=type(e).__name__) from None
+    except OSError as e:
+        # 왜: src 는 이미 받아 둔 로컬 spool 이라 여기서 나는 OSError 는 호출자 쪽 파일 시스템(디스크 가득·쓰기 불가)의 일이다.
+        # 받은 내용의 문제(INTEGRITY_ERROR, 재시도 불가)가 아니라 비운 뒤 다시 하면 되는 일시 장애다(RUNTIME R3.27, CONVENTIONS 3절).
+        raise BoundaryError("UNAVAILABLE", "tar를 쓰지 못했다(호출자 쪽 파일 시스템)", {"reason": type(e).__name__}) from None
 
 
 def build_tar(entries: dict[str, bytes | Path]) -> tempfile._TemporaryFileWrapper:

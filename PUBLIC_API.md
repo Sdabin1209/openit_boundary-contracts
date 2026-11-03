@@ -57,6 +57,7 @@
 ## 프론트가 지킬 것
 - STT 결과가 비었거나 신뢰할 수 없으면 서버로 보내지 않고 "다시 말씀해 주세요"를 프론트에서 안내해도 된다.
 - 응답이 없거나 일시 장애(429·502·503·504·네트워크 오류)면 같은 `turn_id`로 지수 백오프(지터 포함)로 재시도하고, 총 재시도 예산(120초 = 대기의 2배, CONVENTIONS 시간 상한 사슬 D125)을 넘기면 직원 호출 화면을 보인다. 요청 타임아웃(키오스크 대기)은 60초다(D125, D119 대체). 401(기기 인증 실패)은 재시도로 풀리지 않으므로 재시도 없이 직원 호출 화면을 보인다(RUNTIME R3.13).
+- 408 을 받거나 요청이 한도 안에 도착하지 못해 연결이 끊기면 일시 장애와 같다(같은 `turn_id`, 위 재시도 규칙). 413·414·431 은 재시도하지 않고(같은 요청은 같은 결과) 401 과 같이 직원 호출 화면을 보인다(RFC 9110 15.5.9·15.5.14, RUNTIME R3.5·R3.6·R3.17).
 - 한 세션의 요청은 순서대로 하나씩 보낸다(동시에 두 턴을 보내지 않는다).
 
 ## 아직 정하지 않은 것(프론트와 협의 필요 없이 우리가 정함, 바뀔 수 있음)
@@ -76,7 +77,7 @@
 ## B. 결과 조회 API (병원/의사 시스템용)
 3.2.0(U83, 사용자 결정 2026-11-03): 문진 결과는 **의사가 본다**. 게이트웨이는 아래 읽기 두 경로와 확인 표시 경로를 역할 `clinician`(사람 계정, Exposure kind account)에 열고, 상류에는 `result-reader` 토큰을 붙이고 `X-Openit-User`(인증 계정)를 넘긴다. 다른 역할·무인증은 403/401. 결과 화면은 admin-console 의 "문진 결과" 탭(목록·상세·인쇄·확인 표시). FHIR `QuestionnaireResponse` 내보내기는 EMR 연동 옵션으로 다음 판.
 - 확인 표시: `POST /v1/results/{session_id}/ack` 본문 `{}` → `SessionResult`(갱신본). 결과에 `acknowledged_by`(계정 ID, 게이트웨이의 X-Openit-User)·`acknowledged_at`(ISO)이 채워진다(문진 스키마 SessionResult 의 선택 필드, 정수 버전 1 호환 추가). 두 번째 호출은 멱등(처음 값 유지).
-- 도착 알림: 세션이 `ENDED_*` 로 끝나면 직원·의사 콘솔 SSE(`GET /v1/staff/alerts/stream`)에 이벤트 `result_ready`(본문 `{"session_id", "status", "ended_at"}`; subject_ref 는 넣지 않는다)를 보낸다. 같은 때 `topics`에 `results`가 있는 푸시 구독자(clinician)에게 웹 푸시 `StaffPushPayload{session_id, kind: "RESULT_READY"}`를 보낸다(3.4.0, U92: 화면을 닫은 의사도 도착을 안다). 본문에 subject_ref·결과 값은 넣지 않는다. 발송 실패는 직원 알림과 같은 재시도 규칙을 따른다.
+- 도착 알림: 세션이 `ENDED_*` 로 끝나면 직원·의사 콘솔 SSE(`GET /v1/staff/alerts/stream`)에 이벤트 `result_ready`(본문 `{"session_id", "status", "ended_at"}`; subject_ref 는 넣지 않는다)를 보낸다. 같은 때 `topics`에 `results`가 있는 푸시 구독자(clinician)에게 웹 푸시 `StaffPushPayload{session_id, kind: "RESULT_READY"}`를 보낸다(3.4.0, U92: 화면을 닫은 의사도 도착을 안다). 본문에 subject_ref·결과 값은 넣지 않는다. 발송 실패는 직원 알림과 같은 재시도 규칙을 따른다. 콘솔이 SSE 에서 `resync`(`EVENTS_NOT_RESUMABLE`)를 받으면 직원 알림은 `GET /v1/staff/alerts?status=OPEN`, 결과 도착은 `GET /v1/results?updated_after=<마지막으로 받은 heartbeat 의 ts>` 로 다시 맞춘다. `updated_after` 는 세션 결과가 마지막으로 바뀐 시각(상태 변경·답 확정·확인 표시 포함)이 그 값보다 뒤인 결과만 뜻한다(3.4.4).
 - 접근 기록: 결과 읽기·확인 표시마다 아래 접근 기록(계정 ID 포함)을 남기고 보존 365일(감사 기록).
 역할 `result-reader` 토큰(상류·기계용). 호출마다 접근 기록(시각, 역할 이름, 게이트웨이가 인증한 행위자 `X-Openit-User`가 있으면 그 계정 ID, session_id 또는 조회 조건, 결과; 토큰·발화 제외)을 남기고, 기록을 못 남기면 데이터를 주지 않는다(503).
 - `GET /v1/results/{session_id}` → `SessionResult`: `{"session_id", "subject_ref": str|null, "status": "IN_PROGRESS|PAUSED_RISK|ENDED_COMPLETE|ENDED_STAFF|ENDED_LEFT|ENDED_USER_STOP", "started_at": ISO|null, "ended_at": ISO|null, "release_id": str|null, "question_set_id": str|null, "question_set_title": str|null, "question_bank_version": str|null, "answers": [{"key","value","status","precision"}], "skipped_details": [{"item", "slot"?, "reason": "UNKNOWN|REJECTED|UNCLEAR|REASK_LIMIT|..."}]}`. 끝나지 않은 세션과 직원·이탈로 끝난 세션의 **부분 결과도 상태와 함께** 돌려준다. 환자 발화 원문과 대화 로그는 포함하지 않는다(직원 세션 조회에만 있다).

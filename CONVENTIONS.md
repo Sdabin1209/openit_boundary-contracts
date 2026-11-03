@@ -27,7 +27,7 @@
 | NOT_FOUND | 대상이 없다 | false |
 | INVALID_RECORD | 보낸 레코드가 스키마를 위반한다 | false |
 | UNSUPPORTED_VERSION | 계약 버전을 지원하지 않는다(MAJOR 불일치, 문진 스키마 정수 불일치) | false |
-| CONFLICT | 같은 ID에 다른 내용을 쓰려 했다 | false |
+| CONFLICT | 같은 ID에 다른 내용을 쓰려 했거나, 요청이 대상의 현재 순서·상태와 어긋난다(PUBLIC_API 409, HTTP.md I5) | false |
 | INTEGRITY_ERROR | 해시가 맞지 않는다 | false |
 | FAILED_PRECONDITION | 지금 상태에서는 할 수 없다(예: 통과하지 않은 릴리스 활성화) | false |
 | PERMISSION_DENIED | 권한이 없다 | false |
@@ -43,6 +43,8 @@ SDK는 `BoundaryError`를 예외로 던진다. 메모리 구현도 같은 예외
 - 같은 ID에 다른 내용이면 `CONFLICT`다.
 - 쓰는 쪽은 쓰기 전에 스키마로 검증한다. 받는 쪽도 검증하며, 위반이면 `INVALID_RECORD`다.
 - 호출자는 `UNAVAILABLE`일 때만 재시도한다. 재시도해도 결과가 같다는 것이 위 규칙으로 보장된다.
+- **동시 도착(3.4.4).** 같은 ID(+버전)에 대한 쓰기 둘이 동시에 도착해도 결과는 둘을 어떤 순서로든 하나씩 처리한 것과 같다: 하나가 만들고 나머지는 같은 내용이면 200, 다르면 409 `CONFLICT`. 저장소의 유일 제약 경합을 503 으로 내지 않는다(RFC 9110 9.2.2).
+- **예외: 턴 기록 수집(I6).** 같은 (session_id, turn_id)의 `TraceEnvelope` 가 다시 오면 내용이 달라도 200 `IngestResult{status:"DUPLICATE"}` 이고 먼저 받은 것을 유지한다(409 아님). 수집은 최소 한 번 전달이라 보내는 쪽이 재전송에 안전해야 한다.
 
 ## 5. 목록과 페이지
 
@@ -53,7 +55,7 @@ SDK는 `BoundaryError`를 예외로 던진다. 메모리 구현도 같은 예외
 - 서비스 사이 호출은 `Authorization: Bearer <서비스 토큰>`이고 토큰은 파일로 받는다(D84: `NAME_FILE`에 경로를 주고 `boundary_contracts.secrets.read_secret(NAME)`으로 읽는다. 환경 변수 `NAME`은 개발·시험용 호환일 뿐이며 운영에서는 쓰지 않는다). 읽기 SDK는 읽기 전용 토큰, 쓰기는 소유 영역의 토큰만 쓴다.
 - 저장소의 쓰기 권한은 소유 영역 하나에만 있다(경계 규칙 1). 다른 영역에는 읽기 전용 DB 계정만 준다.
 - 문진 대상 인증과 공개 API 인증은 이 규약의 대상이 아니다(O06, Frontend 팀과 협의).
-- **사람 신원과 역할(3.4.0, U82, head ADR 0014).** 사람 인증은 게이트웨이가 표준 IdP(Keycloak, OIDC)로 끝낸다. 게이트웨이는 인증을 마친 요청에 `X-Openit-User: <사용자 ID>`와 `X-Openit-Roles: <역할 쉼표 목록>`을 붙이고, 클라이언트가 보낸 같은 이름의 헤더는 지운다. 역할 이름은 고정 목록 `staff`, `operator`, `release-approver`, `reviewer`, `author`, `clinical-reviewer`, `clinician`, `admin`이다(IdP 그룹 이름과 같다). 사용자별 역할이 필요한 서비스는 자체 설정(사용자→역할 표)을 두지 않고 `X-Openit-Roles`를 읽는다. 역할이 하나도 없는 인증 사용자(가입 승인 대기)는 게이트웨이가 403 `{"code":"PERMISSION_DENIED","details":{"reason":"ACCOUNT_PENDING_APPROVAL"}}`로 막는다.
+- **사람 신원과 역할(3.4.0, U82, head ADR 0014).** 사람 인증은 게이트웨이가 표준 IdP(Keycloak, OIDC)로 끝낸다. 게이트웨이는 인증을 마친 요청에 `X-Openit-User: <사용자 ID>`와 `X-Openit-Roles: <역할 쉼표 목록>`을 붙이고, 클라이언트가 보낸 같은 이름의 헤더는 지운다. 역할 이름은 고정 목록 `staff`, `operator`, `release-approver`, `reviewer`, `author`, `clinical-reviewer`, `clinician`, `admin`이다(IdP 그룹 이름과 같다). 사용자별 역할이 필요한 서비스는 자체 설정(사용자→역할 표)을 두지 않고 `X-Openit-Roles`를 읽는다. 역할이 하나도 없는 인증 사용자(가입 승인 대기)는 `Exposure.auth.kind=authenticated` 경로와 계정 관리 화면을 뺀 모든 경로에서 게이트웨이가 403 `{"code":"PERMISSION_DENIED","details":{"reason":"ACCOUNT_PENDING_APPROVAL"}}`로 막는다(RUNTIME R3.24).
 
 ## 7. SDK의 형태
 
@@ -88,12 +90,12 @@ SDK의 원격 구현과 서비스 API가 같은 규칙을 쓴다.
 HTTP 층의 보충 규칙(PUBLIC_API.md의 표가 공개 API의 정본이다):
 - **전송 계층 한도(2.2.2):** 본문이 상한을 넘으면 413, 요청 줄이 너무 길면 414, 헤더가 너무 크면 431이다(RFC 9110 15.5.14·15.5.15, RFC 6585 5). 이 응답은 HTTP 서버(예: waitress)가 앱을 부르기 전에 낼 수 있어 본문이 `BoundaryError`가 아닐 수 있다. 클라이언트는 본문과 무관하게 `INVALID_RECORD`(재시도 안 함)로 읽는다(`details.http_status`). 서비스는 상한 값을 자기 ADR에 적는다. 서버가 본문을 읽지 않고 413을 보낸 뒤 닫아 클라이언트의 본문 쓰기가 끊겨도, 클라이언트는 응답을 읽어 같은 규칙을 지킨다(2.4.2, RFC 9112 9.5).
 - **원래 상태 코드(2.4.2):** HTTP 오류 응답에서 만든 `BoundaryError`는 `details.http_status`에 원래 상태를 담는다(예: 같은 `PERMISSION_DENIED`의 401과 403 구분).
-- **401과 403은 두 종류의 API에서 다르다.** (1) **공개 API**(`PUBLIC_API.md`: 키오스크·직원 콘솔이 부르는 문진 서비스): 토큰이 없거나 틀리면 401, 토큰은 맞지만 그 호출 권한이 없으면 403이다. (2) **영역 사이 서비스 API**(`HTTP.md`의 I1~I9: 출고 게이트, 모델 등록소, 모델 서버, 운영 기록, 문항 저작): 공개 API와 같다. **토큰이 없거나 틀리면 401**이고 응답에 `WWW-Authenticate: Bearer`를 싣는다. 토큰은 맞지만 그 호출 권한이 없으면 403이다(RFC 9110 15.5.2·11.6.1, RFC 6750 3절; 2026-10-29에 D106로 정함. 이전에는 토큰이 없거나 틀린 경우도 403이었다). 사람 행위자가 필요한 `POST /v1/approvals`·`activate`·`rollback`·`cases/{id}/review`는 `X-Openit-User`가 없으면 401이다. 어느 쪽이든 `BoundaryError.code`는 `PERMISSION_DENIED`이고 재시도하지 않는다. `boundary_contracts.clients`는 401과 403을 모두 `PERMISSION_DENIED`로 읽으므로 클라이언트는 바뀌지 않는다.
+- **401과 403은 두 종류의 API에서 다르다.** (1) **공개 API**(`PUBLIC_API.md`: 키오스크·직원 콘솔이 부르는 문진 서비스): 토큰이 없거나 틀리면 401, 토큰은 맞지만 그 호출 권한이 없으면 403이다. (2) **영역 사이 서비스 API**(`HTTP.md`의 I1~I9: 출고 게이트, 모델 등록소, 모델 서버, 운영 기록, 문항 저작): 공개 API와 같다. **토큰이 없거나 틀리면 401**이고 응답에 `WWW-Authenticate: Bearer`를 싣는다. 토큰은 맞지만 그 호출 권한이 없으면 403이다(RFC 9110 15.5.2·11.6.1, RFC 6750 3절; 2026-10-29에 D106로 정함. 이전에는 토큰이 없거나 틀린 경우도 403이었다). 사람 행위자가 필요한 `POST /v1/approvals`·`activate`·`rollback`·`cases/{id}/review`는 사람 요청에 `X-Openit-User`가 없으면 401이다. 단 서비스 역할 토큰(release-gate `GATE_SERVICE_ROLES`, 기본 `ops-feedback`)으로 오는 기계 호출의 `activate`·`rollback`은 이 헤더 없이 받고 행위자를 `service:<역할>`로 기록한다(RUNTIME R10.9). `POST /v1/approvals`와 `cases/{id}/review`는 어느 토큰이든 헤더가 필요하다. 어느 쪽이든 `BoundaryError.code`는 `PERMISSION_DENIED`이고 재시도하지 않는다. `boundary_contracts.clients`는 401과 403을 모두 `PERMISSION_DENIED`로 읽으므로 클라이언트는 바뀌지 않는다.
 - **과다 요청.** 공개 API는 429와 `UNAVAILABLE`을 내고 `Retry-After`(초, 정수)를 따라 재시도한다. 영역 사이 서비스 API는 과다 요청에 **503 `UNAVAILABLE`** 을 내며 `Retry-After`는 서비스마다 다르다(없을 수 있다). 호출자는 둘 다 일시 장애로 취급해 백오프 재시도한다.
 - **재시도 의미는 `code`의 기본값에 사유가 덧붙는다.** `retryable`은 `code`별 기본값이다. 같은 `code` 안에서 재시도해도 되는 사유는 `details.reason`으로 구분한다. 예: 409 `CONFLICT`는 기본 재시도하지 않지만 `details.reason`이 `TURN_IN_PROGRESS`이면 `Retry-After` 뒤 같은 `turn_id`로 다시 보낸다. 새 사유는 `PUBLIC_API.md`나 `HTTP.md`에 적힌 것만 쓴다.
 - **중계를 거쳐도 의미는 같다(RUNTIME.md).** TLS 종단·서버 분리·재시작이 끼어도 아래 상태 코드의 의미는 바뀌지 않는다. 실패 경우별 응답은 RUNTIME.md R3 표가 정본이다.
 - **gateway(역방향 프록시)의 상류 장애 응답은 `BoundaryError`가 아니다.** 상류 연결 거부·재시작은 503, 상류 시간 초과는 504이고 본문은 `{"code": "UPSTREAM_UNAVAILABLE"}`, `Retry-After`가 붙는다. 이 `code`는 `BoundaryError` 열거에 없다. 클라이언트는 502·503·504를 모두 재시도 가능한 일시 장애로 취급한다(`Retry-After`가 있으면 따른다). 서비스가 직접 502·504를 내는 일은 없다.
-- **SDK 클라이언트의 `Retry-After`.** 지금 `boundary_contracts.clients`의 원격 구현은 `Retry-After`를 읽지 않고 호출자가 정한다(서비스 영역이 `UNAVAILABLE` 처리를 직접 한다). 읽도록 바꾸는 것은 후속 MINOR 후보다.
+- **SDK 클라이언트의 `Retry-After`(3.1.2 부터, 3.4.4 문장 정정).** 클라이언트는 본문이 `BoundaryError` 인 409·429·503 응답의 `Retry-After`(0~3600 정수 초)를 `details.retry_after_s` 로 호출자에게 넘긴다. 본문이 `BoundaryError` 가 아닌 502·503·504(게이트웨이 `UPSTREAM_UNAVAILABLE` 포함)는 `UNAVAILABLE` 만 내고 `retry_after_s` 는 없다. 대기와 재시도는 호출자가 정한다.
 
 - 수집(I6): `POST /v1/traces`, 본문 `TraceEnvelope`, 성공은 200과 `IngestResult`.
 - 쓰기 요청의 멱등성은 4절을 따른다(같은 ID와 내용이면 같은 응답).
@@ -143,6 +145,7 @@ HTTP 층의 보충 규칙(PUBLIC_API.md의 표가 공개 API의 정본이다):
 | release-gate 승인·활성화·롤백·조회 | 181초(180) | 170초 | 190초 | 계산된 최악 승인 128초(D120 계기: 설정 상한의 합 — DB 문장 16×3초 + 이웃 호출 8×10초; 실측 아님) 위의 여유 |
 | question-authoring 저자 경로·신호 | 121초(120) | 110초 | 130초 | 계산된 최악 자료 올리기 62초(설정 상한의 합, 실측 아님) 위의 여유 |
 | ops-feedback 검토 | 61초(60) | 55초 | 70초 | 프록시 표준 60초(계산된 최악 11초) |
+| 표에 행이 없는 사람·기기 경로(survey-service 의사 결과 조회·확인, 계정 관리 화면, 화면 정적 파일) | 56초(연결 1초 + 응답 헤더 55초) | 받는 쪽이 정한다(56초보다 짧게) | 60초 | 가장 짧은 사람 화면 행(환자·직원 경로)의 일반화, 프록시 표준 60초(측정 안 함). RUNTIME R3.3 |
 
 재시도는 **남은 턴 예산이 호출 상한 이상일 때만** 한다. 남은 예산이 모자라면 재시도하지 않고 실패로 처리한다. 값은 측정이 아니라 표준·여유에서 나온 상한이며, 목표(2초)의 달성 여부는 지표(`METRICS.md`)로 본다. 상태 확인(`/readyz` 2초)은 관측 임계라 이 표와 별개다.
 
