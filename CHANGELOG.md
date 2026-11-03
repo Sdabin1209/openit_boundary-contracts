@@ -14,6 +14,7 @@
 - **L13** `QuestionAuthoringEnv.QA_REQUIRE_TWO_PERSON` 기본 false(사용자 결정 2026-11-03).
 - **U83 결과 전달**(사용자 결정 2026-11-03): PUBLIC_API B절 — 결과 읽기 경로를 역할 `clinician` 에 열고(게이트웨이), `POST /v1/results/{id}/ack`(확인 표시, SessionResult 에 acknowledged_by/at 선택 필드), SSE `result_ready` 이벤트, 결과 접근 기록 365일. FHIR 내보내기는 다음 판 옵션.
 - **CR-007(model-runtime)** `RuntimeProfile.engine.enable_prefix_caching`(boolean) 추가, `ModelServingEnv` 에 HF_HUB_DISABLE_TELEMETRY·HF_DATASETS_OFFLINE 선언.
+- **U36·G12 빈칸 처리**: 되묻기 한도 뒤 정지 대신 빈칸(skipped_details.reason=REASK_LIMIT). SessionState.pause_reason 의 REASK_LIMIT 는 폐기 예정 표기. PUBLIC_API B절 예시 skipped → skipped_details.
 - 3.1.3 의 변경(next_item 은 서버가 정한다, ADR 0014)을 포함한다. 3.1.3 태그는 배포되지 않았다.
 
 ## 3.1.3 (PATCH, 와이어 형식 변경 없음 — `next_item`의 책임을 서버로)
