@@ -5,6 +5,7 @@
 ## 3.4.0 (MINOR, 와이어 추가 — 결과 도착 웹 푸시, U92; 사용자 결정 2026-11-03 "도착 알림")
 왜: 3.2.0은 결과 도착을 의사 화면이 열려 있을 때(SSE)만 알렸다. 화면을 닫은 의사는 결과가 와도 몰랐다.
 - `StaffPushPayload.kind`에 `RESULT_READY`(본문 session_id·kind만, tag `result-`+session_id).
+- 사람 신원·역할 규약(CONVENTIONS 6절, U82·head ADR 0014): 게이트웨이가 `X-Openit-User`와 `X-Openit-Roles`(고정 역할 목록)를 붙이고 역할 없는 사용자는 403 ACCOUNT_PENDING_APPROVAL. `QuestionAuthoringEnv.QA_USER_ROLES` 삭제(서비스가 사용자→역할 표를 갖지 않는다).
 - `OpsFeedbackServerEnv.OPS_DB_SCHEMA` 기본 apply → verify, 설명 정정(L08: ops-feedback DB 계정 분리, 서버·잡은 apply 거부).
 - PUBLIC_API: 푸시 구독 본문에 선택 `topics`(`alerts`=staff, `results`=clinician, 기본 `alerts`). 세션이 `ENDED_*`면 `results` 구독자에게 웹 푸시. B절의 "웹 푸시로는 보내지 않는다" 삭제.
 

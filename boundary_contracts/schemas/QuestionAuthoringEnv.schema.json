@@ -91,8 +91,7 @@
      "QA_SCHEMA_DIR",
      "QA_SHUTDOWN_GRACE_SECONDS",
      "QA_SIGNALS_DEADLINE_SECONDS",
-     "QA_SOURCE_RETENTION_DAYS",
-     "QA_USER_ROLES"
+     "QA_SOURCE_RETENTION_DAYS"
     ]
    }
   ]
@@ -145,11 +144,6 @@
   "QA_GATEWAY_TOKENS": {
    "$ref": "#/$defs/RoleTokenList",
    "description": "개발·시험 호환: gateway 서비스 토큰 목록. 이 토큰의 요청만 X-Openit-User 를 신뢰. 운영 금지(운영은 QA_GATEWAY_TOKENS_FILE)"
-  },
-  "QA_USER_ROLES": {
-   "type": "string",
-   "pattern": "^([^=,]+=(question-author|clinical-reviewer))(,[^=,]+=(question-author|clinical-reviewer))*$",
-   "description": "gateway 경유 사용자의 역할표 '사용자ID=역할' 쉼표 목록"
   },
   "QA_FAILURES_URL": {
    "$ref": "#/$defs/Url",

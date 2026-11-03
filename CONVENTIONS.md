@@ -53,6 +53,7 @@ SDK는 `BoundaryError`를 예외로 던진다. 메모리 구현도 같은 예외
 - 서비스 사이 호출은 `Authorization: Bearer <서비스 토큰>`이고 토큰은 파일로 받는다(D84: `NAME_FILE`에 경로를 주고 `boundary_contracts.secrets.read_secret(NAME)`으로 읽는다. 환경 변수 `NAME`은 개발·시험용 호환일 뿐이며 운영에서는 쓰지 않는다). 읽기 SDK는 읽기 전용 토큰, 쓰기는 소유 영역의 토큰만 쓴다.
 - 저장소의 쓰기 권한은 소유 영역 하나에만 있다(경계 규칙 1). 다른 영역에는 읽기 전용 DB 계정만 준다.
 - 문진 대상 인증과 공개 API 인증은 이 규약의 대상이 아니다(O06, Frontend 팀과 협의).
+- **사람 신원과 역할(3.4.0, U82, head ADR 0014).** 사람 인증은 게이트웨이가 표준 IdP(Keycloak, OIDC)로 끝낸다. 게이트웨이는 인증을 마친 요청에 `X-Openit-User: <사용자 ID>`와 `X-Openit-Roles: <역할 쉼표 목록>`을 붙이고, 클라이언트가 보낸 같은 이름의 헤더는 지운다. 역할 이름은 고정 목록 `staff`, `operator`, `release-approver`, `reviewer`, `author`, `clinical-reviewer`, `clinician`, `admin`이다(IdP 그룹 이름과 같다). 사용자별 역할이 필요한 서비스는 자체 설정(사용자→역할 표)을 두지 않고 `X-Openit-Roles`를 읽는다. 역할이 하나도 없는 인증 사용자(가입 승인 대기)는 게이트웨이가 403 `{"code":"PERMISSION_DENIED","details":{"reason":"ACCOUNT_PENDING_APPROVAL"}}`로 막는다.
 
 ## 7. SDK의 형태
 
