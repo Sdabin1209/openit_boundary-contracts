@@ -15,7 +15,7 @@ import urllib.parse
 import urllib.request
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Mapping, Optional
 
 from ..canonical import content_hash as _content_hash, directory_hash, sha256_hash
 from ..errors import CODES, BoundaryError
@@ -243,12 +243,38 @@ def require_tls_url(base_url: str) -> None:
     raise ValueError(f"평문 http:// 는 같은 기계 안(loopback)만 허용한다: {parts.scheme}://{host} — https:// 주소를 쓴다(U99)")
 
 
+def require_egress_proxy(url: str) -> None:
+    """자기 영역 게이트웨이의 CONNECT 주소는 같은 네트워크 공간의 loopback 평문만 받는다(3.4.4, CONVENTIONS 13절).
+    왜: 터널 안의 TLS 가 끝까지 유지되므로 프록시 구간은 평문 CONNECT 여도 내용이 드러나지 않고(RFC 9110 9.3.6),
+    loopback 밖이면 다른 기계를 거쳐 나가게 되어 '자기 영역 게이트웨이'가 아니다."""
+    parts = urllib.parse.urlsplit(url)
+    host = (parts.hostname or "").lower()
+    ok_host = host == "localhost"
+    if not ok_host:
+        try:
+            ok_host = ipaddress.ip_address(host).is_loopback
+        except ValueError:
+            ok_host = False
+    if parts.scheme != "http" or not ok_host or parts.port is None or parts.path not in ("", "/") or parts.query:
+        raise ValueError("egress_proxy 는 http://<loopback>:<포트> 형식이어야 한다(자기 영역 게이트웨이, CONVENTIONS 13절)")
+
+
+def egress_proxy_from(environ: Mapping[str, str]) -> Optional[str]:
+    """영역의 배선 코드가 자기 환경에서 공통 이름 OPENIT_EGRESS_PROXY 를 명시적으로 꺼내 클라이언트에 넘길 때 쓴다(R9.1: 환경을 통째로 넘기지 않는다)."""
+    v = environ.get("OPENIT_EGRESS_PROXY")
+    if v is None or v == "":
+        return None
+    require_egress_proxy(v)
+    return v
+
+
 class HttpClientBase:
     """생성자는 base_url, token, timeout만 받는다. 환경 변수는 읽지 않는다. 재시도는 호출자가 UNAVAILABLE일 때만 한다."""
     max_tar_bytes = 8 * 2**30      # 풀기 전 총 크기 상한(인스턴스나 서브클래스에서 바꾼다)
     max_body_bytes = 256 * 2**20   # JSON·바이트 응답 상한
 
-    def __init__(self, base_url: str, token: Optional[str], timeout: float = 10.0, *, user: Optional[str] = None):
+    def __init__(self, base_url: str, token: Optional[str], timeout: float = 10.0, *, user: Optional[str] = None,
+                 egress_proxy: Optional[str] = None):
         """user: 사람 행위자의 인증된 ID를 `X-Openit-User`로 싣는다(3.1.0, D88·HTTP.md I5). 게이트웨이를 거치면 게이트웨이가 인증 계정으로 덮어쓰고,
         게이트웨이 뒤 내부망에서 서비스를 직접 부르는 도구(시험·운영)만 이 값을 쓴다. 이 헤더가 필요한 쓰기(승인·활성화·롤백·검토)가 비공개 속성 없이 부를 수 있게 한다."""
         require_tls_url(base_url)
@@ -259,8 +285,14 @@ class HttpClientBase:
             check_id(user, "user")
             self._headers["X-Openit-User"] = user
         self._timeout = timeout
-        # ProxyHandler({}): 환경 변수의 프록시를 읽지 않는다
-        self._opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect, _HTTPHandler, _HTTPSHandler)
+        # 환경 변수의 프록시(HTTPS_PROXY 등)는 읽지 않는다. 영역 게이트웨이를 거쳐 나가는 길은 egress_proxy 로만 명시한다
+        # (3.4.4, CONVENTIONS 13절·RUNTIME R1.8: 영역의 모든 출력은 그 영역 게이트웨이를 지난다. 표준 HTTP CONNECT 터널, RFC 9110 9.3.6 —
+        # TLS 는 호출 컴포넌트와 받는 영역 게이트웨이 사이에서 끝까지 유지되고, 자기 게이트웨이는 허용된 상대에게만 터널을 연다).
+        proxies = {}
+        if egress_proxy is not None:
+            require_egress_proxy(egress_proxy)
+            proxies = {"https": egress_proxy}
+        self._opener = urllib.request.build_opener(urllib.request.ProxyHandler(proxies), _NoRedirect, _HTTPHandler, _HTTPSHandler)
 
     # ---- 요청 ----
     def _scrub(self, text: str) -> str:

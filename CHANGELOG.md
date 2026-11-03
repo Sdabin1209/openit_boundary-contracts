@@ -15,6 +15,7 @@
 - 새 스키마 `HealthStatus`(R5.1, OPEN_GAPS U101 닫음): 모든 /healthz·/readyz 본문의 공통 최소 모양. 영역마다 달랐던 '아님' 표기('not ready'·'not-ready')를 정본 `not_ready` 로 정하고 옛 표기는 같은 뜻으로 받는다(생산자는 옮긴다). 시험 test_health_status_344.py(영역 준비 확인 예시 전부가 공통 모양도 통과).
 - RUNTIME 행마다 "출력하는 쪽 → 받는 쪽" 칸. 중계 표현을 영역 게이트웨이·platform 공개 입구로.
 - 호출 × 실패 칸 810개 확정(RUNTIME-MATRIX-CELLS.md). 열린 칸을 닫는 계약 행: RUNTIME R3.19~R3.27(R3.22 는 R3.10 에 합침)·R9.3·R10.13 신설, R1.5·R1.6·R3.3·R3.10·R3.12·R3.13·R3.17·R3.18·R4.6·R9.2·R10.2·R10.3(10초, 코드·사슬과 같게)·R10.4·R10.6·R10.11 보충, 게이트웨이 `Retry-After: 5`. CONVENTIONS 3절 CONFLICT·4절 동시 도착·I6 중복 예외·6절 승인 대기·9절 기계 호출 헤더와 클라이언트 Retry-After 문장 정정·시간 사슬 56초 행. HTTP.md I5 activate 멱등·롤백 REJECTED 200·approver_id 400, I6 중복, I9 401. PUBLIC_API 키오스크 408·413, 결과 resync·updated_after 뜻.
+- 영역 게이트웨이의 나가는 쪽(CONVENTIONS 13절, RUNTIME R1.8·IN-EGRESS): 공통 환경 변수 `OPENIT_EGRESS_PROXY`, 클라이언트 `egress_proxy` 인자·`egress_proxy_from(environ)`·`require_egress_proxy`(loopback http 만). 표준 HTTP CONNECT 터널(RFC 9110 9.3.6), TLS 는 끝까지. 시험 test_egress_proxy_344.py(CONNECT 대상 기록·거절·미도달·형식, 변이 확인).
 - 클라이언트 `extract_tar`: 호출자 쪽 쓰기 실패(OSError)는 `UNAVAILABLE`(전에는 `INTEGRITY_ERROR` 로 재시도를 막았다, R3.27). 시험 test_extract_tar_disk_344.py(변이 확인).
 - `JobsDeclaration.job.timeout_seconds`(선택, 정수 ≥ 1): 잡 한 번 실행의 시간 상한. 선택인 이유는 기존 선언과의 하위 호환. 3.4.2 의 Env 선택 필드처럼 레코드 와이어가 아니라 선언이라 PATCH.
 
