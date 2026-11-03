@@ -1,161 +1,178 @@
 {
- "$schema": "https://json-schema.org/draft/2020-12/schema",
- "$id": "Exposure.schema.json",
- "title": "Exposure",
- "description": "서비스(영역)의 게이트웨이 노출 표(라벨 io.openit.exposure 의 내용). 영역이 들어오는 쪽(routes: 어느 경로를 어떤 인증으로 platform 공개 입구에 내는가)과 나가는 쪽(egress: 영역 게이트웨이가 CONNECT 터널을 열어 줄 상대)을 선언한다. deploy 가 배포 때 이 선언으로 게이트웨이 설정을 만들거나 대조한다(게이트웨이 제품·설정 파일은 platform·deploy 내부, 3.4.4 검토 B-19). 역할 이름은 CONVENTIONS 6절의 역할 집합이어야 한다(여기서는 형식만 본다). 노출하지 않는 경로는 auth.kind=denied 로 적는다: 목록에 없는 /v1/* 는 404 가 기본이다. 게이트웨이는 모든 경로에서 클라이언트가 보낸 X-Openit-User·X-Openit-Roles·X-Openit-Device 를 지운다(CONVENTIONS 6절).",
- "x-producers": ["*"],
- "x-consumers": ["platform", "deploy"],
- "type": "object",
- "properties": {
-  "service": {
-   "type": "string",
-   "pattern": "^[a-z][a-z0-9-]*$"
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Exposure.schema.json",
+  "title": "Exposure",
+  "description": "서비스(영역)의 게이트웨이 노출 표(라벨 io.openit.exposure 의 내용). 영역이 들어오는 쪽(routes: 어느 경로를 어떤 인증으로 platform 공개 입구에 내는가)과 나가는 쪽(egress: 영역 게이트웨이가 CONNECT 터널을 열어 줄 상대)을 선언한다. deploy 가 배포 때 이 선언으로 게이트웨이 설정을 만들거나 대조한다(게이트웨이 제품·설정 파일은 platform·deploy 내부, 3.4.4 검토 B-19). 역할 이름은 CONVENTIONS 6절의 역할 집합이어야 한다(여기서는 형식만 본다). 노출하지 않는 경로는 auth.kind=denied 로 적는다: 목록에 없는 /v1/* 는 404 가 기본이다. 게이트웨이는 모든 경로에서 클라이언트가 보낸 X-Openit-User·X-Openit-Roles·X-Openit-Device 를 지운다(CONVENTIONS 6절).",
+  "x-producers": [
+    "*"
+  ],
+  "x-consumers": [
+    "platform",
+    "deploy"
+  ],
+  "type": "object",
+  "properties": {
+    "service": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "egress": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "description": "받는 서비스 이름(INTERFACES 한눈에 표의 호출 관계 안에서만)"
+          },
+          {
+            "const": "external:web-push",
+            "description": "공인 주소의 443(웹 푸시 발송, RUNTIME R3.18). survey-service 만 선언한다(R6.4)"
+          },
+          {
+            "const": "external:backup",
+            "description": "platform 백업 저장소(RUNTIME R10.1)"
+          }
+        ]
+      },
+      "description": "3.4.4(CONVENTIONS 13절, RUNTIME R1.8): 이 영역의 게이트웨이가 CONNECT 터널을 열어 줄 상대. 없으면 빈 목록과 같다(영역 밖으로 나가는 호출이 없다). 목록 밖 상대는 403(EGRESS_DENIED)"
+    },
+    "routes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/route"
+      }
+    }
   },
-  "egress": {
-    "type": "array",
-    "uniqueItems": true,
-    "items": {
-      "oneOf": [
-        {
+  "required": [
+    "service",
+    "routes"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "route": {
+      "type": "object",
+      "properties": {
+        "paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^/"
+          }
+        },
+        "methods": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE"
+            ]
+          },
+          "description": "비우면 모든 메서드"
+        },
+        "auth": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "device-token",
+                "account",
+                "authenticated",
+                "machine-token",
+                "none",
+                "denied"
+              ],
+              "description": "device-token: 키오스크 기기(mTLS/기기 토큰). account: 사람 계정(roles 필수). authenticated: 로그인한 사람 계정이면 역할과 무관하게 연다(3.4.0, U82: 데이터 없는 화면 정적 파일 — 가입 승인 대기 계정에게 안내를 보이려면 화면이 열려야 한다; roles 를 쓰지 않는다). machine-token: (3.4.7 정정) 비사람 호출자의 경로. 게이트웨이는 토큰을 대조하지 않고 받는 서비스가 대조한다(RUNTIME R3.23). platform 공개 입구는 이 경로를 내보내지 않는다(denied 와 같다): compose 밖 호출자는 R1.5 의 hosts 표로 받는 영역의 게이트웨이에 바로 간다. 값은 4.0.0 에서 뺀다. none: 인증 없음(/healthz 등). denied: 밖에서 닿을 수 없음"
+            },
+            "roles": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z][a-z-]*$"
+              }
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "account"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "roles"
+            ],
+            "properties": {
+              "roles": {
+                "minItems": 1
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "upstream_token": {
           "type": "string",
           "pattern": "^[a-z][a-z0-9-]*$",
-          "description": "받는 서비스 이름(INTERFACES 한눈에 표의 호출 관계 안에서만)"
+          "description": "gateway 가 상류에 붙이는 서비스 토큰의 비밀 이름(값 아님)"
         },
-        {
-          "const": "external:web-push",
-          "description": "공인 주소의 443(웹 푸시 발송, RUNTIME R3.18). survey-service 만 선언한다(R6.4)"
+        "user_header": {
+          "enum": [
+            "set",
+            "strip"
+          ],
+          "description": "set=인증된 계정 ID 를 X-Openit-User 로 붙임(클라이언트 값은 덮어씀), strip=지움"
         },
-        {
-          "const": "external:backup",
-          "description": "platform 백업 저장소(RUNTIME R10.1)"
+        "streaming": {
+          "type": "boolean"
+        },
+        "timeouts_ms": {
+          "type": "object",
+          "properties": {
+            "dial": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "response_header": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "read": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "max_body_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8589934592,
+          "description": "3.4.7(RUNTIME R3.5·R10.13): 이 경로의 요청 본문 상한(바이트). platform 공개 입구와 영역 게이트웨이가 둘 다 이 값으로 413 을 낸다(앱에 닿기 전). 없으면 8MiB(8388608, 지금까지의 공개 입구 기본, 시작값·측정 안 함). 상한은 클라이언트 max_tar_bytes 8GiB. 값은 받는 영역이 ADR 로 근거와 함께 정한다"
+        },
+        "upstream_port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "3.4.7: 영역 게이트웨이가 이 경로를 넘길 영역 안 컴포넌트의 loopback 포트(같은 네트워크 공간 127.0.0.1). 없으면 그 영역 서비스 하나(배포 설정의 앱 포트)로 넘긴다. 영역 안 구성은 영역이 정하고, 이 값은 배포 때 게이트웨이 설정을 만드는 입력이다(CONVENTIONS 13절 예외)"
         }
-      ]
-    },
-    "description": "3.4.4(CONVENTIONS 13절, RUNTIME R1.8): 이 영역의 게이트웨이가 CONNECT 터널을 열어 줄 상대. 없으면 빈 목록과 같다(영역 밖으로 나가는 호출이 없다). 목록 밖 상대는 403(EGRESS_DENIED)"
-  },
-  "routes": {
-   "type": "array",
-   "minItems": 1,
-   "items": {
-    "$ref": "#/$defs/route"
-   }
-  }
- },
- "required": [
-  "service",
-  "routes"
- ],
- "additionalProperties": false,
- "$defs": {
-  "route": {
-   "type": "object",
-   "properties": {
-    "paths": {
-     "type": "array",
-     "minItems": 1,
-     "items": {
-      "type": "string",
-      "pattern": "^/"
-     }
-    },
-    "methods": {
-     "type": "array",
-     "uniqueItems": true,
-     "items": {
-      "enum": [
-       "GET",
-       "POST",
-       "PUT",
-       "PATCH",
-       "DELETE"
-      ]
-     },
-     "description": "비우면 모든 메서드"
-    },
-    "auth": {
-     "type": "object",
-     "properties": {
-      "kind": {
-       "enum": [
-        "device-token",
-        "account",
-        "authenticated",
-        "machine-token",
-        "none",
-        "denied"
-       ],
-       "description": "device-token: 키오스크 기기(mTLS/기기 토큰). account: 사람 계정(roles 필수). authenticated: 로그인한 사람 계정이면 역할과 무관하게 연다(3.4.0, U82: 데이터 없는 화면 정적 파일 — 가입 승인 대기 계정에게 안내를 보이려면 화면이 열려야 한다; roles 를 쓰지 않는다). machine-token: 비사람 호출자가 보내는 고정 Bearer 토큰을 게이트웨이가 파일 토큰과 대조한다(3.2.0 U67, D122: 다른 호스트의 추론 서버가 release-gate 읽기 면을 읽는 경로). none: 인증 없음(/healthz 등). denied: 밖에서 닿을 수 없음"
       },
-      "roles": {
-       "type": "array",
-       "uniqueItems": true,
-       "items": {
-        "type": "string",
-        "pattern": "^[a-z][a-z-]*$"
-       }
-      }
-     },
-     "required": [
-      "kind"
-     ],
-     "if": {
-      "properties": {
-       "kind": {
-        "const": "account"
-       }
-      }
-     },
-     "then": {
       "required": [
-       "roles"
+        "paths",
+        "auth"
       ],
-      "properties": {
-       "roles": {
-        "minItems": 1
-       }
-      }
-     },
-     "additionalProperties": false
-    },
-    "upstream_token": {
-     "type": "string",
-     "pattern": "^[a-z][a-z0-9-]*$",
-     "description": "gateway 가 상류에 붙이는 서비스 토큰의 비밀 이름(값 아님)"
-    },
-    "user_header": {
-     "enum": [
-      "set",
-      "strip"
-     ],
-     "description": "set=인증된 계정 ID 를 X-Openit-User 로 붙임(클라이언트 값은 덮어씀), strip=지움"
-    },
-    "streaming": {
-     "type": "boolean"
-    },
-    "timeouts_ms": {
-     "type": "object",
-     "properties": {
-      "dial": {
-       "type": "integer",
-       "minimum": 1
-      },
-      "response_header": {
-       "type": "integer",
-       "minimum": 1
-      },
-      "read": {
-       "type": "integer",
-       "minimum": 1
-      }
-     },
-     "additionalProperties": false
+      "additionalProperties": false
     }
-   },
-   "required": [
-    "paths",
-    "auth"
-   ],
-   "additionalProperties": false
   }
- }
 }

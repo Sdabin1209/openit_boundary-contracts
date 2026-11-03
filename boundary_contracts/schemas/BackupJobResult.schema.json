@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "BackupJobResult.schema.json",
+  "title": "BackupJobResult",
+  "description": "3.4.7(RUNTIME R10.1·R9.2): 데이터베이스를 가진 영역의 백업 잡이 표준 출력 마지막 줄에 내는 JSON 한 줄. 종료 코드: 0 = ok, 75 = 재시도 가능(백업 저장소에 닿지 못함·UNAVAILABLE, EX_TEMPFAIL), 1 = 그 밖의 실패. 비밀·저장소 주소·데이터 내용은 넣지 않는다.",
+  "x-producers": [
+    "*"
+  ],
+  "x-consumers": [
+    "deploy"
+  ],
+  "type": "object",
+  "required": [
+    "status",
+    "snapshot_id",
+    "bytes",
+    "started_at",
+    "finished_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "status": {
+      "enum": [
+        "ok",
+        "failed"
+      ]
+    },
+    "snapshot_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 128,
+      "description": "백업 저장소가 준 스냅숏 ID(restic snapshot id). 실패면 null"
+    },
+    "bytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "started_at": {
+      "$ref": "_common.schema.json#/$defs/Timestamp"
+    },
+    "finished_at": {
+      "$ref": "_common.schema.json#/$defs/Timestamp"
+    },
+    "error": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "실패면 BoundaryError 레코드 모양(code·message·retryable), 아니면 null"
+    }
+  }
+}

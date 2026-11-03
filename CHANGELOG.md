@@ -6,6 +6,12 @@
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 
+## 3.4.7 (PATCH, 와이어 변경 없음 — Exposure 경로의 본문 상한·영역 안 상류, machine-token 정정)
+왜: platform 담당이 공개 입구·영역 게이트웨이 설정을 Exposure 선언에서 만들려다 찾은 빈칸 3건(헤드 누락): 경로별 본문 상한이 선언에 없었고, 영역 안 컴포넌트가 여럿일 때 상류를 정할 값이 없었고, machine-token 경로의 토큰 대조 주체가 3.4.5 와 스키마 설명이 달랐다.
+- `Exposure.routes[].max_body_bytes`(없으면 8MiB), `upstream_port`(선택). R3.5 가 이 값을 가리킨다.
+- machine-token: 게이트웨이는 대조하지 않고 공개 입구는 내보내지 않는다(R3.23).
+- question-authoring 담당이 찾은 빈칸: `QuestionAuthoringEnv` 에 release-gate(I4) 호출 이름 QA_GATE_URL·QA_GATE_TOKEN_ENV·QA_GATE_TOKEN_FILE·QA_GATE_TOKEN·QA_GATE_TIMEOUT_SECONDS, 저작 API 의 판정 조회(`DecisionsQuery`→`Decisions`)·문진표 버전 목록(`QuestionSetVersionsQuery`→`QuestionSetVersions`). 공통 `BackupJobResult`(백업 잡 마지막 줄, 종료 코드 0·75·1).
+
 ## 3.4.6 (PATCH, 와이어 변경 없음 — 데이터 주인 표, ext 쓰기 규칙, 소비자 정정)
 왜: 사용자 지시 '여러 영역이 읽고 쓰는 데이터는 누가 갖는가 — 전부 확인'. 전수 확인에서 (1) `ext` 규칙이 남의 레코드에도 덧붙일 수 있는 것처럼 읽혀 '쓰는 영역은 하나'와 부딪혔고, (2) 3.4.4 에 헤드가 넣은 x-consumers 중 admin-console 이 실제로 읽지 않는 스키마 7개가 있었다(설명문만 보고 넣음; admin-console 코드의 호출 경로로 대조).
 - DATA_OWNERSHIP.md 신설: 영역 사이 데이터 전부의 주인·쓰기 경로·읽기 경로.
