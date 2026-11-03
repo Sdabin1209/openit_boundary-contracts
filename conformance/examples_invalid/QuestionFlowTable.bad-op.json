@@ -5,7 +5,7 @@
   "skips": [
     {
       "slot": "Q4.answer",
-      "op": "!=",
+      "op": "~=",
       "value": false,
       "skip_item": "Q1"
     }

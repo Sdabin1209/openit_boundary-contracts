@@ -35,12 +35,13 @@ def release(release_id, passed=True):
     b = bank(3)
     m = example("ReleaseManifest")
     m["release_id"] = release_id
-    m["question_set"] = ref_of("qs-main", "3", b)
+    b2 = bank(1)
+    m["question_sets"] = [dict(ref_of("qs-main", "3", b), title="건강검진 문진표"), dict(ref_of("qs-alcohol", "1", b2), title="음주 문진표")]
     for role, files in (("LORA_A", FILES_A), ("LORA_B", FILES_B)):
         m["adapters"][role]["adapter_hash"] = adapter_digest(files)
         m["adapters"][role]["system_prompt"] = {"path": "system_prompt.txt",
                                                 "sha256": "sha256:" + hashlib.sha256(files["system_prompt.txt"]).hexdigest()}
-    return {"manifest": sealed(m), "bank": b, "adapters": {"LORA_A": FILES_A, "LORA_B": FILES_B}, "pass": passed}
+    return {"manifest": sealed(m), "bank": b, "banks": {"qs-main": b, "qs-alcohol": b2}, "adapters": {"LORA_A": FILES_A, "LORA_B": FILES_B}, "pass": passed}
 
 
 def package_manifest(files=FILES_A, version="1.2.0"):

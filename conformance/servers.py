@@ -271,18 +271,37 @@ class ReferenceServer:
                     return J(r["manifest"])
                 if not r["pass"]:
                     raise BoundaryError("FAILED_PRECONDITION", "PASS가 아닌 릴리스")
-                if g[2] == "/question-bank":      # 2.7.0(U47): 어댑터 없이 문항 세트만
-                    return J({"release_id": g[1], "content_hash": r["manifest"]["question_set"]["content_hash"], "question_bank": r["bank"]})
-                files = {"manifest.json": json.dumps(r["manifest"]).encode(), "question_bank.json": json.dumps(r["bank"]).encode()}
+                sets = r["manifest"]["question_sets"]
+                banks = r.get("banks") or {sets[0]["id"]: r["bank"]}          # 3.3.0: 세트 id -> bank
+                if g[2] == "/question-bank":      # 2.7.0(U47): 어댑터 없이 문항 세트만. 3.3.0: 세트별(?question_set_id=)
+                    qid = q.get("question_set_id")
+                    if qid is None:
+                        if len(sets) != 1:
+                            raise BoundaryError("INVALID_RECORD", "릴리스에 문진표가 둘 이상이라 question_set_id가 필요하다", {"reason": "QUESTION_SET_REQUIRED"})
+                        qid = sets[0]["id"]
+                    ref = next((x for x in sets if x["id"] == qid), None)
+                    if ref is None or qid not in banks:
+                        raise nf("문진표")
+                    return J({"release_id": g[1], "question_set_id": qid, "content_hash": ref["content_hash"], "question_bank": banks[qid]})
+                files = {"manifest.json": json.dumps(r["manifest"]).encode()}
+                for qid, bk in banks.items():
+                    files[f"question_banks/{qid}.json"] = json.dumps(bk).encode()
                 for role_, fs in r["adapters"].items():
                     files.update({f"adapters/{role_}/{p}": d for p, d in fs.items()})
                 return 200, "application/x-tar", make_tar(files)
             if path == "/v1/decisions":
-                keys = {"question_set_id": ("question_set", "id"), "question_set_version": ("question_set", "version"),
-                        "lora_a_id": ("lora_a", "id"), "lora_a_version": ("lora_a", "version"),
+                keys = {"lora_a_id": ("lora_a", "id"), "lora_a_version": ("lora_a", "version"),
                         "lora_b_id": ("lora_b", "id"), "lora_b_version": ("lora_b", "version")}
+
+                def qs_match(d):   # 3.3.0: 문진표 목록 중 하나와 맞으면 된다
+                    cands = d["subject"]["question_sets"]
+                    if "question_set_id" in q:
+                        cands = [x for x in cands if x["id"] == q["question_set_id"]]
+                    if "question_set_version" in q:
+                        cands = [x for x in cands if x["version"] == q["question_set_version"]]
+                    return bool(cands)
                 out = [d for d in reversed(self.decisions)
-                       if all(d["subject"][keys[k][0]][keys[k][1]] == v for k, v in q.items() if k in keys)
+                       if all(d["subject"][keys[k][0]][keys[k][1]] == v for k, v in q.items() if k in keys) and qs_match(d)
                        and ("submission_id" not in q or d.get("submission_id") == q["submission_id"])]
                 return self._page(out, q)
             if g := m(r"/v1/decisions/([^/]+)"):
@@ -657,12 +676,15 @@ class PublicApiReferenceServer(StaffCallReferenceServer):
 
     `turn_fn(utterance) -> (response_text, committed: bool, risk: bool)`로 서비스 판단을 대신한다(기본: 안내 문장, 확정, 위험 아님).
     `states[session_id]["inflight"]`에 turn_id를 넣으면 같은 turn_id가 처리 중인 것으로 보고 409 TURN_IN_PROGRESS를 낸다.
+    3.3.0: 활성 문진표 목록(`GET /v1/question-sets`, `question_sets_active`)과 SESSION_START 의 `question_set_id` 검사(하나면 생략 가능, 둘 이상이면 필수, 없는 ID 는 400).
     모사하지 않는 것: 결과 조회(B), 직원 세션 조회(C), 위험 신호 입력(D), `X-Openit-User` 행위자 기록(E), 푸시/SSE.
     """
 
     def __init__(self, tokens: dict[str, str], retry_after_s: int = 30, max_retries: int = 10):
         super().__init__(tokens, retry_after_s, max_retries)
         self.states: dict[str, dict] = {}
+        # 3.3.0: 활성 릴리스의 문진표 목록(GET /v1/question-sets). 기본은 하나라 question_set_id 없는 시작이 그대로 동작한다.
+        self.question_sets_active: list[dict] = [{"question_set_id": "qs-main", "title": "시험 문진표", "version": "3"}]
         self.trust_device_header = True   # 2.3.0: 키오스크는 X-Openit-Device(게이트웨이 mTLS)로도 식별된다
         self.turn_fn = lambda utterance: ("다음 질문입니다.", True, False)
         self.processed: list[str] = []   # 실제로 처리한 turn_id(멱등 시험용)
@@ -686,19 +708,31 @@ class PublicApiReferenceServer(StaffCallReferenceServer):
             raise BoundaryError("INVALID_RECORD", "본문이 FrontendMessage가 아니다")
 
     def _route(self, method, path, q, body, role):
+        if path == "/v1/question-sets" and method == "GET":      # 3.3.0 I10: 활성 문진표 목록(기기 인증은 /v1/sessions와 같다)
+            if not role.startswith("kiosk"):
+                raise BoundaryError("PERMISSION_DENIED", "키오스크 토큰만 호출할 수 있다")
+            return self._j({"items": [dict(x) for x in self.question_sets_active]})
         if path == "/v1/sessions" and method == "POST":
             if not role.startswith("kiosk"):
                 raise BoundaryError("PERMISSION_DENIED", "키오스크 토큰만 호출할 수 있다")
             b = self._body(body)
             sid = b.get("session_id")
-            self._msg(b, sid, "SESSION_START", ("subject_ref",))
+            self._msg(b, sid, "SESSION_START", ("subject_ref", "question_set_id"))
             if "subject_ref" in b and not (isinstance(b["subject_ref"], str) and _SUBJECT_REF.match(b["subject_ref"])):
                 raise BoundaryError("INVALID_RECORD", "subject_ref 형식이 아니다")
+            qsid = b.get("question_set_id")      # 3.3.0: 세션의 문진표. 활성 세트가 하나면 생략 가능, 둘 이상이면 필수
+            active = [x["question_set_id"] for x in self.question_sets_active]
+            if qsid is None:
+                if len(active) != 1:
+                    raise BoundaryError("INVALID_RECORD", "활성 문진표가 둘 이상이라 question_set_id가 필요하다", {"reason": "QUESTION_SET_REQUIRED"})
+                qsid = active[0]
+            elif qsid not in active:
+                raise BoundaryError("INVALID_RECORD", "활성 릴리스에 없는 문진표다", {"reason": "UNKNOWN_QUESTION_SET"})
             if sid in self.states:
                 raise BoundaryError("CONFLICT", "이미 있는 세션이다")
             self.sessions[sid] = role
             self.states[sid] = {"state": "ACTIVE", "resume_text": None, "pause_reason": None, "turns": {}, "inflight": set(),
-                                "subject_ref": b.get("subject_ref")}
+                                "subject_ref": b.get("subject_ref"), "question_set_id": qsid}
             return self._j(self._fi("안녕하세요. 문진을 시작하겠습니다."), 201)
         g = re.fullmatch(r"/v1/sessions/([^/]+)/(turns|end|state|intervention)", path)
         if not g:

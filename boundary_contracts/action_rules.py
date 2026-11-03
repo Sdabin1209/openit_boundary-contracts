@@ -3,7 +3,7 @@
 규칙은 `data/action_extraction_rules.json`(데이터)이 정하고, 이 모듈은 그 데이터를 읽어 적용하는 해석기 하나다.
 형식(스키마) 검사는 ActionExtraction 스키마가 한다. 여기서는 스키마로 표현할 수 없는 규칙만 본다.
 검사기를 부르는 쪽은 LoRA-A 컴포넌트(model-runtime) 하나다. 통과한 값은 다른 컴포넌트가 다시 검사하지 않는다(R7).
-문항 순서 표(flow)는 문진 스키마 `QuestionFlow`의 모양(order, skips)을 그대로 받는다.
+문항 순서 표(flow)는 계약 `QuestionFlowTable`(order, skips)이다. 3.3.0: survey-service 가 세션의 문진표(문진 스키마 QuestionBank 의 order·prerequisite)에서 만든다.
 """
 from __future__ import annotations
 
@@ -49,6 +49,22 @@ def _same(a, b) -> bool:
     return isinstance(a, bool) == isinstance(b, bool) and a == b
 
 
+def _is_num(x) -> bool:
+    return isinstance(x, (int, float)) and not isinstance(x, bool)
+
+
+def holds(saved_value, op: str, value) -> bool:
+    """건너뛰기 조건 `saved op value`(QuestionFlowTable.skips, 3.3.0). ==·!= 는 종류까지 같아야 하고(bool != 수),
+    크기 비교는 수끼리만 참이 된다(종류가 다르면 거짓: 문항 세트 prerequisite 의 뜻을 보수적으로 지킨다)."""
+    if op == "==":
+        return _same(saved_value, value)
+    if op == "!=":
+        return not _same(saved_value, value)
+    if not (_is_num(saved_value) and _is_num(value)):
+        return False
+    return {">": saved_value > value, ">=": saved_value >= value, "<": saved_value < value, "<=": saved_value <= value}[op]
+
+
 class _Flow:
     def __init__(self, flow: dict):
         self.order = list(flow["order"])
@@ -59,7 +75,7 @@ class _Flow:
         return self._pos.get(item)
 
     def _skipped(self, item, saved):
-        return any(s["skip_item"] == item and s["slot"] in saved and _same(saved[s["slot"]], s["value"]) for s in self.skips)
+        return any(s["skip_item"] == item and s["slot"] in saved and holds(saved[s["slot"]], s.get("op", "=="), s["value"]) for s in self.skips)
 
     def next_item(self, after, saved):
         i = self._pos[after] + 1

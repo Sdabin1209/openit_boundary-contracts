@@ -2,6 +2,16 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.3.0 (MINOR, 와이어 형식 변경 — 문진표 여러 개와 세션별 선택; 사용자 결정 2026-11-03)
+왜: 배포에 문진표가 하나뿐이었고, 세션이 문진표를 고를 길이 없었고, 순서·건너뛰기가 문진표가 아닌 고정 파일(survey-service `question_flow.json`)에서 왔다. 제품의 핵심 흐름(저자가 올린 문진표로 환자마다 문진한다)이 성립하지 않았다.
+- `_common.QuestionSetRef`(ArtifactRef + `title`) 신설. `ReleaseManifest.question_sets[]`(1개 이상, QuestionSetRef)가 단수 `question_set`을 대체. `GateSubmissionRequest`·`GateSubmission`·`GateDecision`·`ReviewReport`의 `subject.question_sets[]`(ArtifactRef)가 단수를 대체. `find_decisions`의 문진표 질의는 목록 중 하나와 맞으면 반환.
+- I4 `get_release_question_bank(release_id, question_set_id=None)`: `?question_set_id=` 세트별 조회, 응답에 `question_set_id`(둘 이상이면 필수, 없으면 400 INVALID_RECORD/QUESTION_SET_REQUIRED). `load_bundle` tar는 `question_banks/<id>.json`(세트마다), `ReleaseBundle.question_banks`(id -> QuestionBank).
+- `QuestionFlowTable.skips[].op` 여섯 연산자(`==,!=,>,>=,<,<=`): 문진표 `prerequisite`(묻는 조건)의 부정을 표현한다. `action_rules.holds()` 평가, `fill_next_item`·`check_action_extraction` 반영. 표는 survey-service가 세션의 문진표(order·prerequisite)에서 만든다.
+- `DeviceConfig.question_set_id`, `KioskStartFragment.question_set_id`(기기 배치, 조각이 먼저).
+- I10(PUBLIC_API I절): `GET /v1/question-sets` 활성 문진표 목록, `SESSION_START.question_set_id`(하나면 생략 가능, 둘 이상이면 필수, 없는 ID 400 INVALID_RECORD/UNKNOWN_QUESTION_SET), `SessionResult.question_set_id`·`question_set_title`. 클라이언트 `HttpPublicApi.list_question_sets()`, `start_session(question_set_id=)`. 참조 서버 모사.
+- `ResponseRequest` START의 `next.question_id`를 `Q1.D01` 고정에서 임의 문항 ID로(문진표마다 첫 문항이 다르다).
+- 문진 스키마(survey-service 소유) 4.0.0과 짝: `QuestionBank.question_set_id`·`title` 필수, `Prerequisite{slot, op, value}`, `SessionResult`·`StaffSessionView`·`SESSION_START` 필드, `QuestionFlow`·`question_flow.json` 삭제, 정수 runtime_contract_version 2(CONVENTIONS 12절).
+
 ## 3.2.0 (MINOR, 와이어 형식 추가·선언 강화 — 영역 사이 이름을 전부 스키마 안으로)
 - **U73 영역 사이 설정 이름 선언**: 서비스별 환경 변수 선언 스키마 신설 `ModelServingEnv`(40) `GateEnv`(39) `ModelRegistryEnv`(16) `DatasetStoreEnv`(19) `KioskFrontendEnv`(3), 개정 `SurveyServiceEnv`(모든 이름에 뜻·형식·기본값, 91) `OpsFeedbackServerEnv`(설명 채움, `OPS_GATE_*` 선언, 퇴역 `TURN_ENGINE_VERSION` 삭제) `QuestionAuthoringEnv`(독립 스키마 31, DeployInterface 의 Environment 는 $ref). 규칙: deploy 는 선언된 이름만 주고, 서비스는 기동 때 자기 environ 을 자기 선언으로 검증한다(접두사 이름 중 미선언은 거부). 뜻은 각 영역의 설정 로더·runbook 에서 옮겼고 모르는 것은 "미정"으로 표시했다(GateEnv 2건).
 - **U67** `Exposure.auth.kind` 에 `machine-token` 추가(D122 추론 서버 → release-gate 읽기 경로).

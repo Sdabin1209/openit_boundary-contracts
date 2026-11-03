@@ -71,6 +71,34 @@
         }
       },
       "description": "이 어댑터를 학습할 때 쓴 시스템 프롬프트(D75). model-runtime은 서빙할 때 이 패키지의 프롬프트만 쓴다. LoRA 교체(D72)가 프롬프트까지 함께 바뀌어야 하기 때문이다. serving_config의 프롬프트 템플릿 버전과는 별개다(INTERFACES.md I9)."
+    },
+    "QuestionSetRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "content_hash",
+        "title"
+      ],
+      "description": "3.3.0: 릴리스에 묶인 문진표(문항 세트) 하나. ArtifactRef에 화면용 제목을 더한 것. id가 문진표 ID(문진 스키마 QuestionBank.question_set_id와 같다). 왜: 세션마다 문진표를 고르고 결과·의사 화면이 어느 문진표인지 보여야 하는데 ArtifactRef에는 사람이 읽는 이름이 없었다.",
+      "properties": {
+        "id": {
+          "$ref": "_common.schema.json#/$defs/Id"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_hash": {
+          "$ref": "_common.schema.json#/$defs/Hash"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "저자가 정한 문진표 제목(문진 스키마 QuestionBank.title). 키오스크 선택 화면·결과·의사 화면에 보인다."
+        }
+      }
     }
   },
   "description": "영역 사이 계약의 공통 타입. Hash는 'sha256:' + 소문자 16진 64자. 계약이 정한 대상의 정규화 JSON(RFC 8785)을 해시한다. Timestamp는 UTC 'Z' 표기."

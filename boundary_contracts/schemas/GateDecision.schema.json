@@ -28,13 +28,18 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "question_set",
+        "question_sets",
         "lora_a",
         "lora_b"
       ],
       "properties": {
-        "question_set": {
-          "$ref": "_common.schema.json#/$defs/ArtifactRef"
+        "question_sets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "_common.schema.json#/$defs/ArtifactRef"
+          },
+          "description": "3.3.0: 함께 승인·판정하는 문진표 전부(하나 이상, id 중복 금지). 3.2.x의 단수 question_set을 대체한다."
         },
         "lora_a": {
           "$ref": "_common.schema.json#/$defs/ArtifactRef"

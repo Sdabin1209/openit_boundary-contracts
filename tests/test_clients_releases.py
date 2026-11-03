@@ -34,7 +34,7 @@ class Releases(unittest.TestCase):
     def test_find_decisions는_최신부터이고_조건과_쪽을_쓴다(self):
         items, _ = self.r.find_decisions(submission_id="sub-1")
         self.assertEqual([d["decision_id"] for d in items], ["gd-3", "gd-1"])
-        ref = example("GateDecision.pass")["subject"]["question_set"]
+        ref = example("GateDecision.pass")["subject"]["question_sets"][0]
         self.assertEqual(len(self.r.find_decisions(question_set=ref)[0]), 3)
         self.assertEqual(self.r.find_decisions(question_set=dict(ref, version="zz"))[0], [])
         first, cur = self.r.find_decisions(limit=2)
@@ -45,7 +45,8 @@ class Releases(unittest.TestCase):
         b = self.r.load_bundle("rel-0001", dest=self.tmp)
         self.assertIsInstance(b, sdk.ReleaseBundle)
         self.assertEqual(b.manifest["release_id"], "rel-0001")
-        self.assertEqual(b.question_bank["version"], 3)
+        self.assertEqual(b.question_banks["qs-main"]["version"], 3)
+        self.assertEqual(set(b.question_banks), {"qs-main", "qs-alcohol"})   # 3.3.0: 세트마다 question_banks/<id>.json
         self.assertEqual(set(b.adapters), {"LORA_A", "LORA_B"})
         self.assertEqual(directory_hash(b.adapters["LORA_A"]), b.manifest["adapters"]["LORA_A"]["adapter_hash"])
         self.assertEqual((b.adapters["LORA_B"] / "adapter_config.json").read_bytes(), FILES_B["adapter_config.json"])
@@ -170,14 +171,21 @@ class QuestionBankRead(unittest.TestCase):
         return cm.exception.code
 
     def test_문항_세트만_받고_해시가_매니페스트와_같다(self):
-        b = self.r.get_release_question_bank("rel-0001")
+        """3.3.0: 릴리스에 문진표가 둘이라 세트별로 받는다. 생략하면 400 INVALID_RECORD(QUESTION_SET_REQUIRED)."""
+        b = self.r.get_release_question_bank("rel-0001", "qs-main")
         m = self.r.get_release("rel-0001")
-        self.assertEqual(b["content_hash"], m["question_set"]["content_hash"])
+        self.assertEqual(b["question_set_id"], "qs-main")
+        self.assertEqual(b["content_hash"], m["question_sets"][0]["content_hash"])
         self.assertEqual(b["question_bank"]["version"], 3)
+        b2 = self.r.get_release_question_bank("rel-0001", "qs-alcohol")
+        self.assertEqual(b2["content_hash"], m["question_sets"][1]["content_hash"])
+        self.assertEqual(self.code(self.r.get_release_question_bank, "rel-0001"), "INVALID_RECORD")
+        self.assertEqual(self.code(self.r.get_release_question_bank, "rel-0001", "qs-none"), "NOT_FOUND")
         self.assertNotIn("/v1/releases/rel-0001/bundle", [p for _, p, _ in self.srv.requests])
+        self.assertEqual(len(self.r.find_decisions(question_set={"id": "qs-alcohol", "version": "1"})[0]), 3)   # 목록 중 하나와 맞으면 반환
 
     def test_PASS가_아니면_412_없으면_404_변조는_INTEGRITY(self):
         self.assertEqual(self.code(self.r.get_release_question_bank, "rel-0002"), "FAILED_PRECONDITION")
         self.assertEqual(self.code(self.r.get_release_question_bank, "rel-9"), "NOT_FOUND")
-        self.srv.releases["rel-0001"]["bank"]["questions"][0]["text"] = "변조"
-        self.assertEqual(self.code(self.r.get_release_question_bank, "rel-0001"), "INTEGRITY_ERROR")
+        self.srv.releases["rel-0001"]["banks"]["qs-main"]["questions"][0]["text"] = "변조"
+        self.assertEqual(self.code(self.r.get_release_question_bank, "rel-0001", "qs-main"), "INTEGRITY_ERROR")

@@ -2,24 +2,64 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "QuestionFlowTable.schema.json",
   "title": "QuestionFlowTable",
-  "description": "문항 순서와 건너뛰기 표(ADR 0010). LoRA-A 출력 규칙 검사(check_action_extraction)가 입력으로 받는 최소 모양이다. 문진 스키마 QuestionFlow(survey-service 소유)에서 order와 skips만 뽑아 만든다.",
+  "description": "문항 순서와 건너뛰기 표(ADR 0010). LoRA-A 출력 규칙 검사(check_action_extraction, fill_next_item)가 입력으로 받는 최소 모양이다. 3.3.0: survey-service가 세션의 문진표(문진 스키마 QuestionBank)에서 만든다 — order는 문항 order 정렬, skips는 prerequisite의 부정. 고정 흐름 파일은 없다.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["order", "skips"],
+  "required": [
+    "order",
+    "skips"
+  ],
   "properties": {
-    "order": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}, "description": "문항 ID를 묻는 순서."},
+    "order": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "문항 ID를 묻는 순서."
+    },
     "skips": {
       "type": "array",
-      "description": "slot에 저장된 값이 value와 같으면(op '==') skip_item은 묻지 않는다. bool과 수는 다르다(true != 1).",
+      "description": "slot에 저장된 값이 있고 `saved op value`가 참이면 skip_item은 묻지 않는다. 문진표(문항 세트)의 prerequisite(묻는 조건)의 부정에서 survey-service가 만든다.",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["slot", "op", "value", "skip_item"],
+        "required": [
+          "slot",
+          "op",
+          "value",
+          "skip_item"
+        ],
         "properties": {
-          "slot": {"type": "string", "pattern": "^[A-Za-z0-9_.]+\\.[A-Za-z0-9_]+$", "description": "문항.칸 (종류 괄호 없음). 예: Q8_1.days"},
-          "op": {"const": "=="},
-          "value": {"type": ["boolean", "number", "string"]},
-          "skip_item": {"type": "string", "minLength": 1}
+          "slot": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.]+\\.[A-Za-z0-9_]+$",
+            "description": "문항.칸 (종류 괄호 없음). 예: Q8_1.days"
+          },
+          "op": {
+            "enum": [
+              "==",
+              "!=",
+              ">",
+              ">=",
+              "<",
+              "<="
+            ],
+            "description": "3.3.0: 비교 연산자. 저장 값이 있고 `saved op value`가 참이면 skip_item을 묻지 않는다. bool과 수는 다르다(true != 1). 크기 비교는 수끼리만 참이 된다. 3.2.x까지는 == 만 있었다(문항 세트 prerequisite의 부정을 표현하려면 여섯 개가 필요하다)."
+          },
+          "value": {
+            "type": [
+              "boolean",
+              "number",
+              "string"
+            ]
+          },
+          "skip_item": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       }
     }

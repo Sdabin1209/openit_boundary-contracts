@@ -13,6 +13,12 @@
       "op": "==",
       "value": false,
       "skip_item": "Q4_1"
+    },
+    {
+      "slot": "Q8_1.days",
+      "op": "<=",
+      "value": 0,
+      "skip_item": "Q5"
     }
   ]
 }

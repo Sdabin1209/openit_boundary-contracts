@@ -47,11 +47,11 @@ class ModelRegistry(Protocol):
 
 @runtime_checkable
 class ReleaseReader(Protocol):
-    """I4. 소유: release-gate. load_bundle의 반환은 ReleaseBundle(manifest, question_bank, adapters)이다."""
+    """I4. 소유: release-gate. load_bundle의 반환은 ReleaseBundle(manifest, question_banks, adapters)이다(3.3.0: 문진표 id -> QuestionBank)."""
     def get_active_pointer(self) -> Optional[Record]: ...
     def get_release(self, release_id: str) -> Record: ...
     def load_bundle(self, release_id: str, *, dest: Path) -> "ReleaseBundle": ...
-    def get_release_question_bank(self, release_id: str) -> Record: ...   # 3.0.0: 어댑터 없이 문항 세트만(SurveyQuestionBankRead)
+    def get_release_question_bank(self, release_id: str, question_set_id: Optional[str] = None) -> Record: ...   # 3.0.0: 어댑터 없이 문항 세트만. 3.3.0: 세트별(SurveyQuestionBankRead)
     def get_decision(self, decision_id: str) -> Record: ...
     def find_decisions(self, *, question_set: Optional[Ref] = None, lora_a: Optional[Ref] = None,
                        lora_b: Optional[Ref] = None, submission_id: Optional[str] = None,
@@ -60,10 +60,10 @@ class ReleaseReader(Protocol):
 
 
 class ReleaseBundle:
-    """릴리스에 묶인 내용. adapters의 키는 'LORA_A'|'LORA_B'."""
-    def __init__(self, manifest: Record, question_bank: dict, adapters: Mapping[str, Path]):
+    """릴리스에 묶인 내용. adapters의 키는 'LORA_A'|'LORA_B'. question_banks(3.3.0)는 문진표 id -> QuestionBank(manifest.question_sets 순서)."""
+    def __init__(self, manifest: Record, question_banks: Mapping[str, dict], adapters: Mapping[str, Path]):
         self.manifest = manifest
-        self.question_bank = question_bank
+        self.question_banks = dict(question_banks)
         self.adapters = dict(adapters)
 
 

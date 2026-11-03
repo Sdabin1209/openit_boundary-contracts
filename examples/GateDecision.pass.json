@@ -4,11 +4,18 @@
   "decided_at": "2026-10-14T00:00:00Z",
   "gate_policy_version": "1",
   "subject": {
-    "question_set": {
-      "id": "qs-main",
-      "version": "3",
-      "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
-    },
+    "question_sets": [
+      {
+        "id": "qs-main",
+        "version": "3",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "id": "qs-alcohol",
+        "version": "1",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    ],
     "lora_a": {
       "id": "lora-a",
       "version": "1.2.0",

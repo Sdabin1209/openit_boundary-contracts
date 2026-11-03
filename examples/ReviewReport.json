@@ -3,11 +3,18 @@
   "submission_id": "sub-1",
   "generated_at": "2026-10-15T00:00:00Z",
   "subject": {
-    "question_set": {
-      "id": "qs-main",
-      "version": "3",
-      "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
-    },
+    "question_sets": [
+      {
+        "id": "qs-main",
+        "version": "3",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "id": "qs-alcohol",
+        "version": "1",
+        "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    ],
     "lora_a": {
       "id": "lora-a",
       "version": "1.2.0",

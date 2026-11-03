@@ -36,22 +36,28 @@ class HttpReleaseReader(HttpClientBase):
                        lora_b: Optional[dict] = None, submission_id: Optional[str] = None,
                        cursor: Optional[str] = None, limit: int = 100):
         q = {"submission_id": submission_id}
-        for key, ref in (("question_set", question_set), ("lora_a", lora_a), ("lora_b", lora_b)):
+        for key, ref in (("question_set", question_set), ("lora_a", lora_a), ("lora_b", lora_b)):   # question_set: 목록 중 하나와 맞으면 반환(3.3.0)
             if ref is not None:
                 q[key + "_id"], q[key + "_version"] = ref["id"], ref["version"]
         return self._page("/v1/decisions", cursor, limit, q, schema="GateDecision")
 
-    def get_release_question_bank(self, release_id: str) -> dict:
-        """GET /v1/releases/{id}/question-bank(2.7.0, OPEN_GAPS U47, SurveyQuestionBankRead). 어댑터 없이 릴리스에 묶인 문항 세트만.
+    def get_release_question_bank(self, release_id: str, question_set_id: Optional[str] = None) -> dict:
+        """GET /v1/releases/{id}/question-bank?question_set_id=(2.7.0 U47, 3.3.0 세트별; SurveyQuestionBankRead). 어댑터 없이 문항 세트만.
+        릴리스에 문진표가 둘 이상이면 question_set_id 가 필수(서버 400 INVALID_RECORD), 하나면 생략 가능.
         PASS가 아닌 릴리스는 412(load_bundle과 같다). 문항 세트 해시를 응답의 content_hash로 검증한다."""
-        body = self._record("/v1/releases/" + self._q(check_id(release_id, "release_id"), "question-bank"), "SurveyQuestionBankRead")
-        if body.get("release_id") != release_id or "question_bank" not in body or "content_hash" not in body:
-            raise integrity("문항 세트 응답의 release_id가 요청과 다르거나 question_bank·content_hash가 없다")
+        q = {}
+        if question_set_id is not None:
+            q["question_set_id"] = check_id(question_set_id, "question_set_id")
+        body = self._record("/v1/releases/" + self._q(check_id(release_id, "release_id"), "question-bank"), "SurveyQuestionBankRead", query=q)
+        if body.get("release_id") != release_id or "question_bank" not in body or "content_hash" not in body or "question_set_id" not in body:
+            raise integrity("문항 세트 응답의 release_id가 요청과 다르거나 question_set_id·question_bank·content_hash가 없다")
+        if question_set_id is not None and body["question_set_id"] != question_set_id:
+            raise integrity("문항 세트 응답의 question_set_id가 요청과 다르다")
         verify_json_hash(body["question_bank"], body["content_hash"], "QuestionBank")
         return body
 
     def load_bundle(self, release_id: str, *, dest: Path) -> ReleaseBundle:
-        """dest/<release_id> 아래에 manifest.json, question_bank.json, adapters/<역할>/을 풀고 모든 해시를 검증한다."""
+        """dest/<release_id> 아래에 manifest.json, question_banks/<문진표 id>.json(3.3.0: 세트마다 하나), adapters/<역할>/을 풀고 모든 해시를 검증한다."""
         check_id(release_id, "release_id")
         dest = Path(dest)
         dest.mkdir(parents=True, exist_ok=True)
@@ -61,15 +67,21 @@ class HttpReleaseReader(HttpClientBase):
             self._download_tar("/v1/releases/" + self._q(release_id, "bundle"), root, stage)
             try:
                 manifest = json.loads((root / "manifest.json").read_bytes())
-                bank = json.loads((root / "question_bank.json").read_bytes())
             except (OSError, ValueError):
-                raise integrity("번들에 manifest.json 또는 question_bank.json이 없거나 JSON이 아니다") from None
+                raise integrity("번들에 manifest.json이 없거나 JSON이 아니다") from None
             check_record("ReleaseManifest", manifest, hashed=True)
             if manifest["release_id"] != release_id:
                 raise integrity("번들의 release_id가 요청과 다르다")
-            if not isinstance(bank, dict):
-                raise integrity("question_bank.json이 객체가 아니다")
-            verify_json_hash(bank, manifest["question_set"]["content_hash"], "QuestionBank")
+            banks: dict[str, dict] = {}
+            for ref in manifest["question_sets"]:
+                try:
+                    bank = json.loads((root / "question_banks" / (ref["id"] + ".json")).read_bytes())
+                except (OSError, ValueError):
+                    raise integrity(f"번들에 question_banks/{ref['id']}.json이 없거나 JSON이 아니다") from None
+                if not isinstance(bank, dict):
+                    raise integrity(f"question_banks/{ref['id']}.json이 객체가 아니다")
+                verify_json_hash(bank, ref["content_hash"], "QuestionBank")
+                banks[ref["id"]] = bank
             for role in ROLES:
                 a = root / "adapters" / role
                 if not a.is_dir():
@@ -78,7 +90,7 @@ class HttpReleaseReader(HttpClientBase):
                 verify_system_prompt(a, manifest["adapters"][role]["system_prompt"])
             final = dest / release_id
             self._place(root, final)
-            return ReleaseBundle(manifest, bank, {r: final / "adapters" / r for r in ROLES})
+            return ReleaseBundle(manifest, banks, {r: final / "adapters" / r for r in ROLES})
         finally:
             shutil.rmtree(stage, ignore_errors=True)
 

@@ -21,7 +21,8 @@
 ## 호출
 | 목적 | 요청 | 응답 |
 | --- | --- | --- |
-| 세션 시작 | `POST /v1/sessions` 본문 `{"kind": "SESSION_START"}`(`session_id`는 생략한다: 서버가 발급해 응답의 `session_id`로 돌려준다, 위 7행·D106) | `FrontendInput` (`response_text`: 첫 안내 문장) |
+| 활성 문진표 목록 (3.3.0, I절) | `GET /v1/question-sets` | `{"items": [{"question_set_id", "title", "version"}]}` 활성 릴리스의 문진표 전부(`ReleaseManifest.question_sets`). 인증은 `/v1/sessions`와 같다 |
+| 세션 시작 | `POST /v1/sessions` 본문 `{"kind": "SESSION_START", "question_set_id"?: "..."}`(`session_id`는 생략한다: 서버가 발급해 응답의 `session_id`로 돌려준다, 위 7행·D106. `question_set_id`(3.3.0, I절): 이 세션의 문진표. 활성 문진표가 하나면 생략 가능, 둘 이상이면 필수. 생략·불일치는 400 `INVALID_RECORD`에 `details.reason` `QUESTION_SET_REQUIRED`·`UNKNOWN_QUESTION_SET`) | `FrontendInput` (`response_text`: 첫 안내 문장, 그 문진표 순서의 첫 문항) |
 | 환자 발화 | `POST /v1/sessions/{session_id}/turns` 본문 `{"session_id", "kind": "UTTERANCE", "utterance": "STT 텍스트", "turn_id": "..."}` | `FrontendInput` |
 | 세션 종료 | `POST /v1/sessions/{session_id}/end` 본문 `{"session_id", "kind": "SESSION_END"}` | `FrontendInput` (`response_text`는 null일 수 있음) |
 | 세션 상태 (D66) | `GET /v1/sessions/{session_id}/state` | `SessionState`. 키오스크가 위험 정지 중에 2초 간격으로 폴링한다. 직원이 재개하면 `state=ACTIVE`와 `resume_text`(이어서 할 안내 문장)가 오고, 다음 발화 턴이 접수되면 `resume_text`는 null이 된다. 직원이 종료하면 `ENDED` |
@@ -77,7 +78,7 @@
 - 도착 알림: 세션이 `ENDED_*` 로 끝나면 직원·의사 콘솔 SSE(`GET /v1/staff/alerts/stream`)에 이벤트 `result_ready`(본문 `{"session_id", "status", "ended_at"}`; subject_ref 는 넣지 않는다)를 보낸다. 웹 푸시로는 보내지 않는다(결과는 화면에서 본다).
 - 접근 기록: 결과 읽기·확인 표시마다 아래 접근 기록(계정 ID 포함)을 남기고 보존 365일(감사 기록).
 역할 `result-reader` 토큰(상류·기계용). 호출마다 접근 기록(시각, 역할 이름, 게이트웨이가 인증한 행위자 `X-Openit-User`가 있으면 그 계정 ID, session_id 또는 조회 조건, 결과; 토큰·발화 제외)을 남기고, 기록을 못 남기면 데이터를 주지 않는다(503).
-- `GET /v1/results/{session_id}` → `SessionResult`: `{"session_id", "subject_ref": str|null, "status": "IN_PROGRESS|PAUSED_RISK|ENDED_COMPLETE|ENDED_STAFF|ENDED_LEFT|ENDED_USER_STOP", "started_at": ISO|null, "ended_at": ISO|null, "release_id": str|null, "question_bank_version": str|null, "answers": [{"key","value","status","precision"}], "skipped_details": [{"item", "slot"?, "reason": "UNKNOWN|REJECTED|UNCLEAR|REASK_LIMIT|..."}]}`. 끝나지 않은 세션과 직원·이탈로 끝난 세션의 **부분 결과도 상태와 함께** 돌려준다. 환자 발화 원문과 대화 로그는 포함하지 않는다(직원 세션 조회에만 있다).
+- `GET /v1/results/{session_id}` → `SessionResult`: `{"session_id", "subject_ref": str|null, "status": "IN_PROGRESS|PAUSED_RISK|ENDED_COMPLETE|ENDED_STAFF|ENDED_LEFT|ENDED_USER_STOP", "started_at": ISO|null, "ended_at": ISO|null, "release_id": str|null, "question_set_id": str|null, "question_set_title": str|null, "question_bank_version": str|null, "answers": [{"key","value","status","precision"}], "skipped_details": [{"item", "slot"?, "reason": "UNKNOWN|REJECTED|UNCLEAR|REASK_LIMIT|..."}]}`. 끝나지 않은 세션과 직원·이탈로 끝난 세션의 **부분 결과도 상태와 함께** 돌려준다. 환자 발화 원문과 대화 로그는 포함하지 않는다(직원 세션 조회에만 있다).
 - **`status`의 뜻** (survey-service CR-014 반영): `ENDED_COMPLETE` 문진을 끝까지 마침(**완료는 이것뿐**). `ENDED_LEFT` 환자가 끝나기 전에 떠남(키오스크 종료 요청 또는 유휴 만료). `ENDED_STAFF` 직원이 종료. `ENDED_USER_STOP` 예약된 값으로 지금 만들어지지 않는다. `IN_PROGRESS`·`PAUSED_RISK` 아직 끝나지 않음. 완료가 아닌 상태의 `answers`는 그때까지 저장된 부분 결과이고, `skipped`는 건너뛴 문항 ID일 뿐 미응답 문항 목록이 아니다. 완료 여부는 `status == "ENDED_COMPLETE"`로만 판단한다.
 - `GET /v1/results?subject_ref=&status=&updated_after=&limit=&cursor=` → `{"items": [SessionResult], "next_cursor": str|null}` (`limit` 기본 50 최대 200).
 - 빈칸 사유(3.2.0, U36·G12·U35): 같은 문항을 3번 되물어도 답을 얻지 못하면 직원을 부르지 않고 그 칸을 빈칸으로 두고 다음 문항으로 간다. 사유는 `skipped_details[].reason`(UNKNOWN 모름, REJECTED 거부, UNCLEAR 모호, REASK_LIMIT 되묻기 한도 뒤 빈칸)에 남는다. 문진 스키마 SessionResult 가 정본.
@@ -142,3 +143,10 @@
 - `TurnFailureSignal`과 `StaffSessionView`는 문진 스키마(`../survey-service/schema`, survey-service 소유)에 있으므로 **이 리포가 고치지 않는다.** 이 문서가 정한 필드 이름·열거 값(`pause_reason`: `RISK|REASK_LIMIT|OTHER`, optional)을 survey-service가 자기 스키마에 반영한다(D21). `SessionState`·`StaffAlert`는 이 리포 스키마다.
 - 상태 이름 `PAUSED_RISK`는 바꾸지 않는다(MAJOR가 되고 `SessionResult.status` 소비자가 깨진다). `SessionResult.status` 규약도 그대로다.
 - 새 클라이언트 + 옛 서버는 필드가 없으므로 미상으로 폴백한다.
+
+## I. 문진표 선택 (3.3.0, 사용자 결정 2026-11-03)
+배포는 문진표(문항 세트)를 여러 개 함께 운영한다(`ReleaseManifest.question_sets`). 어느 문진표로 문진할지는 **진료 측이 정한다**(표준 임상 흐름: 환자가 아니라 접수·배치가 정한다).
+- 기기에 배치된 문진표가 기본이다: `DeviceConfig.question_set_id`(deploy 기기 설정) 또는 시작 URL 조각 `#...&question_set_id=`(`KioskStartFragment`, 조각이 먼저).
+- 키오스크는 시작 전에 `GET /v1/question-sets`로 활성 목록을 받는다. 정한 값이 목록에 있으면 그대로 `SESSION_START.question_set_id`로 보낸다. 정한 값이 없고 목록이 하나면 그것으로 시작하고(생략 가능), 둘 이상이면 선택 화면(제목 목록)을 보이고 고른 값을 보낸다. 목록이 비면 시작할 수 없다는 안내를 보인다.
+- 서비스는 그 문진표의 문항 `order`·`prerequisite`로 첫 문항·다음 문항·끝을 정한다(고정 흐름 파일은 없다, 계약 `QuestionFlowTable` 설명). 결과(`SessionResult`)와 직원 세션 조회에는 `question_set_id`·`question_set_title`·`question_bank_version`이 있어 의사 화면이 어느 문진표인지 보인다.
+- 문항·칸 **구조**가 다른 문진표는 게이트가 거절한다(U81: 모델은 학습한 구조만 다룬다). 질문 문장·순서·건너뛰기만 다른 문진표는 재학습 없이 운영한다.

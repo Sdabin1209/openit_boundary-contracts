@@ -64,16 +64,16 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 | `get_active_pointer` | `GET /v1/active-pointer` | `{"item": ActivePointer \| null}` |
 | `get_release` | `GET /v1/releases/{id}` | `ReleaseManifest` |
 | `list_releases` | `GET /v1/releases` | 목록(`ReleaseManifest`, 최신부터) |
-| `load_bundle` | `GET /v1/releases/{id}/bundle` | tar: `manifest.json`, `question_bank.json`, `adapters/LORA_A/…`, `adapters/LORA_B/…`. PASS가 아닌 릴리스는 412. 클라이언트가 모든 해시를 검증 |
-| `get_release_question_bank` | `GET /v1/releases/{id}/question-bank` (2.7.0) | `SurveyQuestionBankRead` 응답 `{release_id, content_hash, question_bank}`. 어댑터 없이 문항 세트만. PASS가 아닌 릴리스는 412. 클라이언트가 문항 세트 해시를 검증 |
+| `load_bundle` | `GET /v1/releases/{id}/bundle` | tar: `manifest.json`, `question_banks/<문진표 id>.json`(3.3.0: `manifest.question_sets` 항목마다 하나), `adapters/LORA_A/…`, `adapters/LORA_B/…`. PASS가 아닌 릴리스는 412. 클라이언트가 모든 해시를 검증 |
+| `get_release_question_bank` | `GET /v1/releases/{id}/question-bank?question_set_id=` (2.7.0; 3.3.0 세트별) | `SurveyQuestionBankRead` 응답 `{release_id, question_set_id, content_hash, question_bank}`. 어댑터 없이 문항 세트만. `question_set_id`는 릴리스의 `question_sets`가 둘 이상이면 필수(없으면 400 `INVALID_RECORD`, `details.reason=QUESTION_SET_REQUIRED`), 하나면 생략 가능. 목록에 없는 ID는 404. PASS가 아닌 릴리스는 412. 클라이언트가 문항 세트 해시를 검증 |
 | `get_decision` | `GET /v1/decisions/{id}` | `GateDecision` |
-| `find_decisions` | `GET /v1/decisions?question_set_id=&question_set_version=&lora_a_id=&lora_a_version=&lora_b_id=&lora_b_version=&submission_id=` | 목록(`GateDecision`, 최신부터) |
+| `find_decisions` | `GET /v1/decisions?question_set_id=&question_set_version=&lora_a_id=&lora_a_version=&lora_b_id=&lora_b_version=&submission_id=` | 목록(`GateDecision`, 최신부터). `question_set_id`·`question_set_version`은 판정의 `subject.question_sets` 중 하나와 맞으면 반환(3.3.0) |
 
 ## I5 GateService — 소유: release-gate (현행 경로를 그대로 따른다)
 
 | 호출 | 요청 | 응답 |
 | --- | --- | --- |
-| `submit_candidate` | `POST /v1/submissions` 본문 `GateSubmissionRequest`{subject, requested_by_role} (3.1.0에서 스키마로) | `GateSubmission` (202) |
+| `submit_candidate` | `POST /v1/submissions` 본문 `GateSubmissionRequest`{subject{question_sets[], lora_a, lora_b}, requested_by_role} (3.1.0에서 스키마로; 3.3.0: 문진표 목록, 서버는 세트마다 구조 대조·해시 검증을 하고 하나라도 어긋나면 전체를 거절) | `GateSubmission` (202) |
 | `activate` | `POST /v1/activate` 본문 `{release_id, requested_by_role}` | `ActivePointer` |
 | `request_rollback` | `POST /v1/rollback` 본문 `RollbackRequest` | `RollbackReceipt` |
 | `list_submissions` (D68) | `GET /v1/submissions?status=&limit=&cursor=` | 목록(`SubmissionView`, 최신부터, `status`로 거름). 승인 화면이 `status=AWAITING_APPROVAL`로 대기 건을 본다 |
@@ -139,7 +139,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 
 **정본은 `PUBLIC_API.md`**(경로, 본문, 응답, 상태 코드와 재시도, 인증, 직원 콘솔, 2.1.0 추가)이고 이 절은 그것을 복사하지 않는다. HTTP 규약만 적는다.
 - **2.3.0:** 키오스크 경로는 게이트웨이 mTLS로 인증하고 서비스는 `X-Openit-Device`를 믿는다(PUBLIC_API.md F절). `HttpPublicApi(base_url, token=None, device_id=None)`.
-- 클라이언트 `boundary_contracts.clients.HttpPublicApi`(`start_session`, `send_utterance`, `end_session`, `get_state`, `intervene`, `healthz`)와 `HttpStaffCall`(`retry`, `report`). 토큰은 키오스크 기기 토큰이고 `intervene`은 staff 토큰이다.
+- 클라이언트 `boundary_contracts.clients.HttpPublicApi`(`list_question_sets`(3.3.0), `start_session(question_set_id=)`, `send_utterance`, `end_session`, `get_state`, `intervene`, `healthz`)와 `HttpStaffCall`(`retry`, `report`). 토큰은 키오스크 기기 토큰이고 `intervene`은 staff 토큰이다.
 - `turn_id`는 API 봉투 필드다. 본문 스키마(`FrontendMessage`, `FrontendInput`)는 문진 스키마라 클라이언트는 필수 필드와 타입만 확인하고(위반은 `INTEGRITY_ERROR`), `SessionState`는 이 패키지 스키마로 검증한다.
 - `/healthz`, `/readyz`는 인증이 없다. 429·503은 `UNAVAILABLE`이고 `details.reason`을 먼저 본다(PUBLIC_API.md G절).
 - 참조 서버 `conformance.servers.PublicApiReferenceServer`는 상태 기계(ACTIVE/PAUSED_RISK/ENDED), `turn_id` 멱등, 확정되지 못한 턴의 재처리, 기기 토큰 소유 확인(다른 기기 404, staff 403)을 모사한다. 모사하지 않는 것: 결과 조회(B), 직원 세션 조회(C), 위험 신호 입력(D), `X-Openit-User` 행위자 기록(E), SSE·푸시 구독.
