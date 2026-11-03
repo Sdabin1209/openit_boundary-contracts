@@ -62,7 +62,9 @@
    },
    {
     "enum": [
+     "HF_DATASETS_OFFLINE",
      "HF_HOME",
+     "HF_HUB_DISABLE_TELEMETRY",
      "HF_HUB_OFFLINE",
      "HOME",
      "MODEL_RUNTIME_ALLOW_FAKE",
@@ -301,6 +303,22 @@
   "TORCH_HOME": {
    "$ref": "#/$defs/Path",
    "description": "Torch 캐시 디렉터리. 이미지 ENV 가 정하고 서버는 쓰기 가능 여부를 /readyz 에서 보장한다"
+  },
+  "HF_HUB_DISABLE_TELEMETRY": {
+   "type": "string",
+   "enum": [
+    "0",
+    "1"
+   ],
+   "description": "Hugging Face 표준: 원격 측정 끔. 이미지 ENV 가 1 로 정한다(CR-007)"
+  },
+  "HF_DATASETS_OFFLINE": {
+   "type": "string",
+   "enum": [
+    "0",
+    "1"
+   ],
+   "description": "Hugging Face datasets 오프라인 모드(GPU 세션 키트가 쓴다, CR-007)"
   }
  },
  "required": [
