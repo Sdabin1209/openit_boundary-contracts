@@ -4,7 +4,7 @@
   "title": "RuntimeInfo",
   "description": "GET /v1/info의 응답 본문. model-runtime이 만들고 deploy·model-lab·survey-service가 읽는다. HTTP.md I9는 앞 6개 필드(service, runtime_version, supported_contract_versions, backend, loaded, serving_config_hash)만 정하고, 나머지 3개(system_prompt_sha256, serving_config_expectation, test_hooks)는 이 영역이 더한 것이다. 최상위는 모르는 키를 허용한다(읽는 쪽은 무시): 내는 쪽이 필드를 더해도 읽는 쪽이 깨지지 않게 하려는 것이다. serving_config_expectation 안은 닫는다: deploy·model-lab이 이 값에 맞춰 설정을 만들기 때문에 키 이름이 틀리면 조용히 어긋난다.",
   "x-producers": ["model-runtime"],
-  "x-consumers": ["deploy", "model-lab", "survey-service"],
+  "x-consumers": ["deploy", "model-lab", "survey-service", "release-gate"],
   "type": "object",
   "required": [
     "service",

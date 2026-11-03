@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "StaffAlertPage",
   "x-producers": ["survey-service"],
-  "x-consumers": ["kiosk-frontend"],
+  "x-consumers": ["kiosk-frontend", "admin-console"],
   "type": "object",
   "additionalProperties": false,
   "required": [

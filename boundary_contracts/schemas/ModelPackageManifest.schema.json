@@ -106,7 +106,7 @@
           "items": {
             "$ref": "_common.schema.json#/$defs/ArtifactRef"
           },
-          "description": "학습에 쓴 문항 세트. 게이트의 QUESTION_MODEL_COMPAT가 참고하는 정보이며 반려 근거로 쓰지는 않는다(새 문항 세트는 재학습 없이 출고할 수 있다, D32)."
+          "description": "학습에 쓴 문항 세트(3.4.4, 검토 B-04로 뜻 정정). model-lab 은 게시할 때 반드시 채운다(1개 이상). 게이트의 QUESTION_MODEL_COMPAT 는 제출 문진표의 문항·칸 구조를 이 세트들의 구조와 대조한다: 구조가 다르면 FAIL(반려, U81), 문장·순서·건너뛰기만 다르면 PASS(재학습 없이 출고, D32). 이 필드가 없거나 비면 대조할 수 없으므로 FAIL 이다. 스키마에서 필수로 바꾸지 않은 이유: 필수 추가는 MAJOR(CONVENTIONS 1절 2항)라 출력 규칙으로 같은 효과를 낸다."
         }
       }
     },

@@ -27,7 +27,8 @@
       "type": "string"
     },
     "subject": {
-      "type": "object"
+      "$ref": "GateSubmission.schema.json#/properties/subject",
+      "description": "3.4.4(검토 B-14): GateSubmission.subject 와 같은 모양(question_sets·lora_a·lora_b 필수)"
     },
     "status": {
       "enum": [

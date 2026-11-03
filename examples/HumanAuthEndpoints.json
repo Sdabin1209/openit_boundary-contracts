@@ -1,0 +1,8 @@
+{
+  "login": "/oauth2/start",
+  "logout": "/oauth2/sign_out",
+  "userinfo": "/oauth2/userinfo",
+  "idp_logout": "/auth/realms/openit/protocol/openid-connect/logout",
+  "account_admin": "/auth/admin/openit/console/#/openit/users",
+  "client_id": "openit-gateway"
+}

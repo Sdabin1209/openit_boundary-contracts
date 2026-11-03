@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "GatewayError.schema.json",
+  "title": "GatewayError",
+  "description": "3.4.4(검토 A-10): 게이트웨이(영역 게이트웨이·platform 공개 입구) 자신이 상류 장애로 내는 503·504 본문(RUNTIME R3, CONVENTIONS 9절). `BoundaryError` 가 아니다: 계약 클라이언트는 이 본문을 `UNAVAILABLE` 로 읽는다(재시도 가능). 앱이 낸 `BoundaryError` 와 구별하려고 code 를 따로 둔다. 헤더 `Retry-After: 5` 가 함께 온다.",
+  "x-producers": [
+    "platform",
+    "*"
+  ],
+  "x-consumers": [
+    "*",
+    "external:person"
+  ],
+  "type": "object",
+  "required": [
+    "code"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "const": "UPSTREAM_UNAVAILABLE"
+    }
+  }
+}

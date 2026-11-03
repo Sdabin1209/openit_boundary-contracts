@@ -15,13 +15,13 @@ Page[T]    = (items: list[T], next_cursor: str | None)
 | I1 QuestionReader | question-authoring | 저작 API(내부) | synthetic-data, model-lab, release-gate |
 | I2 DatasetStore | synthetic-data | synthetic-data | model-lab |
 | I3 ModelRegistry | model-lab | model-lab | release-gate |
-| I4 ReleaseReader | release-gate | release-gate | survey-service, ops-feedback, question-authoring, model-lab, admin-console |
+| I4 ReleaseReader | release-gate | release-gate | survey-service, ops-feedback, question-authoring, model-lab, admin-console, model-runtime(번들, HTTP.md I9) |
 | I5 GateService | release-gate | operator, ops-feedback, release-approver(admin-console 경유, 게이트웨이가 사람 인증 뒤 `X-Openit-User`를 붙임) | — |
 | I6 TraceIngest | ops-feedback | survey-service | — |
 | I7 FailureStore | ops-feedback | ops-feedback | synthetic-data, model-lab, question-authoring, admin-console(사례 검토) |
 | I8 turn-engine (3.0.0 폐기: 출력 규칙은 계약 `action_rules`, 서버가 보증, D109·ADR 0010) | — | — | — |
 | I9 model-runtime | model-runtime | — | survey-service, model-lab, release-gate |
-| I10 공개 API | survey-service | — | kiosk-frontend(환자 화면, 직원 콘솔). 운영 화면(admin-console)은 I5·I4·I7만 쓴다 |
+| I10 공개 API | survey-service | — | kiosk-frontend(환자 화면, 직원 콘솔), admin-console(문진 결과 탭·직원·의사 알림 SSE·푸시 구독, PUBLIC_API B절; 3.4.4 검토 A-14·B-15) |
 
 ## I1. QuestionReader (question-authoring)
 
@@ -78,12 +78,13 @@ get_eval_report(ref: str) -> bytes                     # EvaluationReport(JSON).
 get_active_pointer() -> ActivePointer | None           # 값싼 호출. 읽는 쪽이 주기적으로 불러 pointer_version이 달라졌는지 본다
 get_release(release_id: str) -> ReleaseManifest
 load_bundle(release_id: str, *, dest: Path) -> ReleaseBundle
-    # ReleaseBundle(manifest: ReleaseManifest, question_bank: QuestionBank,
+    # ReleaseBundle(manifest: ReleaseManifest, question_banks: dict[str, QuestionBank],   # 3.3.0: 문진표 id -> QuestionBank
     #               adapters: dict["LORA_A"|"LORA_B", Path])
-    # 서비스가 I9 load에 넘기는 serving_config와 해시는 manifest.adapters[role]에 있다(I3를 읽지 않는다).
+    # serving_config 와 해시는 manifest.adapters[role] 에 있다. 추론 서버는 I4 에서 번들을 스스로 읽어 적재한다(HTTP.md I9; 서비스는 어댑터를 보내지 않는다).
     # 모든 해시를 검증한다(어댑터 디렉터리, 그 안의 시스템 프롬프트 파일 manifest.adapters[role].system_prompt 포함). 통과(PASS)하지 않은 릴리스는 FAILED_PRECONDITION.
 get_decision(decision_id: str) -> GateDecision
-find_decisions(*, question_set: Ref | None = None, lora_a: Ref | None = None, lora_b: Ref | None = None,
+find_decisions(*, question_set: Ref | None = None,   # 3.3.0: 판정의 question_sets 중 하나와 맞으면 반환
+               lora_a: Ref | None = None, lora_b: Ref | None = None,
                submission_id: str | None = None, cursor=None, limit=100) -> Page[GateDecision]   # 최신부터. 같은 조합의 첫 항목이 그 조합의 현재 판정이다
 list_releases(*, cursor=None, limit=100) -> Page[ReleaseManifest]   # 최신부터
 ```
@@ -98,8 +99,8 @@ list_releases(*, cursor=None, limit=100) -> Page[ReleaseManifest]   # 최신부�
 
 ```
 submit_candidate(subject: GateSubject, *, requested_by_role: str) -> GateSubmission
-    # GateSubject = {question_set: Ref, lora_a: Ref, lora_b: Ref}. 즉시 접수만 하고 판정은 비동기.
-    # 판정이 끝나면 GateDecision(submission_id로 연결)이 생긴다. 같은 subject의 중복 요청은 기존 접수를 돌려준다.
+    # GateSubject = {question_sets: list[Ref], lora_a: Ref, lora_b: Ref}(3.3.0). 즉시 접수만 하고(202) 판정은 비동기.
+    # 판정이 끝나면 GateDecision(submission_id로 연결)이 생긴다. 같은 subject의 중복 요청은 기존 접수를 200 으로 돌려준다(RUNTIME R10.8).
 activate(release_id: str, *, requested_by_role: str) -> ActivePointer
     # PASS로 만든 릴리스만 가능. 아니면 FAILED_PRECONDITION. 포인터 변경은 원자적이다.
 request_rollback(request: RollbackRequest) -> RollbackReceipt
@@ -202,7 +203,7 @@ SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 - `respond`(LoRA-B): 출력은 JSON이 아니라 **문장 그대로의 텍스트**(`ResponseText`)다. 형식(비어 있지 않은 문자열)을 지키지 못하면 입력의 재료(`known`, `ask`, `hold`, `next.text`)를 이어 붙여 읽는 문장을 대신 내고, 대체했음을 알린다. 라이브러리는 `is_fallback=true`, HTTP는 응답 헤더 `X-Openit-Outcome: fallback`이다. `is_fallback`은 모델이 아니라 코드가 채운다. 대체 문장을 만드는 규칙은 model-runtime이 정한다(계약 밖, 미정).
 - 대체 응답이나 재시도가 일어나면 `last_call_info`에 몇 번 시도했고 어떤 보호가 몇 건 적용됐는지 남긴다. 조용히 지나가지 않는다. model-lab은 `*_raw`로 검증 전 품질을 따로 잰다.
 - 라이브러리 예외는 인프라 문제에만 쓴다(`BackendNotAvailable` 등). `BoundaryError`가 아니다.
-**서비스가 지키는 것: `OUTPUT_INVALID` 처리(D75).** survey-service는 `extract`가 503 `OUTPUT_INVALID`를 내거나 turn-engine의 `validate_extraction`이 위반을 내면 **같은 요청을 한 번 다시 보낸다.** 그래도 같으면 그 턴을 실패 신호(`TurnFailureSignal`, `write_committed`는 NOT_COMMITTED)로 처리하고 **세션 상태를 바꾸지 않는다**(기록 저장, 진행 갱신 없음). 틀린 값을 기록에 넣는 것보다 환자에게 다시 묻는 편이 안전하다. 다른 이유의 `UNAVAILABLE`은 서비스의 일반 재시도 정책을 따른다. 클라이언트는 `boundary_contracts.clients.is_output_invalid(err)`로 구분한다.
+**서비스가 지키는 것: `OUTPUT_INVALID` 처리(D75).** survey-service는 `extract`가 503 `OUTPUT_INVALID`를 내면 **같은 요청을 한 번 다시 보낸다**(turn-engine 은 3.0.0 에 폐기되어 `validate_extraction` 경로는 없다; 그 밖의 실패 처리는 HTTP.md I9 호출자 규칙). 그래도 같으면 그 턴을 실패 신호(`TurnFailureSignal`, `write_committed`는 NOT_COMMITTED)로 처리하고 **세션 상태를 바꾸지 않는다**(기록 저장, 진행 갱신 없음). 틀린 값을 기록에 넣는 것보다 환자에게 다시 묻는 편이 안전하다. 다른 이유의 `UNAVAILABLE`은 서비스의 일반 재시도 정책을 따른다. 클라이언트는 `boundary_contracts.clients.is_output_invalid(err)`로 구분한다.
 
 **시스템 프롬프트는 모델 패키지의 일부다(D75).** LoRA 어댑터와 짝이 되는 시스템 프롬프트 파일이 어댑터 디렉터리 안에 있고, `ModelPackageManifest.system_prompt`(`path`는 디렉터리 안의 상대 경로, `sha256`은 파일 바이트의 `canonical.file_hash`)가 이를 가리킨다. 게이트는 같은 값을 `ReleaseManifest.adapters[role].system_prompt`로 복사한다(서비스가 I3를 읽지 않아도 되게). model-runtime은 서빙할 때 **이 패키지의 프롬프트만 쓴다**(코드나 설정에 박은 문장을 쓰지 않는다). LoRA 교체(D72)가 프롬프트까지 함께 바뀌어야 하기 때문이다. 프롬프트 파일은 어댑터 디렉터리 안에 있으므로 `adapter_hash`에도 포함되고, 클라이언트(`open_adapter`, `load_bundle`, `publish`)는 파일이 있고 `sha256`이 맞는지 따로 확인한다(어기면 INTEGRITY_ERROR). 역할마다 하나(A, B 각 한 종)다. `serving_config`의 **프롬프트 템플릿 버전**과는 다른 것이다: 시스템 프롬프트는 *무슨 말을 시키는가*(패키지 데이터, 학습과 짝)이고, 템플릿 버전은 *입력 JSON과 시스템 프롬프트를 어떻게 채팅 형식으로 조립하는가*(model-runtime 코드의 렌더링 규칙)다. 둘 다 해시로 고정된다(`system_prompt.sha256`, `serving_config_hash`).
 
@@ -222,6 +223,6 @@ SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 | synthetic-data | I1, I7 | I2 |
 | model-lab | I2, I1, I7, I4, I9 | I3 |
 | release-gate | I1, I3, I9, I5 요청 | I4, I5 |
-| survey-service | I4, I8, I9 | I6, I10 |
+| survey-service | I4, I9 | I6, I10 |
 | ops-feedback | I6, I4, (롤백 요청은 I5 호출) | I7, I6 수집 |
-| turn-engine / model-runtime | 이 리포지토리의 모델 입출력 스키마, 문진 스키마 | I8 / I9 |
+| model-runtime | 이 리포지토리의 모델 입출력 스키마, I4(번들) | I9 |

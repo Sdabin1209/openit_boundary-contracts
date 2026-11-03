@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ResyncEvent.schema.json",
+  "title": "ResyncEvent",
+  "description": "3.4.4(검토 B-05): SSE 이벤트 `resync` 의 `data:`. Last-Event-ID 로 이어 받을 수 없는 재연결에 한 번. 받으면 알림은 GET /v1/staff/alerts?status=OPEN, 결과는 GET /v1/results?updated_after=<마지막 heartbeat ts> 로 다시 맞춘다(PUBLIC_API B절).",
+  "x-producers": [
+    "survey-service"
+  ],
+  "x-consumers": [
+    "admin-console",
+    "kiosk-frontend"
+  ],
+  "type": "object",
+  "required": [
+    "reason"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "reason": {
+      "const": "EVENTS_NOT_RESUMABLE"
+    }
+  }
+}

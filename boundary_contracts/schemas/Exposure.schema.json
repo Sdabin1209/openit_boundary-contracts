@@ -2,7 +2,7 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "Exposure.schema.json",
  "title": "Exposure",
- "description": "서비스의 게이트웨이 노출 표 (라벨 io.openit.exposure 의 내용). 서비스(영역)가 어느 경로를 어떤 인증으로 밖에 내는지 선언하고 deploy 가 config/Caddyfile 을 만들거나 대조한다. 지금은 Caddyfile 이 영역 API 경로·메서드·역할을 직접 안다. 역할 이름은 boundary-contracts 의 역할 집합이어야 한다(여기서는 형식만 본다). 노출하지 않는 경로는 auth.kind=denied 로 적는다: 목록에 없는 /v1/* 는 gateway 가 404 로 막는 것이 기본이다.",
+ "description": "서비스(영역)의 게이트웨이 노출 표(라벨 io.openit.exposure 의 내용). 영역이 들어오는 쪽(routes: 어느 경로를 어떤 인증으로 platform 공개 입구에 내는가)과 나가는 쪽(egress: 영역 게이트웨이가 CONNECT 터널을 열어 줄 상대)을 선언한다. deploy 가 배포 때 이 선언으로 게이트웨이 설정을 만들거나 대조한다(게이트웨이 제품·설정 파일은 platform·deploy 내부, 3.4.4 검토 B-19). 역할 이름은 CONVENTIONS 6절의 역할 집합이어야 한다(여기서는 형식만 본다). 노출하지 않는 경로는 auth.kind=denied 로 적는다: 목록에 없는 /v1/* 는 404 가 기본이다. 게이트웨이는 모든 경로에서 클라이언트가 보낸 X-Openit-User·X-Openit-Roles·X-Openit-Device 를 지운다(CONVENTIONS 6절).",
  "x-producers": ["*"],
  "x-consumers": ["platform", "deploy"],
  "type": "object",
@@ -10,6 +10,28 @@
   "service": {
    "type": "string",
    "pattern": "^[a-z][a-z0-9-]*$"
+  },
+  "egress": {
+    "type": "array",
+    "uniqueItems": true,
+    "items": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "description": "받는 서비스 이름(INTERFACES 한눈에 표의 호출 관계 안에서만)"
+        },
+        {
+          "const": "external:web-push",
+          "description": "공인 주소의 443(웹 푸시 발송, RUNTIME R3.18). survey-service 만 선언한다(R6.4)"
+        },
+        {
+          "const": "external:backup",
+          "description": "platform 백업 저장소(RUNTIME R10.1)"
+        }
+      ]
+    },
+    "description": "3.4.4(CONVENTIONS 13절, RUNTIME R1.8): 이 영역의 게이트웨이가 CONNECT 터널을 열어 줄 상대. 없으면 빈 목록과 같다(영역 밖으로 나가는 호출이 없다). 목록 밖 상대는 403(EGRESS_DENIED)"
   },
   "routes": {
    "type": "array",

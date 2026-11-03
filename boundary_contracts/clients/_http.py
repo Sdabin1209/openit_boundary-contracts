@@ -243,6 +243,12 @@ def require_tls_url(base_url: str) -> None:
     raise ValueError(f"평문 http:// 는 같은 기계 안(loopback)만 허용한다: {parts.scheme}://{host} — https:// 주소를 쓴다(U99)")
 
 
+def _egress_denied(e: BaseException) -> bool:
+    """CONNECT 터널이 403 으로 거절됐는가. http.client 는 터널 실패를 OSError("Tunnel connection failed: <코드> <이유>")로 낸다(CPython http.client._tunnel)."""
+    reason = getattr(e, "reason", e)
+    return isinstance(reason, OSError) and str(reason).startswith("Tunnel connection failed: 403")
+
+
 def require_egress_proxy(url: str) -> None:
     """자기 영역 게이트웨이의 CONNECT 주소는 같은 네트워크 공간의 loopback 평문만 받는다(3.4.4, CONVENTIONS 13절).
     왜: 터널 안의 TLS 가 끝까지 유지되므로 프록시 구간은 평문 CONNECT 여도 내용이 드러나지 않고(RFC 9110 9.3.6),
@@ -276,7 +282,7 @@ class HttpClientBase:
     def __init__(self, base_url: str, token: Optional[str], timeout: float = 10.0, *, user: Optional[str] = None,
                  egress_proxy: Optional[str] = None):
         """user: 사람 행위자의 인증된 ID를 `X-Openit-User`로 싣는다(3.1.0, D88·HTTP.md I5). 게이트웨이를 거치면 게이트웨이가 인증 계정으로 덮어쓰고,
-        게이트웨이 뒤 내부망에서 서비스를 직접 부르는 도구(시험·운영)만 이 값을 쓴다. 이 헤더가 필요한 쓰기(승인·활성화·롤백·검토)가 비공개 속성 없이 부를 수 있게 한다."""
+        platform 공개 입구 역할(토큰 역할 `gateway`)과 함께일 때만 서비스가 이 값을 쓴다(그 밖의 토큰의 같은 헤더는 무시한다, CONVENTIONS 6절, 3.4.4 검토 A-25). 이 헤더가 필요한 쓰기(승인·활성화·롤백·검토)가 비공개 속성 없이 부를 수 있게 한다."""
         require_tls_url(base_url)
         self._base = base_url.rstrip("/")
         self._token = token
@@ -325,6 +331,11 @@ class HttpClientBase:
         except urllib.error.HTTPError as e:
             raise self._map_error(e) from None
         except (urllib.error.URLError, OSError, http.client.HTTPException, ValueError) as e:
+            if _egress_denied(e):
+                # 왜: 자기 영역 게이트웨이가 CONNECT 를 403 으로 거절한 것은 계약 밖 호출 관계라는 정책 판정이라
+                # 다시 보내도 같다(RFC 9110 15.5.4). 재시도 가능한 UNAVAILABLE 로 내면 잡이 계속 재시도한다(RUNTIME R1.8, 검토 B-23).
+                raise BoundaryError("PERMISSION_DENIED", "자기 영역 게이트웨이가 이 상대로 나가는 것을 허용하지 않는다",
+                                    {"reason": "EGRESS_DENIED", "http_status": 403}) from None
             raise self._unavailable("서비스에 연결하지 못했다", reason=type(e).__name__) from None
 
     def _map_error(self, e: urllib.error.HTTPError) -> BoundaryError:

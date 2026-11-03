@@ -16,6 +16,12 @@
 - RUNTIME 행마다 "출력하는 쪽 → 받는 쪽" 칸. 중계 표현을 영역 게이트웨이·platform 공개 입구로.
 - 호출 × 실패 칸 810개 확정(RUNTIME-MATRIX-CELLS.md). 열린 칸을 닫는 계약 행: RUNTIME R3.19~R3.27(R3.22 는 R3.10 에 합침)·R9.3·R10.13 신설, R1.5·R1.6·R3.3·R3.10·R3.12·R3.13·R3.17·R3.18·R4.6·R9.2·R10.2·R10.3(10초, 코드·사슬과 같게)·R10.4·R10.6·R10.11 보충, 게이트웨이 `Retry-After: 5`. CONVENTIONS 3절 CONFLICT·4절 동시 도착·I6 중복 예외·6절 승인 대기·9절 기계 호출 헤더와 클라이언트 Retry-After 문장 정정·시간 사슬 56초 행. HTTP.md I5 activate 멱등·롤백 REJECTED 200·approver_id 400, I6 중복, I9 401. PUBLIC_API 키오스크 408·413, 결과 resync·updated_after 뜻.
 - 영역 게이트웨이의 나가는 쪽(CONVENTIONS 13절, RUNTIME R1.8·IN-EGRESS): 공통 환경 변수 `OPENIT_EGRESS_PROXY`, 클라이언트 `egress_proxy` 인자·`egress_proxy_from(environ)`·`require_egress_proxy`(loopback http 만). 표준 HTTP CONNECT 터널(RFC 9110 9.3.6), TLS 는 끝까지. 시험 test_egress_proxy_344.py(CONNECT 대상 기록·거절·미도달·형식, 변이 확인).
+- 독립 검토 A(34건)·B(28건) 반영(/tmp 검토 원문의 번호를 각 문장에 적음):
+  - 새 스키마: `ResultReadyEvent`·`HeartbeatEvent`·`ResyncEvent`(SSE `data:`), `PushSubscriptionRequest`(endpoint SSRF 방지), `HumanAuthEndpoints`·`HumanUserInfo`(platform 로그인 경로·userinfo), `CommonEnv`(`OPENIT_EGRESS_PROXY`), `GatewayError`(`UPSTREAM_UNAVAILABLE`). `EXTERNAL_SCHEMAS.json`: 정본이 문진 스키마인 영역 사이 스키마 6개와 주인(헤드 cross-area-check 가 존재 대조).
+  - 결정: 데이터베이스는 영역의 컴포넌트(Database per Service, CONVENTIONS 13절, R10.1; 호출 C24 를 영역 사이 표에서 뺌). 영역 게이트웨이 출구 거절은 `PERMISSION_DENIED`/`EGRESS_DENIED`(클라이언트 수정). 서비스 토큰의 401·403 은 받는 서비스가 낸다. 사람 신원 헤더는 `gateway` 역할 토큰 요청에서만 믿는다. 모든 401 에 `WWW-Authenticate`. R10.8 은 내용이 다르면 409.
+  - 출력이 없던 입력: 활성 릴리스 없음 503 `NO_ACTIVE_RELEASE`, 배치 문진표가 목록에 없음, 제출 해시 422·구조 `REJECTED_AUTO`, `lineage.question_sets` 없으면 FAIL, 키오스크의 NOT_COMMITTED·4xx 화면 동작, SSE 역할 필터·최대 수명(`SURVEY_SSE_MAX_SECONDS`)·상태 확인 탐침, 추론 서버 404 재적재, 비 /v1 미인증 401.
+  - 낡은 문장 정정: INTERFACES I4·I5·I8·I10, PUBLIC_API 인증·폐기 예정·REASK_LIMIT·"아직 정하지 않은 것", HTTP.md 저작 API 지위·I1 목록 경로·approver_id·(ADR 0010 R7), CONVENTIONS 6·9·10절·시간 사슬(56초 행 서버 마감 50초, 이웃 호출 10초 행, 근거 표기), 3.3.0 MAJOR 예외 기록, RFC 9110 9.2.2 인용 정정, CELLS 의 R10.3 인용·감시/스케줄러 표기·머리 주석.
+  - 호출 표: C30 인증 없음, C34 정의, C37~C42 추가(칸 162개는 같은 인터페이스·같은 호출자 종류의 기존 칸에서 옮김).
 - 클라이언트 `extract_tar`: 호출자 쪽 쓰기 실패(OSError)는 `UNAVAILABLE`(전에는 `INTEGRITY_ERROR` 로 재시도를 막았다, R3.27). 시험 test_extract_tar_disk_344.py(변이 확인).
 - `JobsDeclaration.job.timeout_seconds`(선택, 정수 ≥ 1): 잡 한 번 실행의 시간 상한. 선택인 이유는 기존 선언과의 하위 호환. 3.4.2 의 Env 선택 필드처럼 레코드 와이어가 아니라 선언이라 PATCH.
 
@@ -44,6 +50,7 @@
 - PUBLIC_API: 푸시 구독 본문에 선택 `topics`(`alerts`=staff, `results`=clinician, 기본 `alerts`). 세션이 `ENDED_*`면 `results` 구독자에게 웹 푸시. B절의 "웹 푸시로는 보내지 않는다" 삭제.
 
 ## 3.3.0 (MINOR, 와이어 형식 변경 — 문진표 여러 개와 세션별 선택; 사용자 결정 2026-11-03)
+(3.4.4 기록: 이 판은 필수 필드 추가·필드 삭제를 포함해 CONVENTIONS 1절 2항으로는 MAJOR 였다. 데모 단계라 MINOR 로 냈고 병행 기간 없이 3.2.x 레코드를 읽지 않는다 — CONVENTIONS 1절 4항 예외에 적었다.)
 왜: 배포에 문진표가 하나뿐이었고, 세션이 문진표를 고를 길이 없었고, 순서·건너뛰기가 문진표가 아닌 고정 파일(survey-service `question_flow.json`)에서 왔다. 제품의 핵심 흐름(저자가 올린 문진표로 환자마다 문진한다)이 성립하지 않았다.
 - `_common.QuestionSetRef`(ArtifactRef + `title`) 신설. `ReleaseManifest.question_sets[]`(1개 이상, QuestionSetRef)가 단수 `question_set`을 대체. `GateSubmissionRequest`·`GateSubmission`·`GateDecision`·`ReviewReport`의 `subject.question_sets[]`(ArtifactRef)가 단수를 대체. `find_decisions`의 문진표 질의는 목록 중 하나와 맞으면 반환.
 - I4 `get_release_question_bank(release_id, question_set_id=None)`: `?question_set_id=` 세트별 조회, 응답에 `question_set_id`(둘 이상이면 필수, 없으면 400 INVALID_RECORD/QUESTION_SET_REQUIRED). `load_bundle` tar는 `question_banks/<id>.json`(세트마다), `ReleaseBundle.question_banks`(id -> QuestionBank).

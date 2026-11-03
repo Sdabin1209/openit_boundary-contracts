@@ -38,7 +38,9 @@ def test_calls_go_through_own_gateway_as_connect_tunnel():
     with pytest.raises(BoundaryError) as e:
         c.get_active_pointer()
     assert proxy.lines == ["CONNECT release-gate:8443 HTTP/1.1"]
-    assert e.value.code == "UNAVAILABLE"      # 허용 목록 밖·게이트웨이 거절은 R6.2 의 OUT-NET 과 같다
+    assert e.value.code == "PERMISSION_DENIED"     # 허용 목록 밖: 정책 거절, 재시도 안 함(R1.8, 검토 B-23)
+    assert e.value.retryable is False
+    assert e.value.details["reason"] == "EGRESS_DENIED"
 
 
 def test_own_gateway_unreachable_is_unavailable():

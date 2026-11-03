@@ -1,0 +1,8 @@
+{
+  "user": "u-1",
+  "email": "doctor@example.org",
+  "preferredUsername": "doctor",
+  "groups": [
+    "/clinician"
+  ]
+}

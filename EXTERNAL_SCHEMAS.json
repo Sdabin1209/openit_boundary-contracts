@@ -1,0 +1,13 @@
+{
+  "_설명": "3.4.4(검토 B-20): 영역 사이를 오가지만 정본이 문진 스키마(openit-survey-schema, survey-service 소유, D21)에 있는 스키마 목록. 헤드는 이 목록으로 영역 사이 계약에 속함과 주인(생산자·소비자)을 정하고, 모양의 정본은 survey-service 가 문진 스키마에서 정한다(사본을 두지 않는다). 기준 판은 deploy/scripts/lib.sh 의 DEPLOY_SS_TAG. head/scripts/cross-area-check.py 가 각 이름이 그 판의 문진 스키마에 있는지와 아래 목록이 이 파일과 같은지를 대조한다.",
+  "package": "openit-survey-schema",
+  "owner": "survey-service",
+  "schemas": [
+    {"name": "QuestionBank", "x-producers": ["question-authoring"], "x-consumers": ["release-gate", "synthetic-data", "model-lab", "survey-service"], "where": "HTTP.md I1·I4 번들"},
+    {"name": "FrontendMessage", "x-producers": ["kiosk-frontend"], "x-consumers": ["survey-service"], "where": "PUBLIC_API 세션·발화"},
+    {"name": "FrontendInput", "x-producers": ["survey-service"], "x-consumers": ["kiosk-frontend"], "where": "PUBLIC_API 세션·발화 응답(TurnFailureSignal 포함, RUNTIME R3.20)"},
+    {"name": "SessionResult", "x-producers": ["survey-service"], "x-consumers": ["admin-console"], "where": "PUBLIC_API B절"},
+    {"name": "StaffSessionView", "x-producers": ["survey-service"], "x-consumers": ["kiosk-frontend", "admin-console"], "where": "PUBLIC_API C절"},
+    {"name": "TurnTrace", "x-producers": ["survey-service"], "x-consumers": ["ops-feedback"], "where": "TraceEnvelope.trace(HTTP.md I6)"}
+  ]
+}

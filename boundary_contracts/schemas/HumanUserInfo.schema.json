@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "HumanUserInfo.schema.json",
+  "title": "HumanUserInfo",
+  "description": "3.4.4(검토 B-10): GET /oauth2/userinfo 의 200 본문(platform 사람 인증). groups 는 역할 이름(CONVENTIONS 6절 목록)이며 앞에 '/' 가 붙을 수 있다(그룹 경로 매퍼). 화면은 표시에만 쓰고 권한 판단은 게이트웨이가 한다. 모르는 키는 무시한다.",
+  "x-producers": [
+    "platform"
+  ],
+  "x-consumers": [
+    "admin-console",
+    "kiosk-frontend"
+  ],
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "user": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "preferredUsername": {
+      "type": "string"
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^/?[a-z][a-z-]*$"
+      }
+    }
+  }
+}

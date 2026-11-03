@@ -9,7 +9,7 @@
 - **목록**은 `{"items": [...], "next_cursor": 문자열 | null}`이다. 쿼리 `cursor`, `limit`(기본 100, 최대 500)을 받는다. 정렬은 인터페이스 명세를 따른다.
 - 해시는 클라이언트가 받은 뒤 다시 계산해 `INTEGRITY_ERROR`로 판정한다(서버를 믿지 않는다). 서버는 `content_hash`를 계산해 담는다.
 - 토큰: 서버는 `<이름>_TOKENS`(역할=토큰 쌍의 목록)를 파일로 받는다(D84: `<이름>_TOKENS_FILE`에 경로를 주고 `read_secret`으로 읽는다. 환경 변수 `<이름>_TOKENS`는 개발·시험용 호환이다. 영역 문서가 이름을 정한다). 읽기와 쓰기 역할을 구분하고, 읽기 토큰은 쓰기 경로를 호출할 수 없다(PERMISSION_DENIED, 403).
-- 클라이언트는 생성자에 `base_url`, `token`, `timeout`을 인자로 받는다(환경 변수는 서비스 진입점이 읽는다, CONVENTIONS 7절). 네트워크 오류와 5xx와 503은 `UNAVAILABLE`(재시도 가능)이다.
+- 클라이언트는 생성자에 `base_url`, `token`, `timeout`을 인자로 받는다(환경 변수는 서비스 진입점이 읽는다, CONVENTIONS 7절). 네트워크 오류와 5xx(503 포함)는 `UNAVAILABLE`(재시도 가능)이다.
 - 클라이언트는 응답을 **읽기 모드**로 검증한다(CONVENTIONS 1절): 같은 MAJOR의 모르는 필드와 모르는 열거값은 받아들이고(`content_hash`는 모르는 필드까지 포함한 원본으로 계산), 필수 필드·타입·패턴 위반은 `INTEGRITY_ERROR`, `pipeline_schema_version`의 MAJOR가 다르면 `UNSUPPORTED_VERSION`이다. 요청 본문은 엄격한 스키마로 검증한다.
 - tar 스트림은 경로에 `..`, 절대 경로, 심볼릭 링크를 두지 않고 클라이언트도 풀 때 거부한다.
 
@@ -19,14 +19,14 @@
 
 | 호출 | 요청 | 응답 |
 | --- | --- | --- |
-| `list_ids` | `GET /v1/question-sets` | 목록(ID 문자열) |
+| `list_ids` | `GET /v1/question-sets` | 목록(ID 문자열). 영역 사이 전용이다: platform 공개 입구에 노출하지 않는다(사람·기기용 같은 경로 `GET /v1/question-sets` 의 주인은 survey-service, PUBLIC_API; 검토 A-17) |
 | `list_versions` | `GET /v1/question-sets/{id}/versions` | 목록(`ArtifactRef`, 오래된 것부터) |
 | `latest` | `GET /v1/question-sets/{id}/latest?reviewed_only=true\|false` | `ArtifactRef`. 없으면 404 |
 | `get_question_bank` | `GET /v1/question-sets/{id}/versions/{version}` | `QuestionBank` JSON. 클라이언트는 `ref.content_hash`와 대조 |
 | `get_reviews` | `GET /v1/question-sets/{id}/versions/{version}/reviews` | 목록(`ReviewRecord`, 시각순) |
 | `get_change` | `GET /v1/question-sets/{id}/versions/{version}/change` | `{"item": ChangeClassification \| null}` |
 
-저작 API(`/v1/drafts`, `/v1/materials`, `/v1/reviews` 등)는 이 규약의 대상이 아니다(영역 내부).
+저작 API(`/v1/drafts`, `/v1/materials`, `/v1/reviews` 등)는 사람(저자·검수자)이 platform 공개 입구를 거쳐 부르는 면이다. 요청·응답 본문의 정본은 `AuthoringRequests`·`AuthoringResponses`·`SignalsResponse` 이고, 경로·메서드·역할은 question-authoring 의 `Exposure` 선언이 정본이다(이 문서는 경로를 복사하지 않는다; 3.4.4 검토 A-16). 실패 본문과 상태 코드는 9절과 RUNTIME 을 따른다.
 
 ## I2 DatasetStore — 소유: synthetic-data (서비스 이름: dataset-store), 소비: model-lab (D100, 2.1.0)
 
@@ -73,7 +73,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 
 | 호출 | 요청 | 응답 |
 | --- | --- | --- |
-| `submit_candidate` | `POST /v1/submissions` 본문 `GateSubmissionRequest`{subject{question_sets[], lora_a, lora_b}, requested_by_role} (3.1.0에서 스키마로; 3.3.0: 문진표 목록, 서버는 세트마다 구조 대조·해시 검증을 하고 하나라도 어긋나면 전체를 거절) | `GateSubmission` (202) |
+| `submit_candidate` | `POST /v1/submissions` 본문 `GateSubmissionRequest`{subject{question_sets[], lora_a, lora_b}, requested_by_role} (3.1.0에서 스키마로; 3.3.0: 문진표 목록, 서버는 세트마다 구조 대조·해시 검증을 하고 하나라도 어긋나면 전체를 거절) | `GateSubmission` (202). 문진표·모델 참조의 ID·버전·해시를 읽을 수 없거나 해시가 다르면 202 를 내지 않고 422 `INTEGRITY_ERROR`(재시도 안 함)다. 문진표 구조가 모델과 맞지 않는 것은 접수(202) 뒤 자동 검사에서 가려진다: 상태 `REJECTED_AUTO`, `GateDecision.checks` 의 `QUESTION_MODEL_COMPAT`=FAIL, `reject_codes` 에 `CHECK_FAILED`, 어긋난 세트 ID 는 그 검사의 `detail` 에 적는다. 세트 하나라도 어긋나면 제출 전체가 `REJECTED_AUTO` 다(3.4.4, 검토 B-03) |
 | `activate` | `POST /v1/activate` 본문 `{release_id, requested_by_role}` | `ActivePointer`. 이미 활성인 같은 `release_id` 면 200 으로 현재 포인터를 그대로 돌려준다(새 포인터·버전을 만들지 않는다, RUNTIME R10.8) |
 | `request_rollback` | `POST /v1/rollback` 본문 `RollbackRequest` | 200 `RollbackReceipt`. 선행 조건 위반(`from_release_id` 가 현재 활성이 아님, `to_release_id` 가 PASS·해시 검증을 통과하지 못함, 둘이 같음)도 412 가 아니라 200 `status:"REJECTED"` + `reason`(거부도 영수증으로 남는다). 같은 `request_id` 는 같은 영수증(R10.8) |
 | `list_submissions` (D68) | `GET /v1/submissions?status=&limit=&cursor=` | 목록(`SubmissionView`, 최신부터, `status`로 거름). 승인 화면이 `status=AWAITING_APPROVAL`로 대기 건을 본다 |
@@ -84,7 +84,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 **승인 요청의 해시·충돌·승인자 (D69).**
 - `GET /v1/submissions/{id}/review-report`의 응답 헤더 `X-Openit-Report-Hash`가 그 보고서의 해시다. 클라이언트는 해시를 **계산하지 않고** 받은 값을 `POST /v1/approvals`의 `report_hash`로 그대로 돌려보낸다(해시 구현은 서버 한 곳, `boundary_contracts.canonical`).
 - 409의 사유는 `BoundaryError.details.reason`으로 구분한다: `STALE_REPORT`(승인자가 본 보고서가 이미 바뀜), `ALREADY_DECIDED`(이 제출에 이미 다른 결정이 있음). `code`는 `CONFLICT` 그대로다.
-- 승인자 식별: 게이트웨이가 사람 인증을 마친 뒤 요청에 `X-Openit-User: <인증된 사용자 ID>` 헤더를 붙인다(클라이언트가 보낸 같은 이름의 헤더는 게이트웨이가 지운다). 서버는 `release-approver` 토큰의 요청에서 이 헤더 값을 승인자로 쓴다. 본문에 `approver_id` 를 넣으면 400 `INVALID_RECORD` 다(`ApprovalRequest` 는 닫힌 스키마, 3.4.4 문장 정정). **헤더가 없으면 401로 거부한다**(D88 U7, 활성화·롤백과 같은 규칙: 승인자는 항상 개인으로 식별되어야 하고, 본문 값은 위조할 수 있다). 개발·시험은 시험용 게이트웨이나 시험 헤더를 붙여 호출한다.
+- 승인자 식별: 게이트웨이가 사람 인증을 마친 뒤 요청에 `X-Openit-User: <인증된 사용자 ID>` 헤더를 붙인다(클라이언트가 보낸 같은 이름의 헤더는 게이트웨이가 지운다). 서버는 `release-approver` 토큰의 요청에서 이 헤더 값을 승인자로 쓴다. 본문에 `approver_id` 를 넣으면 400 `INVALID_RECORD` 다(`ApprovalRequest` 는 닫힌 스키마, 3.4.4 문장 정정). **헤더가 없으면 401로 거부한다**(D88 U7, 활성화·롤백과 같은 규칙: 승인자는 항상 개인으로 식별되어야 하고, 본문 값은 위조할 수 있다). 시험도 게이트웨이(platform 공개 입구 역할의 `gateway` 토큰)를 거쳐 호출한다(CONVENTIONS 6절, 검토 A-25).
 
 사람의 반려는 `GateDecision.reject_codes`에 `CHECK_FAILED`를 쓰고, `checks`의 `HUMAN_APPROVAL`이 FAIL이면 사람이 반려한 것이다(코드를 새로 만들지 않는다, D58). 요청 본문의 `report_hash`는 필수다(3.0.0 `ApprovalRequest`): 승인자가 본 보고서의 `X-Openit-Report-Hash` 값을 그대로 보내고, 현재 보고서와 다르면 409 `STALE_REPORT`.
 
@@ -120,17 +120,17 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 
 - 인증은 Bearer 토큰(서버 `MODEL_RUNTIME_TOKENS`, 서비스 `SURVEY_INFERENCE_TOKEN_ENV`). 오류는 `BoundaryError` 본문과 9절 상태 코드(400 입력 계약 위반, 401 토큰 없음·틀림 + `WWW-Authenticate: Bearer`, 403, 404, 412, 422, 503). `/healthz`·`/readyz` 는 인증이 없다.
 - 적재되지 않은 릴리스에 extract/respond가 오면 **404 NOT_FOUND**(서버가 재시작해 잊은 경우 포함). 서비스는 `PUT`으로 적재를 요청한다.
-- **extract 출력 규칙 보증(2.2.0, ADR 0010, D104):** 요청에 `flow`가 있으면 서버는 출력이 `ActionExtraction` 스키마를 통과할 뿐 아니라 `boundary_contracts.action_rules.check_action_extraction(input, output, flow)`(규칙 명세 `ActionExtractionRules`)에 위반이 없는 값만 낸다. 위반이면 재시도하고, 끝내 안 되면 아래 `OUTPUT_INVALID`다. **호출자는 통과한 값을 다시 검사하지 않는다(R7).**
+- **extract 출력 규칙 보증(2.2.0, ADR 0010, D104):** 요청에 `flow`가 있으면 서버는 출력이 `ActionExtraction` 스키마를 통과할 뿐 아니라 `boundary_contracts.action_rules.check_action_extraction(input, output, flow)`(규칙 명세 `ActionExtractionRules`)에 위반이 없는 값만 낸다. 위반이면 재시도하고, 끝내 안 되면 아래 `OUTPUT_INVALID`다. **호출자는 통과한 값을 다시 검사하지 않는다(ADR 0010 R7).**
 - 출력 검증(D36)은 서버의 책임이다. 서버는 `extract`에는 항상 `ActionExtraction` 스키마를 통과하는 값을, `respond`에는 항상 비어 있지 않은 문장을 낸다. 응답 헤더(두 호출 모두): `X-Openit-Outcome: ok|fallback`, `X-Openit-Attempts: <횟수>`(선택), `X-Openit-Protections: G5:1,G2:2`(규칙 코드별 건수, 선택, 코드 값은 model-runtime이 정한다). 서비스는 세기만 한다.
   - `respond`: 모델 출력이 끝내 형식을 지키지 못하면 서버가 입력의 재료로 만든 대체 문장을 내고 `X-Openit-Outcome: fallback`을 붙인다(상태는 200). 정상이면 `ok`. 헤더가 없으면 클라이언트는 `INTEGRITY_ERROR`로 본다.
   - `extract`: 서버가 대신 만들 수 있는 대체 출력이 없다. 모델 출력이 끝내 깨지면 503 `UNAVAILABLE`(`details.reason="OUTPUT_INVALID"`, `details.attempts`는 선택)이고, 정상이면 `X-Openit-Outcome: ok`다. **확정(D75).** 값을 지어내지 않는다. 호출자(survey-service)는 같은 요청을 한 번 다시 보내고, 그래도 안 되면 그 턴을 `turn_failure_signal`로 처리하며 세션 상태를 바꾸지 않는다(INTERFACES.md I9 '서비스가 지키는 것').
   - `ActionExtraction`과 `ResponseText`는 레코드가 아니라 모델 출력이어서 `pipeline_schema_version`·`ext`가 없다. 클라이언트는 읽기 모드 완화 없이 엄격하게 검증하고 위반은 `INTEGRITY_ERROR`다.
   - 시스템 프롬프트는 모델 패키지의 일부다(D75). 서버는 적재한 릴리스의 `ReleaseManifest.adapters[role].system_prompt`가 가리키는 파일(어댑터 디렉터리 안)의 문장만 쓴다. `serving_config`의 프롬프트 템플릿 버전은 조립 규칙이고 시스템 프롬프트와 별개다(INTERFACES.md I9).
 - 서로 다른 세션의 호출은 동시에 들어온다. 서버는 병렬로 처리하거나 짧은 대기열 뒤에서 처리하되, 대기가 호출 상한(CONVENTIONS 시간 상한 사슬 D125: extract 20초·respond 25초)을 넘을 것 같으면 큐에 쌓지 말고 503으로 거절한다. 추론 호출은 부작용이 없다.
-- 서비스의 실패 처리(재시도, 읽기 타임아웃은 재시도 없음, 404면 적재 요청 등)는 survey-service의 `inference-server-spec.md` 5절을 따른다. 이것은 서비스 내부 동작이라 계약이 아니다.
+- 호출자(survey-service)의 실패 처리(3.4.4, 검토 B-09·B-21 — 환자 턴의 출력을 정하므로 계약이다): (1) extract/respond 가 404(적재 안 됨, 서버 재시작 포함)면 같은 턴 안에서 `PUT /v1/releases/{id}` 로 적재를 요청하고, `LOADING` 인 동안 턴 마감(CONVENTIONS 시간 상한 사슬)까지 `GET /v1/releases/{id}` 로 `LOADED` 를 기다린 뒤 한 번 다시 부른다. (2) extract 503 `OUTPUT_INVALID` 는 같은 요청을 한 번 다시 보낸다. (3) 그 밖의 `UNAVAILABLE`(연결 실패·읽기 시간 초과 포함)은 남은 턴 예산이 호출 상한 이상일 때만 다시 보낸다. (4) 어느 경우든 턴 마감에 닿으면 RUNTIME R3.20(`NOT_COMMITTED`)이고 세션 상태를 바꾸지 않는다.
 - 서버의 헤더 이름이 model-runtime의 현행(`X-Model-Runtime-*`)과 다르므로 model-runtime이 이 이름으로 바꾼다.
 
-  - **`fields`(QuestionFieldSpec, 3.0.0부터 필수):** 서버는 `check_action_extraction` 뒤에 `apply_value_rules`를 적용해 값 규칙(범위·R1~R3)을 보증한다. 규칙에 걸린 출력은 데이터셋 정답 모양으로 바뀌어 200으로 나가고, 바꿀 수 없는 위반(`VALUE_TYPE_MISMATCH`, `VALUE_BELOW_MINIMUM`)은 다시 생성해도 남으면 503 `UNAVAILABLE`(`details.reason="OUTPUT_INVALID"`)이다. 호출자(survey-service)는 통과한 출력을 다시 검사하지 않는다(R7).
+  - **`fields`(QuestionFieldSpec, 3.0.0부터 필수):** 서버는 `check_action_extraction` 뒤에 `apply_value_rules`를 적용해 값 규칙(범위·R1~R3)을 보증한다. 규칙에 걸린 출력은 데이터셋 정답 모양으로 바뀌어 200으로 나가고, 바꿀 수 없는 위반(`VALUE_TYPE_MISMATCH`, `VALUE_BELOW_MINIMUM`)은 다시 생성해도 남으면 503 `UNAVAILABLE`(`details.reason="OUTPUT_INVALID"`)이다. 호출자(survey-service)는 통과한 출력을 다시 검사하지 않는다(ADR 0010 R7).
 
 ## I8 turn-engine (3.0.0 폐기, D109 — 출력 규칙은 계약 action_rules가 정본, model-runtime 서버가 보증)
 라이브러리라서 HTTP 면이 없다(INTERFACES.md I8).

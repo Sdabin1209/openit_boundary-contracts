@@ -30,3 +30,17 @@ def test_schema_names_its_producers_and_consumers(path):
         assert len(v) == len(set(v)), f"{path.name}: {key} 중복"
         unknown = set(v) - AREAS - OTHER
         assert not unknown, f"{path.name}: {key} 에 모르는 이름 {sorted(unknown)}"
+
+
+def test_external_schema_registry_names_owners():
+    """EXTERNAL_SCHEMAS.json(검토 B-20): 정본이 문진 스키마인 영역 사이 스키마도 주인을 적는다."""
+    reg = json.loads((Path(schema_dir()).parent.parent / "EXTERNAL_SCHEMAS.json").read_text(encoding="utf-8"))
+    assert reg["owner"] == "survey-service" and reg["package"] == "openit-survey-schema"
+    names = [e["name"] for e in reg["schemas"]]
+    assert len(names) == len(set(names)) and names
+    local = {p.name[: -len(".schema.json")] for p in SCHEMAS}
+    assert not (set(names) & local), "같은 이름을 두 곳이 정본으로 가지면 안 된다"
+    for e in reg["schemas"]:
+        for key in ("x-producers", "x-consumers"):
+            v = e[key]
+            assert v and not (set(v) - AREAS - OTHER), (e["name"], key)

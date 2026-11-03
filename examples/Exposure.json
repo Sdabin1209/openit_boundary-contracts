@@ -12,7 +12,7 @@
       "user_header": "strip",
       "timeouts_ms": {
         "dial": 1000,
-        "response_header": 8500
+        "response_header": 55000
       }
     },
     {
@@ -46,5 +46,11 @@
         "kind": "denied"
       }
     }
+  ],
+  "egress": [
+    "release-gate",
+    "ops-feedback",
+    "model-serving",
+    "external:web-push"
   ]
 }

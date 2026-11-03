@@ -91,6 +91,7 @@
      "SURVEY_SESSION_RETENTION_DAYS",
      "SURVEY_SOCKET_TIMEOUT_SECONDS",
      "SURVEY_SSE_HEARTBEAT_SECONDS",
+          "SURVEY_SSE_MAX_SECONDS",
      "SURVEY_STAFF_API_TOKEN",
      "SURVEY_STAFF_API_TOKEN_ENV",
      "SURVEY_STAFF_API_TOKEN_FILE",
@@ -323,6 +324,12 @@
    "pattern": "^[1-9][0-9]*$",
    "description": "직원 콘솔 SSE 동시 연결 상한",
    "default": "50"
+  },
+  "SURVEY_SSE_MAX_SECONDS": {
+    "type": "string",
+    "pattern": "^[1-9][0-9]*$",
+    "description": "3.4.4(RUNTIME R2.4, 검토 B-08·A-19): SSE 스트림 하나의 최대 수명(초). 이 시각에 서버가 정상 종료하고 클라이언트가 새로 연결한다(인증이 끝났으면 401). platform 의 세션 갱신 주기 이하로 둔다(deploy 가 그 값 이하를 준다). 기본 300(5분): 시작값·측정 안 함",
+    "default": "300"
   },
   "SURVEY_SSE_HEARTBEAT_SECONDS": {
    "type": "string",

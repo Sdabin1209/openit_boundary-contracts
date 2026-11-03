@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "HumanAuthEndpoints.schema.json",
+  "title": "HumanAuthEndpoints",
+  "description": "3.4.4(검토 B-10): platform 공개 입구가 사람 화면(admin-console·kiosk-frontend 직원 콘솔)에 주는 로그인·로그아웃·계정 관리 경로. 모든 경로는 같은 출처의 상대 경로다(화면은 호스트를 코드에 넣지 않는다). 값은 아래 const 가 정본이고, 바꾸면 이 스키마를 올린다. OIDC Core·RP-Initiated Logout 1.0 의 표준 파라미터(client_id, post_logout_redirect_uri)를 쓴다.",
+  "x-producers": [
+    "platform"
+  ],
+  "x-consumers": [
+    "admin-console",
+    "kiosk-frontend"
+  ],
+  "type": "object",
+  "required": [
+    "login",
+    "logout",
+    "userinfo",
+    "idp_logout",
+    "account_admin",
+    "client_id"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "login": {
+      "const": "/oauth2/start",
+      "description": "GET, 쿼리 rd=<로그인 뒤 돌아올 같은 출처 경로>"
+    },
+    "logout": {
+      "const": "/oauth2/sign_out",
+      "description": "GET, 쿼리 rd=<idp_logout 주소>. 로그인 쿠키를 지우고 rd 로 보낸다"
+    },
+    "userinfo": {
+      "const": "/oauth2/userinfo",
+      "description": "GET, 로그인 세션이 있으면 200 HumanUserInfo, 없으면 401(본문 없음 가능, RUNTIME R3.23)"
+    },
+    "idp_logout": {
+      "const": "/auth/realms/openit/protocol/openid-connect/logout",
+      "description": "GET, 쿼리 client_id, post_logout_redirect_uri=<origin>/"
+    },
+    "account_admin": {
+      "const": "/auth/admin/openit/console/#/openit/users",
+      "description": "admin 역할의 가입 승인 화면(계정 관리 제품의 표준 화면)"
+    },
+    "client_id": {
+      "const": "openit-gateway"
+    }
+  }
+}

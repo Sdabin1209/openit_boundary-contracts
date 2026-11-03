@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CommonEnv.schema.json",
+  "title": "CommonEnv",
+  "description": "3.4.4(검토 A-1): 모든 영역 컨테이너(서비스·잡)가 공통으로 받는 환경 변수. 각 영역의 `*Env` 스키마와 함께 지킨다(영역 Env 는 자기 접두사 이름만 검사하므로 OPENIT_ 이름과 겹치지 않는다). deploy 가 배포 때 준다(CONVENTIONS 13절 예외). SSL_CERT_FILE 은 표준 이름이라 여기서 다시 정하지 않는다(RUNTIME IN-ROOT).",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "*"
+  ],
+  "type": "object",
+  "additionalProperties": {
+    "type": "string"
+  },
+  "properties": {
+    "OPENIT_EGRESS_PROXY": {
+      "type": "string",
+      "pattern": "^http://(localhost|127\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}|\\[::1\\]):[0-9]{1,5}/?$",
+      "description": "자기 영역 게이트웨이의 CONNECT 출구(RUNTIME IN-EGRESS·R1.8). 영역 배선 코드가 boundary_contracts.clients.egress_proxy_from(environ) 으로 꺼낸다"
+    }
+  }
+}
