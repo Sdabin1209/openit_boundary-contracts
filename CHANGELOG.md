@@ -6,6 +6,12 @@
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 
+## 3.4.16 (PATCH, 와이어 변경 없음 — deploy 가 platform 이미지 내부 명령에 기대던 것을 입력·잡으로)
+왜: deploy 가 공개 입구 이미지의 부명령(export-root)으로 루트 인증서를 꺼내고, identity 컨테이너 안의 kcadm 과 관리 계정으로 사용자를 만들었다(구조 규칙 1·6 위반). deploy 는 환경을 한 번 구성할 뿐 이미지 안 도구를 부르지 않는다.
+- PublicIngressEnv.INGRESS_ROOT_EXPORT_DIR(기본 /etc/openit/root-out): 공개 입구가 루트 인증서를 써 두는 출력 폴더.
+- IdentityUsersConfig(신규): identity 이미지의 사용자 등록 잡 설정(JobsDeclaration 의 잡이 config.schema 로 가리킨다).
+- 시험 tests/test_ingress_root_users_3416.py.
+
 ## 3.4.15 (PATCH, 와이어 변경 없음 — 파일 저장소 주인 영역의 백업 잡 자원)
 왜: 파일 저장소(models-data, datasets-data, gateway-data, pki-ca)의 주인 영역이 RUNTIME R10.1·DATA_OWNERSHIP 대로 자기 백업·복구 잡을 낼 자원 이름이 JobsDeclaration.needs 에 없어, deploy 가 대신 볼륨을 복사하고 있었다(계약 위반, 헤드 누락).
 - JobsDeclaration.needs: models-data, datasets-data, gateway-data, pki-ca.

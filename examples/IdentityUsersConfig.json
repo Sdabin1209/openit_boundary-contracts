@@ -1,0 +1,4 @@
+{"users": [
+  {"username": "e2e-reviewer", "email": "reviewer@example.invalid", "groups": ["reviewer", "staff"], "password_file": "/run/secrets/users/e2e-reviewer"},
+  {"username": "e2e-author", "groups": ["author"], "password_file": "/run/secrets/users/e2e-author", "enabled": true}
+]}

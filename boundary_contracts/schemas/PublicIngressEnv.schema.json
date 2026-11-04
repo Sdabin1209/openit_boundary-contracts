@@ -1,172 +1,177 @@
 {
- "$schema": "https://json-schema.org/draft/2020-12/schema",
- "$id": "https://openit.example/schemas/PublicIngressEnv.schema.json",
- "title": "PublicIngressEnv",
- "description": "3.4.10(구조 규칙 6: deploy → platform 입력을 계약에 둔다, 헤드 누락 수정). platform 공개 입구 이미지(public-ingress) 컨테이너의 환경 변수. 경로 표는 영역 Exposure 선언에서 이미지가 만든다(CONVENTIONS 13절 공개 입구 경로 표). 파생 값(호스트 이름 목록 등)은 이미지가 만들고 deploy 는 주지 않는다.",
- "x-producers": [
-  "deploy"
- ],
- "x-consumers": [
-  "platform"
- ],
- "type": "object",
- "$defs": {
-  "Port": {
-   "type": "string",
-   "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
-   "description": "TCP 포트 1~65535"
-  },
-  "PosInt": {
-   "type": "string",
-   "pattern": "^[1-9][0-9]*$",
-   "description": "1 이상 정수"
-  },
-  "Path": {
-   "type": "string",
-   "pattern": "^/",
-   "minLength": 1,
-   "description": "컨테이너 안 절대 경로"
-  },
-  "Duration": {
-   "type": "string",
-   "pattern": "^[0-9]+(ms|s|m|h|d)$",
-   "description": "기간(정수+단위 ms|s|m|h|d)"
-  },
-  "HostPort": {
-   "type": "string",
-   "pattern": "^[A-Za-z0-9.-]+:[0-9]{1,5}$",
-   "description": "<호스트>:<포트>"
-  },
-  "HttpsUrl": {
-   "type": "string",
-   "pattern": "^https://[^\\s]+$",
-   "description": "https URL"
-  }
- },
- "propertyNames": {
-  "anyOf": [
-   {
-    "not": {
-     "pattern": "^(GATEWAY_|INGRESS_|AUTH_CHECK_|LOGIN_RATE_)"
-    }
-   },
-   {
-    "enum": [
-     "AUTH_CHECK_TIMEOUT",
-     "GATEWAY_ACME_DIRECTORY",
-     "GATEWAY_ACME_EMAIL",
-     "GATEWAY_HOSTS",
-     "GATEWAY_PROBE_SITE",
-     "GATEWAY_PUBLIC_TLS_PORT",
-     "GATEWAY_TLS_MODE",
-     "INGRESS_DEVICE_CA_FILE",
-     "INGRESS_DEVICE_TOKENS_DIR",
-     "INGRESS_EXPOSURES",
-     "INGRESS_ROOT_CA",
-     "INGRESS_TLS_DIR",
-     "INGRESS_UPSTREAM_TOKENS_DIR",
-     "LOGIN_RATE_EVENTS"
-    ]
-   }
-  ]
- },
- "properties": {
-  "GATEWAY_HOSTS": {
-   "type": "string",
-   "pattern": "^(?![0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+(:|$|\\s|,))[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(:[0-9]{1,5})?(\\s*,\\s*(?![0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+(:|$|\\s|,))[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(:[0-9]{1,5})?)*$",
-   "description": "공개 입구가 받는 호스트 이름 목록(쉼표 구분, 선택 포트). 첫 항목이 공개 주소. 와일드카드 금지. 3.4.14: DNS 이름만 — IP 리터럴 금지(기본 기기 인증 mTLS 에서 Host 와 TLS SNI 가 같아야 하고(RFC 9110 421), SNI 에는 IP 리터럴을 쓸 수 없다(RFC 6066 3절)). 설치처는 호스트 이름으로 접속한다"
-  },
-  "GATEWAY_PUBLIC_TLS_PORT": {
-   "$ref": "#/$defs/Port",
-   "description": "밖에서 보이는 TLS 포트(공개 주소에 붙는다)",
-   "default": "443"
-  },
-  "GATEWAY_PROBE_SITE": {
-   "$ref": "#/$defs/HostPort",
-   "description": "같은 서버의 감시가 부르는 사이트 이름:포트",
-   "default": "gateway:8443"
-  },
-  "GATEWAY_TLS_MODE": {
-   "type": "string",
-   "enum": [
-    "internal",
-    "files",
-    "acme"
-   ],
-   "default": "internal",
-   "description": "인증서 출처: internal(사설 CA), files(INGRESS_TLS_DIR 의 tls.crt·tls.key), acme(RFC 8555)"
-  },
-  "GATEWAY_ACME_EMAIL": {
-   "type": "string",
-   "pattern": "^[^@\\s]+@[^@\\s]+$",
-   "description": "acme 모드의 연락 주소(RFC 8555). acme 일 때 필수"
-  },
-  "GATEWAY_ACME_DIRECTORY": {
-   "$ref": "#/$defs/HttpsUrl",
-   "description": "acme 디렉터리 URL(RFC 8555)"
-  },
-  "INGRESS_TLS_DIR": {
-   "$ref": "#/$defs/Path",
-   "description": "files 모드의 인증서 폴더(tls.crt·tls.key)",
-   "default": "/etc/openit/ingress-tls"
-  },
-  "INGRESS_EXPOSURES": {
-   "$ref": "#/$defs/Path",
-   "description": "영역 Exposure 선언 폴더(파일마다 Exposure 스키마 하나, 영역 이미지 라벨에서 deploy 가 꺼낸다). 없으면 종료 64, 위반·같은 공개 경로 중복이면 65",
-   "default": "/etc/openit/exposures"
-  },
-  "INGRESS_DEVICE_TOKENS_DIR": {
-   "$ref": "#/$defs/Path",
-   "description": "키오스크 기기 토큰(PUBLIC_API F-1 호환) 폴더: 기기마다 파일 하나, 파일 이름 = device_id(PUBLIC_API F절 패턴), 내용 = 토큰 한 줄(비밀, D84). 파일을 지우면 그 기기는 폐기. 0개도 유효",
-   "default": "/run/secrets/devices"
-  },
-  "INGRESS_UPSTREAM_TOKENS_DIR": {
-   "$ref": "#/$defs/Path",
-   "description": "게이트웨이 토큰 폴더: Exposure.routes[].upstream_token 이름마다 파일 하나(비밀, D84)",
-   "default": "/run/secrets"
-  },
-  "INGRESS_ROOT_CA": {
-   "$ref": "#/$defs/Path",
-   "description": "영역 서비스 인증서를 검증할 루트(PEM)",
-   "default": "/etc/openit/pki/root_ca.crt"
-  },
-  "AUTH_CHECK_TIMEOUT": {
-   "$ref": "#/$defs/Duration",
-   "description": "사람 인증 확인 시간 한도(R3.12). platform ADR 0002, 측정 안 함",
-   "default": "2s"
-  },
-  "LOGIN_RATE_EVENTS": {
-   "$ref": "#/$defs/PosInt",
-   "description": "로그인·가입·기기 등록 경로의 분당 허용 횟수(R10.4). platform ADR 0002, 측정 안 함",
-   "default": "30"
-  },
-  "INGRESS_DEVICE_CA_FILE": {
-   "$ref": "#/$defs/Path",
-   "default": "/etc/openit/device-ca.pem",
-   "description": "3.4.13: 키오스크 기기 인증서(mTLS, PUBLIC_API F절 — 기본 기기 인증)를 검증할 기기 CA(PEM). 기기 경로(Exposure auth device-token)는 이 CA 로 서명된 클라이언트 인증서가 있으면 그 CN 을 X-Openit-Device 로 붙이고, 없으면 F-1 호환 기기 토큰(INGRESS_DEVICE_TOKENS_DIR)을 본다. 필수: 기본 기기 인증이 조용히 꺼지지 않게 한다. 기기 CA 와 기기 인증서 발급은 운영(설치처)이 deploy 로 준다"
-  }
- },
- "required": [
-  "GATEWAY_HOSTS",
-  "INGRESS_DEVICE_CA_FILE"
- ],
- "allOf": [
-  {
-   "if": {
-    "properties": {
-     "GATEWAY_TLS_MODE": {
-      "const": "acme"
-     }
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openit.example/schemas/PublicIngressEnv.schema.json",
+  "title": "PublicIngressEnv",
+  "description": "3.4.10(구조 규칙 6: deploy → platform 입력을 계약에 둔다, 헤드 누락 수정). platform 공개 입구 이미지(public-ingress) 컨테이너의 환경 변수. 경로 표는 영역 Exposure 선언에서 이미지가 만든다(CONVENTIONS 13절 공개 입구 경로 표). 파생 값(호스트 이름 목록 등)은 이미지가 만들고 deploy 는 주지 않는다.",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "platform"
+  ],
+  "type": "object",
+  "$defs": {
+    "Port": {
+      "type": "string",
+      "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
+      "description": "TCP 포트 1~65535"
     },
-    "required": [
-     "GATEWAY_TLS_MODE"
+    "PosInt": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$",
+      "description": "1 이상 정수"
+    },
+    "Path": {
+      "type": "string",
+      "pattern": "^/",
+      "minLength": 1,
+      "description": "컨테이너 안 절대 경로"
+    },
+    "Duration": {
+      "type": "string",
+      "pattern": "^[0-9]+(ms|s|m|h|d)$",
+      "description": "기간(정수+단위 ms|s|m|h|d)"
+    },
+    "HostPort": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9.-]+:[0-9]{1,5}$",
+      "description": "<호스트>:<포트>"
+    },
+    "HttpsUrl": {
+      "type": "string",
+      "pattern": "^https://[^\\s]+$",
+      "description": "https URL"
+    }
+  },
+  "propertyNames": {
+    "anyOf": [
+      {
+        "not": {
+          "pattern": "^(GATEWAY_|INGRESS_|AUTH_CHECK_|LOGIN_RATE_)"
+        }
+      },
+      {
+        "enum": [
+          "AUTH_CHECK_TIMEOUT",
+          "GATEWAY_ACME_DIRECTORY",
+          "GATEWAY_ACME_EMAIL",
+          "GATEWAY_HOSTS",
+          "GATEWAY_PROBE_SITE",
+          "GATEWAY_PUBLIC_TLS_PORT",
+          "GATEWAY_TLS_MODE",
+          "INGRESS_DEVICE_CA_FILE",
+          "INGRESS_DEVICE_TOKENS_DIR",
+          "INGRESS_EXPOSURES",
+          "INGRESS_ROOT_CA",
+          "INGRESS_TLS_DIR",
+          "INGRESS_UPSTREAM_TOKENS_DIR",
+          "LOGIN_RATE_EVENTS"
+        ]
+      }
     ]
-   },
-   "then": {
-    "required": [
-     "GATEWAY_ACME_EMAIL"
-    ]
-   }
-  }
- ]
+  },
+  "properties": {
+    "GATEWAY_HOSTS": {
+      "type": "string",
+      "pattern": "^(?![0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+(:|$|\\s|,))[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(:[0-9]{1,5})?(\\s*,\\s*(?![0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+(:|$|\\s|,))[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(:[0-9]{1,5})?)*$",
+      "description": "공개 입구가 받는 호스트 이름 목록(쉼표 구분, 선택 포트). 첫 항목이 공개 주소. 와일드카드 금지. 3.4.14: DNS 이름만 — IP 리터럴 금지(기본 기기 인증 mTLS 에서 Host 와 TLS SNI 가 같아야 하고(RFC 9110 421), SNI 에는 IP 리터럴을 쓸 수 없다(RFC 6066 3절)). 설치처는 호스트 이름으로 접속한다"
+    },
+    "GATEWAY_PUBLIC_TLS_PORT": {
+      "$ref": "#/$defs/Port",
+      "description": "밖에서 보이는 TLS 포트(공개 주소에 붙는다)",
+      "default": "443"
+    },
+    "GATEWAY_PROBE_SITE": {
+      "$ref": "#/$defs/HostPort",
+      "description": "같은 서버의 감시가 부르는 사이트 이름:포트",
+      "default": "gateway:8443"
+    },
+    "GATEWAY_TLS_MODE": {
+      "type": "string",
+      "enum": [
+        "internal",
+        "files",
+        "acme"
+      ],
+      "default": "internal",
+      "description": "인증서 출처: internal(사설 CA), files(INGRESS_TLS_DIR 의 tls.crt·tls.key), acme(RFC 8555)"
+    },
+    "GATEWAY_ACME_EMAIL": {
+      "type": "string",
+      "pattern": "^[^@\\s]+@[^@\\s]+$",
+      "description": "acme 모드의 연락 주소(RFC 8555). acme 일 때 필수"
+    },
+    "GATEWAY_ACME_DIRECTORY": {
+      "$ref": "#/$defs/HttpsUrl",
+      "description": "acme 디렉터리 URL(RFC 8555)"
+    },
+    "INGRESS_TLS_DIR": {
+      "$ref": "#/$defs/Path",
+      "description": "files 모드의 인증서 폴더(tls.crt·tls.key)",
+      "default": "/etc/openit/ingress-tls"
+    },
+    "INGRESS_EXPOSURES": {
+      "$ref": "#/$defs/Path",
+      "description": "영역 Exposure 선언 폴더(파일마다 Exposure 스키마 하나, 영역 이미지 라벨에서 deploy 가 꺼낸다). 없으면 종료 64, 위반·같은 공개 경로 중복이면 65",
+      "default": "/etc/openit/exposures"
+    },
+    "INGRESS_DEVICE_TOKENS_DIR": {
+      "$ref": "#/$defs/Path",
+      "description": "키오스크 기기 토큰(PUBLIC_API F-1 호환) 폴더: 기기마다 파일 하나, 파일 이름 = device_id(PUBLIC_API F절 패턴), 내용 = 토큰 한 줄(비밀, D84). 파일을 지우면 그 기기는 폐기. 0개도 유효",
+      "default": "/run/secrets/devices"
+    },
+    "INGRESS_UPSTREAM_TOKENS_DIR": {
+      "$ref": "#/$defs/Path",
+      "description": "게이트웨이 토큰 폴더: Exposure.routes[].upstream_token 이름마다 파일 하나(비밀, D84)",
+      "default": "/run/secrets"
+    },
+    "INGRESS_ROOT_CA": {
+      "$ref": "#/$defs/Path",
+      "description": "영역 서비스 인증서를 검증할 루트(PEM)",
+      "default": "/etc/openit/pki/root_ca.crt"
+    },
+    "AUTH_CHECK_TIMEOUT": {
+      "$ref": "#/$defs/Duration",
+      "description": "사람 인증 확인 시간 한도(R3.12). platform ADR 0002, 측정 안 함",
+      "default": "2s"
+    },
+    "LOGIN_RATE_EVENTS": {
+      "$ref": "#/$defs/PosInt",
+      "description": "로그인·가입·기기 등록 경로의 분당 허용 횟수(R10.4). platform ADR 0002, 측정 안 함",
+      "default": "30"
+    },
+    "INGRESS_DEVICE_CA_FILE": {
+      "$ref": "#/$defs/Path",
+      "default": "/etc/openit/device-ca.pem",
+      "description": "3.4.13: 키오스크 기기 인증서(mTLS, PUBLIC_API F절 — 기본 기기 인증)를 검증할 기기 CA(PEM). 기기 경로(Exposure auth device-token)는 이 CA 로 서명된 클라이언트 인증서가 있으면 그 CN 을 X-Openit-Device 로 붙이고, 없으면 F-1 호환 기기 토큰(INGRESS_DEVICE_TOKENS_DIR)을 본다. 필수: 기본 기기 인증이 조용히 꺼지지 않게 한다. 기기 CA 와 기기 인증서 발급은 운영(설치처)이 deploy 로 준다"
+    },
+    "INGRESS_ROOT_EXPORT_DIR": {
+      "$ref": "#/$defs/Path",
+      "description": "3.4.16: internal 모드에서 공개 입구가 자기 사설 CA 의 루트 인증서(공개)를 root_ca.crt 로 써 두는 폴더(deploy 가 연결하는 출력 마운트, RUNTIME OUT-FILE). 루트가 생기거나 바뀔 때마다 같은 폴더에 쓰고 rename 으로 바꿔 넣는다(쓰는 도중 파일을 읽히지 않는다). deploy 는 이 파일을 감시·키오스크·직원 PC 에 나눠 준다. 이미지 안 경로나 부명령에 기대지 않게 한다(구조 규칙 1)",
+      "default": "/etc/openit/root-out"
+    }
+  },
+  "required": [
+    "GATEWAY_HOSTS",
+    "INGRESS_DEVICE_CA_FILE"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "GATEWAY_TLS_MODE": {
+            "const": "acme"
+          }
+        },
+        "required": [
+          "GATEWAY_TLS_MODE"
+        ]
+      },
+      "then": {
+        "required": [
+          "GATEWAY_ACME_EMAIL"
+        ]
+      }
+    }
+  ]
 }

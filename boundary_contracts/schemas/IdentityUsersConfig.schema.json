@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "IdentityUsersConfig.schema.json",
+  "title": "IdentityUsersConfig",
+  "description": "3.4.16(구조 규칙 1·6): platform identity 이미지의 사용자 등록 잡(JobsDeclaration 의 잡, config.schema 가 이 스키마)이 읽는 설정 파일. deploy 가 배치 때 파일로 준다. 잡은 realm openit 에 사용자와 역할 그룹을 만들고, 이미 있으면 같은 상태로 맞춘다(멱등, D39). deploy 는 Keycloak 의 도구·경로·관리 계정을 알지 않는다. 운영 구성에는 이 파일을 주지 않거나 실제 직원만 둔다(시험용 문 아님: 같은 잡이 운영의 직원 등록 입구다).",
+  "x-producers": ["deploy"],
+  "x-consumers": ["platform"],
+  "type": "object",
+  "properties": {
+    "users": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "username": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{1,62}$"},
+          "email": {"type": "string", "format": "email"},
+          "groups": {
+            "type": "array", "uniqueItems": true,
+            "items": {"enum": ["staff", "operator", "release-approver", "reviewer", "author", "clinical-reviewer", "clinician", "admin"]},
+            "description": "역할 이름(CONVENTIONS 6절 고정 목록 = IdP 그룹 이름)"
+          },
+          "password_file": {"type": "string", "pattern": "^/", "description": "그 사용자의 첫 암호가 든 파일의 컨테이너 안 경로(D84: 비밀은 파일). 잡은 첫 로그인 때 암호 변경을 요구하지 않는다(값은 deploy 가 정한다)"},
+          "enabled": {"type": "boolean", "default": true, "description": "false 면 승인 대기(가입 승인 전) 상태로 둔다"}
+        },
+        "required": ["username", "groups", "password_file"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["users"],
+  "additionalProperties": false
+}
