@@ -6,6 +6,10 @@
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 
+## 3.4.14 (PATCH, 와이어 변경 없음 — 공개 입구 호스트는 DNS 이름만)
+왜: 3.4.13 에서 기본 기기 인증(mTLS)을 필수로 켜자 공개 입구가 Host 와 TLS SNI 일치를 요구했다(RFC 9110 421). SNI 에는 IP 리터럴을 쓸 수 없어(RFC 6066 3절) IP 로 접속하면 421 이다. 계약 GATEWAY_HOSTS 가 IP 를 받아 표준과 어긋났다(platform 담당이 찾음).
+- PublicIngressEnv.GATEWAY_HOSTS: IP 리터럴 금지.
+
 ## 3.4.13 (PATCH, 와이어 변경 없음 — 키오스크 기본 기기 인증 입력)
 왜: platform 담당이 기기 mTLS(PUBLIC_API F절의 기본 기기 인증)를 켜는 입력이 PublicIngressEnv 에 없음을 찾았다. deploy 구성도 이것을 넘기지 않아 기본 기기 인증이 꺼진 채 배치될 수 있었다. 헤드 경계 점검은 'deploy 가 넘기는 것 ⊆ 계약'만 보고 '계약이 요구하는 것 ⊆ deploy 가 넘기는 것'을 보지 않았다(점검 보강).
 - PublicIngressEnv.INGRESS_DEVICE_CA_FILE(필수, 기본 /etc/openit/device-ca.pem).
