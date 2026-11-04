@@ -52,6 +52,8 @@
    },
    {
     "enum": [
+     "MONITORING_NODE_HOST_ROOT",
+     "MONITORING_NODE_TEXTFILE_DIR",
      "MONITORING_ROOT_CA",
      "MONITORING_TARGETS_DIR",
      "PROMETHEUS_RETENTION"
@@ -74,6 +76,16 @@
    "$ref": "#/$defs/Path",
    "description": "영역 서비스 인증서를 검증할 루트(PEM)",
    "default": "/etc/openit/pki/root_ca.crt"
+  },
+  "MONITORING_NODE_HOST_ROOT": {
+   "$ref": "#/$defs/Path",
+   "default": "/host",
+   "description": "node 역할이 읽는 호스트 루트(읽기 전용, node_exporter --path.rootfs 표준)(3.4.12)"
+  },
+  "MONITORING_NODE_TEXTFILE_DIR": {
+   "$ref": "#/$defs/Path",
+   "default": "/textfile",
+   "description": "node 역할의 textfile 수집 폴더(주기 잡 지표, node_exporter textfile collector 표준)(3.4.12)"
   }
  },
  "x-argv": {
