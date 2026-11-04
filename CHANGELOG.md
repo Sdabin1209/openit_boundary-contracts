@@ -6,6 +6,9 @@
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 
+## 3.4.14 이후 문서 보충(패키지·와이어 변경 없음, 태그 없음)
+- CONVENTIONS 13절: 서비스 이름 = 게시 이미지 이름(PublishRequest.service). ops-feedback 서버는 `ops-feedback`.
+
 ## 3.4.14 (PATCH, 와이어 변경 없음 — 공개 입구 호스트는 DNS 이름만)
 왜: 3.4.13 에서 기본 기기 인증(mTLS)을 필수로 켜자 공개 입구가 Host 와 TLS SNI 일치를 요구했다(RFC 9110 421). SNI 에는 IP 리터럴을 쓸 수 없어(RFC 6066 3절) IP 로 접속하면 421 이다. 계약 GATEWAY_HOSTS 가 IP 를 받아 표준과 어긋났다(platform 담당이 찾음).
 - PublicIngressEnv.GATEWAY_HOSTS: IP 리터럴 금지.
