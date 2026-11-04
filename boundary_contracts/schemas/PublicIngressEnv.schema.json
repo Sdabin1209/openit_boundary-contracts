@@ -63,6 +63,7 @@
           "INGRESS_DEVICE_TOKENS_DIR",
           "INGRESS_EXPOSURES",
           "INGRESS_ROOT_CA",
+          "INGRESS_ROOT_EXPORT_DIR",
           "INGRESS_TLS_DIR",
           "INGRESS_UPSTREAM_TOKENS_DIR",
           "LOGIN_RATE_EVENTS"

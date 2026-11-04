@@ -6,6 +6,14 @@
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 
+## 3.4.17 (PATCH, 와이어 변경 없음 — 영역 이미지는 스스로 서고 deploy 는 환경만 구성한다)
+왜: deploy 가 platform step-ca·감시 이미지의 역할을 compose command(이미지 부명령)로 고르고, 이미지 사용자 번호(user)와 상태 확인 명령(healthcheck)을 직접 적었다(구조 규칙 1 위반, 헤드 경계 점검 규칙 8 이 77건 찾음). 역할을 고르는 계약 입력과, 이미지가 HEALTHCHECK·USER 를 갖는다는 조항이 없었다.
+- StepCaEnv: STEP_ROLE(serve·root·token·cert), STEP_CERT_NAME, STEP_TOKEN_NAMES, STEP_CERT_GID(기본 10100).
+- MonitoringEnv: MONITORING_ROLE(prometheus·alertmanager·blackbox·json·node; 없으면 이미지가 시작 거부, 스키마 필수는 아님 — PATCH 호환).
+- 3.4.16 결함 수정: PublicIngressEnv.propertyNames 허용 목록에 INGRESS_ROOT_EXPORT_DIR 이 빠져 있었다(3.4.11 과 같은 종류). 모든 스키마의 properties 가 propertyNames 를 통과하는지 보는 시험을 더했다.
+- CONVENTIONS 13절: 영역 이미지는 진입점·HEALTHCHECK·USER 를 갖고 역할은 Env 로 고른다. deploy 는 영역 이미지에 command·entrypoint·healthcheck·user·volumes_from·exec 를 쓰지 않는다.
+- 시험 tests/test_image_roles_3417.py.
+
 ## 3.4.16 (PATCH, 와이어 변경 없음 — deploy 가 platform 이미지 내부 명령에 기대던 것을 입력·잡으로)
 왜: deploy 가 공개 입구 이미지의 부명령(export-root)으로 루트 인증서를 꺼내고, identity 컨테이너 안의 kcadm 과 관리 계정으로 사용자를 만들었다(구조 규칙 1·6 위반). deploy 는 환경을 한 번 구성할 뿐 이미지 안 도구를 부르지 않는다.
 - PublicIngressEnv.INGRESS_ROOT_EXPORT_DIR(기본 /etc/openit/root-out): 공개 입구가 루트 인증서를 써 두는 출력 폴더.

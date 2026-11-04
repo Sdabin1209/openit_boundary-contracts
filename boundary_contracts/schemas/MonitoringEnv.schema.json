@@ -1,102 +1,113 @@
 {
- "$schema": "https://json-schema.org/draft/2020-12/schema",
- "$id": "https://openit.example/schemas/MonitoringEnv.schema.json",
- "title": "MonitoringEnv",
- "description": "3.4.10(구조 규칙 6: deploy → platform 입력을 계약에 둔다, 헤드 누락 수정). platform 감시 이미지(monitoring) 컨테이너의 입력. 역할은 첫 인자(x-argv)로 고른다. 수집 대상 폴더는 Prometheus file_sd 표준 형식의 파일 네 개(metrics.yml: '<서비스>:443' 대상, readyz.yml·public.yml·gate.yml: 'https://<서비스>/readyz' 대상)를 deploy 가 배치에서 만든다.",
- "x-producers": [
-  "deploy"
- ],
- "x-consumers": [
-  "platform"
- ],
- "type": "object",
- "$defs": {
-  "Port": {
-   "type": "string",
-   "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
-   "description": "TCP 포트 1~65535"
-  },
-  "PosInt": {
-   "type": "string",
-   "pattern": "^[1-9][0-9]*$",
-   "description": "1 이상 정수"
-  },
-  "Path": {
-   "type": "string",
-   "pattern": "^/",
-   "minLength": 1,
-   "description": "컨테이너 안 절대 경로"
-  },
-  "Duration": {
-   "type": "string",
-   "pattern": "^[0-9]+(ms|s|m|h|d)$",
-   "description": "기간(정수+단위 ms|s|m|h|d)"
-  },
-  "HostPort": {
-   "type": "string",
-   "pattern": "^[A-Za-z0-9.-]+:[0-9]{1,5}$",
-   "description": "<호스트>:<포트>"
-  },
-  "HttpsUrl": {
-   "type": "string",
-   "pattern": "^https://[^\\s]+$",
-   "description": "https URL"
-  }
- },
- "propertyNames": {
-  "anyOf": [
-   {
-    "not": {
-     "pattern": "^(PROMETHEUS_|MONITORING_)"
-    }
-   },
-   {
-    "enum": [
-     "MONITORING_NODE_HOST_ROOT",
-     "MONITORING_NODE_TEXTFILE_DIR",
-     "MONITORING_ROOT_CA",
-     "MONITORING_TARGETS_DIR",
-     "PROMETHEUS_RETENTION"
-    ]
-   }
-  ]
- },
- "properties": {
-  "PROMETHEUS_RETENTION": {
-   "$ref": "#/$defs/Duration",
-   "description": "prometheus 역할의 시계열 보존 기간. platform ADR 0010",
-   "default": "15d"
-  },
-  "MONITORING_TARGETS_DIR": {
-   "$ref": "#/$defs/Path",
-   "description": "수집 대상 폴더(file_sd)",
-   "default": "/etc/openit/monitoring/targets"
-  },
-  "MONITORING_ROOT_CA": {
-   "$ref": "#/$defs/Path",
-   "description": "영역 서비스 인증서를 검증할 루트(PEM)",
-   "default": "/etc/openit/pki/root_ca.crt"
-  },
-  "MONITORING_NODE_HOST_ROOT": {
-   "$ref": "#/$defs/Path",
-   "default": "/host",
-   "description": "node 역할이 읽는 호스트 루트(읽기 전용, node_exporter --path.rootfs 표준)(3.4.12)"
-  },
-  "MONITORING_NODE_TEXTFILE_DIR": {
-   "$ref": "#/$defs/Path",
-   "default": "/textfile",
-   "description": "node 역할의 textfile 수집 폴더(주기 잡 지표, node_exporter textfile collector 표준)(3.4.12)"
-  }
- },
- "x-argv": {
-  "enum": [
-   "prometheus",
-   "alertmanager",
-   "blackbox",
-   "json",
-   "node",
-   "check"
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openit.example/schemas/MonitoringEnv.schema.json",
+  "title": "MonitoringEnv",
+  "description": "3.4.10(구조 규칙 6: deploy → platform 입력을 계약에 둔다, 헤드 누락 수정). platform 감시 이미지(monitoring) 컨테이너의 입력. 역할은 첫 인자(x-argv)로 고른다. 수집 대상 폴더는 Prometheus file_sd 표준 형식의 파일 네 개(metrics.yml: '<서비스>:443' 대상, readyz.yml·public.yml·gate.yml: 'https://<서비스>/readyz' 대상)를 deploy 가 배치에서 만든다.",
+  "x-producers": [
+    "deploy"
   ],
-  "description": "컨테이너 첫 인자. 역할마다 컨테이너 하나"
- }
+  "x-consumers": [
+    "platform"
+  ],
+  "type": "object",
+  "$defs": {
+    "Port": {
+      "type": "string",
+      "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
+      "description": "TCP 포트 1~65535"
+    },
+    "PosInt": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$",
+      "description": "1 이상 정수"
+    },
+    "Path": {
+      "type": "string",
+      "pattern": "^/",
+      "minLength": 1,
+      "description": "컨테이너 안 절대 경로"
+    },
+    "Duration": {
+      "type": "string",
+      "pattern": "^[0-9]+(ms|s|m|h|d)$",
+      "description": "기간(정수+단위 ms|s|m|h|d)"
+    },
+    "HostPort": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9.-]+:[0-9]{1,5}$",
+      "description": "<호스트>:<포트>"
+    },
+    "HttpsUrl": {
+      "type": "string",
+      "pattern": "^https://[^\\s]+$",
+      "description": "https URL"
+    }
+  },
+  "propertyNames": {
+    "anyOf": [
+      {
+        "not": {
+          "pattern": "^(PROMETHEUS_|MONITORING_)"
+        }
+      },
+      {
+        "enum": [
+          "MONITORING_NODE_HOST_ROOT",
+          "MONITORING_NODE_TEXTFILE_DIR",
+          "MONITORING_ROLE",
+          "MONITORING_ROOT_CA",
+          "MONITORING_TARGETS_DIR",
+          "PROMETHEUS_RETENTION"
+        ]
+      }
+    ]
+  },
+  "properties": {
+    "PROMETHEUS_RETENTION": {
+      "$ref": "#/$defs/Duration",
+      "description": "prometheus 역할의 시계열 보존 기간. platform ADR 0010",
+      "default": "15d"
+    },
+    "MONITORING_TARGETS_DIR": {
+      "$ref": "#/$defs/Path",
+      "description": "수집 대상 폴더(file_sd)",
+      "default": "/etc/openit/monitoring/targets"
+    },
+    "MONITORING_ROOT_CA": {
+      "$ref": "#/$defs/Path",
+      "description": "영역 서비스 인증서를 검증할 루트(PEM)",
+      "default": "/etc/openit/pki/root_ca.crt"
+    },
+    "MONITORING_NODE_HOST_ROOT": {
+      "$ref": "#/$defs/Path",
+      "default": "/host",
+      "description": "node 역할이 읽는 호스트 루트(읽기 전용, node_exporter --path.rootfs 표준)(3.4.12)"
+    },
+    "MONITORING_NODE_TEXTFILE_DIR": {
+      "$ref": "#/$defs/Path",
+      "default": "/textfile",
+      "description": "node 역할의 textfile 수집 폴더(주기 잡 지표, node_exporter textfile collector 표준)(3.4.12)"
+    },
+    "MONITORING_ROLE": {
+      "enum": [
+        "prometheus",
+        "alertmanager",
+        "blackbox",
+        "json",
+        "node"
+      ],
+      "description": "3.4.17(구조 규칙 1): 이 컨테이너의 역할. deploy 는 이미지 부명령을 모른다. 이미지가 역할에 맞는 HEALTHCHECK 와 USER 를 갖는다. 없으면 이미지가 시작을 거부한다(종료 64). PATCH 호환: 스키마의 필수는 아니다"
+    }
+  },
+  "x-argv": {
+    "enum": [
+      "prometheus",
+      "alertmanager",
+      "blackbox",
+      "json",
+      "node",
+      "check"
+    ],
+    "description": "컨테이너 첫 인자. 역할마다 컨테이너 하나"
+  }
 }

@@ -1,4 +1,5 @@
 {
- "PROMETHEUS_RETENTION": "15d",
- "MONITORING_TARGETS_DIR": "/etc/openit/monitoring/targets"
+  "PROMETHEUS_RETENTION": "15d",
+  "MONITORING_TARGETS_DIR": "/etc/openit/monitoring/targets",
+  "MONITORING_ROLE": "prometheus"
 }
