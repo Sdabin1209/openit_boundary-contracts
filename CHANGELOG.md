@@ -6,6 +6,11 @@
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 
+## 3.4.15 (PATCH, 와이어 변경 없음 — 파일 저장소 주인 영역의 백업 잡 자원)
+왜: 파일 저장소(models-data, datasets-data, gateway-data, pki-ca)의 주인 영역이 RUNTIME R10.1·DATA_OWNERSHIP 대로 자기 백업·복구 잡을 낼 자원 이름이 JobsDeclaration.needs 에 없어, deploy 가 대신 볼륨을 복사하고 있었다(계약 위반, 헤드 누락).
+- JobsDeclaration.needs: models-data, datasets-data, gateway-data, pki-ca.
+- 시험 tests/test_jobs_needs_3415.py.
+
 ## 3.4.14 이후 문서 보충(패키지·와이어 변경 없음, 태그 없음)
 - CONVENTIONS 13절: 서비스 이름 = 게시 이미지 이름(PublishRequest.service). ops-feedback 서버는 `ops-feedback`.
 
