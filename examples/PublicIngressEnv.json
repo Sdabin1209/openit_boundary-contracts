@@ -6,5 +6,6 @@
  "INGRESS_DEVICE_TOKENS_DIR": "/run/secrets/devices",
  "INGRESS_UPSTREAM_TOKENS_DIR": "/run/secrets",
  "AUTH_CHECK_TIMEOUT": "2s",
- "LOGIN_RATE_EVENTS": "30"
+ "LOGIN_RATE_EVENTS": "30",
+ "INGRESS_DEVICE_CA_FILE": "/etc/openit/device-ca.pem"
 }

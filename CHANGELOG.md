@@ -6,6 +6,10 @@
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 
+## 3.4.13 (PATCH, 와이어 변경 없음 — 키오스크 기본 기기 인증 입력)
+왜: platform 담당이 기기 mTLS(PUBLIC_API F절의 기본 기기 인증)를 켜는 입력이 PublicIngressEnv 에 없음을 찾았다. deploy 구성도 이것을 넘기지 않아 기본 기기 인증이 꺼진 채 배치될 수 있었다. 헤드 경계 점검은 'deploy 가 넘기는 것 ⊆ 계약'만 보고 '계약이 요구하는 것 ⊆ deploy 가 넘기는 것'을 보지 않았다(점검 보강).
+- PublicIngressEnv.INGRESS_DEVICE_CA_FILE(필수, 기본 /etc/openit/device-ca.pem).
+
 ## 3.4.12 (PATCH, 와이어 변경 없음 — 헤드 경계 전수 점검이 찾은 빈칸)
 왜: head/scripts/check-boundary-coverage.py(deploy 구성의 서비스마다 이미지·환경·마운트를 계약과 대조)가 StepCaEnv 의 인증서·토큰·상태 폴더와 MonitoringEnv 의 node 역할 폴더가 계약에 없음을 찾았다.
 - StepCaEnv: STEP_CERTS_DIR(/certs), STEP_TOKENS_DIR(/tokens), STEP_CA_HOME(/home/step).

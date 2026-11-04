@@ -59,6 +59,7 @@
      "GATEWAY_PROBE_SITE",
      "GATEWAY_PUBLIC_TLS_PORT",
      "GATEWAY_TLS_MODE",
+     "INGRESS_DEVICE_CA_FILE",
      "INGRESS_DEVICE_TOKENS_DIR",
      "INGRESS_EXPOSURES",
      "INGRESS_ROOT_CA",
@@ -138,10 +139,16 @@
    "$ref": "#/$defs/PosInt",
    "description": "로그인·가입·기기 등록 경로의 분당 허용 횟수(R10.4). platform ADR 0002, 측정 안 함",
    "default": "30"
+  },
+  "INGRESS_DEVICE_CA_FILE": {
+   "$ref": "#/$defs/Path",
+   "default": "/etc/openit/device-ca.pem",
+   "description": "3.4.13: 키오스크 기기 인증서(mTLS, PUBLIC_API F절 — 기본 기기 인증)를 검증할 기기 CA(PEM). 기기 경로(Exposure auth device-token)는 이 CA 로 서명된 클라이언트 인증서가 있으면 그 CN 을 X-Openit-Device 로 붙이고, 없으면 F-1 호환 기기 토큰(INGRESS_DEVICE_TOKENS_DIR)을 본다. 필수: 기본 기기 인증이 조용히 꺼지지 않게 한다. 기기 CA 와 기기 인증서 발급은 운영(설치처)이 deploy 로 준다"
   }
  },
  "required": [
-  "GATEWAY_HOSTS"
+  "GATEWAY_HOSTS",
+  "INGRESS_DEVICE_CA_FILE"
  ],
  "allOf": [
   {
