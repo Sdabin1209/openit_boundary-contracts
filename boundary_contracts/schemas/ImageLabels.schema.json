@@ -78,7 +78,7 @@
   ],
   "propertyNames": {
     "not": {
-      "pattern": "^io\\.openit\\.(?!(service|revision|contracts\\.boundary|contracts\\.survey-schema|model-runtime|variant|app-version|langgraph|jobs|exposure)$)"
+      "pattern": "^io\\.openit\\.(?!(service|revision|contracts\\.boundary|contracts\\.survey-schema|model-runtime|variant|app-version|langgraph|jobs|exposure|database)$)"
     }
   }
 }

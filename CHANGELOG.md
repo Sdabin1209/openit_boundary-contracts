@@ -6,6 +6,11 @@
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 
+## 3.4.11 (PATCH, 와이어 변경 없음 — 3.4.10 결함 수정)
+왜: 3.4.10 에서 ImageLabels.properties 에 io.openit.database 를 두면서 propertyNames 허용 목록에는 넣지 않아 DB 이미지 라벨이 거부됐다(release-gate 담당이 찾음, 헤드 결함 — 라벨 검증 시험이 없었다).
+- ImageLabels propertyNames 에 database.
+- 시험 tests/test_image_labels_3411.py: properties 의 모든 라벨을 propertyNames 가 받는지.
+
 ## 3.4.10 (PATCH, 와이어 변경 없음 — deploy 가 넘기는 입력을 계약에, 헤드 누락 수정)
 왜: 헤드가 deploy compose 의 환경 변수를 계약 Env 스키마와 대조하니 platform 이미지·사람 인증(Keycloak·oauth2-proxy 내부 설정 41개)·영역 DB 초기화 입력이 계약에 없었다. deploy 가 이웃 영역의 내부 구조를 알고 있었다(구조 규칙 1·6 위반). 오늘 platform 영역·Database per Service(D126·D127)를 정하면서 deploy 쪽 입력을 끝까지 따라가지 않은 헤드 누락.
 - 새 스키마: AreaGatewayEnv, PublicIngressEnv, MonitoringEnv, BackupStoreEnv, StepCaEnv, IdentityEnv, IdentityProxyEnv, AreaDatabaseEnv, DatabaseDeclaration.
