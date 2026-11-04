@@ -6,6 +6,11 @@
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 
+## 3.4.9 (PATCH, 와이어 변경 없음 — 시험용 문 삭제, 공개 입구 경로 표 규칙 명시)
+왜: survey-service 담당이 SurveyServiceEnv 에서 사설 주소 푸시를 허용하는 시험용 설정(R3.18 SSRF 방지 우회)을 찾았다. platform 담당이 공개 입구 생성기에서 영역 상태 경로·같은 공개 경로 충돌을 어떻게 다룰지 물었다(규칙은 CONVENTIONS 2절·HTTP I1 에 있었으나 Exposure 설명과 13절에 없었다).
+- `SurveyServiceEnv` 에서 `SURVEY_PUSH_ALLOW_PRIVATE_HOSTS` 삭제(survey-service 코드는 이미 읽지 않음).
+- `Exposure` auth `none` 설명, CONVENTIONS 13절: 공개 입구는 denied·machine-token·영역 상태 경로를 내보내지 않고, 같은 공개 경로를 두 영역이 열면 시작하지 않는다.
+
 ## 3.4.8 (PATCH, 와이어 변경 없음 — 게시할 수 있는 서비스 이름에 platform 이미지)
 왜: 3.4.4 에서 platform 영역을 만들었는데 PublishRequest.service 목록에 platform 이미지 이름이 없어 deploy 가 digest 잠금에 올릴 수 없었다(deploy 담당 CR-publish-platform-images, 헤드 누락).
 - `PublishRequest.service` 에 area-gateway·public-ingress·monitoring·backup-store·step-ca.

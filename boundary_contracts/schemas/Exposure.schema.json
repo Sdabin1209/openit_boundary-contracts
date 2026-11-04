@@ -89,7 +89,7 @@
                 "none",
                 "denied"
               ],
-              "description": "device-token: 키오스크 기기(mTLS/기기 토큰). account: 사람 계정(roles 필수). authenticated: 로그인한 사람 계정이면 역할과 무관하게 연다(3.4.0, U82: 데이터 없는 화면 정적 파일 — 가입 승인 대기 계정에게 안내를 보이려면 화면이 열려야 한다; roles 를 쓰지 않는다). machine-token: (3.4.7 정정) 비사람 호출자의 경로. 게이트웨이는 토큰을 대조하지 않고 받는 서비스가 대조한다(RUNTIME R3.23). platform 공개 입구는 이 경로를 내보내지 않는다(denied 와 같다): compose 밖 호출자는 R1.5 의 hosts 표로 받는 영역의 게이트웨이에 바로 간다. 값은 4.0.0 에서 뺀다. none: 인증 없음(/healthz 등). denied: 밖에서 닿을 수 없음"
+              "description": "device-token: 키오스크 기기(mTLS/기기 토큰). account: 사람 계정(roles 필수). authenticated: 로그인한 사람 계정이면 역할과 무관하게 연다(3.4.0, U82: 데이터 없는 화면 정적 파일 — 가입 승인 대기 계정에게 안내를 보이려면 화면이 열려야 한다; roles 를 쓰지 않는다). machine-token: (3.4.7 정정) 비사람 호출자의 경로. 게이트웨이는 토큰을 대조하지 않고 받는 서비스가 대조한다(RUNTIME R3.23). platform 공개 입구는 이 경로를 내보내지 않는다(denied 와 같다): compose 밖 호출자는 R1.5 의 hosts 표로 받는 영역의 게이트웨이에 바로 간다. 값은 4.0.0 에서 뺀다. none: 인증 없음(/healthz 등). (3.4.9) 영역의 /healthz·/readyz·/metrics 는 영역 게이트웨이 용이고 platform 공개 입구는 내보내지 않는다(CONVENTIONS 2절 상태 경로 규칙). denied: 밖에서 닿을 수 없음"
             },
             "roles": {
               "type": "array",

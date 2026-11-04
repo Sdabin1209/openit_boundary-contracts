@@ -61,7 +61,6 @@
      "SURVEY_OUTBOX_STAGE_GRACE_SECONDS",
      "SURVEY_PORT",
      "SURVEY_HOST",
-     "SURVEY_PUSH_ALLOW_PRIVATE_HOSTS",
      "SURVEY_PUSH_TIMEOUT_SECONDS",
      "SURVEY_READYZ_DB_TIMEOUT_SECONDS",
      "SURVEY_RELEASE_POLL_SECONDS",
@@ -605,21 +604,6 @@
    "pattern": "^[0-9]+(\\.[0-9]+)?$",
    "description": "웹 푸시 전송 timeout",
    "default": "3.0"
-  },
-  "SURVEY_PUSH_ALLOW_PRIVATE_HOSTS": {
-   "type": "string",
-   "enum": [
-    "1",
-    "0",
-    "true",
-    "false",
-    "yes",
-    "no",
-    "on",
-    "off"
-   ],
-   "description": "푸시 수신처로 사설 주소 허용(개발용)",
-   "default": "0"
   },
   "SURVEY_MAX_PUSH_SUBSCRIPTIONS": {
    "type": "string",
