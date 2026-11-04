@@ -1,0 +1,60 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://openit.example/schemas/AreaDatabaseEnv.schema.json",
+ "title": "AreaDatabaseEnv",
+ "description": "3.4.10(D126 DB 는 그 데이터 주인 영역의 컴포넌트: DB 초기화는 영역 이미지 안, deploy 는 선언대로 비밀을 만들고 배치만). 영역 DB 이미지(<영역>-db) 컨테이너의 환경 변수. 초기화(계정·권한·접속 규칙·TLS 설정)는 이미지 안에서 DatabaseDeclaration 대로 한다.",
+ "x-producers": [
+  "deploy"
+ ],
+ "x-consumers": [
+  "survey-service",
+  "question-authoring",
+  "ops-feedback",
+  "release-gate",
+  "platform"
+ ],
+ "type": "object",
+ "$defs": {
+  "Path": {
+   "type": "string",
+   "pattern": "^/",
+   "minLength": 1,
+   "description": "컨테이너 안 절대 경로"
+  }
+ },
+ "propertyNames": {
+  "anyOf": [
+   {
+    "not": {
+     "pattern": "^(POSTGRES_PASSWORD_FILE|DB_ACCOUNT_|DB_TLS_)"
+    }
+   },
+   {
+    "enum": [
+     "POSTGRES_PASSWORD_FILE",
+     "DB_ACCOUNT_SECRETS_DIR",
+     "DB_TLS_DIR"
+    ]
+   }
+  ]
+ },
+ "properties": {
+  "POSTGRES_PASSWORD_FILE": {
+   "$ref": "#/$defs/Path",
+   "description": "슈퍼유저 암호 파일(공식 postgres 이미지 표준 변수, 비밀 D84). 초기화에만 쓰고 영역 앱은 쓰지 않는다"
+  },
+  "DB_ACCOUNT_SECRETS_DIR": {
+   "$ref": "#/$defs/Path",
+   "default": "/run/secrets/db",
+   "description": "DatabaseDeclaration.accounts 의 계정마다 파일 하나(이름 = 계정 이름, 내용 = 암호 한 줄, 비밀 D84)"
+  },
+  "DB_TLS_DIR": {
+   "$ref": "#/$defs/Path",
+   "default": "/certs",
+   "description": "서비스 이름 인증서 폴더(tls.crt·tls.key). 서버 TLS 필수(접속은 verify-full)"
+  }
+ },
+ "required": [
+  "POSTGRES_PASSWORD_FILE"
+ ]
+}

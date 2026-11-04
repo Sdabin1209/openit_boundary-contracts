@@ -1,0 +1,91 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://openit.example/schemas/AreaGatewayEnv.schema.json",
+ "title": "AreaGatewayEnv",
+ "description": "3.4.10(구조 규칙 6: deploy → platform 입력을 계약에 둔다, 헤드 누락 수정). platform 영역 게이트웨이 이미지(area-gateway) 컨테이너의 환경 변수. 들어오는 쪽 TLS 종단·나가는 쪽 CONNECT(CONVENTIONS 13절, RUNTIME R1.8).",
+ "x-producers": [
+  "deploy"
+ ],
+ "x-consumers": [
+  "platform"
+ ],
+ "type": "object",
+ "$defs": {
+  "Port": {
+   "type": "string",
+   "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
+   "description": "TCP 포트 1~65535"
+  },
+  "PosInt": {
+   "type": "string",
+   "pattern": "^[1-9][0-9]*$",
+   "description": "1 이상 정수"
+  },
+  "Path": {
+   "type": "string",
+   "pattern": "^/",
+   "minLength": 1,
+   "description": "컨테이너 안 절대 경로"
+  },
+  "Duration": {
+   "type": "string",
+   "pattern": "^[0-9]+(ms|s|m|h|d)$",
+   "description": "기간(정수+단위 ms|s|m|h|d)"
+  },
+  "HostPort": {
+   "type": "string",
+   "pattern": "^[A-Za-z0-9.-]+:[0-9]{1,5}$",
+   "description": "<호스트>:<포트>"
+  },
+  "HttpsUrl": {
+   "type": "string",
+   "pattern": "^https://[^\\s]+$",
+   "description": "https URL"
+  }
+ },
+ "propertyNames": {
+  "anyOf": [
+   {
+    "not": {
+     "pattern": "^(AREA_GATEWAY_)"
+    }
+   },
+   {
+    "enum": [
+     "AREA_GATEWAY_CERT_DIR",
+     "AREA_GATEWAY_EGRESS_PORT",
+     "AREA_GATEWAY_EXPOSURE",
+     "AREA_GATEWAY_INGRESS_PORT",
+     "AREA_GATEWAY_UPSTREAM"
+    ]
+   }
+  ]
+ },
+ "properties": {
+  "AREA_GATEWAY_UPSTREAM": {
+   "$ref": "#/$defs/HostPort",
+   "description": "들어오는 요청을 넘길 같은 pod 안 영역 서비스(루프백)",
+   "default": "127.0.0.1:8080"
+  },
+  "AREA_GATEWAY_INGRESS_PORT": {
+   "$ref": "#/$defs/Port",
+   "description": "들어오는 쪽 TLS 포트",
+   "default": "443"
+  },
+  "AREA_GATEWAY_EGRESS_PORT": {
+   "$ref": "#/$defs/Port",
+   "description": "나가는 쪽 CONNECT 포트(루프백에서만 연다). 영역 앱의 OPENIT_EGRESS_PROXY 와 같은 포트",
+   "default": "3128"
+  },
+  "AREA_GATEWAY_EXPOSURE": {
+   "$ref": "#/$defs/Path",
+   "description": "그 영역 Exposure 선언 파일(Exposure 스키마, 영역 이미지 라벨 io.openit.exposure 내용). 없으면 종료 64, 스키마 위반이면 65",
+   "default": "/etc/openit/exposure.json"
+  },
+  "AREA_GATEWAY_CERT_DIR": {
+   "$ref": "#/$defs/Path",
+   "description": "서비스 이름 인증서 폴더(tls.crt·tls.key PEM). 폴더가 없으면 들어오는 쪽을 열지 않고 나가는 쪽만 연다(compose 밖 호출자용)",
+   "default": "/certs"
+  }
+ }
+}

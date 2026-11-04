@@ -1,0 +1,7 @@
+{
+ "IDENTITY_PUBLIC_URL": "https://kiosk.example.internal",
+ "IDENTITY_DB_URL_FILE": "/run/secrets/identity-db-url",
+ "IDENTITY_CLIENT_SECRET_FILE": "/run/secrets/identity-client-secret",
+ "IDENTITY_ADMIN_PASSWORD_FILE": "/run/secrets/identity-admin-password",
+ "IDENTITY_INITIAL_ADMIN_PASSWORD_FILE": "/run/secrets/identity-initial-admin-password"
+}

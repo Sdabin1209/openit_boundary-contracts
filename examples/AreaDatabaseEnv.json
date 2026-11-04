@@ -1,0 +1,5 @@
+{
+ "POSTGRES_PASSWORD_FILE": "/run/secrets/db-superuser",
+ "DB_ACCOUNT_SECRETS_DIR": "/run/secrets/db",
+ "DB_TLS_DIR": "/certs"
+}

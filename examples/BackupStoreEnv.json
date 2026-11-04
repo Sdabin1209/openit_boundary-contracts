@@ -1,0 +1,5 @@
+{
+ "OPENIT_BACKUP_PORT": "443",
+ "OPENIT_BACKUP_AREAS_DIR": "/run/secrets/areas",
+ "OPENIT_BACKUP_TLS_DIR": "/run/tls"
+}

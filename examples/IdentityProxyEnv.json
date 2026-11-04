@@ -1,0 +1,7 @@
+{
+ "IDENTITY_PUBLIC_URL": "https://kiosk.example.internal",
+ "IDENTITY_CLIENT_SECRET_FILE": "/run/secrets/identity-client-secret",
+ "IDENTITY_COOKIE_SECRET_FILE": "/run/secrets/identity-cookie-secret",
+ "IDENTITY_SESSION_MAX": "8h",
+ "IDENTITY_SESSION_REFRESH": "5m"
+}

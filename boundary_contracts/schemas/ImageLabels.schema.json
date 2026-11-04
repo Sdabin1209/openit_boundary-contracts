@@ -60,6 +60,14 @@
         "$ref": "Exposure.schema.json"
       },
       "description": "게이트웨이 노출 선언(JSON 문자열)"
+    },
+    "io.openit.database": {
+      "type": "string",
+      "contentMediaType": "application/json",
+      "contentSchema": {
+        "$ref": "DatabaseDeclaration.schema.json"
+      },
+      "description": "3.4.10(D126): 영역 DB 이미지(<영역>-db, identity-db)의 DB 선언(JSON 문자열). DB 이미지에만 있다"
     }
   },
   "required": [

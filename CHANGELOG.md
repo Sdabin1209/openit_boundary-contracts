@@ -6,6 +6,13 @@
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 
+## 3.4.10 (PATCH, 와이어 변경 없음 — deploy 가 넘기는 입력을 계약에, 헤드 누락 수정)
+왜: 헤드가 deploy compose 의 환경 변수를 계약 Env 스키마와 대조하니 platform 이미지·사람 인증(Keycloak·oauth2-proxy 내부 설정 41개)·영역 DB 초기화 입력이 계약에 없었다. deploy 가 이웃 영역의 내부 구조를 알고 있었다(구조 규칙 1·6 위반). 오늘 platform 영역·Database per Service(D126·D127)를 정하면서 deploy 쪽 입력을 끝까지 따라가지 않은 헤드 누락.
+- 새 스키마: AreaGatewayEnv, PublicIngressEnv, MonitoringEnv, BackupStoreEnv, StepCaEnv, IdentityEnv, IdentityProxyEnv, AreaDatabaseEnv, DatabaseDeclaration.
+- ImageLabels 에 `io.openit.database`. PublishRequest.service 에 identity·identity-proxy·identity-db·survey-db·question-authoring-db·ops-feedback-db·release-gate-db.
+- 키오스크 기기 토큰은 기기마다 비밀 파일 하나(INGRESS_DEVICE_TOKENS_DIR). 파생 값(공개 입구 호스트 이름 목록, Keycloak·oauth2-proxy 설정, DB 계정·권한)은 받는 이미지가 만든다.
+- CONVENTIONS 13절: deploy 입력은 모두 받는 쪽 Env 스키마에.
+
 ## 3.4.9 (PATCH, 와이어 변경 없음 — 시험용 문 삭제, 공개 입구 경로 표 규칙 명시)
 왜: survey-service 담당이 SurveyServiceEnv 에서 사설 주소 푸시를 허용하는 시험용 설정(R3.18 SSRF 방지 우회)을 찾았다. platform 담당이 공개 입구 생성기에서 영역 상태 경로·같은 공개 경로 충돌을 어떻게 다룰지 물었다(규칙은 CONVENTIONS 2절·HTTP I1 에 있었으나 Exposure 설명과 13절에 없었다).
 - `SurveyServiceEnv` 에서 `SURVEY_PUSH_ALLOW_PRIVATE_HOSTS` 삭제(survey-service 코드는 이미 읽지 않음).

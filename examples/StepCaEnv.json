@@ -1,0 +1,5 @@
+{
+ "STEP_CA_PORT": "9000",
+ "STEP_CA_URL": "https://step-ca:9000",
+ "STEP_RENEW_EXPIRES_IN": "12h"
+}

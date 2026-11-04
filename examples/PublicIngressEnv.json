@@ -1,0 +1,10 @@
+{
+ "GATEWAY_HOSTS": "kiosk.example.internal",
+ "GATEWAY_PUBLIC_TLS_PORT": "443",
+ "GATEWAY_TLS_MODE": "internal",
+ "INGRESS_EXPOSURES": "/etc/openit/exposures",
+ "INGRESS_DEVICE_TOKENS_DIR": "/run/secrets/devices",
+ "INGRESS_UPSTREAM_TOKENS_DIR": "/run/secrets",
+ "AUTH_CHECK_TIMEOUT": "2s",
+ "LOGIN_RATE_EVENTS": "30"
+}

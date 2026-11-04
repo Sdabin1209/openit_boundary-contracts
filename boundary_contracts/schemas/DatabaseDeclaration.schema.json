@@ -1,0 +1,82 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://openit.example/schemas/DatabaseDeclaration.schema.json",
+ "title": "DatabaseDeclaration",
+ "description": "3.4.10(D126 DB 는 그 데이터 주인 영역의 컴포넌트: DB 초기화는 영역 이미지 안, deploy 는 선언대로 비밀을 만들고 배치만). 영역 DB 이미지의 라벨 io.openit.database 값. 그 DB 의 엔진과 계정을 선언한다. deploy 는 계정마다 무작위 암호 파일을 만들어 DB 컨테이너(AreaDatabaseEnv.DB_ACCOUNT_SECRETS_DIR)와, 그 계정을 쓰는 영역 컨테이너의 <접속 이름>_FILE(libpq 접속 URI, sslmode=verify-full)에 같은 값으로 준다.",
+ "x-producers": [
+  "survey-service",
+  "question-authoring",
+  "ops-feedback",
+  "release-gate",
+  "platform"
+ ],
+ "x-consumers": [
+  "deploy"
+ ],
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "engine",
+  "major",
+  "port",
+  "accounts"
+ ],
+ "properties": {
+  "engine": {
+   "const": "postgresql"
+  },
+  "major": {
+   "type": "integer",
+   "minimum": 14,
+   "description": "엔진 주 버전(영역 ADR)"
+  },
+  "port": {
+   "type": "integer",
+   "minimum": 1,
+   "maximum": 65535,
+   "default": 5432
+  },
+  "accounts": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "name",
+     "database",
+     "privilege",
+     "url_env"
+    ],
+    "properties": {
+     "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,30}$",
+      "description": "계정 이름. 암호 파일 이름도 이것"
+     },
+     "database": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,30}$",
+      "description": "접속할 데이터베이스"
+     },
+     "privilege": {
+      "enum": [
+       "owner",
+       "dml"
+      ],
+      "description": "owner: 그 데이터베이스 소유(스키마 변경), dml: 표 읽기·쓰기만"
+     },
+     "url_env": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+       "type": "string",
+       "pattern": "^[A-Z][A-Z0-9_]*_FILE$"
+      },
+      "description": "이 계정으로 접속하는 영역 컨테이너의 환경 변수 이름(그 영역 Env 스키마에 있는 *_DATABASE_URL_FILE 등). deploy 가 접속 URI 파일을 만들어 준다"
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,84 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://openit.example/schemas/IdentityEnv.schema.json",
+ "title": "IdentityEnv",
+ "description": "3.4.10(구조 규칙 1·6: deploy 가 Keycloak·oauth2-proxy 내부 설정을 쓰지 않게, 사람 인증 입력을 계약에 둔다). platform 사람 인증 이미지(identity, Keycloak 공식 이미지 위) 컨테이너의 환경 변수. realm·클라이언트·역할 그룹(CONVENTIONS 6절 역할 목록)은 이미지가 만든다.",
+ "x-producers": [
+  "deploy"
+ ],
+ "x-consumers": [
+  "platform"
+ ],
+ "type": "object",
+ "$defs": {
+  "Path": {
+   "type": "string",
+   "pattern": "^/",
+   "minLength": 1,
+   "description": "컨테이너 안 절대 경로"
+  },
+  "HttpsUrl": {
+   "type": "string",
+   "pattern": "^https://[^\\s/]+(:[0-9]{1,5})?$",
+   "description": "https://<호스트>[:<포트>] (경로 없음)"
+  },
+  "Duration": {
+   "type": "string",
+   "pattern": "^[0-9]+(s|m|h)$",
+   "description": "기간(정수+단위 s|m|h)"
+  }
+ },
+ "propertyNames": {
+  "anyOf": [
+   {
+    "not": {
+     "pattern": "^(IDENTITY_)"
+    }
+   },
+   {
+    "enum": [
+     "IDENTITY_ADMIN_PASSWORD_FILE",
+     "IDENTITY_CLIENT_SECRET_FILE",
+     "IDENTITY_DB_URL_FILE",
+     "IDENTITY_INITIAL_ADMIN_PASSWORD_FILE",
+     "IDENTITY_PUBLIC_URL",
+     "IDENTITY_ROOT_CA"
+    ]
+   }
+  ]
+ },
+ "properties": {
+  "IDENTITY_PUBLIC_URL": {
+   "$ref": "#/$defs/HttpsUrl",
+   "description": "공개 입구의 공개 주소(PublicIngressEnv.GATEWAY_HOSTS 첫 항목 + GATEWAY_PUBLIC_TLS_PORT). 사람 인증 경로(HumanAuthEndpoints)는 이 아래다. 발급자·되돌아올 주소 등은 이미지가 이 값과 HumanAuthEndpoints 에서 만든다"
+  },
+  "IDENTITY_CLIENT_SECRET_FILE": {
+   "$ref": "#/$defs/Path",
+   "default": "/run/secrets/identity-client-secret",
+   "description": "공개 입구 OIDC 클라이언트 비밀(identity 와 identity-proxy 가 같은 값, 비밀 D84). deploy 가 무작위로 만든다"
+  },
+  "IDENTITY_ROOT_CA": {
+   "$ref": "#/$defs/Path",
+   "default": "/etc/openit/pki/root_ca.crt",
+   "description": "서비스 인증서 루트(PEM)"
+  },
+  "IDENTITY_DB_URL_FILE": {
+   "$ref": "#/$defs/Path",
+   "default": "/run/secrets/identity-db-url",
+   "description": "identity-db 접속 URI 파일(libpq URI, sslmode=verify-full; DatabaseDeclaration 의 url_env, 비밀 D84)"
+  },
+  "IDENTITY_ADMIN_PASSWORD_FILE": {
+   "$ref": "#/$defs/Path",
+   "default": "/run/secrets/identity-admin-password",
+   "description": "Keycloak 자체(master) 관리자 암호 파일(비밀 D84). 운영(설치처)이 준다"
+  },
+  "IDENTITY_INITIAL_ADMIN_PASSWORD_FILE": {
+   "$ref": "#/$defs/Path",
+   "default": "/run/secrets/identity-initial-admin-password",
+   "description": "openit realm 의 첫 관리자 계정(가입 승인용, 역할 admin) 암호 파일(비밀 D84). 운영(설치처)이 준다"
+  }
+ },
+ "required": [
+  "IDENTITY_PUBLIC_URL"
+ ]
+}

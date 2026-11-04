@@ -1,0 +1,79 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://openit.example/schemas/BackupStoreEnv.schema.json",
+ "title": "BackupStoreEnv",
+ "description": "3.4.10(구조 규칙 6: deploy → platform 입력을 계약에 둔다, 헤드 누락 수정). platform 백업 저장소 이미지(backup-store, restic rest-server) 컨테이너의 환경 변수. append-only 를 쓰지 않고 영역마다 자기 경로만(--private-repos, D130).",
+ "x-producers": [
+  "deploy"
+ ],
+ "x-consumers": [
+  "platform"
+ ],
+ "type": "object",
+ "$defs": {
+  "Port": {
+   "type": "string",
+   "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
+   "description": "TCP 포트 1~65535"
+  },
+  "PosInt": {
+   "type": "string",
+   "pattern": "^[1-9][0-9]*$",
+   "description": "1 이상 정수"
+  },
+  "Path": {
+   "type": "string",
+   "pattern": "^/",
+   "minLength": 1,
+   "description": "컨테이너 안 절대 경로"
+  },
+  "Duration": {
+   "type": "string",
+   "pattern": "^[0-9]+(ms|s|m|h|d)$",
+   "description": "기간(정수+단위 ms|s|m|h|d)"
+  },
+  "HostPort": {
+   "type": "string",
+   "pattern": "^[A-Za-z0-9.-]+:[0-9]{1,5}$",
+   "description": "<호스트>:<포트>"
+  },
+  "HttpsUrl": {
+   "type": "string",
+   "pattern": "^https://[^\\s]+$",
+   "description": "https URL"
+  }
+ },
+ "propertyNames": {
+  "anyOf": [
+   {
+    "not": {
+     "pattern": "^(OPENIT_BACKUP_PORT|OPENIT_BACKUP_AREAS_|OPENIT_BACKUP_TLS_)"
+    }
+   },
+   {
+    "enum": [
+     "OPENIT_BACKUP_AREAS_DIR",
+     "OPENIT_BACKUP_PORT",
+     "OPENIT_BACKUP_TLS_DIR"
+    ]
+   }
+  ]
+ },
+ "properties": {
+  "OPENIT_BACKUP_PORT": {
+   "$ref": "#/$defs/Port",
+   "description": "들을 포트. 영역 게이트웨이 출구는 backup-store:443 만 허용하므로 배치는 443 을 준다",
+   "default": "8000"
+  },
+  "OPENIT_BACKUP_AREAS_DIR": {
+   "$ref": "#/$defs/Path",
+   "description": "영역 자격 폴더: 영역마다 파일 하나, 파일 이름 = 영역 이름 = 사용자 이름, 내용 = 그 영역의 CommonEnv OPENIT_BACKUP_CREDENTIALS_FILE 과 같은 한 줄 '<사용자>:<암호>'(RFC 7617, 비밀 D84)",
+   "default": "/run/secrets/areas"
+  },
+  "OPENIT_BACKUP_TLS_DIR": {
+   "$ref": "#/$defs/Path",
+   "description": "서비스 이름 backup-store 인증서 폴더(tls.crt·tls.key)",
+   "default": "/run/tls"
+  }
+ }
+}
