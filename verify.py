@@ -3,9 +3,12 @@
 import copy, glob, json, os, sys, jsonschema
 here = os.path.dirname(os.path.abspath(__file__)); base = "file://" + here + "/schemas/"
 common = json.load(open(here + "/schemas/_common.schema.json"))
+from boundary_contracts import validator
+from boundary_contracts.http_contracts import HttpContract, catalog
+
+
 def val(name):
-    s = json.load(open(f"{here}/schemas/{name}.schema.json")); jsonschema.Draft202012Validator.check_schema(s)
-    return jsonschema.Draft202012Validator(s, resolver=jsonschema.RefResolver(base, s, store={base + os.path.basename(q): json.load(open(q)) for q in glob.glob(here + "/schemas/*.schema.json")}))
+    return validator(name)
 def ex(name): return json.load(open(f"{here}/examples/{name}.json"))
 bad = 0
 names = sorted(os.path.basename(p)[:-12] for p in glob.glob(here + "/schemas/*.schema.json") if not os.path.basename(p).startswith("_"))
@@ -54,15 +57,16 @@ neg("포인터 버전 0", "ActivePointer", "ActivePointer", lambda d: d.update(p
 # 확장 필드는 허용되어야 한다
 d = ex("ReleaseManifest"); d["ext"] = {"model-lab": {"note": "x"}}
 errs = list(val("ReleaseManifest").iter_errors(d)); print("OK  " if not errs else "FAIL", "ext 허용"); bad += bool(errs)
-# 문진 스키마가 같은 워크스페이스에 있으면 TraceEnvelope.trace를 TurnTrace로 검증한다.
-survey = os.path.join(here, "..", "survey-service", "schema", "schemas", "TurnTrace.json")
-if os.path.exists(survey):
-    _tt = json.load(open(survey)); _tt.pop("$id", None)  # 상대 $id는 참조 해석을 깨뜨린다
-    tt = jsonschema.Draft202012Validator(_tt)
-    errs = [e.message for e in tt.iter_errors(ex("TraceEnvelope")["trace"])]
-    print("OK  " if not errs else "FAIL", "TraceEnvelope.trace는 TurnTrace를 통과", errs[:2]); bad += bool(errs)
-else:
-    print("건너뜀: 문진 스키마가 없어 TraceEnvelope.trace를 TurnTrace로 검증하지 않음")
+# 외부 데이터는 설치된 소유자 스키마로만 검증한다. 누락은 검증 실패다.
+_tt = validator("TraceEnvelope")
+from boundary_contracts.schema_sources import external_schema
+_survey_turn = external_schema("https://openit.example/survey/v1/TurnTrace.json")
+errs = list(jsonschema.Draft202012Validator(_survey_turn).iter_errors(ex("TraceEnvelope")["trace"]))
+print("OK  " if not errs else "FAIL", "TraceEnvelope.trace는 설치된 TurnTrace를 통과")
+bad += bool(errs)
+for service in catalog()["services"]:
+    HttpContract(service).lint()
+    print("OK  ", service, "HTTP 계약 참조가 모두 해석된다")
 d = ex("FailureCase"); d.pop("question_set", None); d.pop("expected_kind"); d["expected"] = {}
 errs = [e.message for e in val("FailureCase").iter_errors(d)]; print("OK  " if not errs else "FAIL", "expected_kind 없는 FailureCase도 유효(권장일 뿐)", errs); bad += bool(errs)
 d = ex("ModelPackageManifest"); d["base_model"]["id"] = "org/name-with.slash_1"

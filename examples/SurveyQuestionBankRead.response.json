@@ -1,8 +1,10 @@
 {
   "release_id": "rel-1",
-  "question_set_id": "health-screening",
-  "content_hash": "sha256:1a5c159fd7120ce0426f3791e6cac485c85c605199b3df2a39c8e02a3bd42fbf",
+  "question_set_id": "general-intake",
+  "content_hash": "sha256:0ef695191111c7afe16f624c4c32f95c12d7cbc687942adb074bd90cd57f7d91",
   "question_bank": {
+    "question_set_id": "general-intake",
+    "title": "일반 문진표",
     "version": 1,
     "questions": [
       {
@@ -28,7 +30,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "diagnosed을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           },
           {
             "slot_id": "on_medication",
@@ -37,7 +40,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "on_medication을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -64,7 +68,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "diagnosed을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           },
           {
             "slot_id": "on_medication",
@@ -73,7 +78,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "on_medication을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -100,7 +106,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "diagnosed을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           },
           {
             "slot_id": "on_medication",
@@ -109,7 +116,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "on_medication을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -136,7 +144,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "diagnosed을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           },
           {
             "slot_id": "on_medication",
@@ -145,7 +154,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "on_medication을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -172,7 +182,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "diagnosed을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           },
           {
             "slot_id": "on_medication",
@@ -181,7 +192,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "on_medication을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -208,7 +220,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "diagnosed을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           },
           {
             "slot_id": "on_medication",
@@ -217,7 +230,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "on_medication을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -244,7 +258,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "diagnosed을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           },
           {
             "slot_id": "on_medication",
@@ -253,7 +268,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "on_medication을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -280,7 +296,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "diagnosed을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           },
           {
             "slot_id": "on_medication",
@@ -289,7 +306,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "on_medication을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -316,7 +334,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "diagnosed을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           },
           {
             "slot_id": "on_medication",
@@ -325,7 +344,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "on_medication을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -352,7 +372,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "diagnosed을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           },
           {
             "slot_id": "on_medication",
@@ -361,7 +382,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "on_medication을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -388,7 +410,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "diagnosed을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           },
           {
             "slot_id": "on_medication",
@@ -397,7 +420,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "on_medication을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -424,7 +448,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "family_history을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -451,7 +476,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "family_history을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -478,7 +504,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "family_history을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -505,7 +532,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "family_history을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -532,7 +560,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "family_history을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -555,11 +584,16 @@
           {
             "slot_id": "answer",
             "units": [],
-            "choices": [],
+            "choices": [
+              "no",
+              "unknown",
+              "yes"
+            ],
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "answer을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "option"
           }
         ]
       },
@@ -586,7 +620,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "answer을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -609,11 +644,15 @@
           {
             "slot_id": "status",
             "units": [],
-            "choices": [],
+            "choices": [
+              "current",
+              "former"
+            ],
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "status을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "option"
           },
           {
             "slot_id": "total_years",
@@ -622,7 +661,10 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "total_years을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "integer",
+            "unit": "년",
+            "minimum": 0
           },
           {
             "slot_id": "daily_count",
@@ -631,7 +673,10 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "daily_count을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "number",
+            "unit": "개비",
+            "minimum": 0
           },
           {
             "slot_id": "years_since_quit",
@@ -640,7 +685,10 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "years_since_quit을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "number",
+            "unit": "년",
+            "minimum": 0
           }
         ]
       },
@@ -667,7 +715,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "answer을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -690,11 +739,15 @@
           {
             "slot_id": "status",
             "units": [],
-            "choices": [],
+            "choices": [
+              "current",
+              "former"
+            ],
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "status을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "option"
           },
           {
             "slot_id": "total_years",
@@ -703,7 +756,10 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "total_years을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "integer",
+            "unit": "년",
+            "minimum": 0
           },
           {
             "slot_id": "daily_count",
@@ -712,7 +768,10 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "daily_count을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "number",
+            "unit": "개비",
+            "minimum": 0
           },
           {
             "slot_id": "years_since_quit",
@@ -721,7 +780,10 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "years_since_quit을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "number",
+            "unit": "년",
+            "minimum": 0
           }
         ]
       },
@@ -748,7 +810,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "answer을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           }
         ]
       },
@@ -771,11 +834,18 @@
           {
             "slot_id": "use_pattern",
             "units": [],
-            "choices": [],
+            "choices": [
+              "daily",
+              "days_10_29",
+              "days_1_2",
+              "days_3_9",
+              "no"
+            ],
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "use_pattern을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "option"
           }
         ]
       },
@@ -802,7 +872,8 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "does_not_drink을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "boolean"
           },
           {
             "slot_id": "frequency",
@@ -811,16 +882,23 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "frequency을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "number",
+            "exclusive_minimum": 0
           },
           {
             "slot_id": "unit",
             "units": [],
-            "choices": [],
+            "choices": [
+              "month",
+              "week",
+              "year"
+            ],
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "unit을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "option"
           }
         ]
       },
@@ -841,9 +919,9 @@
         "repeat_keys": [
           "soju",
           "beer",
-          "wine",
           "spirits",
-          "makgeolli"
+          "makgeolli",
+          "wine"
         ],
         "slots": [
           {
@@ -853,16 +931,24 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "amount을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "number",
+            "minimum": 0
           },
           {
             "slot_id": "unit",
             "units": [],
-            "choices": [],
+            "choices": [
+              "bottle",
+              "can",
+              "cc",
+              "glass"
+            ],
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "unit을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "option"
           }
         ]
       },
@@ -883,9 +969,9 @@
         "repeat_keys": [
           "soju",
           "beer",
-          "wine",
           "spirits",
-          "makgeolli"
+          "makgeolli",
+          "wine"
         ],
         "slots": [
           {
@@ -895,16 +981,24 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "amount을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "number",
+            "minimum": 0
           },
           {
             "slot_id": "unit",
             "units": [],
-            "choices": [],
+            "choices": [
+              "bottle",
+              "can",
+              "cc",
+              "glass"
+            ],
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "unit을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "option"
           }
         ]
       },
@@ -931,7 +1025,11 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "days을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "integer",
+            "unit": "day/week",
+            "minimum": 0,
+            "maximum": 7
           }
         ]
       },
@@ -958,7 +1056,10 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "duration_minutes을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "integer",
+            "unit": "minute",
+            "minimum": 0
           }
         ]
       },
@@ -985,7 +1086,11 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "days을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "integer",
+            "unit": "day/week",
+            "minimum": 0,
+            "maximum": 7
           }
         ]
       },
@@ -1012,7 +1117,10 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "duration_minutes을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "integer",
+            "unit": "minute",
+            "minimum": 0
           }
         ]
       },
@@ -1039,7 +1147,11 @@
             "yes_no_map": null,
             "required": true,
             "reask_sentence": "days을(를) 다시 말씀해 주세요.",
-            "risk_rule": null
+            "risk_rule": null,
+            "data_type": "integer",
+            "unit": "day/week",
+            "minimum": 0,
+            "maximum": 7
           }
         ]
       }

@@ -35,7 +35,7 @@ def _check(stem):
     if len(parts) > 1 and "type" not in schema and parts[1] in schema.get("$defs", {}):
         v = validator(name)
         sub = {"$ref": f"#/$defs/{parts[1]}"}
-        return jsonschema.Draft202012Validator({**{k: schema[k] for k in ("$defs",)}, **sub}, resolver=v.resolver)
+        return v.evolve(schema={**v.schema, **sub})
     return validator(name)
 
 

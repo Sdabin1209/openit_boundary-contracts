@@ -61,10 +61,16 @@ def _relax(node):
 @lru_cache(maxsize=None)
 def _reader(name: str):
     import jsonschema
-    base = schema_dir().as_uri() + "/"
-    store = {base + p.name: _relax(json.loads(p.read_text(encoding="utf-8"))) for p in schema_dir().glob("*.schema.json")}
-    schema = store[base + name + ".schema.json"]
-    return jsonschema.Draft202012Validator(schema, resolver=jsonschema.RefResolver(base, schema, store=store))
+    from ..schemas_api import schema_registry, load_schema
+    if name.startswith("survey:"):
+        from ..schema_sources import SURVEY_URI
+        schema = {"$ref": SURVEY_URI + name.removeprefix("survey:") + ".json"}
+    else:
+        name, _, fragment = name.partition("#")
+        uri = (schema_dir() / f"{name}.schema.json").as_uri()
+        schema = {"$ref": uri + "#" + fragment} if fragment else {**_relax(load_schema(name)), "$id": uri}
+    return jsonschema.Draft202012Validator(schema, registry=schema_registry(transform=_relax),
+                                          format_checker=jsonschema.FormatChecker())
 
 
 def integrity(message: str, **details) -> BoundaryError:

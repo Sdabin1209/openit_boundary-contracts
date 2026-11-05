@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "StaffStreamEvent.schema.json",
+  "title": "StaffStreamEvent",
+  "x-producers": [
+    "survey-service"
+  ],
+  "x-consumers": [
+    "kiosk-frontend",
+    "admin-console"
+  ],
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event": {
+          "const": "alert"
+        },
+        "data": {
+          "$ref": "../schemas/StaffAlert.schema.json"
+        }
+      },
+      "required": [
+        "event",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event": {
+          "const": "resolved"
+        },
+        "data": {
+          "$ref": "../schemas/StaffAlert.schema.json"
+        }
+      },
+      "required": [
+        "event",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event": {
+          "const": "result_ready"
+        },
+        "data": {
+          "$ref": "../schemas/ResultReadyEvent.schema.json"
+        }
+      },
+      "required": [
+        "event",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event": {
+          "const": "heartbeat"
+        },
+        "data": {
+          "$ref": "../schemas/HeartbeatEvent.schema.json"
+        }
+      },
+      "required": [
+        "event",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event": {
+          "const": "resync"
+        },
+        "data": {
+          "$ref": "../schemas/ResyncEvent.schema.json"
+        }
+      },
+      "required": [
+        "event",
+        "data"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

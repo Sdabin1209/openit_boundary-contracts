@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "services": {
+    "survey-service": {
+      "owner": "survey-service",
+      "document": "survey-service.json"
+    },
+    "question-authoring": {
+      "owner": "question-authoring",
+      "document": "question-authoring.json"
+    },
+    "ops-feedback": {
+      "owner": "ops-feedback",
+      "document": "ops-feedback.json"
+    },
+    "release-gate": {
+      "owner": "release-gate",
+      "document": "release-gate.json"
+    },
+    "model-registry": {
+      "owner": "model-lab",
+      "document": "model-registry.json"
+    },
+    "dataset-store": {
+      "owner": "synthetic-data",
+      "document": "dataset-store.json"
+    },
+    "model-serving": {
+      "owner": "model-runtime",
+      "document": "model-serving.json"
+    }
+  },
+  "schema_sources": {
+    "survey": {
+      "uri_prefix": "https://openit.example/survey/v1/",
+      "package": "openit-survey-schema",
+      "runtime_version": 1
+    }
+  }
+}

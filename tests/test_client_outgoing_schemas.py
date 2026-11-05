@@ -10,10 +10,6 @@ from boundary_contracts import validator
 
 CLIENTS = pathlib.Path(__file__).resolve().parents[1] / "boundary_contracts" / "clients"
 EXEMPT = {
-    "HttpPublicApi.start_session": "본문(FrontendMessage)은 문진 스키마(survey-service 소유)라 이 패키지에 없다. PUBLIC_API.md 모양을 메서드가 직접 확인한다",
-    "HttpPublicApi.send_utterance": "위와 같다(FrontendMessage, 문진 스키마)",
-    "HttpPublicApi.end_session": "위와 같다(FrontendMessage, 문진 스키마)",
-    "HttpPublicApi.intervene": "본문(InterventionRequest)은 문진 스키마 소유",
     "HttpModelRuntime.load_release": "본문 없는 PUT(HTTP.md I9)",
 }
 
@@ -34,7 +30,7 @@ class ClientOutgoing(unittest.TestCase):
     def test_쓰기_메서드는_계약_스키마로_검사하거나_이유가_있다(self):
         missing = []
         for name, seg in write_methods():
-            names = re.findall(r'check_outgoing\(\s*"([A-Za-z]+)"', seg)
+            names = re.findall(r'check_outgoing\(\s*"([^\"]+)"', seg)
             if not names and name not in EXEMPT:
                 missing.append(name)
             for n in names:

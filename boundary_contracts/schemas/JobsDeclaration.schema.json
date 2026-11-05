@@ -37,7 +37,13 @@
           "items": {
             "type": "string"
           },
-          "description": "이미지 안에서 실행할 명령"
+          "description": "이미지 안에서 실행할 명령",
+          "prefixItems": [
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
         },
         "idempotent": {
           "const": true
@@ -60,11 +66,13 @@
             },
             "schema": {
               "type": "string",
-              "description": "설정 파일의 JSON Schema 위치(영역 계약 패키지 안)"
+              "description": "설정 파일의 JSON Schema 위치(영역 계약 패키지 안)",
+              "minLength": 1
             }
           },
           "required": [
-            "container_path"
+            "container_path",
+            "schema"
           ],
           "additionalProperties": false
         },

@@ -1,0 +1,321 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "HttpQueries.schema.json",
+  "title": "HttpQueries",
+  "x-producers": [
+    "*"
+  ],
+  "x-consumers": [
+    "*"
+  ],
+  "$defs": {
+    "None": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "Page": {
+      "type": "object",
+      "properties": {
+        "cursor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limit": {
+          "type": "string",
+          "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$",
+          "default": "100"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "Latest": {
+      "type": "object",
+      "properties": {
+        "reviewed_only": {
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "false"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "ReleaseBank": {
+      "type": "object",
+      "properties": {
+        "question_set_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "SubmissionPage": {
+      "type": "object",
+      "properties": {
+        "cursor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limit": {
+          "type": "string",
+          "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$",
+          "default": "100"
+        },
+        "status": {
+          "$ref": "SubmissionView.schema.json#/properties/status"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "Cases": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "string",
+          "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "latest_only": {
+          "enum": [
+            "true",
+            "false"
+          ]
+        },
+        "updated_since": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "review_status": {
+          "enum": [
+            "PENDING",
+            "CONFIRMED",
+            "DISMISSED"
+          ]
+        },
+        "failure_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_release_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": []
+    },
+    "CaseVersion": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "Decisions": {
+      "type": "object",
+      "properties": {
+        "cursor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limit": {
+          "type": "string",
+          "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$",
+          "default": "100"
+        },
+        "question_set_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "question_set_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "lora_a_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "lora_a_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "lora_b_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "lora_b_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "submission_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "dependentRequired": {
+        "question_set_version": [
+          "question_set_id"
+        ],
+        "lora_a_version": [
+          "lora_a_id"
+        ],
+        "lora_b_version": [
+          "lora_b_id"
+        ]
+      }
+    },
+    "Alerts": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "OPEN",
+            "RESOLVED"
+          ]
+        },
+        "limit": {
+          "type": "string",
+          "pattern": "^([1-9]|[1-9][0-9]|1[0-9]{2}|200)$",
+          "default": "50"
+        },
+        "cursor": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "Results": {
+      "type": "object",
+      "properties": {
+        "subject_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:/#=+-]{1,128}$"
+        },
+        "status": {
+          "enum": [
+            "IN_PROGRESS",
+            "PAUSED_RISK",
+            "ENDED_COMPLETE",
+            "ENDED_STAFF",
+            "ENDED_LEFT",
+            "ENDED_USER_STOP"
+          ]
+        },
+        "updated_after": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limit": {
+          "type": "string",
+          "pattern": "^([1-9]|[1-9][0-9]|1[0-9]{2}|200)$",
+          "default": "50"
+        },
+        "cursor": {
+          "type": "string",
+          "pattern": "^[0-9]{1,18}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "Endpoint": {
+      "type": "object",
+      "properties": {
+        "endpoint": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        }
+      },
+      "required": [
+        "endpoint"
+      ],
+      "additionalProperties": false
+    },
+    "Stream": {
+      "type": "object",
+      "properties": {
+        "topics": {
+          "type": "string",
+          "pattern": "^(alerts|result_ready)(,(alerts|result_ready))*$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "AuthoringDrafts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "question_set_id": {
+          "$ref": "_common.schema.json#/$defs/Id"
+        }
+      }
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "#/$defs/None"
+    },
+    {
+      "$ref": "#/$defs/Page"
+    },
+    {
+      "$ref": "#/$defs/Latest"
+    },
+    {
+      "$ref": "#/$defs/ReleaseBank"
+    },
+    {
+      "$ref": "#/$defs/SubmissionPage"
+    },
+    {
+      "$ref": "#/$defs/Cases"
+    },
+    {
+      "$ref": "#/$defs/CaseVersion"
+    },
+    {
+      "$ref": "#/$defs/Decisions"
+    },
+    {
+      "$ref": "#/$defs/Alerts"
+    },
+    {
+      "$ref": "#/$defs/Results"
+    },
+    {
+      "$ref": "#/$defs/Endpoint"
+    },
+    {
+      "$ref": "#/$defs/Stream"
+    },
+    {
+      "$ref": "#/$defs/AuthoringDrafts"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "HttpWire.schema.json",
+  "title": "HttpWire",
+  "x-producers": [
+    "*"
+  ],
+  "x-consumers": [
+    "*"
+  ],
+  "$defs": {
+    "Binary": {
+      "type": "string",
+      "format": "binary"
+    },
+    "User": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._@:+/#=-]{1,128}$"
+    },
+    "Id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "SessionId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{1,64}$"
+    },
+    "FilePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+    },
+    "EventId": {
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "#/$defs/Binary"
+    },
+    {
+      "$ref": "#/$defs/User"
+    },
+    {
+      "$ref": "#/$defs/Id"
+    },
+    {
+      "$ref": "#/$defs/SessionId"
+    },
+    {
+      "$ref": "#/$defs/FilePath"
+    },
+    {
+      "$ref": "#/$defs/EventId"
+    }
+  ]
+}

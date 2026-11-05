@@ -1,5 +1,13 @@
 # 변경 이력
 
+## 3.4.19
+
+- 충돌하던 단일 OpenAPI를 서비스별 계약과 catalog로 대체한다. 정의는 코드에서 생성하지 않고 명시적으로 편집하며 head 도구는 구현 경로를 대조한다.
+- HTTP 요청·응답·쿼리·행위자·역할 바인딩·매체·오류 상태를 기계 계약으로 선언한다. 공개 API DTO와 목록 항목은 JSON Schema 원본을 참조한다.
+- immutable referencing registry로 로컬·설치된 소유자 스키마만 해석한다. 인터넷 및 이웃 작업 폴더 fallback은 없다.
+- JSON Schema와 OpenAPI의 최종 공존 정책은 미정이며 이번 변경은 참조 기반 구성이다.
+
+
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
 ## 3.4.18 (2026-11-05)

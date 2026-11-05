@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "HttpCatalog.schema.json",
+  "title": "HttpCatalog",
+  "x-producers": [
+    "head"
+  ],
+  "x-consumers": [
+    "*"
+  ],
+  "type": "object",
+  "required": [
+    "version",
+    "services",
+    "schema_sources"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "services": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9-]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "owner",
+          "document"
+        ],
+        "properties": {
+          "owner": {
+            "type": "string",
+            "minLength": 1
+          },
+          "document": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*\\.json$"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "schema_sources": {
+      "const": {
+        "survey": {
+          "uri_prefix": "https://openit.example/survey/v1/",
+          "package": "openit-survey-schema",
+          "runtime_version": 1
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

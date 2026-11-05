@@ -55,7 +55,8 @@
         "OPS_FAILURE_DATABASE_URL_FILE"
       ],
       "config": {
-        "container_path": "/config/job.yaml"
+        "container_path": "/config/job.yaml",
+        "schema": "OpsFeedbackJobConfig"
       },
       "needs": [
         "postgres",

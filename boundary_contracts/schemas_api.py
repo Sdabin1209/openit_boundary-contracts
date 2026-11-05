@@ -20,14 +20,40 @@ def load_schema(name: str) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def validator(name: str):
-    """계약 이름으로 jsonschema 검증기를 만든다(_common 참조를 해석한다)."""
-    import jsonschema
+def schema_registry(*, schema_sources=None, transform=None):
+    """Immutable offline registry; each schema is resolved from its declared owner."""
+    from referencing import Registry, Resource
+    from referencing.jsonschema import DRAFT202012
+    from urllib.parse import urljoin
+    from .schema_sources import external_schema
 
+    def resource(doc, uri):
+        if transform:
+            doc = transform(doc)
+        return Resource.from_contents({**doc, "$id": uri}, default_specification=DRAFT202012)
+
+    def retrieve(uri):
+        return resource(external_schema(uri, schema_sources), uri)
+
+    registry = Registry(retrieve=retrieve)
     base = schema_dir().as_uri() + "/"
-    common = json.loads((schema_dir() / "_common.schema.json").read_text(encoding="utf-8"))
-    schema = load_schema(name)
-    store = {base + p.name: json.loads(p.read_text(encoding="utf-8")) for p in schema_dir().glob("*.schema.json")}
-    store[base + "_common.schema.json"] = common
+    for path in schema_dir().glob("*.schema.json"):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        value = resource(doc, path.as_uri())
+        registry = registry.with_resource(path.as_uri(), value)
+        if "$id" in doc:
+            registry = registry.with_resource(urljoin(base, doc["$id"]), value)
+    return registry
+
+
+def validator(name: str, *, schema_sources=None):
+    """Draft 2020-12 validation with formats and offline owner references."""
+    import jsonschema
+    name, _, fragment = name.partition("#")
+    uri = (schema_dir() / f"{name}.schema.json").as_uri()
+    schema = {**load_schema(name), "$id": uri}
+    if fragment:
+        schema = {"$ref": uri + "#" + fragment}
     jsonschema.Draft202012Validator.check_schema(schema)
-    return jsonschema.Draft202012Validator(schema, resolver=jsonschema.RefResolver(base, schema, store=store))
+    return jsonschema.Draft202012Validator(schema, registry=schema_registry(schema_sources=schema_sources),
+                                          format_checker=jsonschema.FormatChecker())

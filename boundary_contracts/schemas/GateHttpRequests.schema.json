@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "GateHttpRequests.schema.json",
+  "title": "GateHttpRequests",
+  "x-producers": [
+    "admin-console",
+    "ops-feedback"
+  ],
+  "x-consumers": [
+    "release-gate"
+  ],
+  "$defs": {
+    "Rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pipeline_schema_version",
+        "request_id",
+        "requested_at",
+        "from_release_id",
+        "to_release_id",
+        "reason",
+        "evidence_refs"
+      ],
+      "properties": {
+        "pipeline_schema_version": {
+          "$ref": "RollbackRequest.schema.json#/properties/pipeline_schema_version"
+        },
+        "request_id": {
+          "$ref": "RollbackRequest.schema.json#/properties/request_id"
+        },
+        "requested_at": {
+          "$ref": "RollbackRequest.schema.json#/properties/requested_at"
+        },
+        "from_release_id": {
+          "$ref": "RollbackRequest.schema.json#/properties/from_release_id"
+        },
+        "to_release_id": {
+          "$ref": "RollbackRequest.schema.json#/properties/to_release_id"
+        },
+        "reason": {
+          "$ref": "RollbackRequest.schema.json#/properties/reason"
+        },
+        "evidence_refs": {
+          "$ref": "RollbackRequest.schema.json#/properties/evidence_refs"
+        },
+        "requested_by_role": {
+          "$ref": "RollbackRequest.schema.json#/properties/requested_by_role"
+        },
+        "ext": {
+          "$ref": "RollbackRequest.schema.json#/properties/ext"
+        }
+      }
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "#/$defs/Rollback"
+    }
+  ]
+}

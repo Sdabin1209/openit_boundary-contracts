@@ -1,0 +1,312 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "PublicApiRequests.schema.json",
+  "title": "PublicApiRequests",
+  "x-producers": [
+    "kiosk-frontend",
+    "admin-console",
+    "external:install-site"
+  ],
+  "x-consumers": [
+    "survey-service"
+  ],
+  "$defs": {
+    "SessionStartBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "const": "SESSION_START"
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$(?![\\s\\S])",
+          "description": "생략하면 서버가 발급한다. 정해 보내는 방식은 폐기 예정(3.0.0 제거)"
+        },
+        "turn_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])",
+          "description": "예약 값 start·end·idle-expire도 허용"
+        },
+        "subject_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._:/#=+-]{1,128}$(?![\\s\\S])",
+              "description": "병원이 정한 불투명 환자·방문 참조"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "question_set_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])",
+          "description": "문진할 문진표 ID(FrontendMessage SESSION_START와 같다). 활성 문진표가 하나면 생략할 수 있고 둘 이상이면 필수(검사는 서비스)."
+        }
+      }
+    },
+    "UtteranceBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "session_id",
+        "kind",
+        "utterance",
+        "turn_id"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$(?![\\s\\S])"
+        },
+        "kind": {
+          "const": "UTTERANCE"
+        },
+        "turn_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])",
+          "not": {
+            "enum": [
+              "start",
+              "end",
+              "idle-expire"
+            ]
+          }
+        },
+        "utterance": {
+          "type": "string",
+          "maxLength": 1000,
+          "pattern": "\\S",
+          "description": "공백만으로 이뤄지면 거부한다(strip 뒤 빈 문자열)"
+        }
+      }
+    },
+    "SessionEndBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "session_id",
+        "kind"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$(?![\\s\\S])"
+        },
+        "kind": {
+          "const": "SESSION_END"
+        },
+        "turn_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])",
+          "description": "예약 값 허용"
+        }
+      }
+    },
+    "InterventionBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "session_id",
+        "decision",
+        "turn_id"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$(?![\\s\\S])"
+        },
+        "decision": {
+          "enum": [
+            "RESUME",
+            "END"
+          ]
+        },
+        "turn_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])",
+          "not": {
+            "enum": [
+              "start",
+              "end",
+              "idle-expire"
+            ]
+          }
+        },
+        "staff_id": {
+          "description": "무시된다"
+        }
+      }
+    },
+    "StaffCallRetryBody": {
+      "allOf": [
+        {
+          "$ref": "../schemas/StaffCallRetryRequest.schema.json"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "turn_id"
+          ],
+          "properties": {
+            "turn_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])",
+              "not": {
+                "enum": [
+                  "start",
+                  "end",
+                  "idle-expire"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "StaffCallReportBody": {
+      "allOf": [
+        {
+          "$ref": "../schemas/StaffCallReport.schema.json"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "outcome",
+            "turn_id"
+          ],
+          "properties": {
+            "outcome": {
+              "enum": [
+                "STAFF_NOTIFIED_MANUALLY",
+                "NOT_NOTIFIED"
+              ]
+            },
+            "turn_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])",
+              "not": {
+                "enum": [
+                  "start",
+                  "end",
+                  "idle-expire"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "PushSubscribeBody": {
+      "type": "object",
+      "required": [
+        "endpoint",
+        "keys"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "endpoint": {
+          "type": "string",
+          "maxLength": 2048,
+          "pattern": "^https://[^/?#@:\\s]+\\.[^/?#@:\\s]+(:443)?([/?#]\\S*)?$(?![\\s\\S])",
+          "allOf": [
+            {
+              "not": {
+                "pattern": "^https://[lL][oO][cC][aA][lL][hH][oO][sS][tT]\\.?(:443)?([/?#]|$)"
+              }
+            },
+            {
+              "not": {
+                "pattern": "^https://[^/?#@:\\s]*\\.([lL][oO][cC][aA][lL]|[lL][oO][cC][aA][lL][dD][oO][mM][aA][iI][nN]|[iI][nN][tT][eE][rR][nN][aA][lL]|[lL][aA][nN]|[hH][oO][mM][eE]|[cC][oO][rR][pP]|[iI][nN][tT][rR][aA][nN][eE][tT])\\.?(:443)?([/?#]|$)"
+              }
+            }
+          ],
+          "description": "웹 푸시 endpoint"
+        },
+        "keys": {
+          "type": "object",
+          "required": [
+            "p256dh",
+            "auth"
+          ],
+          "properties": {
+            "p256dh": {
+              "type": "string",
+              "minLength": 1
+            },
+            "auth": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "expirationTime": {},
+        "topics": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "alerts",
+              "results"
+            ]
+          },
+          "description": "구독 주제(계약 3.4.0). alerts=직원 알림(staff 역할), results=결과 도착(clinician 역할=result-reader 토큰). 없으면 [\"alerts\"]. 역할 확인은 서비스가 한다."
+        }
+      }
+    },
+    "PushUnsubscribeBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "endpoint"
+      ],
+      "properties": {
+        "endpoint": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        }
+      }
+    },
+    "RiskSignalBody": {
+      "$ref": "https://openit.example/survey/v1/RiskSignal.json"
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "#/$defs/SessionStartBody"
+    },
+    {
+      "$ref": "#/$defs/UtteranceBody"
+    },
+    {
+      "$ref": "#/$defs/SessionEndBody"
+    },
+    {
+      "$ref": "#/$defs/InterventionBody"
+    },
+    {
+      "$ref": "#/$defs/StaffCallRetryBody"
+    },
+    {
+      "$ref": "#/$defs/StaffCallReportBody"
+    },
+    {
+      "$ref": "#/$defs/PushSubscribeBody"
+    },
+    {
+      "$ref": "#/$defs/PushUnsubscribeBody"
+    },
+    {
+      "$ref": "#/$defs/RiskSignalBody"
+    }
+  ]
+}

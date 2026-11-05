@@ -54,7 +54,7 @@
 ```
 
 ## 3. 실행 방법
-전제: 파이썬 3 (`python3`), `jsonschema>=4.10`(`pyproject.toml`의 유일한 의존). Docker는 필요 없다(서비스가 아니므로 Dockerfile·`/healthz`·이미지 해당 없음).
+전제: 파이썬 3 (`python3`), `jsonschema>=4.18` 및 `referencing`(`pyproject.toml`의 범위가 정본). Docker는 필요 없다(서비스가 아니므로 Dockerfile·`/healthz`·이미지 해당 없음).
 
 ```bash
 cd boundary-contracts
@@ -135,3 +135,17 @@ pip install git+ssh://git@github.com/Sdabin1209/openit_boundary-contracts.git@<�
 | [0011](docs/adr/0011-정지-사유를-pause_reason으로-더한다.md) | `pause_reason` (CR-H002) |
 | [0012](docs/adr/0012-I2-DatasetStore를-HTTP로-한다.md) | I2 DatasetStore HTTP (D100) |
 | [0013](docs/adr/0013-METRICS를-v2로-개정한다.md) | METRICS v2 (D96~D98) |
+
+## 서비스별 HTTP 계약
+
+`openapi/catalog.json`은 서비스 식별자와 독립된 OpenAPI 3.1 문서를 연결한다.
+동일한 URL 경로를 가진 서비스도 요청·응답 정의를 공유한다고 추정하지 않는다.
+데이터 모양은 `schemas/`의 JSON Schema를 `$ref`로 참조한다.
+JSON Schema를 OpenAPI로 완전히 대체할지는 미정이다.
+설계 근거: [ADR 0017](docs/adr/0017-서비스별-HTTP-계약.md).
+
+`HttpContract`는 요청의 경로·쿼리·본문·인증 정책과 응답의 상태·매체·본문·필수 헤더를 검사한다.
+외부 문진 데이터는 설치된 `openit-survey-schema` 또는 wiring이 전달한 schema source로 해석한다.
+네트워크나 이웃 작업 폴더에서 스키마를 찾지 않는다.
+`python -m pytest -q tests/test_http_contracts.py`는 표준 OpenAPI 메타스키마와 누락·위반 변형을 검사한다.
+이 검사가 업무 계산·상태 전이·배포 인터페이스 전체의 완결성을 증명하지는 않는다.

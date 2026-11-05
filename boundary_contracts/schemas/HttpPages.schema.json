@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "HttpPages.schema.json",
+  "title": "HttpPages",
+  "x-producers": [
+    "question-authoring",
+    "synthetic-data",
+    "model-lab",
+    "release-gate",
+    "ops-feedback",
+    "survey-service"
+  ],
+  "x-consumers": [
+    "*"
+  ],
+  "$defs": {
+    "Ids": {
+      "allOf": [
+        {
+          "$ref": "../schemas/ListEnvelope.schema.json"
+        },
+        {
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ArtifactRefs": {
+      "allOf": [
+        {
+          "$ref": "../schemas/ListEnvelope.schema.json"
+        },
+        {
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "../schemas/ArtifactRef.schema.json"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Reviews": {
+      "allOf": [
+        {
+          "$ref": "../schemas/ListEnvelope.schema.json"
+        },
+        {
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "../schemas/ReviewRecord.schema.json"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Releases": {
+      "allOf": [
+        {
+          "$ref": "../schemas/ListEnvelope.schema.json"
+        },
+        {
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "../schemas/ReleaseManifest.schema.json"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Submissions": {
+      "allOf": [
+        {
+          "$ref": "../schemas/ListEnvelope.schema.json"
+        },
+        {
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "../schemas/SubmissionView.schema.json"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Decisions": {
+      "allOf": [
+        {
+          "$ref": "../schemas/ListEnvelope.schema.json"
+        },
+        {
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "../schemas/GateDecision.schema.json"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Cases": {
+      "allOf": [
+        {
+          "$ref": "../schemas/ListEnvelope.schema.json"
+        },
+        {
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "../schemas/FailureCase.schema.json"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Results": {
+      "allOf": [
+        {
+          "$ref": "../schemas/ListEnvelope.schema.json"
+        },
+        {
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "https://openit.example/survey/v1/SessionResult.json"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "#/$defs/Ids"
+    },
+    {
+      "$ref": "#/$defs/ArtifactRefs"
+    },
+    {
+      "$ref": "#/$defs/Reviews"
+    },
+    {
+      "$ref": "#/$defs/Releases"
+    },
+    {
+      "$ref": "#/$defs/Submissions"
+    },
+    {
+      "$ref": "#/$defs/Decisions"
+    },
+    {
+      "$ref": "#/$defs/Cases"
+    },
+    {
+      "$ref": "#/$defs/Results"
+    }
+  ]
+}

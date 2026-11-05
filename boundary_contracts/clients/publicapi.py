@@ -1,7 +1,7 @@
 """공개 API(I10, PUBLIC_API.md)의 HTTP 클라이언트: 세션 시작·발화·종료·상태 조회와 직원 개입 결정, /healthz.
 
-본문 스키마(`FrontendMessage`, `FrontendInput`)는 문진 스키마(survey-service 소유)라 이 패키지에 없다. 그래서 보내는 본문은
-PUBLIC_API.md의 모양을 여기서 직접 확인하고, 받는 `FrontendInput`은 필수 필드와 타입만 읽기 모드로 확인한다(위반은 INTEGRITY_ERROR).
+API 봉투 본문은 PublicApiRequests, 응답은 소유 패키지의 FrontendInput을 참조한다.
+본문을 보내기 전에 계약으로 검증하고, 응답은 동일 정본의 읽기 모드로 검증한다.
 `SessionState`는 이 패키지 스키마로 검증한다. 키오스크는 기기 토큰, 개입 결정은 staff 토큰으로 부른다.
 """
 from __future__ import annotations
@@ -10,7 +10,7 @@ import re
 from typing import Optional
 
 from ..errors import BoundaryError
-from ._http import HttpClientBase, check_record, integrity
+from ._http import HttpClientBase, check_record, check_outgoing, integrity
 
 _SESSION_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 _SUBJECT_REF = re.compile(r"^[A-Za-z0-9._:/#=+-]{1,128}$")
@@ -34,15 +34,8 @@ def _turn(turn_id) -> str:
 
 def check_frontend_input(rec) -> dict:
     """FrontendInput 읽기 모드 확인: response_text(비지 않은 문자열|null), turn_failure_signal(객체|null)."""
-    if not isinstance(rec, dict) or "response_text" not in rec or "turn_failure_signal" not in rec:
-        raise integrity("FrontendInput 응답이 아니다")
-    rt, sig = rec["response_text"], rec["turn_failure_signal"]
-    if not (rt is None or (isinstance(rt, str) and rt)):
-        raise integrity("response_text가 문자열이나 null이 아니다")
-    if sig is not None and not (isinstance(sig, dict) and isinstance(sig.get("session_id"), str)
-                                and isinstance(sig.get("write_committed"), str) and isinstance(sig.get("staff_alert"), str)):
-        raise integrity("turn_failure_signal 형식이 아니다")
-    return rec
+    return check_record("survey:FrontendInput", rec)
+
 
 
 class HttpPublicApi(HttpClientBase):
@@ -61,11 +54,7 @@ class HttpPublicApi(HttpClientBase):
         """`GET /v1/question-sets`(3.3.0, PUBLIC_API.md I10). 활성 릴리스의 문진표 목록 `[{question_set_id, title, version}]`.
         키오스크가 시작 전에 부른다: 기기·URL 조각의 question_set_id 가 목록에 있는지, 없으면 하나인지(자동) 둘 이상인지(선택 화면)."""
         body = self._json("GET", "/v1/question-sets")
-        items = body.get("items") if isinstance(body, dict) else None
-        if not isinstance(items, list) or not all(isinstance(x, dict) and isinstance(x.get("question_set_id"), str) and _QUESTION_SET_ID.match(x["question_set_id"])
-                                                  and isinstance(x.get("title"), str) and x["title"] and isinstance(x.get("version"), str) and x["version"] for x in items):
-            raise integrity("문진표 목록 응답 형식이 아니다")
-        return items
+        return check_record("QuestionSetList", body)["items"]
 
     def start_session(self, session_id: Optional[str] = None, subject_ref: Optional[str] = None, question_set_id: Optional[str] = None) -> dict:
         """`POST /v1/sessions`. 첫 안내 문장이 든 FrontendInput. session_id는 생략한다: 서버가 발급해 응답에 돌려준다(D106, PUBLIC_API.md 7행).
@@ -81,6 +70,7 @@ class HttpPublicApi(HttpClientBase):
             if not isinstance(question_set_id, str) or not _QUESTION_SET_ID.match(question_set_id):
                 raise BoundaryError("INVALID_RECORD", "question_set_id 형식이 아니다")
             body["question_set_id"] = question_set_id
+        check_outgoing("PublicApiRequests#/$defs/SessionStartBody", body)
         return check_frontend_input(self._json("POST", "/v1/sessions", body=body))
 
     def send_utterance(self, session_id: str, utterance: str, turn_id: str) -> dict:
@@ -88,11 +78,13 @@ class HttpPublicApi(HttpClientBase):
         if not isinstance(utterance, str):
             raise BoundaryError("INVALID_RECORD", "utterance가 문자열이 아니다")
         body = {"session_id": _sid(session_id), "kind": "UTTERANCE", "utterance": utterance, "turn_id": _turn(turn_id)}
+        check_outgoing("PublicApiRequests#/$defs/UtteranceBody", body)
         return check_frontend_input(self._json("POST", "/v1/sessions/" + self._q(session_id, "turns"), body=body))
 
     def end_session(self, session_id: str) -> dict:
         """`POST /v1/sessions/{id}/end`. response_text는 null일 수 있다."""
         body = {"session_id": _sid(session_id), "kind": "SESSION_END"}
+        check_outgoing("PublicApiRequests#/$defs/SessionEndBody", body)
         return check_frontend_input(self._json("POST", "/v1/sessions/" + self._q(session_id, "end"), body=body))
 
     def get_state(self, session_id: str) -> dict:
@@ -105,6 +97,7 @@ class HttpPublicApi(HttpClientBase):
         if decision not in ("RESUME", "END"):
             raise BoundaryError("INVALID_RECORD", "decision은 RESUME 또는 END")
         body = {"session_id": _sid(session_id), "decision": decision, "turn_id": _turn(turn_id)}
+        check_outgoing("PublicApiRequests#/$defs/InterventionBody", body)
         return check_frontend_input(self._json("POST", "/v1/sessions/" + self._q(session_id, "intervention"), body=body))
 
     def healthz(self) -> bool:

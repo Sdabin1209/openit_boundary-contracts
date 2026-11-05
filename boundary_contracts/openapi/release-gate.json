@@ -1,0 +1,3063 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "release-gate",
+    "version": "3.4.19"
+  },
+  "servers": [
+    {
+      "url": "https://release-gate"
+    }
+  ],
+  "x-owner": "release-gate",
+  "security": [
+    {
+      "serviceToken": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "serviceToken": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "paths": {
+    "/v1/active-pointer": {
+      "get": {
+        "operationId": "release_gate_get_v1_active_pointer",
+        "x-owner": "release-gate",
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/None"
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/ActivePointerItem.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/401"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "required": true,
+                "schema": {
+                  "const": "Bearer"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/404"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/405"
+                }
+              }
+            },
+            "headers": {
+              "Allow": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/412"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/422"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway deadline exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/504"
+                }
+              }
+            }
+          }
+        },
+        "x-body-absent": true,
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": false
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": {
+          "binding": "read_roles"
+        }
+      }
+    },
+    "/v1/releases": {
+      "get": {
+        "operationId": "release_gate_get_v1_releases",
+        "x-owner": "release-gate",
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/Page"
+        },
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/Page/properties/cursor"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/Page/properties/limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpPages.schema.json#/$defs/Releases"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/401"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "required": true,
+                "schema": {
+                  "const": "Bearer"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/404"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/405"
+                }
+              }
+            },
+            "headers": {
+              "Allow": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/412"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/422"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway deadline exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/504"
+                }
+              }
+            }
+          }
+        },
+        "x-body-absent": true,
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": false
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": {
+          "binding": "read_roles"
+        }
+      }
+    },
+    "/v1/releases/{rid}": {
+      "get": {
+        "operationId": "release_gate_get_v1_releases_rid",
+        "x-owner": "release-gate",
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/None"
+        },
+        "parameters": [
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "../schemas/HttpWire.schema.json#/$defs/Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/ReleaseManifest.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/401"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "required": true,
+                "schema": {
+                  "const": "Bearer"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/404"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/405"
+                }
+              }
+            },
+            "headers": {
+              "Allow": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/412"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/422"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway deadline exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/504"
+                }
+              }
+            }
+          }
+        },
+        "x-body-absent": true,
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": false
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": {
+          "binding": "read_roles"
+        }
+      }
+    },
+    "/v1/releases/{rid}/bundle": {
+      "get": {
+        "operationId": "release_gate_get_v1_releases_rid_bundle",
+        "x-owner": "release-gate",
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/None"
+        },
+        "parameters": [
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "../schemas/HttpWire.schema.json#/$defs/Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/x-tar": {
+                "schema": {
+                  "$ref": "../schemas/HttpWire.schema.json#/$defs/Binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/401"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "required": true,
+                "schema": {
+                  "const": "Bearer"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/404"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/405"
+                }
+              }
+            },
+            "headers": {
+              "Allow": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/412"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/422"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway deadline exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/504"
+                }
+              }
+            }
+          }
+        },
+        "x-body-absent": true,
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": false
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": {
+          "binding": "read_roles"
+        }
+      }
+    },
+    "/v1/releases/{rid}/question-bank": {
+      "get": {
+        "operationId": "release_gate_get_v1_releases_rid_question_bank",
+        "x-owner": "release-gate",
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/ReleaseBank"
+        },
+        "parameters": [
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "../schemas/HttpWire.schema.json#/$defs/Id"
+            }
+          },
+          {
+            "name": "question_set_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/ReleaseBank/properties/question_set_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/SurveyQuestionBankRead.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/401"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "required": true,
+                "schema": {
+                  "const": "Bearer"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/404"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/405"
+                }
+              }
+            },
+            "headers": {
+              "Allow": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/412"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/422"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway deadline exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/504"
+                }
+              }
+            }
+          }
+        },
+        "x-body-absent": true,
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": false
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": {
+          "binding": "read_roles"
+        }
+      }
+    },
+    "/v1/submissions": {
+      "get": {
+        "operationId": "release_gate_get_v1_submissions",
+        "x-owner": "release-gate",
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/SubmissionPage"
+        },
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/SubmissionPage/properties/cursor"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/SubmissionPage/properties/limit"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/SubmissionPage/properties/status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpPages.schema.json#/$defs/Submissions"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/401"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "required": true,
+                "schema": {
+                  "const": "Bearer"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/404"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/405"
+                }
+              }
+            },
+            "headers": {
+              "Allow": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/412"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/422"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway deadline exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/504"
+                }
+              }
+            }
+          }
+        },
+        "x-body-absent": true,
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": false
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": {
+          "binding": "read_roles"
+        }
+      },
+      "post": {
+        "operationId": "release_gate_post_v1_submissions",
+        "x-owner": "release-gate",
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/None"
+        },
+        "parameters": [],
+        "responses": {
+          "202": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/GateSubmission.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/401"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "required": true,
+                "schema": {
+                  "const": "Bearer"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/404"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/405"
+                }
+              }
+            },
+            "headers": {
+              "Allow": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/412"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/422"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway deadline exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/504"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/GateSubmissionRequest.schema.json"
+              }
+            }
+          }
+        },
+        "x-default-content-type": "application/json",
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": false
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": {
+          "binding": "write_roles"
+        },
+        "x-role-claim": {
+          "property": "requested_by_role",
+          "prefix": "w:"
+        }
+      }
+    },
+    "/v1/submissions/{sid}": {
+      "get": {
+        "operationId": "release_gate_get_v1_submissions_sid",
+        "x-owner": "release-gate",
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/None"
+        },
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "../schemas/HttpWire.schema.json#/$defs/Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/SubmissionView.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/401"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "required": true,
+                "schema": {
+                  "const": "Bearer"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/404"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/405"
+                }
+              }
+            },
+            "headers": {
+              "Allow": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/412"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/422"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway deadline exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/504"
+                }
+              }
+            }
+          }
+        },
+        "x-body-absent": true,
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": false
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": {
+          "binding": "read_roles"
+        }
+      }
+    },
+    "/v1/submissions/{sid}/review-report": {
+      "get": {
+        "operationId": "release_gate_get_v1_submissions_sid_review_report",
+        "x-owner": "release-gate",
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/None"
+        },
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "../schemas/HttpWire.schema.json#/$defs/Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/ReviewReport.schema.json"
+                }
+              }
+            },
+            "headers": {
+              "X-Openit-Report-Hash": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/401"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "required": true,
+                "schema": {
+                  "const": "Bearer"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/404"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/405"
+                }
+              }
+            },
+            "headers": {
+              "Allow": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/412"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/422"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway deadline exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/504"
+                }
+              }
+            }
+          }
+        },
+        "x-body-absent": true,
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": false
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": {
+          "binding": "read_roles"
+        }
+      }
+    },
+    "/v1/decisions": {
+      "get": {
+        "operationId": "release_gate_get_v1_decisions",
+        "x-owner": "release-gate",
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/Decisions"
+        },
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/Decisions/properties/cursor"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/Decisions/properties/limit"
+            }
+          },
+          {
+            "name": "question_set_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/Decisions/properties/question_set_id"
+            }
+          },
+          {
+            "name": "question_set_version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/Decisions/properties/question_set_version"
+            }
+          },
+          {
+            "name": "lora_a_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/Decisions/properties/lora_a_id"
+            }
+          },
+          {
+            "name": "lora_a_version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/Decisions/properties/lora_a_version"
+            }
+          },
+          {
+            "name": "lora_b_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/Decisions/properties/lora_b_id"
+            }
+          },
+          {
+            "name": "lora_b_version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/Decisions/properties/lora_b_version"
+            }
+          },
+          {
+            "name": "submission_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "../schemas/HttpQueries.schema.json#/$defs/Decisions/properties/submission_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpPages.schema.json#/$defs/Decisions"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/401"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "required": true,
+                "schema": {
+                  "const": "Bearer"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/404"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/405"
+                }
+              }
+            },
+            "headers": {
+              "Allow": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/412"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/422"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway deadline exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/504"
+                }
+              }
+            }
+          }
+        },
+        "x-body-absent": true,
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": false
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": {
+          "binding": "read_roles"
+        }
+      }
+    },
+    "/v1/decisions/{did}": {
+      "get": {
+        "operationId": "release_gate_get_v1_decisions_did",
+        "x-owner": "release-gate",
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/None"
+        },
+        "parameters": [
+          {
+            "name": "did",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "../schemas/HttpWire.schema.json#/$defs/Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/GateDecision.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/401"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "required": true,
+                "schema": {
+                  "const": "Bearer"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/404"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/405"
+                }
+              }
+            },
+            "headers": {
+              "Allow": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/412"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/422"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway deadline exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/504"
+                }
+              }
+            }
+          }
+        },
+        "x-body-absent": true,
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": false
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": {
+          "binding": "read_roles"
+        }
+      }
+    },
+    "/v1/approvals": {
+      "post": {
+        "operationId": "release_gate_post_v1_approvals",
+        "x-owner": "release-gate",
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/None"
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/GateApproval.schema.json"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/GateApproval.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/401"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "required": true,
+                "schema": {
+                  "const": "Bearer"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/404"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/405"
+                }
+              }
+            },
+            "headers": {
+              "Allow": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/412"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/422"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway deadline exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/504"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/ApprovalRequest.schema.json"
+              }
+            }
+          }
+        },
+        "x-default-content-type": "application/json",
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": true,
+          "trusted_roles": {
+            "binding": "gateway_roles"
+          }
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": {
+          "binding": "approver_roles"
+        },
+        "x-role-claim": {
+          "property": "approver_role",
+          "prefix": "w:"
+        }
+      }
+    },
+    "/v1/activate": {
+      "post": {
+        "operationId": "release_gate_post_v1_activate",
+        "x-owner": "release-gate",
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/None"
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/ActivePointer.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/401"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "required": true,
+                "schema": {
+                  "const": "Bearer"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/404"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/405"
+                }
+              }
+            },
+            "headers": {
+              "Allow": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/412"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/422"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway deadline exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/504"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/ActivateRequest.schema.json"
+              }
+            }
+          }
+        },
+        "x-default-content-type": "application/json",
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": true,
+          "unless_roles": {
+            "binding": "service_roles"
+          },
+          "trusted_roles": {
+            "binding": "gateway_roles"
+          }
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": {
+          "binding": "activate_roles"
+        },
+        "x-role-claim": {
+          "property": "requested_by_role",
+          "prefix": "w:"
+        }
+      }
+    },
+    "/v1/rollback": {
+      "post": {
+        "operationId": "release_gate_post_v1_rollback",
+        "x-owner": "release-gate",
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/None"
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/RollbackReceipt.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/401"
+                }
+              }
+            },
+            "headers": {
+              "WWW-Authenticate": {
+                "required": true,
+                "schema": {
+                  "const": "Bearer"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/404"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/405"
+                }
+              }
+            },
+            "headers": {
+              "Allow": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/412"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/422"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway deadline exceeded",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/504"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/GateHttpRequests.schema.json#/$defs/Rollback"
+              }
+            }
+          }
+        },
+        "x-default-content-type": "application/json",
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": true,
+          "unless_roles": {
+            "binding": "service_roles"
+          },
+          "trusted_roles": {
+            "binding": "gateway_roles"
+          }
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": {
+          "binding": "rollback_roles"
+        },
+        "x-role-claim": {
+          "property": "requested_by_role",
+          "prefix": "w:"
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "operationId": "release_gate_healthz",
+        "security": [],
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/None"
+        },
+        "x-body-absent": true,
+        "responses": {
+          "200": {
+            "description": "Health",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HealthStatus.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            }
+          }
+        },
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": false
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": []
+      }
+    },
+    "/readyz": {
+      "get": {
+        "operationId": "release_gate_readyz",
+        "security": [],
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/None"
+        },
+        "x-body-absent": true,
+        "responses": {
+          "200": {
+            "description": "Health",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HealthStatus.schema.json"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Health",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "../schemas/HealthStatus.schema.json"
+                    },
+                    {
+                      "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/400"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Boundary error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/HttpErrors.schema.json#/$defs/413"
+                }
+              }
+            }
+          }
+        },
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": false
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": []
+      }
+    },
+    "/metrics": {
+      "get": {
+        "operationId": "release_gate_metrics",
+        "security": [],
+        "x-query-schema": {
+          "$ref": "../schemas/HttpQueries.schema.json#/$defs/None"
+        },
+        "x-body-absent": true,
+        "responses": {
+          "200": {
+            "description": "Prometheus exposition",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-query-serialization": {
+          "repeated_keys": "reject",
+          "blank_values": "preserve",
+          "unknown_keys": "schema"
+        },
+        "x-user-policy": {
+          "required": false
+        },
+        "x-max-body-bytes": 1048576,
+        "x-roles": []
+      }
+    }
+  },
+  "x-bindings-schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "read_roles",
+      "write_roles",
+      "approver_roles",
+      "gateway_roles",
+      "activate_roles",
+      "service_roles",
+      "rollback_roles"
+    ],
+    "properties": {
+      "read_roles": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "write_roles": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "approver_roles": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "gateway_roles": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "activate_roles": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "service_roles": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "rollback_roles": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  },
+  "x-empty-role-policy": "deny"
+}

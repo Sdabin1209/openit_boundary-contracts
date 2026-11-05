@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "HttpErrors.schema.json",
+  "title": "HttpErrors",
+  "x-producers": [
+    "*"
+  ],
+  "x-consumers": [
+    "*"
+  ],
+  "$defs": {
+    "400": {
+      "allOf": [
+        {
+          "$ref": "BoundaryError.schema.json"
+        },
+        {
+          "properties": {
+            "code": {
+              "enum": [
+                "INVALID_RECORD"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "401": {
+      "allOf": [
+        {
+          "$ref": "BoundaryError.schema.json"
+        },
+        {
+          "properties": {
+            "code": {
+              "enum": [
+                "PERMISSION_DENIED"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "403": {
+      "allOf": [
+        {
+          "$ref": "BoundaryError.schema.json"
+        },
+        {
+          "properties": {
+            "code": {
+              "enum": [
+                "PERMISSION_DENIED"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "404": {
+      "allOf": [
+        {
+          "$ref": "BoundaryError.schema.json"
+        },
+        {
+          "properties": {
+            "code": {
+              "enum": [
+                "NOT_FOUND"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "405": {
+      "allOf": [
+        {
+          "$ref": "BoundaryError.schema.json"
+        },
+        {
+          "properties": {
+            "code": {
+              "enum": [
+                "INVALID_RECORD"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "409": {
+      "allOf": [
+        {
+          "$ref": "BoundaryError.schema.json"
+        },
+        {
+          "properties": {
+            "code": {
+              "enum": [
+                "CONFLICT"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "412": {
+      "allOf": [
+        {
+          "$ref": "BoundaryError.schema.json"
+        },
+        {
+          "properties": {
+            "code": {
+              "enum": [
+                "FAILED_PRECONDITION"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "413": {
+      "allOf": [
+        {
+          "$ref": "BoundaryError.schema.json"
+        },
+        {
+          "properties": {
+            "code": {
+              "enum": [
+                "INVALID_RECORD"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "422": {
+      "allOf": [
+        {
+          "$ref": "BoundaryError.schema.json"
+        },
+        {
+          "properties": {
+            "code": {
+              "enum": [
+                "INTEGRITY_ERROR",
+                "UNSUPPORTED_VERSION"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "429": {
+      "allOf": [
+        {
+          "$ref": "BoundaryError.schema.json"
+        },
+        {
+          "properties": {
+            "code": {
+              "enum": [
+                "UNAVAILABLE"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "503": {
+      "oneOf": [
+        {
+          "allOf": [
+            {
+              "$ref": "BoundaryError.schema.json"
+            },
+            {
+              "properties": {
+                "code": {
+                  "enum": [
+                    "UNAVAILABLE"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "$ref": "GatewayError.schema.json"
+        }
+      ]
+    },
+    "504": {
+      "$ref": "GatewayError.schema.json"
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "#/$defs/400"
+    },
+    {
+      "$ref": "#/$defs/401"
+    },
+    {
+      "$ref": "#/$defs/403"
+    },
+    {
+      "$ref": "#/$defs/404"
+    },
+    {
+      "$ref": "#/$defs/405"
+    },
+    {
+      "$ref": "#/$defs/409"
+    },
+    {
+      "$ref": "#/$defs/412"
+    },
+    {
+      "$ref": "#/$defs/413"
+    },
+    {
+      "$ref": "#/$defs/422"
+    },
+    {
+      "$ref": "#/$defs/429"
+    },
+    {
+      "$ref": "#/$defs/503"
+    },
+    {
+      "$ref": "#/$defs/504"
+    }
+  ]
+}
