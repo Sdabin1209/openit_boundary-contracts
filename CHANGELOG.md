@@ -13,6 +13,8 @@
   - `RiskSignalResult`: 위험 신호 응답 `{"alert_id","session_status"}`.
 
 ## 미출시 (문서만, 와이어·코드 변경 없음)
+
+- `openapi/openapi.json`(OpenAPI 3.1)을 영역 사이 HTTP 엔드포인트(경로·메서드·요청·응답 스키마 $ref)의 정본으로 둔다. HTTP.md·PUBLIC_API.md 의 표는 설명이다. 만드는 도구는 head/scripts/build-openapi.py 이고, 영역 서버의 실제 경로 선언에서 만든다. md 에만 있는 경로가 0개, 분류되지 않은 응답이 0개일 때만 통과한다. 계약 JSON 스키마가 아닌 응답(바이트, text/plain, SSE, 문진 스키마)은 그 종류를 적는다.
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.
 

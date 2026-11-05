@@ -1,5 +1,7 @@
 # HTTP 매핑 (서비스 사이 호출)
 
+> 엔드포인트의 기계 정본은 `openapi/openapi.json`(OpenAPI 3.1)이다. 이 문서는 설명이다. 둘이 다르면 OpenAPI 가 맞다.
+
 영역 사이 호출은 서로의 코드가 아니라 **HTTP 서비스 API**로 한다(D49). 이 문서는 `INTERFACES.md`의 인터페이스마다 경로, 요청, 응답을 정한다. 서비스(소유 영역)는 서버 쪽을, `boundary_contracts.clients`는 클라이언트 쪽을 구현하고, 둘 다 같은 적합성 시험을 통과한다. 공통 규칙은 `CONVENTIONS.md` 9절(JSON, Bearer 토큰, 역할은 토큰에 묶임, `/healthz`·`/readyz`, 오류는 `BoundaryError` 본문과 고정된 상태 코드)이다.
 
 ## 공통
