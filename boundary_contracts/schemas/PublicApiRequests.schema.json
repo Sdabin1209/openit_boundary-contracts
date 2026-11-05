@@ -278,6 +278,11 @@
     },
     "RiskSignalBody": {
       "$ref": "https://openit.example/survey/v1/RiskSignal.json"
+    },
+    "ResultAckBody": {
+      "type": "object",
+      "maxProperties": 0,
+      "description": "POST /v1/results/{session_id}/ack 본문: 빈 객체 {} (PUBLIC_API.md 82행). 확인한 계정·시각은 서버가 게이트웨이 머리글과 시계로 정한다"
     }
   },
   "anyOf": [

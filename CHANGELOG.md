@@ -1,5 +1,11 @@
 # 변경 이력
 
+## 3.4.20 (2026-11-06)
+
+- 3.4.19 결함 수정(영역 시험이 드러냄, 와이어는 합의 문서대로):
+  - question-authoring `GET /v1/question-sets/{id}/versions/{version}/reviews`: 목록 공통 규칙(HTTP.md)대로 `cursor`·`limit` 쿼리를 받는다. 3.4.19 는 쿼리를 하나도 정하지 않아 계약 클라이언트의 페이지 읽기를 거부했다.
+  - survey-service `POST /v1/results/{session_id}/ack`: 본문은 빈 객체 `{}`다(PUBLIC_API.md 82행, admin-console 이 보내는 값). 3.4.19 는 "본문 없음"으로 정해 실제 확인 요청을 400 으로 거부했다. 새 정의 `PublicApiRequests#/$defs/ResultAckBody`.
+
 ## 3.4.19
 
 - 충돌하던 단일 OpenAPI를 서비스별 계약과 catalog로 대체한다. 정의는 코드에서 생성하지 않고 명시적으로 편집하며 head 도구는 구현 경로를 대조한다.
