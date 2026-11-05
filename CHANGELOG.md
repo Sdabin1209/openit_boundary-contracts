@@ -2,6 +2,16 @@
 
 버전은 `pyproject.toml`의 패키지 버전이고 MAJOR.MINOR는 `pipeline_schema_version`과 같다.
 
+## 3.4.18 (2026-11-05)
+
+- 문서(HTTP.md·PUBLIC_API.md)와 클라이언트 함수에만 있던 응답 모양 6개를 계약 스키마로 옮긴다. md 는 정본이 아니다(헤드 OPEN_GAPS G-HTTP-MD-CANONICAL 첫 단계). 와이어 모양은 바뀌지 않는다.
+  - `ArtifactRef`: I1 latest 응답. `clients._http.check_ref` 와 같은 규칙이다.
+  - `ActivePointerItem`: I4 `GET /v1/active-pointer` 의 `{"item": ActivePointer|null}` 감싸기.
+  - `ChangeClassificationItem`: I1 change 의 `{"item": ChangeClassification|null}` 감싸기.
+  - `QuestionSetList`: 공개 API `GET /v1/question-sets` 응답.
+  - `PushSubscriptionResult`: 푸시 구독 추가(201)와 삭제(200) 응답.
+  - `RiskSignalResult`: 위험 신호 응답 `{"alert_id","session_status"}`.
+
 ## 미출시 (문서만, 와이어·코드 변경 없음)
 - (3.4.4 에서 RUNTIME.md 를 입출력 형식으로 다시 썼다. 아래 줄은 그 전의 기록이다.)
 - `RUNTIME.md` 신설: 중계(게이트웨이·TLS 종단)·배치(서버 분리)·재시작을 거쳐도 CONVENTIONS 9절의 의미가 바뀌지 않는다는 조항(R1~R8)과 실패 경우 표. 배포는 조항마다 구현·정적 점검·단독 시험·E2E 단계를 대응시킨 표를 deploy 리포에 둔다.

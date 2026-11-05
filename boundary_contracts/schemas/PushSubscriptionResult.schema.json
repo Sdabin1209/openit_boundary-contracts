@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PushSubscriptionResult",
+  "description": "3.4.18: POST /v1/staff/push-subscriptions 201 응답(endpoint) 과 DELETE 200 응답(endpoint, deleted). 이전에는 문서·코드에만 있었다.",
+  "x-producers": [
+    "survey-service"
+  ],
+  "x-consumers": [
+    "admin-console"
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "endpoint"
+  ],
+  "properties": {
+    "endpoint": {
+      "type": "string",
+      "pattern": "^https://",
+      "maxLength": 2048
+    },
+    "deleted": {
+      "type": "boolean"
+    }
+  }
+}

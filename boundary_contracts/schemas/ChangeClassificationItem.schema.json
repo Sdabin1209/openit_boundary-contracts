@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ChangeClassificationItem",
+  "description": "3.4.18: GET /v1/question-sets/{id}/versions/{version}/change 응답 감싸기(HTTP.md I1). 분류가 없으면 item 은 null 이다.",
+  "x-producers": [
+    "question-authoring"
+  ],
+  "x-consumers": [
+    "release-gate"
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "item"
+  ],
+  "properties": {
+    "item": {
+      "anyOf": [
+        {
+          "$ref": "ChangeClassification.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

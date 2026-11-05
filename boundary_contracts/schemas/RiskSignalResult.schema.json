@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RiskSignalResult",
+  "description": "3.4.18: POST /v1/sessions/{id}/risk-signals 201/200 응답(PUBLIC_API.md 97행). 같은 signal_id 로 다시 보내면 같은 alert_id 다(멱등). 호출자는 영역 밖의 위험 감지기(역할 risk-source, PUBLIC_API.md 97행)다.",
+  "x-producers": [
+    "survey-service"
+  ],
+  "x-consumers": [
+    "external:install-site"
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "alert_id",
+    "session_status"
+  ],
+  "properties": {
+    "alert_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+      "maxLength": 128
+    },
+    "session_status": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ArtifactRef",
+  "description": "3.4.18: 산출물 참조(HTTP.md I1 latest 응답 등). 이전에는 clients._http.check_ref 와 문서에만 있었다. 그 함수와 같은 규칙이다.",
+  "x-producers": [
+    "question-authoring"
+  ],
+  "x-consumers": [
+    "release-gate",
+    "synthetic-data",
+    "model-lab"
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "content_hash"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+      "maxLength": 128
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}
