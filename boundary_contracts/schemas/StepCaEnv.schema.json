@@ -41,6 +41,16 @@
       "type": "string",
       "pattern": "^https://[^\\s]+$",
       "description": "https URL"
+    },
+    "DnsName": {
+      "type": "string",
+      "pattern": "^(?=.{1,253}$)[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*(?![\\s\\S])",
+      "description": "RFC 1123 ASCII DNS hostname: labels 1..63, total 1..253; no trailing dot, space or path separators."
+    },
+    "DnsNameList": {
+      "type": "string",
+      "pattern": "^(?=[^ ]{1,253}(?: |$))[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*(?: (?=[^ ]{1,253}(?: |$))[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*)*(?![\\s\\S])",
+      "description": "One or more DNS hostnames separated by one ASCII space."
     }
   },
   "propertyNames": {
@@ -131,14 +141,12 @@
       "description": "3.4.17(구조 규칙 1: deploy 는 이미지 부명령을 모른다): 이 컨테이너의 역할. serve=인증기관, root=루트 인증서를 PKI_OUT 에 씀(한 번), token=STEP_TOKEN_NAMES 마다 일회용 토큰을 STEP_TOKENS_DIR 에 씀(한 번), cert=STEP_CERT_NAME 의 인증서를 STEP_CERTS_DIR 에 받고 갱신(상시). 이미지가 역할에 맞는 HEALTHCHECK 와 USER 를 갖는다"
     },
     "STEP_CERT_NAME": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9-]*$",
-      "description": "3.4.17: role=cert 의 인증서 이름 = 서비스 이름(게시 이미지 이름, CONVENTIONS 13절)"
+      "$ref": "#/$defs/DnsName",
+      "description": "3.4.21: role=cert 인증서의 DNS 호스트 이름. 서비스 이름과 외부 추론 서버 이름을 모두 받는다."
     },
     "STEP_TOKEN_NAMES": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9-]*( [a-z][a-z0-9-]*)*$",
-      "description": "3.4.17: role=token 이 토큰을 낼 이름 목록(공백 구분)"
+      "$ref": "#/$defs/DnsNameList",
+      "description": "3.4.21: role=token이 토큰을 낼 DNS 호스트 이름 목록(공백 구분). STEP_CERT_NAME과 같은 이름 규칙이다."
     },
     "STEP_CERT_GID": {
       "type": "string",
