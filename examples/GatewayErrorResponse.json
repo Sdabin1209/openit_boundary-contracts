@@ -1,0 +1,10 @@
+{
+  "status": 503,
+  "headers": {
+    "retry-after": "5",
+    "content-type": "application/json"
+  },
+  "body": {
+    "code": "UPSTREAM_UNAVAILABLE"
+  }
+}

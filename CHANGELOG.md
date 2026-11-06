@@ -1,6 +1,11 @@
 # 변경 이력
 
 
+## 3.6.4 (PATCH: complete the gateway failure response contract)
+
+- GatewayErrorResponse combines the 503/504 status, GatewayError body and required Retry-After: 5 header into one machine-verifiable HTTP envelope. Application responses remain unchanged (R2.1).
+
+
 ## 3.6.3 (PATCH: deployment input contract omissions)
 
 - Add SyntheticJobEnv for run/import secret-file paths; reject server-only settings, direct secret values, relative and NUL-containing file paths.
