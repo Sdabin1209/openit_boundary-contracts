@@ -16,8 +16,8 @@
   "properties": {
     "OPENIT_EGRESS_PROXY": {
       "type": "string",
-      "pattern": "^http://(localhost|127\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}|\\[::1\\]):[0-9]{1,5}/?$",
-      "description": "자기 영역 게이트웨이의 CONNECT 출구(RUNTIME IN-EGRESS·R1.8). 영역 배선 코드가 boundary_contracts.clients.egress_proxy_from(environ) 으로 꺼낸다"
+      "pattern": "^http://(?:localhost|127\\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])|\\[::1\\]):(?:[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])/?(?![\\s\\S])",
+      "description": "자기 영역 게이트웨이의 CONNECT 출구(RUNTIME IN-EGRESS·R1.8). 영역 배선 코드가 boundary_contracts.clients.egress_proxy_from(environ) 으로 꺼낸다 3.4.22: canonical loopback URI; IPv4 octets 0..255 and TCP port 1..65535. Credentials, query and fragment are forbidden."
     },
     "OPENIT_BACKUP_URL": {
       "type": "string",
@@ -33,6 +33,11 @@
       "type": "string",
       "pattern": "^/",
       "description": "3.4.5: restic 저장소 암호화 암호 파일 경로(restic --password-file 표준; 비밀, D84). 영역마다 다르다"
+    },
+    "SSL_CERT_FILE": {
+      "type": "string",
+      "pattern": "^/[^\\s]*$",
+      "description": "3.5.0: TLS 검증에 쓸 CA 인증서 파일 경로(OpenSSL 표준 변수 이름). 배치 영역이 사설 CA 루트를 마운트하고 이 경로를 준다. 파일은 ContainerInputs.files 에 kind=ca-bundle 로 선언한다. 3.4.4 는 '표준 이름이라 다시 정하지 않는다'며 칸을 두지 않아 주입 값 하나가 계약 밖이었다"
     }
   }
 }

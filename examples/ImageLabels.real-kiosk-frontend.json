@@ -3,5 +3,6 @@
   "io.openit.contracts.boundary": "v2.1.1",
   "io.openit.contracts.survey-schema": "1",
   "io.openit.revision": "6b84c64",
-  "io.openit.service": "kiosk-frontend"
+  "io.openit.service": "kiosk-frontend",
+  "io.openit.inputs": "{\"schema_version\":1,\"image\":\"kiosk-frontend\",\"read_only_root\":true,\"exec_absolute_argv\":true,\"role_env\":null,\"roles\":{\"default\":{\"env_schema\":\"KioskFrontendEnv\",\"process\":{\"uid\":10001,\"gid\":101},\"files\":[{\"path_env\":null,\"path\":\"/etc/openit/pki\",\"directory\":true,\"kind\":\"certificate\",\"schema\":null,\"required\":true,\"opened_by\":\"start-process\"}],\"writable\":[{\"path\":\"/tmp\",\"persist\":false,\"written_by\":{\"uid\":10001,\"gid\":101}}],\"capabilities\":[\"NET_BIND_SERVICE\"],\"sysctls\":{}}},\"jobs\":{}}"
 }

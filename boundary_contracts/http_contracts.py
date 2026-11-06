@@ -14,7 +14,7 @@ from urllib.parse import unquote, urljoin
 
 import jsonschema
 
-from .schemas_api import schema_dir, schema_registry, validator as record_validator
+from .schemas_api import schema_dir, schema_registry, format_checker, validator as record_validator
 
 ROOT = Path(__file__).resolve().parent / "openapi"
 SURVEY_URI = "https://openit.example/survey/v1/"
@@ -84,7 +84,7 @@ class HttpContract:
             rooted = {"$id": self.base, **schema}
             jsonschema.Draft202012Validator.check_schema(rooted)
             self._validators[key] = jsonschema.Draft202012Validator(rooted, registry=self._registry,
-                                                                    format_checker=jsonschema.FormatChecker())
+                                                                    format_checker=format_checker(schema))
         return self._validators[key]
 
     def check(self, schema: dict, value, where: str):

@@ -1,5 +1,12 @@
 # 변경 이력
 
+## 3.5.0 (2026-11-06)
+
+- 새 계약 `ContainerInputs`(세 번째 계약 = 영역 밖에서 컨테이너에 주입하는 것 전부): 숫자 실행 사용자, 읽는 파일(경로·경로 변수·종류·필수, 시작 프로세스가 연다), 쓰는 경로(유지 여부·쓰는 사용자), 추가 권한, sysctls, 절대 경로 argv 실행 규칙, 역할별(role_env)·잡별 묶음. 이미지 라벨 `io.openit.inputs` 로 싣고 **모든 영역 이미지에 필수**다(ImageLabels.required). 배치 영역은 이 선언과 정확히 같게 주입한다. 왜: 파일 권한·쓰기 경로·실행 사용자·argv 가 문장 규칙뿐이라 두 영역이 각자 해석했고 2026-11-06 E2E 기동 실패가 모두 그 어긋남이었다.
+- `CommonEnv.SSL_CERT_FILE` 정의(3.4.4 는 표준 이름이라며 칸을 두지 않아 주입 값 하나가 계약 밖이었다).
+- 형식(`format`) 강제: 스키마에 쓴 형식(date-time, uri, email, regex)의 검증기가 없으면 검증기를 만들지 않고 실패한다(jsonschema 는 검증기가 없으면 조용히 건너뛴다). 의존 `jsonschema[format-nongpl]`. 영역 잠금에 rfc3339-validator·rfc3986-validator 가 있어야 한다.
+- SDK `require_egress_proxy` 가 따로 들고 있던 규칙을 지우고 `CommonEnv.OPENIT_EGRESS_PROXY` 로 검증한다(루프백 주소의 옥텟·포트 범위를 계약에서 바로잡음).
+
 ## 3.4.21
 
 - StepCaEnv의 토큰 이름과 인증서 이름을 같은 DNS 호스트 이름 규칙으로 정의한다. 서비스 이름만 허용하던 계약은 외부 추론 서버 host.docker.internal을 거부했다. 라벨·전체 길이 및 빈 목록·잘못된 구분자·경로·개행 거부를 시험한다.

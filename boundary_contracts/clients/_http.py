@@ -5,6 +5,7 @@ import http.client
 import io
 import ipaddress
 import json
+import jsonschema
 import os
 import re
 import shutil
@@ -19,7 +20,7 @@ from typing import Any, Mapping, Optional
 
 from ..canonical import content_hash as _content_hash, directory_hash, sha256_hash
 from ..errors import CODES, BoundaryError
-from ..schemas_api import PIPELINE_SCHEMA_VERSION, schema_dir, validator
+from ..schemas_api import PIPELINE_SCHEMA_VERSION, schema_dir, validator, format_checker
 
 _STATUS_CODE = {400: "INVALID_RECORD", 401: "PERMISSION_DENIED", 403: "PERMISSION_DENIED", 404: "NOT_FOUND",
                 409: "CONFLICT", 412: "FAILED_PRECONDITION", 429: "UNAVAILABLE", 503: "UNAVAILABLE"}
@@ -70,7 +71,7 @@ def _reader(name: str):
         uri = (schema_dir() / f"{name}.schema.json").as_uri()
         schema = {"$ref": uri + "#" + fragment} if fragment else {**_relax(load_schema(name)), "$id": uri}
     return jsonschema.Draft202012Validator(schema, registry=schema_registry(transform=_relax),
-                                          format_checker=jsonschema.FormatChecker())
+                                          format_checker=format_checker(schema))
 
 
 def integrity(message: str, **details) -> BoundaryError:
@@ -269,16 +270,10 @@ def require_egress_proxy(url: str) -> None:
     """자기 영역 게이트웨이의 CONNECT 주소는 같은 네트워크 공간의 loopback 평문만 받는다(3.4.4, CONVENTIONS 13절).
     왜: 터널 안의 TLS 가 끝까지 유지되므로 프록시 구간은 평문 CONNECT 여도 내용이 드러나지 않고(RFC 9110 9.3.6),
     loopback 밖이면 다른 기계를 거쳐 나가게 되어 '자기 영역 게이트웨이'가 아니다."""
-    parts = urllib.parse.urlsplit(url)
-    host = (parts.hostname or "").lower()
-    ok_host = host == "localhost"
-    if not ok_host:
-        try:
-            ok_host = ipaddress.ip_address(host).is_loopback
-        except ValueError:
-            ok_host = False
-    if parts.scheme != "http" or not ok_host or parts.port is None or parts.path not in ("", "/") or parts.query:
-        raise ValueError("egress_proxy 는 http://<loopback>:<포트> 형식이어야 한다(자기 영역 게이트웨이, CONVENTIONS 13절)")
+    try:
+        _validator("CommonEnv").validate({"OPENIT_EGRESS_PROXY": url})
+    except jsonschema.ValidationError:
+        raise ValueError("egress_proxy must follow CommonEnv.OPENIT_EGRESS_PROXY") from None
 
 
 def egress_proxy_from(environ: Mapping[str, str]) -> Optional[str]:

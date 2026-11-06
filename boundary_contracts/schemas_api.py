@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from functools import lru_cache
 from pathlib import Path
 
 PIPELINE_SCHEMA_VERSION = "3.4"
@@ -20,6 +21,36 @@ def load_schema(name: str) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _formats(node):
+    if isinstance(node, dict):
+        if isinstance(node.get("format"), str):
+            yield node["format"]
+        for value in node.values():
+            yield from _formats(value)
+    elif isinstance(node, list):
+        for value in node:
+            yield from _formats(value)
+
+
+@lru_cache(maxsize=1)
+def _required_formats():
+    return frozenset(f for path in schema_dir().glob("*.schema.json")
+                     for f in _formats(json.loads(path.read_text(encoding="utf-8"))))
+
+
+def format_checker(schema=None):
+    """Fail when a declared format lacks its validator; never silently ignore it.
+
+    OpenAPI's binary wire annotation is handled by the HTTP byte/stream layer.
+    """
+    import jsonschema
+    required = (_required_formats() | set(_formats(schema))) - {"binary"}
+    missing = required - set(jsonschema.FormatChecker.checkers)
+    if missing:
+        raise RuntimeError("missing schema format validators: " + ", ".join(sorted(missing)))
+    return jsonschema.FormatChecker()
+
+
 def schema_registry(*, schema_sources=None, transform=None):
     """Immutable offline registry; each schema is resolved from its declared owner."""
     from referencing import Registry, Resource
@@ -28,6 +59,7 @@ def schema_registry(*, schema_sources=None, transform=None):
     from .schema_sources import external_schema
 
     def resource(doc, uri):
+        format_checker(doc)
         if transform:
             doc = transform(doc)
         return Resource.from_contents({**doc, "$id": uri}, default_specification=DRAFT202012)
@@ -56,4 +88,4 @@ def validator(name: str, *, schema_sources=None):
         schema = {"$ref": uri + "#" + fragment}
     jsonschema.Draft202012Validator.check_schema(schema)
     return jsonschema.Draft202012Validator(schema, registry=schema_registry(schema_sources=schema_sources),
-                                          format_checker=jsonschema.FormatChecker())
+                                          format_checker=format_checker(schema))
