@@ -1,5 +1,10 @@
 # 변경 이력
 
+## 3.6.0 (2026-11-06)
+
+- ModelServingEnv.MODEL_RUNTIME_ALLOW_FAKE는 빈 값(비활성)과 1(명시 허용)을 구분한다. vllm 구성에서 compose가 보내는 빈 값은 유효하고, fake/mimic은 여전히 정확히 1이어야 한다. 허용 범위 확장이므로 MINOR를 올렸다.
+- 패키지와 PIPELINE_SCHEMA_VERSION의 MAJOR.MINOR를 3.6으로 맞췄다.
+
 ## 3.5.1 (2026-11-06)
 
 - 서버 기동 환경과 잡 환경을 분리한다: BackupJobEnv와 영역별 백업/복구 Env, IdentityUsersEnv를 추가했다. 기존 필드의 값 규칙은 $ref로 공유하고 잡이 쓰지 않는 서버 필수 조건은 가져오지 않는다.

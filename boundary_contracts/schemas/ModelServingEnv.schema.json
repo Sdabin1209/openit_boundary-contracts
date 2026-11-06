@@ -3,8 +3,12 @@
  "$id": "https://openit.example/schemas/ModelServingEnv.schema.json",
  "title": "ModelServingEnv",
  "description": "추론 서버(model-runtime, 이미지 model-serving) 컨테이너의 환경 변수 선언 (3.2.0, U73: 영역 사이 설정 이름은 이 선언에만 있다. deploy 는 여기 있는 이름만 주고, 서비스는 기동 때 자기 environ 을 이 스키마로 검증한다. 접두사가 붙은 이름 중 여기 없는 것은 거부, 접두사 없는 다른 변수(PATH 등)는 보지 않는다.)",
- "x-producers": ["deploy"],
- "x-consumers": ["model-runtime"],
+ "x-producers": [
+  "deploy"
+ ],
+ "x-consumers": [
+  "model-runtime"
+ ],
  "type": "object",
  "$defs": {
   "Port": {
@@ -160,8 +164,12 @@
    "description": "개발용: 토큰 없이 시작. 운영 금지(ADR 0012)"
   },
   "MODEL_RUNTIME_ALLOW_FAKE": {
-   "$ref": "#/$defs/Flag1",
-   "description": "fake·mimic 백엔드 허용 표시. 운영 금지"
+   "type": "string",
+   "enum": [
+    "",
+    "1"
+   ],
+   "description": "Empty/unset disables test backends; 1 explicitly permits fake/mimic. Production vllm does not need this flag."
   },
   "MODEL_RUNTIME_PUT_ROLES": {
    "$ref": "#/$defs/CsvRoles",
@@ -358,7 +366,12 @@
    "then": {
     "required": [
      "MODEL_RUNTIME_ALLOW_FAKE"
-    ]
+    ],
+    "properties": {
+     "MODEL_RUNTIME_ALLOW_FAKE": {
+      "const": "1"
+     }
+    }
    }
   },
   {
