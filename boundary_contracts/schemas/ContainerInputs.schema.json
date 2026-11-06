@@ -52,7 +52,18 @@
         "pattern": "^[a-z][a-z0-9-]*$"
       },
       "additionalProperties": {
-        "$ref": "#/$defs/InputSet"
+        "allOf": [
+          {
+            "$ref": "#/$defs/InputSet"
+          },
+          {
+            "not": {
+              "required": [
+                "config_paths"
+              ]
+            }
+          }
+        ]
       }
     },
     "jobs": {
@@ -248,6 +259,39 @@
             "minimum": 0
           },
           "description": "배치 영역이 이 값으로 줘야 하는 커널 매개변수(이름 공간 안). 없으면 주지 않는다. 예: root 가 아닌 사용자가 1024 아래 포트를 열 때 net.ipv4.ip_unprivileged_port_start=0"
+        },
+        "config_paths": {
+          "type": "object",
+          "description": "Job config directory paths. Resolve relative values against the config file container directory. Only these declared paths can be mounted; configuration content is validated against JobsDeclaration.config.schema first.",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^/(?:[^~/]|~[01])*(?:/(?:[^~/]|~[01])*)*$",
+            "description": "RFC 6901 JSON Pointer in the job config declared by JobsDeclaration.config."
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ConfigPath"
+          }
+        }
+      }
+    },
+    "ConfigPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "access",
+        "required"
+      ],
+      "properties": {
+        "access": {
+          "enum": [
+            "read",
+            "write"
+          ],
+          "description": "Directory bind: read-only input or writable job output. The process identity is InputSet.process."
+        },
+        "required": {
+          "type": "boolean",
+          "description": "If false, an absent config member does not declare a mount (e.g. HTTP/memory store has no file root)."
         }
       }
     }

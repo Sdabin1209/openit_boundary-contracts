@@ -1,0 +1,4 @@
+{
+  "DATASET_STORE_WRITE_TOKEN_FILE": "/run/secrets/dataset_store_write_token_file",
+  "SSL_CERT_FILE": "/etc/openit/pki/root_ca.crt"
+}

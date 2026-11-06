@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openit.example/schemas/SyntheticJobEnv.schema.json",
+  "title": "SyntheticJobEnv",
+  "description": "synthetic-run/import jobs: secret file paths and shared container environment; server DATASET_STORE settings are not job settings. Token file variables select the D84 secret source.",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "synthetic-data"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "CommonEnv.schema.json"
+    }
+  ],
+  "propertyNames": {
+    "anyOf": [
+      {
+        "not": {
+          "pattern": "^(QUESTION_READER_|FAILURE_STORE_|DATASET_STORE_|OPENIT_)"
+        }
+      },
+      {
+        "enum": [
+          "QUESTION_READER_TOKEN_FILE",
+          "FAILURE_STORE_TOKEN_FILE",
+          "DATASET_STORE_WRITE_TOKEN_FILE",
+          "OPENIT_EGRESS_PROXY"
+        ]
+      }
+    ]
+  },
+  "properties": {
+    "QUESTION_READER_TOKEN_FILE": {
+      "type": "string",
+      "pattern": "^/[^\\s\\u0000]*(?![\\s\\S])"
+    },
+    "FAILURE_STORE_TOKEN_FILE": {
+      "type": "string",
+      "pattern": "^/[^\\s\\u0000]*(?![\\s\\S])"
+    },
+    "DATASET_STORE_WRITE_TOKEN_FILE": {
+      "type": "string",
+      "pattern": "^/[^\\s\\u0000]*(?![\\s\\S])"
+    }
+  },
+  "patternProperties": {
+    "_FILE$": {
+      "type": "string",
+      "pattern": "^/[^\\s\\u0000]*(?![\\s\\S])"
+    }
+  }
+}

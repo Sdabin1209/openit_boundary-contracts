@@ -1,5 +1,12 @@
 # 변경 이력
 
+
+## 3.6.3 (PATCH: deployment input contract omissions)
+
+- Add SyntheticJobEnv for run/import secret-file paths; reject server-only settings, direct secret values, relative and NUL-containing file paths.
+- ContainerInputs job profiles can bind config directory paths by RFC 6901 JSON Pointer, with explicit read/write access and required/optional presence. Service profiles cannot declare job-config bindings.
+- Clarify Exposure.auth scope: public entrance policy does not remove a peer route from the receiving area's gateway. Service token validation remains with the receiver (R3.23).
+
 ## 3.6.2
 
 - BackupJobEnv 저장소 URI의 기존 유효한 포트 표기(앞의 0, 빈 포트)를 유지한다. 빈 포트는 HTTPS 기본 포트이며, 숫자 포트는 선행 0과 무관하게 1..65535다. 포트 0..65536을 보통/선행 0 표기로 전수 대조한다.
