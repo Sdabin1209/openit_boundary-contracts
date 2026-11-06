@@ -54,8 +54,19 @@ def test_backup_env_rejects_undeclared_or_unusable_inputs(name, change):
     "https://backup.example.org/repository", "https://backup.example.org:1/repository",
     "https://backup.example.org:65535/repository", "https://[::1]:8443/repository",
     "https://backup.example.org/nested/repository", "https://backup.example.org/a%20b",
+    "https://backup.example.org:00080/repository", "https://backup.example.org:/repository",
     "https://backup.example.org/repository?param=value", "https://backup.example.org/repository#fragment",
 ])
 def test_backup_env_accepts_supported_repository_urls(name, url):
     document = json.loads((ROOT / "examples" / f"{name}.json").read_text())
     assert validator(name).is_valid({**document, "OPENIT_BACKUP_URL": url})
+
+
+def test_repository_port_range_is_exhaustive_and_accepts_uri_decimal_spelling():
+    import re
+    from boundary_contracts import load_schema
+    pattern = re.compile(load_schema("BackupJobEnv")["properties"]["OPENIT_BACKUP_URL"]["allOf"][-1]["pattern"])
+    for port in range(65537):
+        for spelling in (str(port), "000" + str(port)):
+            assert bool(pattern.fullmatch(f"https://backup.example.org:{spelling}/repository")) == (1 <= port <= 65535), spelling
+    assert pattern.fullmatch("https://backup.example.org:/repository")
