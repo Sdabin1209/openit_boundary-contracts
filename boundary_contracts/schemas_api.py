@@ -5,7 +5,7 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
-PIPELINE_SCHEMA_VERSION = "3.4"
+PIPELINE_SCHEMA_VERSION = "3.5"
 
 
 def schema_dir() -> Path:

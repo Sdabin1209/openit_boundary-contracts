@@ -22,6 +22,6 @@ def test_every_property_is_allowed_by_property_names():   # 3.4.11·3.4.17 교�
             continue
         v = validator(p.rsplit("/", 1)[-1][: -len(".schema.json")])
         from jsonschema import Draft202012Validator
-        chk = Draft202012Validator(pn)
+        chk = v.evolve(schema=pn)
         for k in s["properties"]:
             assert chk.is_valid(k), (p, k)

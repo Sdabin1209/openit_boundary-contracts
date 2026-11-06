@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "IdentityDatabaseBackupEnv.schema.json",
+  "title": "IdentityDatabaseBackupEnv",
+  "description": "Environment for platform backup/restore jobs; field definitions are shared with the owning area, while server-only required conditions do not apply.",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "platform"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "BackupJobEnv.schema.json"
+    }
+  ],
+  "properties": {
+    "IDENTITY_PUBLIC_URL": {
+      "$ref": "IdentityEnv.schema.json#/properties/IDENTITY_PUBLIC_URL"
+    },
+    "IDENTITY_CLIENT_SECRET_FILE": {
+      "$ref": "IdentityEnv.schema.json#/properties/IDENTITY_CLIENT_SECRET_FILE"
+    },
+    "IDENTITY_ROOT_CA": {
+      "$ref": "IdentityEnv.schema.json#/properties/IDENTITY_ROOT_CA"
+    },
+    "IDENTITY_DB_URL_FILE": {
+      "$ref": "IdentityEnv.schema.json#/properties/IDENTITY_DB_URL_FILE"
+    },
+    "IDENTITY_ADMIN_PASSWORD_FILE": {
+      "$ref": "IdentityEnv.schema.json#/properties/IDENTITY_ADMIN_PASSWORD_FILE"
+    },
+    "IDENTITY_INITIAL_ADMIN_PASSWORD_FILE": {
+      "$ref": "IdentityEnv.schema.json#/properties/IDENTITY_INITIAL_ADMIN_PASSWORD_FILE"
+    }
+  },
+  "propertyNames": {
+    "$ref": "IdentityEnv.schema.json#/propertyNames"
+  },
+  "required": [
+    "IDENTITY_DB_URL_FILE",
+    "IDENTITY_ROOT_CA"
+  ]
+}

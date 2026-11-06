@@ -1,0 +1,302 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "SurveyBackupEnv.schema.json",
+  "title": "SurveyBackupEnv",
+  "description": "Environment for survey-service backup/restore jobs; field definitions are shared with the owning area, while server-only required conditions do not apply.",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "survey-service"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "BackupJobEnv.schema.json"
+    }
+  ],
+  "properties": {
+    "SURVEY_PORT": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_PORT"
+    },
+    "SURVEY_HOST": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_HOST"
+    },
+    "SURVEY_LOG_LEVEL": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_LOG_LEVEL"
+    },
+    "SURVEY_MODEL_BACKEND": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_MODEL_BACKEND"
+    },
+    "SURVEY_API_TOKEN_FILE": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_API_TOKEN_FILE"
+    },
+    "SURVEY_STAFF_API_TOKEN_FILE": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_STAFF_API_TOKEN_FILE"
+    },
+    "SURVEY_KIOSK_DEVICE_TOKENS_FILE": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_KIOSK_DEVICE_TOKENS_FILE"
+    },
+    "SURVEY_RESULT_READER_TOKEN_FILE": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RESULT_READER_TOKEN_FILE"
+    },
+    "SURVEY_RISK_SOURCE_TOKEN_FILE": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RISK_SOURCE_TOKEN_FILE"
+    },
+    "SURVEY_RELEASE_READER_TOKEN_FILE": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RELEASE_READER_TOKEN_FILE"
+    },
+    "SURVEY_TRACE_INGEST_TOKEN_FILE": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_TRACE_INGEST_TOKEN_FILE"
+    },
+    "SURVEY_INFERENCE_TOKEN_FILE": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_INFERENCE_TOKEN_FILE"
+    },
+    "SURVEY_VAPID_PRIVATE_KEY_FILE": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_VAPID_PRIVATE_KEY_FILE"
+    },
+    "SURVEY_DATABASE_URL_FILE": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_DATABASE_URL_FILE"
+    },
+    "SURVEY_RELEASE_READER": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RELEASE_READER"
+    },
+    "SURVEY_TRACE_INGEST": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_TRACE_INGEST"
+    },
+    "SURVEY_RELEASE_READER_URL": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RELEASE_READER_URL"
+    },
+    "SURVEY_TRACE_INGEST_URL": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_TRACE_INGEST_URL"
+    },
+    "SURVEY_INFERENCE_URL": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_INFERENCE_URL"
+    },
+    "SURVEY_SESSION_DB": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_SESSION_DB"
+    },
+    "SURVEY_OUTBOX_DB": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_OUTBOX_DB"
+    },
+    "SURVEY_WORK_DIR": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_WORK_DIR"
+    },
+    "SURVEY_RELEASE_READER_TOKEN_ENV": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RELEASE_READER_TOKEN_ENV"
+    },
+    "SURVEY_TRACE_INGEST_TOKEN_ENV": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_TRACE_INGEST_TOKEN_ENV"
+    },
+    "SURVEY_INFERENCE_TOKEN_ENV": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_INFERENCE_TOKEN_ENV"
+    },
+    "SURVEY_INFERENCE_TIMEOUT_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_INFERENCE_TIMEOUT_SECONDS"
+    },
+    "SURVEY_INFERENCE_EXTRACT_TIMEOUT_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_INFERENCE_EXTRACT_TIMEOUT_SECONDS"
+    },
+    "SURVEY_INFERENCE_RESPOND_TIMEOUT_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_INFERENCE_RESPOND_TIMEOUT_SECONDS"
+    },
+    "SURVEY_INFERENCE_LOAD_TIMEOUT_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_INFERENCE_LOAD_TIMEOUT_SECONDS"
+    },
+    "SURVEY_INFERENCE_RETRIES": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_INFERENCE_RETRIES"
+    },
+    "SURVEY_HTTP_TIMEOUT_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_HTTP_TIMEOUT_SECONDS"
+    },
+    "SURVEY_STARTUP_WAIT_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_STARTUP_WAIT_SECONDS"
+    },
+    "SURVEY_TURN_DEADLINE_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_TURN_DEADLINE_SECONDS"
+    },
+    "SURVEY_SOCKET_TIMEOUT_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_SOCKET_TIMEOUT_SECONDS"
+    },
+    "SURVEY_MAX_CONNECTIONS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_MAX_CONNECTIONS"
+    },
+    "SURVEY_MAX_SSE_CONNECTIONS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_MAX_SSE_CONNECTIONS"
+    },
+    "SURVEY_SSE_MAX_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_SSE_MAX_SECONDS"
+    },
+    "SURVEY_SSE_HEARTBEAT_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_SSE_HEARTBEAT_SECONDS"
+    },
+    "SURVEY_API_MAX_INFLIGHT": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_API_MAX_INFLIGHT"
+    },
+    "SURVEY_API_MAX_UTTERANCE_CHARS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_API_MAX_UTTERANCE_CHARS"
+    },
+    "SURVEY_EXTRACT_INPUT_MAX_CHARS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_EXTRACT_INPUT_MAX_CHARS"
+    },
+    "SURVEY_SESSION_IDLE_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_SESSION_IDLE_SECONDS"
+    },
+    "SURVEY_RETRY_AFTER_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RETRY_AFTER_SECONDS"
+    },
+    "SURVEY_STATE_POLL_MIN_INTERVAL_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_STATE_POLL_MIN_INTERVAL_SECONDS"
+    },
+    "SURVEY_READYZ_DB_TIMEOUT_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_READYZ_DB_TIMEOUT_SECONDS"
+    },
+    "SURVEY_DB_CONNECT_TIMEOUT_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_DB_CONNECT_TIMEOUT_SECONDS"
+    },
+    "SURVEY_DB_STATEMENT_TIMEOUT_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_DB_STATEMENT_TIMEOUT_SECONDS"
+    },
+    "SURVEY_DB_RECONNECT_BACKOFF_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_DB_RECONNECT_BACKOFF_SECONDS"
+    },
+    "SURVEY_RELEASE_POLL_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RELEASE_POLL_SECONDS"
+    },
+    "SURVEY_KEEP_RELEASES": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_KEEP_RELEASES"
+    },
+    "SURVEY_RELEASE_RETRY_BASE_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RELEASE_RETRY_BASE_SECONDS"
+    },
+    "SURVEY_RELEASE_RETRY_MAX_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RELEASE_RETRY_MAX_SECONDS"
+    },
+    "SURVEY_RELEASE_RETRY_GIVE_UP_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RELEASE_RETRY_GIVE_UP_SECONDS"
+    },
+    "SURVEY_EXPORT_INTERVAL_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_EXPORT_INTERVAL_SECONDS"
+    },
+    "SURVEY_EXPORT_BACKOFF_MAX_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_EXPORT_BACKOFF_MAX_SECONDS"
+    },
+    "SURVEY_OUTBOX_MAX_PENDING": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_OUTBOX_MAX_PENDING"
+    },
+    "SURVEY_OUTBOX_KEEP_SENT_HOURS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_OUTBOX_KEEP_SENT_HOURS"
+    },
+    "SURVEY_OUTBOX_STAGE_GRACE_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_OUTBOX_STAGE_GRACE_SECONDS"
+    },
+    "SURVEY_DEAD_OUTBOX_RETENTION_DAYS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_DEAD_OUTBOX_RETENTION_DAYS"
+    },
+    "SURVEY_SESSION_RETENTION_DAYS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_SESSION_RETENTION_DAYS"
+    },
+    "SURVEY_ACCESS_LOG_RETENTION_DAYS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_ACCESS_LOG_RETENTION_DAYS"
+    },
+    "SURVEY_ALERT_RETENTION_DAYS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_ALERT_RETENTION_DAYS"
+    },
+    "SURVEY_RETENTION_INTERVAL_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RETENTION_INTERVAL_SECONDS"
+    },
+    "SURVEY_MAX_CONSECUTIVE_REASK": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_MAX_CONSECUTIVE_REASK"
+    },
+    "SURVEY_STAFF_CONSOLE": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_STAFF_CONSOLE"
+    },
+    "SURVEY_STAFF_API_TOKEN_ENV": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_STAFF_API_TOKEN_ENV"
+    },
+    "SURVEY_STAFF_CALL_RETRY_MIN_INTERVAL_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_STAFF_CALL_RETRY_MIN_INTERVAL_SECONDS"
+    },
+    "SURVEY_STAFF_CALL_RETRY_MAX_PER_SESSION": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_STAFF_CALL_RETRY_MAX_PER_SESSION"
+    },
+    "SURVEY_STAFF_CALL_REPORT_MAX_PER_SESSION": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_STAFF_CALL_REPORT_MAX_PER_SESSION"
+    },
+    "SURVEY_ALERT_DB": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_ALERT_DB"
+    },
+    "SURVEY_RESULT_DISPATCHER": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RESULT_DISPATCHER"
+    },
+    "SURVEY_RESULT_READER_TOKEN_ENV": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RESULT_READER_TOKEN_ENV"
+    },
+    "SURVEY_RISK_SOURCE": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RISK_SOURCE"
+    },
+    "SURVEY_RISK_SOURCE_TOKEN_ENV": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RISK_SOURCE_TOKEN_ENV"
+    },
+    "SURVEY_RISK_DEFAULT_RULES": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RISK_DEFAULT_RULES"
+    },
+    "SURVEY_RISK_RULES_FILE": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RISK_RULES_FILE"
+    },
+    "SURVEY_REQUIRE_SUBJECT_REF": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_REQUIRE_SUBJECT_REF"
+    },
+    "SURVEY_API_TOKEN_ENV": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_API_TOKEN_ENV"
+    },
+    "SURVEY_KIOSK_DEVICE_TOKENS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_KIOSK_DEVICE_TOKENS"
+    },
+    "SURVEY_VAPID_PRIVATE_KEY_ENV": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_VAPID_PRIVATE_KEY_ENV"
+    },
+    "SURVEY_VAPID_SUBJECT": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_VAPID_SUBJECT"
+    },
+    "SURVEY_PUSH_TIMEOUT_SECONDS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_PUSH_TIMEOUT_SECONDS"
+    },
+    "SURVEY_MAX_PUSH_SUBSCRIPTIONS": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_MAX_PUSH_SUBSCRIPTIONS"
+    },
+    "SURVEY_API_TOKEN": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_API_TOKEN"
+    },
+    "SURVEY_STAFF_API_TOKEN": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_STAFF_API_TOKEN"
+    },
+    "SURVEY_INFERENCE_TOKEN": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_INFERENCE_TOKEN"
+    },
+    "SURVEY_RELEASE_READER_TOKEN": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RELEASE_READER_TOKEN"
+    },
+    "SURVEY_TRACE_INGEST_TOKEN": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_TRACE_INGEST_TOKEN"
+    },
+    "SURVEY_RESULT_READER_TOKEN": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RESULT_READER_TOKEN"
+    },
+    "SURVEY_RISK_SOURCE_TOKEN": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RISK_SOURCE_TOKEN"
+    },
+    "SURVEY_VAPID_PRIVATE_KEY": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_VAPID_PRIVATE_KEY"
+    },
+    "SURVEY_DATABASE_URL": {
+      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_DATABASE_URL"
+    }
+  },
+  "propertyNames": {
+    "$ref": "SurveyServiceEnv.schema.json#/propertyNames"
+  },
+  "required": [
+    "OPENIT_EGRESS_PROXY"
+  ]
+}

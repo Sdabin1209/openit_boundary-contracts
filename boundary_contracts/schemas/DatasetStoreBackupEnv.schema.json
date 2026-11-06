@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "DatasetStoreBackupEnv.schema.json",
+  "title": "DatasetStoreBackupEnv",
+  "description": "Environment for synthetic-data backup/restore jobs; field definitions are shared with the owning area, while server-only required conditions do not apply.",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "synthetic-data"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "BackupJobEnv.schema.json"
+    }
+  ],
+  "properties": {
+    "DATASET_STORE_READ_TOKENS_FILE": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_READ_TOKENS_FILE"
+    },
+    "DATASET_STORE_READ_TOKENS": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_READ_TOKENS"
+    },
+    "DATASET_STORE_WRITE_TOKENS_FILE": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_WRITE_TOKENS_FILE"
+    },
+    "DATASET_STORE_WRITE_TOKENS": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_WRITE_TOKENS"
+    },
+    "DATASET_STORE_ROOT": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_ROOT"
+    },
+    "DATASET_STORE_SURVEY_SCHEMA_DIR": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_SURVEY_SCHEMA_DIR"
+    },
+    "DATASET_STORE_HOST": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_HOST"
+    },
+    "DATASET_STORE_PORT": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_PORT"
+    },
+    "DATASET_STORE_MAX_BODY": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_MAX_BODY"
+    },
+    "DATASET_STORE_SOCKET_TIMEOUT": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_SOCKET_TIMEOUT"
+    },
+    "DATASET_STORE_MAX_CONNECTIONS": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_MAX_CONNECTIONS"
+    },
+    "DATASET_STORE_THREADS": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_THREADS"
+    },
+    "DATASET_STORE_DRAIN_GRACE": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_DRAIN_GRACE"
+    },
+    "DATASET_STORE_MAX_PUBLISHES": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_MAX_PUBLISHES"
+    },
+    "DATASET_STORE_MAX_DOWNLOADS": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_MAX_DOWNLOADS"
+    },
+    "DATASET_STORE_MAX_ENTRIES": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_MAX_ENTRIES"
+    },
+    "DATASET_STORE_AUTH_FAIL_LIMIT": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_AUTH_FAIL_LIMIT"
+    },
+    "DATASET_STORE_MIN_FREE_GB": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_MIN_FREE_GB"
+    },
+    "DATASET_STORE_MIN_TOKEN_LEN": {
+      "$ref": "DatasetStoreEnv.schema.json#/properties/DATASET_STORE_MIN_TOKEN_LEN"
+    }
+  },
+  "propertyNames": {
+    "$ref": "DatasetStoreEnv.schema.json#/propertyNames"
+  },
+  "required": [
+    "OPENIT_EGRESS_PROXY"
+  ]
+}

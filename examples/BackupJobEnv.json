@@ -1,0 +1,6 @@
+{
+  "OPENIT_BACKUP_URL": "https://backup.example.org/area",
+  "OPENIT_BACKUP_CREDENTIALS_FILE": "/run/secrets/credentials",
+  "OPENIT_BACKUP_REPO_PASSWORD_FILE": "/run/secrets/repository-password",
+  "OPENIT_EGRESS_PROXY": "http://127.0.0.1:3128"
+}

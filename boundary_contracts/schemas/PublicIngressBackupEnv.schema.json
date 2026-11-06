@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "PublicIngressBackupEnv.schema.json",
+  "title": "PublicIngressBackupEnv",
+  "description": "Environment for platform backup/restore jobs; field definitions are shared with the owning area, while server-only required conditions do not apply.",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "platform"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "BackupJobEnv.schema.json"
+    }
+  ],
+  "properties": {
+    "GATEWAY_HOSTS": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/GATEWAY_HOSTS"
+    },
+    "GATEWAY_PUBLIC_TLS_PORT": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/GATEWAY_PUBLIC_TLS_PORT"
+    },
+    "GATEWAY_PROBE_SITE": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/GATEWAY_PROBE_SITE"
+    },
+    "GATEWAY_TLS_MODE": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/GATEWAY_TLS_MODE"
+    },
+    "GATEWAY_ACME_EMAIL": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/GATEWAY_ACME_EMAIL"
+    },
+    "GATEWAY_ACME_DIRECTORY": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/GATEWAY_ACME_DIRECTORY"
+    },
+    "INGRESS_TLS_DIR": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/INGRESS_TLS_DIR"
+    },
+    "INGRESS_EXPOSURES": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/INGRESS_EXPOSURES"
+    },
+    "INGRESS_DEVICE_TOKENS_DIR": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/INGRESS_DEVICE_TOKENS_DIR"
+    },
+    "INGRESS_UPSTREAM_TOKENS_DIR": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/INGRESS_UPSTREAM_TOKENS_DIR"
+    },
+    "INGRESS_ROOT_CA": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/INGRESS_ROOT_CA"
+    },
+    "AUTH_CHECK_TIMEOUT": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/AUTH_CHECK_TIMEOUT"
+    },
+    "LOGIN_RATE_EVENTS": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/LOGIN_RATE_EVENTS"
+    },
+    "INGRESS_DEVICE_CA_FILE": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/INGRESS_DEVICE_CA_FILE"
+    },
+    "INGRESS_ROOT_EXPORT_DIR": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/INGRESS_ROOT_EXPORT_DIR"
+    }
+  },
+  "propertyNames": {
+    "$ref": "PublicIngressEnv.schema.json#/propertyNames"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "BackupJobEnv.schema.json",
+  "title": "BackupJobEnv",
+  "description": "Backup/restore process inputs. Server startup authentication is not required. File contents and mounted storage remain declared by ContainerInputs.",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "*"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "CommonEnv.schema.json"
+    }
+  ],
+  "required": [
+    "OPENIT_BACKUP_URL",
+    "OPENIT_BACKUP_CREDENTIALS_FILE",
+    "OPENIT_BACKUP_REPO_PASSWORD_FILE"
+  ],
+  "properties": {
+    "OPENIT_BACKUP_URL": {
+      "allOf": [
+        {
+          "$ref": "CommonEnv.schema.json#/properties/OPENIT_BACKUP_URL"
+        },
+        {
+          "format": "uri"
+        }
+      ]
+    }
+  }
+}

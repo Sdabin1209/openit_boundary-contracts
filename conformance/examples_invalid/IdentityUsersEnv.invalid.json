@@ -1,0 +1,3 @@
+{
+  "IDENTITY_ROOT_CA": "/etc/openit/pki/root_ca.crt"
+}

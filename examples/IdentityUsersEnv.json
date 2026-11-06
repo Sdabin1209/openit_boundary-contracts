@@ -1,0 +1,4 @@
+{
+  "IDENTITY_ADMIN_PASSWORD_FILE": "/run/secrets/administrator-password",
+  "IDENTITY_ROOT_CA": "/etc/openit/pki/root_ca.crt"
+}

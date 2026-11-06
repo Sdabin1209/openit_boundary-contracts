@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "StepCaBackupEnv.schema.json",
+  "title": "StepCaBackupEnv",
+  "description": "Environment for platform backup/restore jobs; field definitions are shared with the owning area, while server-only required conditions do not apply.",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "platform"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "BackupJobEnv.schema.json"
+    }
+  ],
+  "properties": {
+    "STEP_CA_PORT": {
+      "$ref": "StepCaEnv.schema.json#/properties/STEP_CA_PORT"
+    },
+    "STEP_CA_DNS_NAMES": {
+      "$ref": "StepCaEnv.schema.json#/properties/STEP_CA_DNS_NAMES"
+    },
+    "STEP_CA_PASSWORD_FILE": {
+      "$ref": "StepCaEnv.schema.json#/properties/STEP_CA_PASSWORD_FILE"
+    },
+    "STEP_CA_URL": {
+      "$ref": "StepCaEnv.schema.json#/properties/STEP_CA_URL"
+    },
+    "PKI_OUT": {
+      "$ref": "StepCaEnv.schema.json#/properties/PKI_OUT"
+    },
+    "STEP_CERT_NOT_AFTER": {
+      "$ref": "StepCaEnv.schema.json#/properties/STEP_CERT_NOT_AFTER"
+    },
+    "STEP_RENEW_EXPIRES_IN": {
+      "$ref": "StepCaEnv.schema.json#/properties/STEP_RENEW_EXPIRES_IN"
+    },
+    "STEP_CERTS_DIR": {
+      "$ref": "StepCaEnv.schema.json#/properties/STEP_CERTS_DIR"
+    },
+    "STEP_TOKENS_DIR": {
+      "$ref": "StepCaEnv.schema.json#/properties/STEP_TOKENS_DIR"
+    },
+    "STEP_CA_HOME": {
+      "$ref": "StepCaEnv.schema.json#/properties/STEP_CA_HOME"
+    },
+    "STEP_ROLE": {
+      "$ref": "StepCaEnv.schema.json#/properties/STEP_ROLE"
+    },
+    "STEP_CERT_NAME": {
+      "$ref": "StepCaEnv.schema.json#/properties/STEP_CERT_NAME"
+    },
+    "STEP_TOKEN_NAMES": {
+      "$ref": "StepCaEnv.schema.json#/properties/STEP_TOKEN_NAMES"
+    },
+    "STEP_CERT_GID": {
+      "$ref": "StepCaEnv.schema.json#/properties/STEP_CERT_GID"
+    }
+  },
+  "propertyNames": {
+    "$ref": "StepCaEnv.schema.json#/propertyNames"
+  }
+}

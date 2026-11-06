@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ModelRegistryBackupEnv.schema.json",
+  "title": "ModelRegistryBackupEnv",
+  "description": "Environment for model-lab backup/restore jobs; field definitions are shared with the owning area, while server-only required conditions do not apply.",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "model-lab"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "BackupJobEnv.schema.json"
+    }
+  ],
+  "properties": {
+    "MODEL_REGISTRY_READ_TOKENS_FILE": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_READ_TOKENS_FILE"
+    },
+    "MODEL_REGISTRY_READ_TOKENS": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_READ_TOKENS"
+    },
+    "MODEL_REGISTRY_WRITE_TOKENS_FILE": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_WRITE_TOKENS_FILE"
+    },
+    "MODEL_REGISTRY_WRITE_TOKENS": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_WRITE_TOKENS"
+    },
+    "MODEL_REGISTRY_ROOT": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_ROOT"
+    },
+    "MODEL_REGISTRY_HOST": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_HOST"
+    },
+    "MODEL_REGISTRY_PORT": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_PORT"
+    },
+    "MODEL_REGISTRY_MAX_BODY": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_MAX_BODY"
+    },
+    "MODEL_REGISTRY_SOCKET_TIMEOUT": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_SOCKET_TIMEOUT"
+    },
+    "MODEL_REGISTRY_MAX_CONNECTIONS": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_MAX_CONNECTIONS"
+    },
+    "MODEL_REGISTRY_THREADS": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_THREADS"
+    },
+    "MODEL_REGISTRY_MAX_PUBLISHES": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_MAX_PUBLISHES"
+    },
+    "MODEL_REGISTRY_AUTH_FAIL_LIMIT": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_AUTH_FAIL_LIMIT"
+    },
+    "MODEL_REGISTRY_SHUTDOWN_GRACE": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_SHUTDOWN_GRACE"
+    },
+    "MODEL_REGISTRY_MIN_FREE_GB": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_MIN_FREE_GB"
+    },
+    "MODEL_REGISTRY_MIN_TOKEN_LEN": {
+      "$ref": "ModelRegistryEnv.schema.json#/properties/MODEL_REGISTRY_MIN_TOKEN_LEN"
+    }
+  },
+  "propertyNames": {
+    "$ref": "ModelRegistryEnv.schema.json#/propertyNames"
+  },
+  "required": [
+    "OPENIT_EGRESS_PROXY"
+  ]
+}

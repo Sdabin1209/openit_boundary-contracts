@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """schemas/ 의 모든 스키마가 Draft 2020-12 로 유효하고, 모든 examples/ 가 대응 스키마를 통과하며, 위반 예시가 거부되는지 검사한다."""
 import copy, glob, json, os, sys, jsonschema
+from boundary_contracts import format_checker as _bc_format_checker  # 형식(format) 검증기가 없으면 조용히 넘기지 않고 실패한다(계약 3.5.0)
 here = os.path.dirname(os.path.abspath(__file__)); base = "file://" + here + "/schemas/"
 common = json.load(open(here + "/schemas/_common.schema.json"))
 from boundary_contracts import validator
@@ -66,7 +67,7 @@ errs = list(val("ReleaseManifest").iter_errors(d)); print("OK  " if not errs els
 _tt = validator("TraceEnvelope")
 from boundary_contracts.schema_sources import external_schema
 _survey_turn = external_schema("https://openit.example/survey/v1/TurnTrace.json")
-errs = list(jsonschema.Draft202012Validator(_survey_turn).iter_errors(ex("TraceEnvelope")["trace"]))
+errs = list(jsonschema.Draft202012Validator(_survey_turn, format_checker=_bc_format_checker(_survey_turn)).iter_errors(ex("TraceEnvelope")["trace"]))
 print("OK  " if not errs else "FAIL", "TraceEnvelope.trace는 설치된 TurnTrace를 통과")
 bad += bool(errs)
 for service in catalog()["services"]:

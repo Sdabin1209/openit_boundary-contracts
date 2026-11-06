@@ -1,0 +1,8 @@
+{
+  "OPENIT_BACKUP_URL": "http://backup.example.org/area",
+  "OPENIT_BACKUP_CREDENTIALS_FILE": "/run/secrets/credentials",
+  "OPENIT_BACKUP_REPO_PASSWORD_FILE": "/run/secrets/repository-password",
+  "OPENIT_EGRESS_PROXY": "http://127.0.0.1:3128",
+  "IDENTITY_DB_URL_FILE": "/run/secrets/database-url",
+  "IDENTITY_ROOT_CA": "/etc/openit/pki/root_ca.crt"
+}

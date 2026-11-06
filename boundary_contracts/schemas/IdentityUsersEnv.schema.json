@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "IdentityUsersEnv.schema.json",
+  "title": "IdentityUsersEnv",
+  "description": "Identity register-users job reads the administrator password file and CA; it does not start the identity server or use IDENTITY_PUBLIC_URL.",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "platform"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "CommonEnv.schema.json"
+    }
+  ],
+  "properties": {
+    "IDENTITY_ADMIN_PASSWORD_FILE": {
+      "$ref": "IdentityEnv.schema.json#/properties/IDENTITY_ADMIN_PASSWORD_FILE"
+    },
+    "IDENTITY_ROOT_CA": {
+      "$ref": "IdentityEnv.schema.json#/properties/IDENTITY_ROOT_CA"
+    }
+  },
+  "required": [
+    "IDENTITY_ADMIN_PASSWORD_FILE",
+    "IDENTITY_ROOT_CA"
+  ]
+}
