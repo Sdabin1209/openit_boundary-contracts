@@ -2,8 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "PushConfig",
   "description": "웹 푸시 구독에 필요한 서버 공개키(직원 콘솔). 비밀 키는 담지 않는다.",
-  "x-producers": ["survey-service"],
-  "x-consumers": ["kiosk-frontend", "admin-console"],
+  "x-producers": [
+    "survey-service"
+  ],
+  "x-consumers": [
+    "kiosk-frontend",
+    "admin-console"
+  ],
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -11,11 +16,16 @@
   ],
   "properties": {
     "vapid_public_key": {
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{87}$(?![\\s\\S])"
+        },
+        {
+          "type": "null"
+        }
       ],
-      "description": "null이면 푸시가 꺼져 있고 SSE만 동작한다"
+      "description": "웹 푸시 applicationServerKey: VAPID 공개키(P-256 비압축 점 65바이트)를 패딩 없는 base64url 로(87자, RFC 8292 3.2). null 이면 푸시가 꺼져 있고 SSE 만 동작한다"
     }
   }
 }

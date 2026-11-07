@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "StepCaBackupEnv.schema.json",
   "title": "StepCaBackupEnv",
-  "description": "Environment for platform backup/restore jobs; field definitions are shared with the owning area, while server-only required conditions do not apply.",
+  "description": "platform(step-ca) 백업·복구 잡의 환경 변수. 이름·형식은 그 영역 서비스 Env 를 참조하고(같은 정의), 서비스 기동에만 필요한 필수 조건은 적용하지 않는다. 백업 공통 입력은 BackupJobEnv(allOf).",
   "x-producers": [
     "deploy"
   ],

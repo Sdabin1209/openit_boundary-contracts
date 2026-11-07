@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "IdentityUsersEnv.schema.json",
   "title": "IdentityUsersEnv",
-  "description": "Identity register-users job reads the administrator password file and CA; it does not start the identity server or use IDENTITY_PUBLIC_URL.",
+  "description": "identity register-users 잡의 환경 변수: 관리자 암호 파일과 루트 CA 를 읽는다. identity 서버를 띄우지 않고 IDENTITY_PUBLIC_URL 도 쓰지 않는다.",
   "x-producers": [
     "deploy"
   ],

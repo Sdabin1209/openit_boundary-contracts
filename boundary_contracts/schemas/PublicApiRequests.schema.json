@@ -212,9 +212,8 @@
       ],
       "properties": {
         "endpoint": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 2048
+          "$ref": "PushSubscriptionRequest.schema.json#/properties/endpoint",
+          "description": "해지할 구독의 endpoint(등록 때와 같은 규칙)"
         }
       }
     },

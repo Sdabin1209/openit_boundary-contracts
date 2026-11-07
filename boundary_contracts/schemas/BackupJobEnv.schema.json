@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "BackupJobEnv.schema.json",
   "title": "BackupJobEnv",
-  "description": "Backup/restore process inputs. Server startup authentication is not required. File contents and mounted storage remain declared by ContainerInputs. OPENIT_ names are limited to the common backup inputs and egress proxy; other namespaces are checked by the area Env. Repository URLs use HTTPS, an optional TCP port 1..65535, and a nonempty repository path. Authentication is supplied exclusively through the declared files; URL userinfo is rejected. URI query and fragment syntax remain supported; HTTP does not transmit the fragment. POSIX file paths must be absolute and contain no NUL. Leading zeroes in a decimal port are accepted; an empty port uses the HTTPS default.",
+  "description": "백업·복구 잡 프로세스의 입력. 서버 기동용 인증(토큰)은 필요 없다. 파일 내용과 마운트되는 저장소는 ContainerInputs 가 선언한다. OPENIT_ 이름은 공통 백업 입력과 출구 프록시로 한정하고, 그 밖의 이름 공간은 영역 Env 가 검사한다. 저장소 URL 은 https, 선택 TCP 포트 1~65535, 비어 있지 않은 저장소 경로이며 인증은 선언된 파일로만 받는다(URL userinfo 거부). URI 쿼리·조각 문법은 허용한다(HTTP 는 조각을 보내지 않는다). POSIX 파일 경로는 절대 경로이고 NUL 이 없다. 10진 포트의 앞자리 0 은 받아들이고, 포트가 없으면 https 기본 포트다.",
   "x-producers": [
     "deploy"
   ],

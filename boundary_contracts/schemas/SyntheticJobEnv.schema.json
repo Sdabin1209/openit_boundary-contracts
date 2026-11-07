@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://openit.example/schemas/SyntheticJobEnv.schema.json",
   "title": "SyntheticJobEnv",
-  "description": "synthetic-run/import jobs: secret file paths and shared container environment; server DATASET_STORE settings are not job settings. Token file variables select the D84 secret source.",
+  "description": "synthetic-data run·import 잡의 환경 변수: 비밀 파일 경로와 공통 컨테이너 환경. 서버의 DATASET_STORE_* 설정은 잡 설정이 아니다. 토큰 파일 변수가 비밀 출처를 정한다(D84).",
   "x-producers": [
     "deploy"
   ],
