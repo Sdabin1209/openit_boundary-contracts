@@ -2,9 +2,13 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "SurveyServiceEnv.schema.json",
  "title": "SurveyServiceEnv",
- "description": "배포(deploy)가 survey-service 컨테이너에 주는 환경 변수 집합. 만드는 쪽: deploy(compose). 읽는 쪽: survey_service/settings.py. 값은 모두 문자열. 비밀(SECRETS)은 NAME_FILE(파일 경로)로 준다(D84); 값 NAME은 개발·시험용 호환. 알려진 SURVEY_ 키 목록은 survey_service/settings.py와 read_secret이 읽는 이름과 같아야 한다(자체 스크립트가 코드에서 읽는 이름을 정적으로 대조한다). SURVEY_OUTBOX_DB는 더 쓰지 않으나(ADR-0023) 옛 배포가 주어도 거부하지 않도록 목록에 남긴다. 3.0.2: 추론 연결은 SURVEY_INFERENCE_URL(원격 추론 서버, 운영) 또는 SURVEY_MODEL_BACKEND(내장 백엔드, 지금은 fake만) 중 하나가 있으면 된다(D62부터의 survey-service 동작). 3.0.0까지 SURVEY_MODEL_BACKEND만 필수로 적은 것은 계약 결함이었다(원격 추론 배포가 계약 위반이 됐다). 3.1.1: SURVEY_RELEASE_READER·SURVEY_TRACE_INGEST의 값 형식과 'http'일 때 *_URL 필수를 스키마로 적는다(survey-service가 설정에서 거부하던 조건; 계약이 표현하지 못해 deploy의 설정 검증이 잡지 못했다). (3.2.0, U73: 모든 SURVEY_* 이름에 뜻·형식·기본값을 선언한다. 근거는 survey-service settings.py 기본값과 D88·D125.)",
- "x-producers": ["deploy"],
- "x-consumers": ["survey-service"],
+ "description": "배포(deploy)가 survey-service 컨테이너에 주는 환경 변수 집합. 만드는 쪽: deploy(compose). 읽는 쪽: survey_service/settings.py. 값은 모두 문자열. 비밀(SECRETS)은 NAME_FILE(파일 경로)로 준다(D84); 값 NAME은 개발·시험용 호환. 알려진 SURVEY_ 키 목록은 survey_service/settings.py와 read_secret이 읽는 이름과 같아야 한다(자체 스크립트가 코드에서 읽는 이름을 정적으로 대조한다). SURVEY_OUTBOX_DB는 더 쓰지 않으나(ADR-0023) 옛 배포가 주어도 거부하지 않도록 목록에 남긴다. 3.0.2: 추론 연결은 SURVEY_INFERENCE_URL(원격 추론 서버, 운영) 또는 SURVEY_MODEL_BACKEND(내장 백엔드, 지금은 fake만) 중 하나가 있으면 된다(D62부터의 survey-service 동작). 3.0.0까지 SURVEY_MODEL_BACKEND만 필수로 적은 것은 계약 결함이었다(원격 추론 배포가 계약 위반이 됐다). 3.1.1: SURVEY_RELEASE_READER·SURVEY_TRACE_INGEST의 값 형식과 'http'일 때 *_URL 필수를 스키마로 적는다(survey-service가 설정에서 거부하던 조건; 계약이 표현하지 못해 deploy의 설정 검증이 잡지 못했다). (3.2.0, U73: 모든 SURVEY_* 이름에 뜻·형식·기본값을 선언한다. 근거는 survey-service settings.py 기본값과 D88·D125.) 3.7.0(D9): SURVEY_RELEASE_READER·SURVEY_TRACE_INGEST 는 'http' 만, SURVEY_STAFF_CONSOLE·SURVEY_RESULT_DISPATCHER·SURVEY_RISK_SOURCE(구현 팩토리 '모듈:함수'를 받던 칸, 운영 값 없음)는 없앴다: 직원 접점은 기본 알림 어댑터, 결과 push 는 범위 밖(D102), 위험 신호 입력원은 SURVEY_RISK_RULES_FILE 또는 들어오는 API(risk-signals)다.",
+ "x-producers": [
+  "deploy"
+ ],
+ "x-consumers": [
+  "survey-service"
+ ],
  "type": "object",
  "required": [
   "SURVEY_RELEASE_READER",
@@ -73,7 +77,6 @@
      "SURVEY_RELEASE_RETRY_GIVE_UP_SECONDS",
      "SURVEY_RELEASE_RETRY_MAX_SECONDS",
      "SURVEY_REQUIRE_SUBJECT_REF",
-     "SURVEY_RESULT_DISPATCHER",
      "SURVEY_RESULT_READER_TOKEN",
      "SURVEY_RESULT_READER_TOKEN_ENV",
      "SURVEY_RESULT_READER_TOKEN_FILE",
@@ -81,7 +84,6 @@
      "SURVEY_RETRY_AFTER_SECONDS",
      "SURVEY_RISK_DEFAULT_RULES",
      "SURVEY_RISK_RULES_FILE",
-     "SURVEY_RISK_SOURCE",
      "SURVEY_RISK_SOURCE_TOKEN",
      "SURVEY_RISK_SOURCE_TOKEN_ENV",
      "SURVEY_RISK_SOURCE_TOKEN_FILE",
@@ -90,14 +92,13 @@
      "SURVEY_SESSION_RETENTION_DAYS",
      "SURVEY_SOCKET_TIMEOUT_SECONDS",
      "SURVEY_SSE_HEARTBEAT_SECONDS",
-          "SURVEY_SSE_MAX_SECONDS",
+     "SURVEY_SSE_MAX_SECONDS",
      "SURVEY_STAFF_API_TOKEN",
      "SURVEY_STAFF_API_TOKEN_ENV",
      "SURVEY_STAFF_API_TOKEN_FILE",
      "SURVEY_STAFF_CALL_REPORT_MAX_PER_SESSION",
      "SURVEY_STAFF_CALL_RETRY_MAX_PER_SESSION",
      "SURVEY_STAFF_CALL_RETRY_MIN_INTERVAL_SECONDS",
-     "SURVEY_STAFF_CONSOLE",
      "SURVEY_STARTUP_WAIT_SECONDS",
      "SURVEY_STATE_POLL_MIN_INTERVAL_SECONDS",
      "SURVEY_TRACE_INGEST",
@@ -199,14 +200,16 @@
    "description": "비밀이 든 파일의 절대 경로. 값 자체가 아니다."
   },
   "SURVEY_RELEASE_READER": {
-   "type": "string",
-   "pattern": "^(http|[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*)$",
-   "description": "3.1.1: 'http'(계약 HTTP 클라이언트 기본 조립) 또는 '모듈:함수'(시험·개발 주입). 'http'이면 짝이 되는 *_URL이 필수다."
+   "enum": [
+    "http"
+   ],
+   "description": "I4 릴리스 읽기: 'http'(계약 HTTP 클라이언트, 짝이 되는 *_URL 필수). 3.7.0(D9): '모듈:함수' 선택지를 없앴다 — 시험 대역은 설정이 아니라 배선 인자로 주입한다"
   },
   "SURVEY_TRACE_INGEST": {
-   "type": "string",
-   "pattern": "^(http|[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*)$",
-   "description": "3.1.1: 'http'(계약 HTTP 클라이언트 기본 조립) 또는 '모듈:함수'(시험·개발 주입). 'http'이면 짝이 되는 *_URL이 필수다."
+   "enum": [
+    "http"
+   ],
+   "description": "I6 trace 수집: 'http'(계약 HTTP 클라이언트, 짝이 되는 *_URL 필수). 3.7.0(D9): '모듈:함수' 선택지를 없앴다 — 시험 대역은 설정이 아니라 배선 인자로 주입한다"
   },
   "SURVEY_RELEASE_READER_URL": {
    "type": "string",
@@ -325,10 +328,10 @@
    "default": "50"
   },
   "SURVEY_SSE_MAX_SECONDS": {
-    "type": "string",
-    "pattern": "^[1-9][0-9]*$",
-    "description": "3.4.4(RUNTIME R2.4, 검토 B-08·A-19): SSE 스트림 하나의 최대 수명(초). 이 시각에 서버가 정상 종료하고 클라이언트가 새로 연결한다(인증이 끝났으면 401). platform 의 세션 갱신 주기 이하로 둔다(deploy 가 그 값 이하를 준다). 기본 300(5분): 시작값·측정 안 함",
-    "default": "300"
+   "type": "string",
+   "pattern": "^[1-9][0-9]*$",
+   "description": "3.4.4(RUNTIME R2.4, 검토 B-08·A-19): SSE 스트림 하나의 최대 수명(초). 이 시각에 서버가 정상 종료하고 클라이언트가 새로 연결한다(인증이 끝났으면 401). platform 의 세션 갱신 주기 이하로 둔다(deploy 가 그 값 이하를 준다). 기본 300(5분): 시작값·측정 안 함",
+   "default": "300"
   },
   "SURVEY_SSE_HEARTBEAT_SECONDS": {
    "type": "string",
@@ -491,10 +494,6 @@
    "description": "같은 문항 연속 되묻기 한도(D95). 넘으면 빈칸 처리(U36 결정 반영 예정)",
    "default": "3"
   },
-  "SURVEY_STAFF_CONSOLE": {
-   "type": "string",
-   "description": "직원 콘솔 알림 방식 팩토리 또는 'http'. 비우면 직원 알림 비활성"
-  },
   "SURVEY_STAFF_API_TOKEN_ENV": {
    "type": "string",
    "pattern": "^[A-Z][A-Z0-9_]*$",
@@ -524,19 +523,11 @@
    "minLength": 1,
    "description": "직원 알림 저장소 경로(비우면 세션 DB 안)"
   },
-  "SURVEY_RESULT_DISPATCHER": {
-   "type": "string",
-   "description": "결과 push 전송 팩토리. 비우면 pull 만(D-I 기본)"
-  },
   "SURVEY_RESULT_READER_TOKEN_ENV": {
    "type": "string",
    "pattern": "^[A-Z][A-Z0-9_]*$",
    "description": "결과 읽기(GET /v1/results) 토큰의 비밀 이름",
    "default": "SURVEY_RESULT_READER_TOKEN"
-  },
-  "SURVEY_RISK_SOURCE": {
-   "type": "string",
-   "description": "위험 신호 입력원 팩토리 또는 'http'(외부 감지기 API). 비우면 입력원 없음"
   },
   "SURVEY_RISK_SOURCE_TOKEN_ENV": {
    "type": "string",

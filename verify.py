@@ -84,6 +84,9 @@ errs = [e.message for e in val("FailureCase").iter_errors(d)]; print("OK  " if n
 neg("kind 없는 옛 레코드: expected 문자열인데 reviewed_input 이 ActionExtractionInput", "FailureCase", "FailureCase", lambda d: (d.pop("expected_kind"), d.update(expected="네.")))
 neg("백업 실패인데 error 없음(3.7.0)", "BackupJobResult", "BackupJobResult", lambda d: (d.update(status="failed", snapshot_id=None, bytes=0), d.pop("error", None)))
 neg("백업 오류 코드가 BoundaryError 밖(INTERNAL, 3.7.0)", "BackupJobResult", "BackupJobResult", lambda d: d.update(status="failed", snapshot_id=None, bytes=0, error={"code": "INTERNAL", "message": "x", "retryable": False}))
+for _bad in ("https://:", "https://[]", "https://host:bad", "https://host:99999", "http://host", "https://host?x=1"):
+    neg(f"HttpClientSettings base_url 거부: {_bad}", "_common#/$defs/HttpClientSettings", "GateJobConfig", lambda d, b=_bad: (d.clear(), d.update(kind="http", base_url=b, token_secret="T")))
+neg("HttpClientSettings token_secret 끝 개행", "_common#/$defs/HttpClientSettings", "GateJobConfig", lambda d: (d.clear(), d.update(kind="http", base_url="https://release-gate", token_secret="TOKEN\n")))
 neg("failure_type 끝 개행", "FailureCase", "FailureCase", lambda d: d.update(failure_type="UNCLASSIFIED\n"))
 neg("failure_type 에 공백(3.7.0 FailureType)", "FailureCase", "FailureCase", lambda d: d.update(failure_type="a b"))
 neg("CaseReviewRequest LORA_A 인데 expected 가 ActionExtraction 이 아님(3.7.0)", "CaseReviewRequest", "CaseReviewRequest.confirmed-lora-a", lambda d: d.update(expected={"x": 1}))

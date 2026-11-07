@@ -208,9 +208,6 @@
     "SURVEY_MAX_CONSECUTIVE_REASK": {
       "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_MAX_CONSECUTIVE_REASK"
     },
-    "SURVEY_STAFF_CONSOLE": {
-      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_STAFF_CONSOLE"
-    },
     "SURVEY_STAFF_API_TOKEN_ENV": {
       "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_STAFF_API_TOKEN_ENV"
     },
@@ -226,14 +223,8 @@
     "SURVEY_ALERT_DB": {
       "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_ALERT_DB"
     },
-    "SURVEY_RESULT_DISPATCHER": {
-      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RESULT_DISPATCHER"
-    },
     "SURVEY_RESULT_READER_TOKEN_ENV": {
       "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RESULT_READER_TOKEN_ENV"
-    },
-    "SURVEY_RISK_SOURCE": {
-      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RISK_SOURCE"
     },
     "SURVEY_RISK_SOURCE_TOKEN_ENV": {
       "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RISK_SOURCE_TOKEN_ENV"
