@@ -96,6 +96,9 @@ for _bad in ("https://:", "https://host:bad", "https://host:99999", "https://ide
     neg(f"IDENTITY_PUBLIC_URL 거부(HttpsOrigin): {_bad}", "IdentityEnv", "IdentityEnv", lambda d, b=_bad: d.update(IDENTITY_PUBLIC_URL=b))
 for _bad in ("http://release-gate:8080", "https://release-gate/v1", "https://release-gate?x=1"):
     neg(f"서비스 주소 거부(ServiceUrl, R1.1): {_bad}", "SurveyServiceEnv", "SurveyServiceEnv", lambda d, b=_bad: d.update(SURVEY_RELEASE_READER_URL=b))
+neg("PASS 인데 HUMAN_APPROVAL 검사 없음(3.7.0)", "GateDecision", "GateDecision.pass", lambda d: d.update(checks=[c for c in d["checks"] if c["kind"] != "HUMAN_APPROVAL"]))
+neg("PASS 인데 CONTRACT_COMPAT 만(3.7.0)", "GateDecision", "GateDecision.pass", lambda d: d.update(checks=[{"kind": "CONTRACT_COMPAT", "result": "PASS"}]))
+neg("PASS 인데 approval_id 없음(3.7.0)", "GateDecision", "GateDecision.pass", lambda d: d.pop("approval_id", None))
 neg("failure_type 끝 개행", "FailureCase", "FailureCase", lambda d: d.update(failure_type="UNCLASSIFIED\n"))
 neg("failure_type 에 공백(3.7.0 FailureType)", "FailureCase", "FailureCase", lambda d: d.update(failure_type="a b"))
 neg("CaseReviewRequest LORA_A 인데 expected 가 ActionExtraction 이 아님(3.7.0)", "CaseReviewRequest", "CaseReviewRequest.confirmed-lora-a", lambda d: d.update(expected={"x": 1}))

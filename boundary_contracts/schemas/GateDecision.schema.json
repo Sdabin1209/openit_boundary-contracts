@@ -1,8 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "GateDecision",
-  "x-producers": ["release-gate"],
-  "x-consumers": ["ops-feedback", "question-authoring", "model-lab"],
+  "x-producers": [
+    "release-gate"
+  ],
+  "x-consumers": [
+    "ops-feedback",
+    "question-authoring",
+    "model-lab"
+  ],
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -164,7 +170,8 @@
       },
       "then": {
         "required": [
-          "release_id"
+          "release_id",
+          "approval_id"
         ],
         "not": {
           "anyOf": [
@@ -188,7 +195,70 @@
                   "const": "PASS"
                 }
               }
-            }
+            },
+            "allOf": [
+              {
+                "contains": {
+                  "properties": {
+                    "kind": {
+                      "const": "CONTRACT_COMPAT"
+                    }
+                  },
+                  "required": [
+                    "kind"
+                  ]
+                }
+              },
+              {
+                "contains": {
+                  "properties": {
+                    "kind": {
+                      "const": "QUESTION_MODEL_COMPAT"
+                    }
+                  },
+                  "required": [
+                    "kind"
+                  ]
+                }
+              },
+              {
+                "contains": {
+                  "properties": {
+                    "kind": {
+                      "const": "ACCEPTANCE_EVAL"
+                    }
+                  },
+                  "required": [
+                    "kind"
+                  ]
+                }
+              },
+              {
+                "contains": {
+                  "properties": {
+                    "kind": {
+                      "const": "CLINICAL_SAFETY"
+                    }
+                  },
+                  "required": [
+                    "kind"
+                  ]
+                }
+              },
+              {
+                "contains": {
+                  "properties": {
+                    "kind": {
+                      "const": "HUMAN_APPROVAL"
+                    }
+                  },
+                  "required": [
+                    "kind"
+                  ]
+                }
+              }
+            ],
+            "description": "PASS 판정: 고정 필수 검사 네 가지(CONTRACT_COMPAT, QUESTION_MODEL_COMPAT, ACCEPTANCE_EVAL, CLINICAL_SAFETY — 정책이 줄일 수 없다, GatePolicy)와 승인(HUMAN_APPROVAL)이 모두 있고 모두 PASS 다(D53: 승인 없는 PASS 금지). 3.7.0: 설명뿐이던 이 규칙을 스키마로 옮겼다(그 전에는 release-gate 내부 스키마 DecisionRule 만 강제했다)."
           }
         }
       },

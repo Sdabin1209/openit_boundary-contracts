@@ -35,9 +35,17 @@
       "result": "PASS"
     },
     {
+      "kind": "QUESTION_MODEL_COMPAT",
+      "result": "PASS"
+    },
+    {
       "kind": "ACCEPTANCE_EVAL",
       "result": "PASS",
       "evidence_ref": "eval-0007"
+    },
+    {
+      "kind": "CLINICAL_SAFETY",
+      "result": "PASS"
     },
     {
       "kind": "HUMAN_APPROVAL",
