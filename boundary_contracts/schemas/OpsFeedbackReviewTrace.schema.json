@@ -2,11 +2,1286 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "OpsFeedbackReviewTrace.schema.json",
  "title": "OpsFeedbackReviewTrace",
- "description": "I7 `GET /v1/review-traces/{ref}`(reviewer 역할 전용)가 돌려주는 검토용 trace(3.2.0, L12, 사용자 결정 2026-11-03). OpsFeedbackDeidentifiedTrace 와 같은 모양이되 환자 발화 두 칸(frontend_message.utterance, extract_input.user_utterance)만 원문 문자열(최대 1000자, 문진 스키마 UtteranceBody 상한)을 허용한다. 왜: 발화 없이는 검토자가 실패 원인을 볼 수 없다. 조건: reviewer 역할만 읽고, 읽을 때마다 접근 기록을 남기며(보존 365일, 감사 기록), 확정 사례와 같은 보존(180일), 외부 전송 없음. 기존 get_trace 는 그대로 마스킹된 뷰를 낸다.",
- "x-producers": ["ops-feedback"],
- "x-consumers": ["admin-console"],
+ "description": "I7 `GET /v1/review-traces/{ref}`(reviewer 역할 전용)가 돌려주는 검토용 trace(3.2.0, L12, 사용자 결정 2026-11-03). OpsFeedbackDeidentifiedTrace 와 같고, 정책 review_utterance.keep 이 참일 때 환자 발화 두 경로(frontend_message.utterance, extract_input.user_utterance)만 원문 문자열(1~1000자, 문진 스키마 UtteranceBody 상한)을 더 허용한다. 왜: 발화 없이는 검토자가 실패 원인을 볼 수 없다. 조건: reviewer 역할만 읽고, 읽을 때마다 접근 기록을 남기며(보존 365일, 감사 기록), 확정 사례와 같은 보존(180일), 외부 전송 없음. 3.7.0부터 생성물이다(tools/gen_deid_view.py). 두 경로 밖(예: log_entry.input.utterance)의 원문은 허용하지 않는다 — 3.6.x 는 안쪽이 열려 있어 허용했다.",
+ "x-producers": [
+  "ops-feedback"
+ ],
+ "x-consumers": [
+  "admin-console"
+ ],
+ "x-generated": {
+  "by": "tools/gen_deid_view.py",
+  "from": "openit-survey-schema TurnTrace v1",
+  "rules": "boundary_contracts/data/deid_rules.json"
+ },
  "type": "object",
  "additionalProperties": false,
+ "properties": {
+  "session_id": {
+   "$ref": "#/$defs/Pseudonym"
+  },
+  "turn_id": {
+   "$ref": "#/$defs/Pseudonym"
+  },
+  "contract_version": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "type": "integer"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "frontend_message": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "$ref": "#/$defs/G0b2af77346"
+      },
+      {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/Redacted"
+        },
+        {
+         "type": "object",
+         "additionalProperties": false,
+         "properties": {
+          "session_id": {
+           "$ref": "#/$defs/Pseudonym"
+          },
+          "kind": {
+           "const": "UTTERANCE"
+          },
+          "utterance": {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "type": "string",
+             "minLength": 1,
+             "maxLength": 1000
+            }
+           ]
+          }
+         }
+        }
+       ]
+      },
+      {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/Redacted"
+        },
+        {
+         "type": "object",
+         "additionalProperties": false,
+         "properties": {
+          "session_id": {
+           "$ref": "#/$defs/Pseudonym"
+          },
+          "kind": {
+           "const": "SESSION_END"
+          }
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "intervention_decision": {
+   "$ref": "#/$defs/G2f2c90e97e"
+  },
+  "orchestrator_input": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "frontend_input": {
+         "anyOf": [
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "$ref": "#/$defs/G0b2af77346"
+            },
+            {
+             "anyOf": [
+              {
+               "$ref": "#/$defs/Redacted"
+              },
+              {
+               "type": "object",
+               "additionalProperties": false,
+               "properties": {
+                "session_id": {
+                 "$ref": "#/$defs/Pseudonym"
+                },
+                "kind": {
+                 "const": "UTTERANCE"
+                },
+                "utterance": {
+                 "$ref": "#/$defs/Redacted"
+                }
+               }
+              }
+             ]
+            },
+            {
+             "anyOf": [
+              {
+               "$ref": "#/$defs/Redacted"
+              },
+              {
+               "type": "object",
+               "additionalProperties": false,
+               "properties": {
+                "session_id": {
+                 "$ref": "#/$defs/Pseudonym"
+                },
+                "kind": {
+                 "const": "SESSION_END"
+                }
+               }
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         ]
+        },
+        "intervention_decision": {
+         "$ref": "#/$defs/G2f2c90e97e"
+        },
+        "session_found": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Redacted"
+          },
+          {
+           "type": "boolean"
+          }
+         ]
+        },
+        "session_question_bank_version": {
+         "anyOf": [
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "type": "integer"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         ]
+        },
+        "session_status": {
+         "$ref": "#/$defs/G5a4ccec8c0"
+        },
+        "latest_question_bank_version": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Redacted"
+          },
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "extract_input": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "question_id": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Redacted"
+          },
+          {
+           "anyOf": [
+            {
+             "type": "string",
+             "pattern": "^(?:[A-Za-z0-9][A-Za-z0-9_.\\-]{0,63})$(?![\\s\\S])"
+            },
+            {
+             "$ref": "#/$defs/Redacted"
+            }
+           ]
+          }
+         ]
+        },
+        "current_question": {
+         "$ref": "#/$defs/Redacted"
+        },
+        "user_utterance": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Redacted"
+          },
+          {
+           "type": "string",
+           "minLength": 1,
+           "maxLength": 1000
+          }
+         ]
+        },
+        "state": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Redacted"
+          },
+          {
+           "type": "object",
+           "maxProperties": 0
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "extract_output": {
+   "$ref": "#/$defs/G3ee90e20cb"
+  },
+  "extract_attempts": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "extract_status": {
+   "anyOf": [
+    {
+     "enum": [
+      "OK",
+      "OUTPUT_INVALID",
+      "VIOLATION",
+      "ERROR"
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "extract_protections": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "object",
+       "maxProperties": 0
+      },
+      {
+       "$ref": "#/$defs/CountMap"
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "validation_ok": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "boolean"
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "validation_violations": {
+   "$ref": "#/$defs/G03d0c4212b"
+  },
+  "response_input": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "action": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Redacted"
+          },
+          {
+           "anyOf": [
+            {
+             "type": "string",
+             "pattern": "^(?:[A-Z][A-Z0-9_]{0,31})$(?![\\s\\S])"
+            },
+            {
+             "$ref": "#/$defs/Redacted"
+            }
+           ]
+          }
+         ]
+        },
+        "topic": {
+         "$ref": "#/$defs/Redacted"
+        },
+        "next": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Redacted"
+          },
+          {
+           "type": "object",
+           "maxProperties": 0
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "response_output": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "response_outcome": {
+   "anyOf": [
+    {
+     "enum": [
+      "ok",
+      "fallback",
+      "fixed"
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "response_protections": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "object",
+       "maxProperties": 0
+      },
+      {
+       "$ref": "#/$defs/CountMap"
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "frontend_input": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "response_text": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Redacted"
+          },
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         ]
+        },
+        "turn_failure_signal": {
+         "$ref": "#/$defs/G30f760534a"
+        },
+        "session_id": {
+         "$ref": "#/$defs/Pseudonym"
+        }
+       }
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "staff_console_input": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "staff_alert": {
+         "anyOf": [
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "type": "object",
+             "additionalProperties": false,
+             "properties": {
+              "session_id": {
+               "$ref": "#/$defs/Pseudonym"
+              },
+              "staff_alert": {
+               "$ref": "#/$defs/G7640c0c5c8"
+              }
+             }
+            }
+           ]
+          },
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         ]
+        },
+        "turn_failure_signal": {
+         "$ref": "#/$defs/G70be3afe88"
+        },
+        "intervention_result": {
+         "$ref": "#/$defs/G2e150595bf"
+        }
+       }
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "dispatch_input": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "session_info": {
+         "$ref": "#/$defs/Gdb69e1f8b4"
+        },
+        "answer_records": {
+         "$ref": "#/$defs/Gc1a0d92d21"
+        },
+        "skipped": {
+         "$ref": "#/$defs/G97a768fa1b"
+        },
+        "session_status": {
+         "$ref": "#/$defs/G38b3f9ca5d"
+        },
+        "pause_history": {
+         "$ref": "#/$defs/G8fe0c89e46"
+        }
+       }
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "dispatch_output": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "dispatch_record": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Redacted"
+          },
+          {
+           "type": "object",
+           "additionalProperties": false,
+           "properties": {
+            "succeeded": {
+             "anyOf": [
+              {
+               "$ref": "#/$defs/Redacted"
+              },
+              {
+               "type": "boolean"
+              }
+             ]
+            }
+           }
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "orchestrator_output": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "turn_kind": {
+         "anyOf": [
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "const": "SESSION_START"
+            },
+            {
+             "const": "UTTERANCE"
+            },
+            {
+             "const": "RESUME"
+            },
+            {
+             "const": "INTERVENTION_END"
+            },
+            {
+             "const": "END_LEFT"
+            }
+           ]
+          },
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         ]
+        },
+        "session_info_created": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Gdb69e1f8b4"
+          },
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         ]
+        },
+        "log_entry": {
+         "$ref": "#/$defs/Gd1196c4416"
+        },
+        "turn_failure_signal": {
+         "$ref": "#/$defs/G30f760534a"
+        },
+        "intervention_result": {
+         "$ref": "#/$defs/G2e150595bf"
+        },
+        "dispatch_called": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Redacted"
+          },
+          {
+           "type": "boolean"
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "session_before": {
+   "$ref": "#/$defs/G95539408c6"
+  },
+  "session_after": {
+   "$ref": "#/$defs/G95539408c6"
+  },
+  "log_entry": {
+   "$ref": "#/$defs/Gd1196c4416"
+  },
+  "turn_index": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "type": "integer"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "persistence_load_request": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "session_id": {
+         "$ref": "#/$defs/Pseudonym"
+        }
+       }
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "persistence_load_result": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "session_id": {
+         "$ref": "#/$defs/Pseudonym"
+        },
+        "status": {
+         "enum": [
+          "OK",
+          "NOT_FOUND",
+          "DB_ERROR"
+         ]
+        },
+        "revision": {
+         "anyOf": [
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "anyOf": [
+              {
+               "$ref": "#/$defs/Redacted"
+              },
+              {
+               "type": "integer"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         ]
+        },
+        "state": {
+         "$ref": "#/$defs/G95539408c6"
+        }
+       }
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "persistence_commit_request": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "session_id": {
+         "$ref": "#/$defs/Pseudonym"
+        },
+        "expected_revision": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Redacted"
+          },
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "type": "integer"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         ]
+        },
+        "writes": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Redacted"
+          },
+          {
+           "type": "object",
+           "additionalProperties": false,
+           "properties": {
+            "answer_updates": {
+             "anyOf": [
+              {
+               "$ref": "#/$defs/Redacted"
+              },
+              {
+               "type": "array",
+               "items": {
+                "anyOf": [
+                 {
+                  "anyOf": [
+                   {
+                    "$ref": "#/$defs/Redacted"
+                   },
+                   {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                     "slot": {
+                      "$ref": "#/$defs/G29984a0b7d"
+                     },
+                     "action": {
+                      "enum": [
+                       "FIRST_WRITE",
+                       "NEW_REVISION"
+                      ]
+                     },
+                     "value": {
+                      "$ref": "#/$defs/Gbbe72ef846"
+                     },
+                     "precision": {
+                      "anyOf": [
+                       {
+                        "$ref": "#/$defs/Redacted"
+                       },
+                       {
+                        "enum": [
+                         "exact",
+                         "approximate",
+                         "unspecified"
+                        ]
+                       }
+                      ]
+                     }
+                    }
+                   }
+                  ]
+                 },
+                 {
+                  "$ref": "#/$defs/Redacted"
+                 }
+                ]
+               }
+              }
+             ]
+            },
+            "progress_record_update": {
+             "anyOf": [
+              {
+               "anyOf": [
+                {
+                 "$ref": "#/$defs/Redacted"
+                },
+                {
+                 "type": "object",
+                 "additionalProperties": false,
+                 "properties": {
+                  "current_question_id": {
+                   "anyOf": [
+                    {
+                     "$ref": "#/$defs/Redacted"
+                    },
+                    {
+                     "anyOf": [
+                      {
+                       "type": "string",
+                       "pattern": "^(?:[A-Za-z0-9][A-Za-z0-9_.\\-]{0,63})$(?![\\s\\S])"
+                      },
+                      {
+                       "$ref": "#/$defs/Redacted"
+                      }
+                     ]
+                    }
+                   ]
+                  },
+                  "open_slots": {
+                   "$ref": "#/$defs/G7c85b05845"
+                  },
+                  "skipped_add": {
+                   "$ref": "#/$defs/G97a768fa1b"
+                  },
+                  "skipped_remove": {
+                   "anyOf": [
+                    {
+                     "$ref": "#/$defs/Redacted"
+                    },
+                    {
+                     "type": "array",
+                     "items": {
+                      "$ref": "#/$defs/Redacted"
+                     }
+                    }
+                   ]
+                  },
+                  "session_status": {
+                   "$ref": "#/$defs/G5a4ccec8c0"
+                  },
+                  "pause_history_add": {
+                   "$ref": "#/$defs/G8fe0c89e46"
+                  }
+                 }
+                }
+               ]
+              },
+              {
+               "anyOf": [
+                {
+                 "$ref": "#/$defs/Redacted"
+                },
+                {
+                 "type": "null"
+                }
+               ]
+              }
+             ]
+            }
+           }
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "persistence_commit_result": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "session_id": {
+         "$ref": "#/$defs/Pseudonym"
+        },
+        "status": {
+         "enum": [
+          "OK",
+          "REVISION_CONFLICT",
+          "DB_ERROR"
+         ]
+        },
+        "write_outcome": {
+         "enum": [
+          "APPLIED",
+          "NOT_APPLIED",
+          "UNKNOWN"
+         ]
+        },
+        "revision": {
+         "anyOf": [
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "anyOf": [
+              {
+               "$ref": "#/$defs/Redacted"
+              },
+              {
+               "type": "integer"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         ]
+        },
+        "detail": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Redacted"
+          },
+          {
+           "anyOf": [
+            {
+             "$ref": "#/$defs/Redacted"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         ]
+        }
+       }
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  }
+ },
  "required": [
   "session_id",
   "turn_id",
@@ -38,549 +1313,2106 @@
   "persistence_commit_request",
   "persistence_commit_result"
  ],
- "properties": {
-  "session_id": {
-   "$ref": "#/$defs/Pseudonym"
-  },
-  "turn_id": {
-   "$ref": "#/$defs/Pseudonym"
-  },
-  "contract_version": {
-   "type": "integer",
-   "minimum": 1
-  },
-  "turn_index": {
-   "type": "integer",
-   "minimum": 0
-  },
-  "frontend_message": {
-   "oneOf": [
-    {
-     "type": "null"
-    },
-    {
-     "type": "object",
-     "required": [
-      "session_id",
-      "kind"
-     ],
-     "properties": {
-      "session_id": {
-       "$ref": "#/$defs/Pseudonym"
-      },
-      "kind": {
-       "enum": [
-        "SESSION_START",
-        "UTTERANCE",
-        "SESSION_END"
-       ]
-      },
-      "utterance": {
-       "$ref": "#/$defs/UtteranceOrRedacted"
-      }
-     },
-     "additionalProperties": false
-    }
-   ]
-  },
-  "extract_input": {
-   "oneOf": [
-    {
-     "type": "null"
-    },
-    {
-     "type": "object",
-     "required": [
-      "question_id",
-      "current_question",
-      "user_utterance",
-      "state"
-     ],
-     "properties": {
-      "question_id": {
-       "$ref": "#/$defs/Ident"
-      },
-      "current_question": {
-       "$ref": "#/$defs/Redacted"
-      },
-      "user_utterance": {
-       "$ref": "#/$defs/UtteranceOrRedacted"
-      },
-      "state": {
-       "type": "object"
-      }
-     }
-    }
-   ]
-  },
-  "extract_output": {
-   "oneOf": [
-    {
-     "type": "null"
-    },
-    {
-     "type": "object",
-     "properties": {
-      "values": {
-       "type": "array",
-       "items": {
-        "type": "object",
-        "properties": {
-         "key": {
-          "$ref": "#/$defs/Redacted"
-         },
-         "value": {
-          "$ref": "#/$defs/Redacted"
-         },
-         "precision": {
-          "$ref": "#/$defs/Redacted"
-         },
-         "status": {
-          "$ref": "#/$defs/Redacted"
-         },
-         "save": {
-          "type": "boolean"
-         }
-        }
-       }
-      },
-      "action": {
-       "type": "string",
-       "pattern": "^[A-Z][A-Z0-9_]{0,31}$|^\\[MASKED\\]$"
-      },
-      "next_item": {
-       "oneOf": [
-        {
-         "type": "null"
-        },
-        {
-         "$ref": "#/$defs/Ident"
-        }
-       ]
-      },
-      "reason": {
-       "$ref": "#/$defs/Redacted"
-      },
-      "note": {
-       "$ref": "#/$defs/Redacted"
-      },
-      "targets": {
-       "type": "array"
-      }
-     }
-    }
-   ]
-  },
-  "extract_attempts": {
-   "oneOf": [
-    {
-     "type": "null"
-    },
-    {
-     "type": "integer",
-     "minimum": 1,
-     "maximum": 2
-    }
-   ]
-  },
-  "extract_status": {
+ "$defs": {
+  "Redacted": {
    "enum": [
-    "OK",
-    "OUTPUT_INVALID",
-    "VIOLATION",
-    "ERROR",
-    null
-   ]
+    "[MASKED]",
+    "[DROPPED]"
+   ],
+   "description": "비식별 결과 토큰. 소비자는 내용으로 쓰지 않는다"
   },
-  "extract_protections": {
-   "$ref": "#/$defs/CountMap"
+  "Pseudonym": {
+   "type": "string",
+   "pattern": "^p-[0-9a-f]{32}$(?![\\s\\S])",
+   "description": "의사 식별자(session_id·turn_id, 어디에 나오든)"
   },
-  "validation_ok": {
-   "type": [
-    "boolean",
-    "null"
-   ]
+  "CountMap": {
+   "type": "object",
+   "propertyNames": {
+    "pattern": "^[A-Z][A-Z0-9_]{0,31}$(?![\\s\\S])"
+   },
+   "additionalProperties": {
+    "type": "integer",
+    "minimum": 0
+   }
   },
-  "validation_violations": {
-   "type": [
-    "array",
-    "null"
-   ]
-  },
-  "response_input": {
-   "oneOf": [
+  "G03d0c4212b": {
+   "anyOf": [
     {
-     "type": "null"
+     "$ref": "#/$defs/G04b7b29496"
     },
     {
-     "type": "object",
-     "required": [
-      "action",
-      "topic",
-      "next"
-     ],
-     "properties": {
-      "action": {
-       "type": "string"
-      },
-      "topic": {
+     "anyOf": [
+      {
        "$ref": "#/$defs/Redacted"
       },
-      "next": {
-       "type": "object"
+      {
+       "type": "null"
       }
-     }
+     ]
     }
    ]
   },
-  "response_output": {
-   "oneOf": [
+  "G0446a5a1c5": {
+   "anyOf": [
     {
-     "type": "null"
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G1edd92a35f"
+    }
+   ]
+  },
+  "G048532dba7": {
+   "additionalProperties": false,
+   "properties": {
+    "kind": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "const": "PAUSE"
+      },
+      {
+       "const": "RESUME"
+      }
+     ]
+    },
+    "reasons": {
+     "$ref": "#/$defs/G49ba257b4b"
+    }
+   },
+   "type": "object"
+  },
+  "G04b7b29496": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Ga2e04fdec1"
+    }
+   ]
+  },
+  "G054b0502a8": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Gc0c47248a1"
+    }
+   ]
+  },
+  "G07c22e1cd6": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Gcb9901e269"
     },
     {
      "$ref": "#/$defs/Redacted"
     }
    ]
   },
-  "response_outcome": {
-   "enum": [
-    "ok",
-    "fallback",
-    "fixed",
-    null
-   ]
-  },
-  "response_protections": {
-   "$ref": "#/$defs/CountMap"
-  },
-  "intervention_decision": {
-   "type": [
-    "object",
-    "null"
-   ]
-  },
-  "orchestrator_input": {
-   "type": [
-    "object",
-    "null"
-   ]
-  },
-  "frontend_input": {
-   "oneOf": [
+  "G091bc98b81": {
+   "anyOf": [
     {
-     "type": "null"
+     "$ref": "#/$defs/Redacted"
     },
     {
-     "type": "object",
-     "properties": {
-      "turn_failure_signal": {
-       "oneOf": [
+     "$ref": "#/$defs/Gae8c9a6bf0"
+    }
+   ]
+  },
+  "G0b2af77346": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G2b665ae6ae"
+    }
+   ]
+  },
+  "G0c09e6ee05": {
+   "additionalProperties": false,
+   "properties": {
+    "kind": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "const": "RISK"
+      },
+      {
+       "const": "CALL_STAFF"
+      },
+      {
+       "const": "USER_CALLED_STAFF"
+      }
+     ]
+    },
+    "reasons": {
+     "$ref": "#/$defs/Geb1437f6eb"
+    }
+   },
+   "type": "object"
+  },
+  "G12c3c3d24a": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G56a5a10e3f"
+    }
+   ]
+  },
+  "G137e8b37ce": {
+   "items": {
+    "$ref": "#/$defs/G7e66bd8f4b"
+   },
+   "type": "array"
+  },
+  "G14d6213cb0": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G1b7fe3bc43"
+    }
+   ]
+  },
+  "G1a77e1da9c": {
+   "items": {
+    "$ref": "#/$defs/Ga0459d746c"
+   },
+   "type": "array"
+  },
+  "G1b7fe3bc43": {
+   "items": {
+    "$ref": "#/$defs/G8c6566b7fc"
+   },
+   "type": "array"
+  },
+  "G1edd92a35f": {
+   "additionalProperties": false,
+   "properties": {
+    "answer_records": {
+     "$ref": "#/$defs/Gc1a0d92d21"
+    },
+    "dialogue_log": {
+     "$ref": "#/$defs/G14d6213cb0"
+    },
+    "dispatch_log": {
+     "$ref": "#/$defs/G7bd4a677de"
+    },
+    "progress_record": {
+     "$ref": "#/$defs/G054b0502a8"
+    },
+    "revision": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "anyOf": [
         {
-         "type": "null"
+         "$ref": "#/$defs/Redacted"
         },
         {
-         "$ref": "#/$defs/TurnFailureSignal"
+         "type": "integer"
+        },
+        {
+         "type": "null"
         }
        ]
       }
-     }
+     ]
+    },
+    "session_info": {
+     "$ref": "#/$defs/Gdb69e1f8b4"
+    }
+   },
+   "type": "object"
+  },
+  "G2626bc25d7": {
+   "anyOf": [
+    {
+     "const": "COMMITTED"
+    },
+    {
+     "const": "NOT_APPLICABLE"
+    },
+    {
+     "$ref": "#/$defs/Gb49a0879ec"
     }
    ]
   },
-  "staff_console_input": {
-   "type": [
-    "object",
-    "null"
-   ]
-  },
-  "dispatch_input": {
-   "type": [
-    "object",
-    "null"
-   ]
-  },
-  "dispatch_output": {
-   "type": [
-    "object",
-    "null"
-   ]
-  },
-  "orchestrator_output": {
-   "oneOf": [
+  "G29984a0b7d": {
+   "anyOf": [
     {
-     "type": "null"
+     "$ref": "#/$defs/Redacted"
     },
     {
-     "$ref": "#/$defs/OrchestratorOutputView"
+     "$ref": "#/$defs/Ge438ff098d"
     }
    ]
   },
-  "session_before": {
-   "type": [
-    "object",
-    "null"
-   ]
+  "G2b665ae6ae": {
+   "additionalProperties": false,
+   "properties": {
+    "kind": {
+     "const": "SESSION_START"
+    },
+    "question_set_id": {
+     "$ref": "#/$defs/Redacted"
+    },
+    "session_id": {
+     "$ref": "#/$defs/Pseudonym"
+    },
+    "subject_ref": {
+     "$ref": "#/$defs/Redacted"
+    }
+   },
+   "type": "object"
   },
-  "session_after": {
-   "type": [
-    "object",
-    "null"
-   ]
+  "G2ba00c44a3": {
+   "items": {
+    "$ref": "#/$defs/G8dc0ca493c"
+   },
+   "type": "array"
   },
-  "log_entry": {
-   "oneOf": [
+  "G2e150595bf": {
+   "anyOf": [
     {
-     "type": "null"
+     "$ref": "#/$defs/G4292b18aa1"
     },
     {
-     "$ref": "#/$defs/LogEntryView"
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
     }
    ]
   },
-  "persistence_load_request": {
-   "type": [
-    "object",
-    "null"
-   ]
-  },
-  "persistence_load_result": {
-   "type": [
-    "object",
-    "null"
-   ]
-  },
-  "persistence_commit_request": {
-   "type": [
-    "object",
-    "null"
-   ]
-  },
-  "persistence_commit_result": {
-   "oneOf": [
+  "G2f2c90e97e": {
+   "anyOf": [
     {
-     "type": "null"
+     "$ref": "#/$defs/G91e328c496"
     },
     {
-     "type": "object",
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "G30f760534a": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Gb43c365566"
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "G3313e474b5": {
+   "additionalProperties": false,
+   "properties": {
+    "evidence": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "items": {
+        "$ref": "#/$defs/Redacted"
+       },
+       "type": "array"
+      }
+     ]
+    },
+    "kind": {
+     "const": "RISK_SIGNAL"
+    }
+   },
+   "type": "object"
+  },
+  "G344a49aa39": {
+   "items": {
+    "$ref": "#/$defs/Gf030008735"
+   },
+   "type": "array"
+  },
+  "G38b3f9ca5d": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "const": "IN_PROGRESS"
+    },
+    {
+     "const": "PAUSED_RISK"
+    },
+    {
+     "const": "ENDED_COMPLETE"
+    },
+    {
+     "const": "ENDED_STAFF"
+    },
+    {
+     "const": "ENDED_LEFT"
+    },
+    {
+     "const": "ENDED_USER_STOP"
+    }
+   ]
+  },
+  "G39bb1bd3a7": {
+   "items": {
+    "$ref": "#/$defs/Gb0b07699ff"
+   },
+   "type": "array"
+  },
+  "G3a935aa357": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Gd2e8868dc7"
+    },
+    {
+     "$ref": "#/$defs/Redacted"
+    }
+   ]
+  },
+  "G3cf19d8ba1": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G5bbf4657b7"
+    }
+   ]
+  },
+  "G3ee90e20cb": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Gd919e47861"
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "G411c548cbc": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G7e4f48f3da"
+    }
+   ]
+  },
+  "G4292b18aa1": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "additionalProperties": false,
      "properties": {
+      "result": {
+       "anyOf": [
+        {
+         "const": "APPLIED"
+        },
+        {
+         "const": "IGNORED"
+        },
+        {
+         "const": "FAILED"
+        }
+       ]
+      },
       "session_id": {
        "$ref": "#/$defs/Pseudonym"
-      },
-      "status": {
-       "enum": [
-        "OK",
-        "REVISION_CONFLICT",
-        "DB_ERROR"
-       ]
-      },
-      "write_outcome": {
-       "enum": [
-        "APPLIED",
-        "NOT_APPLIED",
-        "UNKNOWN"
-       ]
       }
-     }
+     },
+     "type": "object"
     }
    ]
-  }
- },
- "$defs": {
-  "Pseudonym": {
-   "type": "string",
-   "pattern": "^p-[0-9a-f]{32}$",
-   "description": "HMAC-SHA256(키=salt, 메시지=JCS({key,value}))의 앞 128비트 16진 32자(ADR 0016). 같은 salt·키·값이면 같다. salt는 이 영역만 안다. 소비자는 원 값으로 되돌릴 수 없고 되돌리려 해서도 안 된다. salt를 바꾸면 값이 모두 달라진다(ADR 0017)."
   },
-  "Redacted": {
-   "enum": [
-    "[MASKED]",
-    "[DROPPED]"
-   ],
-   "description": "자유 문자열 잎의 비식별 결과. 정책 unlisted_string_action이 mask면 [MASKED], drop이면 키를 지우거나 [DROPPED]. 제안: 소비자는 이 값을 내용으로 쓰지 않는다."
-  },
-  "Ident": {
-   "type": "string",
-   "pattern": "^([A-Za-z0-9][A-Za-z0-9_.\\-]{0,63}|\\[MASKED\\])$",
-   "description": "keep 키의 식별자 모양 값(문항 ID 등). 패턴에 맞지 않으면 마스킹된다."
-  },
-  "CountMap": {
-   "oneOf": [
+  "G42c9ac7f8c": {
+   "anyOf": [
     {
-     "type": "null"
+     "$ref": "#/$defs/Redacted"
     },
     {
-     "type": "object",
-     "propertyNames": {
-      "pattern": "^[A-Z][A-Z0-9_]{0,31}$"
-     },
-     "additionalProperties": {
-      "type": "integer",
-      "minimum": 0
-     }
+     "$ref": "#/$defs/Gc779655121"
     }
-   ],
-   "description": "규칙 코드 -> 건수. 정책이 keep_count_map_keys로 허용하지 않으면 {} 또는 제거"
+   ]
   },
-  "TurnFailureSignal": {
-   "type": "object",
-   "description": "정지·알림 신호. pause_reason은 계약 2.1.0 이후 optional(없으면 미상, 모르는 값은 읽는 쪽이 OTHER로 취급). 비식별 정책 keep_pause_reason이 꺼져 있으면 없다.",
+  "G4335dfc0bc": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G79b20a9069"
+    }
+   ]
+  },
+  "G49ba257b4b": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G7220b98370"
+    }
+   ]
+  },
+  "G4d36b681b7": {
+   "additionalProperties": false,
+   "properties": {
+    "question_bank_version": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "session_id": {
+     "$ref": "#/$defs/Pseudonym"
+    }
+   },
+   "type": "object"
+  },
+  "G4e399c7a4d": {
+   "additionalProperties": false,
+   "properties": {
+    "extract_output": {
+     "$ref": "#/$defs/G3ee90e20cb"
+    },
+    "handling": {
+     "$ref": "#/$defs/Gea56762ed7"
+    },
+    "input": {
+     "$ref": "#/$defs/G12c3c3d24a"
+    },
+    "intervention_result": {
+     "$ref": "#/$defs/G2e150595bf"
+    },
+    "question_bank_version": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "response_text": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/Redacted"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      }
+     ]
+    },
+    "staff_alert": {
+     "$ref": "#/$defs/G9682c07be6"
+    },
+    "staff_alert_delivery": {
+     "anyOf": [
+      {
+       "const": "SUCCESS"
+      },
+      {
+       "const": "FAILURE"
+      },
+      {
+       "const": "NOT_APPLICABLE"
+      }
+     ]
+    },
+    "staff_id": {
+     "$ref": "#/$defs/Redacted"
+    },
+    "turn_failure_signal": {
+     "$ref": "#/$defs/G30f760534a"
+    },
+    "turn_result": {
+     "$ref": "#/$defs/G2626bc25d7"
+    },
+    "validation_violations": {
+     "$ref": "#/$defs/G03d0c4212b"
+    }
+   },
+   "type": "object"
+  },
+  "G4fa798a313": {
+   "items": {
+    "$ref": "#/$defs/Ge223ac5c0d"
+   },
+   "type": "array"
+  },
+  "G53ded18cfb": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G1a77e1da9c"
+    }
+   ]
+  },
+  "G56a5a10e3f": {
+   "additionalProperties": false,
+   "properties": {
+    "intervention_decision": {
+     "anyOf": [
+      {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/Redacted"
+        },
+        {
+         "const": "RESUME"
+        },
+        {
+         "const": "END"
+        }
+       ]
+      },
+      {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/Redacted"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      }
+     ]
+    },
+    "kind": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "const": "SESSION_START"
+      },
+      {
+       "const": "UTTERANCE"
+      },
+      {
+       "const": "INTERVENTION"
+      },
+      {
+       "const": "SESSION_END"
+      }
+     ]
+    },
+    "utterance": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/Redacted"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "G5705306e7f": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "additionalProperties": false,
+       "properties": {
+        "succeeded": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/Redacted"
+          },
+          {
+           "type": "boolean"
+          }
+         ]
+        }
+       },
+       "type": "object"
+      }
+     ]
+    },
+    {
+     "$ref": "#/$defs/Redacted"
+    }
+   ]
+  },
+  "G5960ae30ab": {
+   "items": {
+    "$ref": "#/$defs/G5705306e7f"
+   },
+   "type": "array"
+  },
+  "G5a4ccec8c0": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/G38b3f9ca5d"
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "G5b404229f6": {
+   "items": {
+    "$ref": "#/$defs/G3a935aa357"
+   },
+   "type": "array"
+  },
+  "G5b421a6f3f": {
+   "additionalProperties": false,
+   "properties": {
+    "question_name": {
+     "$ref": "#/$defs/Redacted"
+    },
+    "slot": {
+     "$ref": "#/$defs/G29984a0b7d"
+    },
+    "value": {
+     "$ref": "#/$defs/Gbbe72ef846"
+    }
+   },
+   "type": "object"
+  },
+  "G5b8a002723": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Gdf631f73d1"
+    }
+   ]
+  },
+  "G5bbf4657b7": {
+   "additionalProperties": false,
+   "properties": {
+    "extract_output": {
+     "$ref": "#/$defs/G3ee90e20cb"
+    },
+    "handling": {
+     "$ref": "#/$defs/Gea56762ed7"
+    },
+    "input": {
+     "$ref": "#/$defs/G12c3c3d24a"
+    },
+    "intervention_result": {
+     "$ref": "#/$defs/G2e150595bf"
+    },
+    "question_bank_version": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "response_text": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/Redacted"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      }
+     ]
+    },
+    "staff_alert": {
+     "$ref": "#/$defs/G9682c07be6"
+    },
+    "staff_alert_delivery": {
+     "anyOf": [
+      {
+       "const": "SUCCESS"
+      },
+      {
+       "const": "FAILURE"
+      },
+      {
+       "const": "NOT_APPLICABLE"
+      }
+     ]
+    },
+    "staff_id": {
+     "$ref": "#/$defs/Redacted"
+    },
+    "turn_failure_signal": {
+     "$ref": "#/$defs/G70be3afe88"
+    },
+    "turn_result": {
+     "$ref": "#/$defs/G2626bc25d7"
+    },
+    "validation_violations": {
+     "$ref": "#/$defs/G03d0c4212b"
+    }
+   },
+   "type": "object"
+  },
+  "G5bcdebb44b": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Gdea8c89f58"
+    },
+    {
+     "const": "NONE"
+    }
+   ]
+  },
+  "G5c2c4eaa6e": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Gc02eb58496"
+    }
+   ]
+  },
+  "G5d544df169": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Gcba9df942d"
+    }
+   ]
+  },
+  "G5e3c42e382": {
+   "additionalProperties": false,
+   "properties": {
+    "handled": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "const": "SESSION_START"
+      },
+      {
+       "const": "UTTERANCE"
+      },
+      {
+       "const": "RESUME"
+      },
+      {
+       "const": "INTERVENTION_END"
+      },
+      {
+       "const": "END_LEFT"
+      }
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "G61dc1febb4": {
+   "additionalProperties": false,
    "properties": {
     "session_id": {
      "$ref": "#/$defs/Pseudonym"
     },
-    "write_committed": {
-     "enum": [
-      "COMMITTED",
-      "NOT_COMMITTED"
-     ]
-    },
     "staff_alert": {
-     "enum": [
-      "NONE",
-      "DELIVERED",
-      "DELIVERY_FAILED"
+     "anyOf": [
+      {
+       "const": "NONE"
+      },
+      {
+       "const": "DELIVERED"
+      },
+      {
+       "const": "DELIVERY_FAILED"
+      }
      ]
     },
+    "write_committed": {
+     "anyOf": [
+      {
+       "const": "COMMITTED"
+      },
+      {
+       "const": "NOT_COMMITTED"
+      }
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "G6a87ae449a": {
+   "additionalProperties": false,
+   "properties": {
     "pause_reason": {
      "enum": [
       "RISK",
       "REASK_LIMIT",
       "OTHER"
      ]
-    }
-   }
-  },
-  "LogEntryView": {
-   "type": "object",
-   "description": "log_entry의 일부. 나머지 키는 검사하지 않는다.",
-   "properties": {
-    "turn_result": {
-     "oneOf": [
+    },
+    "session_id": {
+     "$ref": "#/$defs/Pseudonym"
+    },
+    "staff_alert": {
+     "anyOf": [
+      {
+       "const": "NONE"
+      },
+      {
+       "const": "DELIVERED"
+      },
+      {
+       "const": "DELIVERY_FAILED"
+      }
+     ]
+    },
+    "write_committed": {
+     "anyOf": [
       {
        "const": "COMMITTED"
       },
       {
-       "const": "NOT_APPLICABLE"
-      },
-      {
-       "type": "object",
-       "required": [
-        "failed_steps"
-       ],
-       "properties": {
-        "failed_steps": {
-         "type": "array",
-         "minItems": 1,
-         "items": {
-          "type": "object",
-          "required": [
-           "phase",
-           "step"
-          ],
-          "properties": {
-           "phase": {
-            "enum": [
-             "BEFORE_COMMIT",
-             "AFTER_COMMIT"
-            ]
-           },
-           "step": {
-            "enum": [
-             "LoRA-A",
-             "VALIDATE",
-             "COMMIT",
-             "DELIVER_STAFF",
-             "LoRA-B",
-             "DELIVER_FRONT"
-            ]
-           }
-          }
-         }
-        }
-       }
-      }
-     ]
-    },
-    "staff_alert_delivery": {
-     "enum": [
-      "SUCCESS",
-      "FAILURE",
-      "NOT_APPLICABLE"
-     ]
-    },
-    "turn_failure_signal": {
-     "oneOf": [
-      {
-       "type": "null"
-      },
-      {
-       "$ref": "#/$defs/TurnFailureSignal"
+       "const": "NOT_COMMITTED"
       }
      ]
     }
-   }
+   },
+   "type": "object"
   },
-  "OrchestratorOutputView": {
-   "type": "object",
-   "description": "orchestrator_output의 일부. 나머지 키는 검사하지 않는다.",
-   "properties": {
-    "turn_failure_signal": {
-     "oneOf": [
-      {
-       "type": "null"
-      },
-      {
-       "$ref": "#/$defs/TurnFailureSignal"
-      }
-     ]
-    },
-    "intervention_result": {
-     "oneOf": [
-      {
-       "type": "null"
-      },
-      {
-       "type": "object",
-       "properties": {
-        "session_id": {
-         "$ref": "#/$defs/Pseudonym"
-        },
-        "result": {
-         "enum": [
-          "APPLIED",
-          "IGNORED",
-          "FAILED"
-         ]
-        }
-       }
-      }
-     ]
-    },
-    "log_entry": {
-     "oneOf": [
-      {
-       "type": "null"
-      },
-      {
-       "$ref": "#/$defs/LogEntryView"
-      }
-     ]
-    }
-   }
-  },
-  "UtteranceOrRedacted": {
-   "oneOf": [
+  "G6b92bb5355": {
+   "anyOf": [
     {
      "$ref": "#/$defs/Redacted"
     },
     {
-     "type": "string",
-     "minLength": 1,
-     "maxLength": 1000
+     "$ref": "#/$defs/G048532dba7"
     }
-   ],
-   "description": "검토 사본에서는 원문, 정책이 끄면 마스킹 토큰"
+   ]
+  },
+  "G6d9d857405": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G5e3c42e382"
+    }
+   ]
+  },
+  "G6e474f559d": {
+   "items": {
+    "$ref": "#/$defs/Gbc7b1bfd07"
+   },
+   "type": "array"
+  },
+  "G70be3afe88": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Gf125f707fa"
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "G72054ecd9a": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G819c3c3c33"
+    }
+   ]
+  },
+  "G7220b98370": {
+   "items": {
+    "$ref": "#/$defs/Gf1966ef3d8"
+   },
+   "type": "array"
+  },
+  "G75a66b167f": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G39bb1bd3a7"
+    }
+   ]
+  },
+  "G7640c0c5c8": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G0c09e6ee05"
+    }
+   ]
+  },
+  "G76b9be419f": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Gd44d02327b"
+    }
+   ]
+  },
+  "G770d9d6bcc": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G7a2cef9b67"
+    }
+   ]
+  },
+  "G79b20a9069": {
+   "additionalProperties": false,
+   "properties": {
+    "amount": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "unit": {
+     "$ref": "#/$defs/Redacted"
+    },
+    "unit_code": {
+     "$ref": "#/$defs/Redacted"
+    }
+   },
+   "type": "object"
+  },
+  "G7a2cef9b67": {
+   "items": {
+    "$ref": "#/$defs/Gde0e2537a7"
+   },
+   "type": "array"
+  },
+  "G7bd4a677de": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G5960ae30ab"
+    }
+   ]
+  },
+  "G7c85b05845": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G2ba00c44a3"
+    }
+   ]
+  },
+  "G7e4f48f3da": {
+   "additionalProperties": false,
+   "properties": {
+    "code": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "anyOf": [
+        {
+         "pattern": "^(?:[A-Z][A-Z0-9_]{0,63})$(?![\\s\\S])",
+         "type": "string"
+        },
+        {
+         "$ref": "#/$defs/Redacted"
+        }
+       ]
+      }
+     ]
+    },
+    "label": {
+     "$ref": "#/$defs/Redacted"
+    }
+   },
+   "type": "object"
+  },
+  "G7e66bd8f4b": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/G72054ecd9a"
+    },
+    {
+     "$ref": "#/$defs/Redacted"
+    }
+   ]
+  },
+  "G819c3c3c33": {
+   "additionalProperties": false,
+   "properties": {
+    "phase": {
+     "anyOf": [
+      {
+       "const": "BEFORE_COMMIT"
+      },
+      {
+       "const": "AFTER_COMMIT"
+      }
+     ]
+    },
+    "step": {
+     "anyOf": [
+      {
+       "const": "LoRA-A"
+      },
+      {
+       "const": "VALIDATE"
+      },
+      {
+       "const": "COMMIT"
+      },
+      {
+       "const": "DELIVER_STAFF"
+      },
+      {
+       "const": "LoRA-B"
+      },
+      {
+       "const": "DELIVER_FRONT"
+      }
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "G8433a908af": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Gbbe72ef846"
+    },
+    {
+     "$ref": "#/$defs/G5d544df169"
+    }
+   ]
+  },
+  "G8c6566b7fc": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/G3cf19d8ba1"
+    },
+    {
+     "$ref": "#/$defs/Redacted"
+    }
+   ]
+  },
+  "G8dc0ca493c": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "additionalProperties": false,
+       "properties": {
+        "key": {
+         "$ref": "#/$defs/Redacted"
+        },
+        "status": {
+         "enum": [
+          "MISSING",
+          "UNCLEAR"
+         ]
+        }
+       },
+       "type": "object"
+      }
+     ]
+    },
+    {
+     "$ref": "#/$defs/Redacted"
+    }
+   ]
+  },
+  "G8e95118ba0": {
+   "additionalProperties": false,
+   "properties": {
+    "decision": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "const": "RESUME"
+      },
+      {
+       "const": "END"
+      }
+     ]
+    },
+    "session_id": {
+     "$ref": "#/$defs/Pseudonym"
+    }
+   },
+   "type": "object"
+  },
+  "G8fe0c89e46": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G6e474f559d"
+    }
+   ]
+  },
+  "G9097b10546": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G137e8b37ce"
+    }
+   ]
+  },
+  "G91e328c496": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G8e95118ba0"
+    }
+   ]
+  },
+  "G95539408c6": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/G0446a5a1c5"
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "G9682c07be6": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/G7640c0c5c8"
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "G97a768fa1b": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G4fa798a313"
+    }
+   ]
+  },
+  "Ga0459d746c": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Gca25934d91"
+    },
+    {
+     "$ref": "#/$defs/Redacted"
+    }
+   ]
+  },
+  "Ga2e04fdec1": {
+   "items": {
+    "$ref": "#/$defs/G07c22e1cd6"
+   },
+   "type": "array"
+  },
+  "Ga8b1f41cf2": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G4e399c7a4d"
+    }
+   ]
+  },
+  "Gae8c9a6bf0": {
+   "additionalProperties": false,
+   "properties": {
+    "kind": {
+     "const": "RISK_RULE"
+    },
+    "target": {
+     "$ref": "#/$defs/G53ded18cfb"
+    }
+   },
+   "type": "object"
+  },
+  "Gb0b07699ff": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/G8433a908af"
+    },
+    {
+     "$ref": "#/$defs/Redacted"
+    }
+   ]
+  },
+  "Gb1413e921a": {
+   "additionalProperties": false,
+   "properties": {
+    "evidence": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "items": {
+        "$ref": "#/$defs/Redacted"
+       },
+       "type": "array"
+      }
+     ]
+    },
+    "kind": {
+     "const": "USER_CALLED_STAFF"
+    }
+   },
+   "type": "object"
+  },
+  "Gb43c365566": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G6a87ae449a"
+    }
+   ]
+  },
+  "Gb49a0879ec": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Gd99bd70eca"
+    }
+   ]
+  },
+  "Gbb14e1a5a6": {
+   "additionalProperties": false,
+   "properties": {
+    "answer": {
+     "$ref": "#/$defs/Gbbe72ef846"
+    }
+   },
+   "type": "object"
+  },
+  "Gbbe72ef846": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "boolean"
+      }
+     ]
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    {
+     "$ref": "#/$defs/G4335dfc0bc"
+    },
+    {
+     "$ref": "#/$defs/G411c548cbc"
+    }
+   ]
+  },
+  "Gbc7b1bfd07": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/G6b92bb5355"
+    },
+    {
+     "$ref": "#/$defs/Redacted"
+    }
+   ]
+  },
+  "Gbdba09ddfb": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Gb1413e921a"
+    }
+   ]
+  },
+  "Gc02eb58496": {
+   "additionalProperties": false,
+   "properties": {
+    "kind": {
+     "const": "RISK_RULE"
+    },
+    "target": {
+     "$ref": "#/$defs/G76b9be419f"
+    }
+   },
+   "type": "object"
+  },
+  "Gc0c47248a1": {
+   "additionalProperties": false,
+   "properties": {
+    "current_question_id": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "anyOf": [
+        {
+         "pattern": "^(?:[A-Za-z0-9][A-Za-z0-9_.\\-]{0,63})$(?![\\s\\S])",
+         "type": "string"
+        },
+        {
+         "$ref": "#/$defs/Redacted"
+        }
+       ]
+      }
+     ]
+    },
+    "open_slots": {
+     "$ref": "#/$defs/G7c85b05845"
+    },
+    "pause_history": {
+     "$ref": "#/$defs/G8fe0c89e46"
+    },
+    "session_status": {
+     "$ref": "#/$defs/G38b3f9ca5d"
+    },
+    "skipped": {
+     "$ref": "#/$defs/G97a768fa1b"
+    }
+   },
+   "type": "object"
+  },
+  "Gc1a0d92d21": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G344a49aa39"
+    }
+   ]
+  },
+  "Gc360b30006": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G3313e474b5"
+    }
+   ]
+  },
+  "Gc779655121": {
+   "additionalProperties": false,
+   "properties": {
+    "current_value": {
+     "$ref": "#/$defs/G5bcdebb44b"
+    },
+    "history": {
+     "$ref": "#/$defs/G75a66b167f"
+    },
+    "precision": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "enum": [
+        "exact",
+        "approximate",
+        "unspecified"
+       ]
+      }
+     ]
+    },
+    "risk_mark": {
+     "anyOf": [
+      {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/Redacted"
+        },
+        {
+         "const": "IMMEDIATE"
+        },
+        {
+         "const": "ON_RESULT"
+        }
+       ]
+      },
+      {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/Redacted"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      }
+     ]
+    },
+    "slot": {
+     "$ref": "#/$defs/G29984a0b7d"
+    }
+   },
+   "type": "object"
+  },
+  "Gca25934d91": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G5b421a6f3f"
+    }
+   ]
+  },
+  "Gcb9901e269": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Ge07812aed7"
+    }
+   ]
+  },
+  "Gcba9df942d": {
+   "additionalProperties": false,
+   "properties": {
+    "precision": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "enum": [
+        "exact",
+        "approximate",
+        "unspecified"
+       ]
+      }
+     ]
+    },
+    "value": {
+     "$ref": "#/$defs/Gbbe72ef846"
+    }
+   },
+   "type": "object"
+  },
+  "Gd1196c4416": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Ga8b1f41cf2"
+    },
+    {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   ]
+  },
+  "Gd2e8868dc7": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Gc360b30006"
+    },
+    {
+     "$ref": "#/$defs/G091bc98b81"
+    },
+    {
+     "$ref": "#/$defs/Gbdba09ddfb"
+    }
+   ]
+  },
+  "Gd44d02327b": {
+   "items": {
+    "$ref": "#/$defs/Ge05bf49283"
+   },
+   "type": "array"
+  },
+  "Gd919e47861": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Gdef2bbe905"
+    }
+   ]
+  },
+  "Gd99bd70eca": {
+   "additionalProperties": false,
+   "properties": {
+    "failed_steps": {
+     "$ref": "#/$defs/G9097b10546"
+    }
+   },
+   "type": "object"
+  },
+  "Gdb69e1f8b4": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G4d36b681b7"
+    }
+   ]
+  },
+  "Gde0e2537a7": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Gf1672a9ace"
+    },
+    {
+     "$ref": "#/$defs/Redacted"
+    }
+   ]
+  },
+  "Gdea8c89f58": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Gbb14e1a5a6"
+    }
+   ]
+  },
+  "Gdef2bbe905": {
+   "additionalProperties": false,
+   "properties": {
+    "action": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "anyOf": [
+        {
+         "pattern": "^(?:[A-Z][A-Z0-9_]{0,31})$(?![\\s\\S])",
+         "type": "string"
+        },
+        {
+         "$ref": "#/$defs/Redacted"
+        }
+       ]
+      }
+     ]
+    },
+    "next_item": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "anyOf": [
+        {
+         "pattern": "^(?:[A-Za-z0-9][A-Za-z0-9_.\\-]{0,63})$(?![\\s\\S])",
+         "type": "string"
+        },
+        {
+         "$ref": "#/$defs/Redacted"
+        }
+       ]
+      }
+     ]
+    },
+    "note": {
+     "$ref": "#/$defs/Redacted"
+    },
+    "reason": {
+     "$ref": "#/$defs/Redacted"
+    },
+    "targets": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "items": {
+        "$ref": "#/$defs/Redacted"
+       },
+       "type": "array"
+      }
+     ]
+    },
+    "values": {
+     "$ref": "#/$defs/G770d9d6bcc"
+    }
+   },
+   "type": "object"
+  },
+  "Gdf631f73d1": {
+   "additionalProperties": false,
+   "properties": {
+    "question_id": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "anyOf": [
+        {
+         "pattern": "^(?:[A-Za-z0-9][A-Za-z0-9_.\\-]{0,63})$(?![\\s\\S])",
+         "type": "string"
+        },
+        {
+         "$ref": "#/$defs/Redacted"
+        }
+       ]
+      }
+     ]
+    },
+    "reason": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "const": "REQUEST_SKIP"
+      },
+      {
+       "const": "REFUSED"
+      },
+      {
+       "const": "UNCERTAIN"
+      },
+      {
+       "const": "REASK_LIMIT"
+      }
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "Ge05bf49283": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/G29984a0b7d"
+    },
+    {
+     "$ref": "#/$defs/Redacted"
+    }
+   ]
+  },
+  "Ge07812aed7": {
+   "additionalProperties": false,
+   "properties": {
+    "code": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "anyOf": [
+        {
+         "pattern": "^(?:[A-Z][A-Z0-9_]{0,63})$(?![\\s\\S])",
+         "type": "string"
+        },
+        {
+         "$ref": "#/$defs/Redacted"
+        }
+       ]
+      }
+     ]
+    },
+    "message": {
+     "$ref": "#/$defs/Redacted"
+    },
+    "path": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "anyOf": [
+        {
+         "pattern": "^(?:[A-Za-z0-9_\\[\\]\\.\\-]{0,160})$(?![\\s\\S])",
+         "type": "string"
+        },
+        {
+         "$ref": "#/$defs/Redacted"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "Ge223ac5c0d": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/G5b8a002723"
+    },
+    {
+     "$ref": "#/$defs/Redacted"
+    }
+   ]
+  },
+  "Ge438ff098d": {
+   "additionalProperties": false,
+   "properties": {
+    "question_id": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "anyOf": [
+        {
+         "pattern": "^(?:[A-Za-z0-9][A-Za-z0-9_.\\-]{0,63})$(?![\\s\\S])",
+         "type": "string"
+        },
+        {
+         "$ref": "#/$defs/Redacted"
+        }
+       ]
+      }
+     ]
+    },
+    "repeat_key": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "anyOf": [
+        {
+         "pattern": "^(?:[A-Za-z0-9_\\-]{0,64})$(?![\\s\\S])",
+         "type": "string"
+        },
+        {
+         "$ref": "#/$defs/Redacted"
+        }
+       ]
+      }
+     ]
+    },
+    "slot_id": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "anyOf": [
+        {
+         "pattern": "^(?:[A-Za-z][A-Za-z0-9_\\-]{0,63})$(?![\\s\\S])",
+         "type": "string"
+        },
+        {
+         "$ref": "#/$defs/Redacted"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "Ge5ba951162": {
+   "additionalProperties": false,
+   "properties": {
+    "key": {
+     "$ref": "#/$defs/Redacted"
+    },
+    "precision": {
+     "$ref": "#/$defs/Redacted"
+    },
+    "save": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "boolean"
+      }
+     ]
+    },
+    "status": {
+     "$ref": "#/$defs/Redacted"
+    },
+    "value": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Redacted"
+      },
+      {
+       "type": "null"
+      },
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "number"
+      },
+      {
+       "maxItems": 0,
+       "type": "array"
+      },
+      {
+       "maxProperties": 0,
+       "type": "object"
+      }
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "Gea56762ed7": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/G6d9d857405"
+    },
+    {
+     "const": "IGNORED"
+    }
+   ]
+  },
+  "Geb1437f6eb": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G5b404229f6"
+    }
+   ]
+  },
+  "Gf030008735": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/G42c9ac7f8c"
+    },
+    {
+     "$ref": "#/$defs/Redacted"
+    }
+   ]
+  },
+  "Gf125f707fa": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/G61dc1febb4"
+    }
+   ]
+  },
+  "Gf1672a9ace": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Ge5ba951162"
+    }
+   ]
+  },
+  "Gf1966ef3d8": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Gfb2684c129"
+    },
+    {
+     "$ref": "#/$defs/Redacted"
+    }
+   ]
+  },
+  "Gfb2684c129": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Redacted"
+    },
+    {
+     "$ref": "#/$defs/Gc360b30006"
+    },
+    {
+     "$ref": "#/$defs/G5c2c4eaa6e"
+    }
+   ]
   }
  }
 }

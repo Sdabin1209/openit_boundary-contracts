@@ -26,7 +26,7 @@
   "log_entry": {
    "input": {
     "kind": "UTTERANCE",
-    "utterance": "고혈압 진단은 받았는데 약은 작년에 끊었어요",
+    "utterance": "[MASKED]",
     "intervention_decision": null
    },
    "handling": {
@@ -68,7 +68,7 @@
  "log_entry": {
   "input": {
    "kind": "UTTERANCE",
-   "utterance": "고혈압 진단은 받았는데 약은 작년에 끊었어요",
+   "utterance": "[MASKED]",
    "intervention_decision": null
   },
   "handling": {

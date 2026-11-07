@@ -371,7 +371,7 @@
     "keep_string_keys",
     "unlisted_string_action"
    ],
-   "description": "비식별 정책. 기본값 없음(사용자 결정). 제안 불변식: pseudonymize_keys에 session_id가 있어야 admin delete-session이 비식별 trace를 찾는다(코드는 없어도 시작한다). 3.0.0(U25): 계약 OpsFeedbackDeidentifiedTrace 밖 출력을 내던 선택지(scrub_string_keys·scrub_patterns 치환 문장, unlisted_string_action drop, count_map_key_pattern)를 뺐다. keep_string_patterns로 64자 넘는 값을 남기는 것은 스키마로 막지 못해 비식별기가 출력 자기 검사로 DEID_FAILED로 닫는다.",
+   "description": "비식별 정책. 기본값 없음(사용자 결정). 고를 수 있는 범위는 공개 규칙 boundary_contracts/data/deid_rules.json 이 정하고 출력 모양은 OpsFeedbackDeidentifiedTrace·OpsFeedbackReviewTrace(그 규칙에서 생성)가 정한다(3.7.0). session_id·turn_id 는 반드시 가명화한다(pseudonymize_keys 에 둘 다): admin delete-session 과 조회가 이 의사 식별자로 비식별 trace 를 찾는다. 두 키는 keep·mask_value 로 겹쳐 지정할 수 없고 그 정의(SessionId)를 mask_defs·drop_defs 로 가릴 수 없다. 3.0.0(U25): 계약 OpsFeedbackDeidentifiedTrace 밖 출력을 내던 선택지(scrub_string_keys·scrub_patterns 치환 문장, unlisted_string_action drop, count_map_key_pattern)를 뺐다.",
    "properties": {
     "policy_id": {
      "type": "string",
@@ -383,13 +383,64 @@
      "description": "salt 비밀의 이름. 값은 <이름>_FILE 파일에서 읽는다. 기본 OPS_DEID_SALT"
     },
     "pseudonymize_keys": {
-     "$ref": "#/$defs/StrList"
+     "type": "array",
+     "uniqueItems": true,
+     "items": {
+      "enum": [
+       "session_id",
+       "turn_id"
+      ]
+     },
+     "allOf": [
+      {
+       "contains": {
+        "const": "session_id"
+       }
+      },
+      {
+       "contains": {
+        "const": "turn_id"
+       }
+      }
+     ],
+     "description": "가명화할 키. 정확히 session_id·turn_id(3.7.0: 둘 다 필수, 다른 키는 출력 계약 밖)"
     },
     "keep_string_keys": {
-     "$ref": "#/$defs/StrList"
+     "type": "array",
+     "uniqueItems": true,
+     "items": {
+      "enum": [
+       "question_id",
+       "next_item",
+       "current_question_id",
+       "slot_id",
+       "repeat_key",
+       "code",
+       "action",
+       "path"
+      ]
+     },
+     "description": "원문 대신 식별자 모양 값을 남길 키. deid_rules.json keep_patterns 의 키 중에서만(그 패턴에 전체 일치할 때만 남고, 아니면 [MASKED])"
     },
     "keep_string_patterns": {
-     "$ref": "#/$defs/RegexMap"
+     "type": "object",
+     "propertyNames": {
+      "enum": [
+       "question_id",
+       "next_item",
+       "current_question_id",
+       "slot_id",
+       "repeat_key",
+       "code",
+       "action",
+       "path"
+      ]
+     },
+     "additionalProperties": {
+      "type": "string",
+      "format": "regex"
+     },
+     "description": "키별 추가 거르개(3.7.0): 값은 deid_rules.json 의 기본 패턴과 이 패턴 둘 다에 전체 일치해야 남는다. 기본보다 넓힐 수 없다(그 전에는 기본을 바꿔치기해 출력 계약 밖 값을 낼 수 있었다)"
     },
     "keep_count_map_keys": {
      "$ref": "#/$defs/StrList"
@@ -402,13 +453,40 @@
      "description": "3.0.0(U25, ops-feedback CR-008 안 2): mask만. drop은 비식별 뷰(OpsFeedbackDeidentifiedTrace)의 필수 칸을 빠뜨려 계약 밖 출력을 냈다"
     },
     "mask_defs": {
-     "$ref": "#/$defs/StrList"
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+       "const": "SessionId"
+      }
+     },
+     "description": "문진 스키마 TurnTrace 의 정의 이름. 그 정의를 거친 위치를 통째로 [MASKED] 로 바꾼다(가명 키의 정의 SessionId 는 안 된다)"
     },
     "drop_defs": {
-     "$ref": "#/$defs/StrList"
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+       "const": "SessionId"
+      }
+     },
+     "description": "문진 스키마 TurnTrace 의 정의 이름. 그 정의를 거친 위치를 통째로 [DROPPED] 로 바꾼다(가명 키의 정의 SessionId 는 안 된다)"
     },
     "mask_value_keys": {
-     "$ref": "#/$defs/StrList"
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+       "enum": [
+        "session_id",
+        "turn_id"
+       ]
+      }
+     },
+     "description": "타입과 상관없이 값을 통째로 [MASKED] 로 바꿀 키(가명 키는 안 된다)"
     },
     "mask_number_keys": {
      "$ref": "#/$defs/StrList"

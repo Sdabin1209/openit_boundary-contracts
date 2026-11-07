@@ -1,0 +1,45 @@
+{
+  "_설명": "3.7.0: 비식별 뷰(OpsFeedbackDeidentifiedTrace·OpsFeedbackReviewTrace)의 공개 규칙. 이 파일이 정본이고, 생성기(tools/gen_deid_view.py)와 ops-feedback 비식별기가 각각 이 데이터를 읽는다(구현 코드를 계약이 복사하지 않고, 구현도 값을 따로 박지 않는다). 정책 설정(OpsFeedbackJobConfig.deid)은 이 규칙 안에서만 고를 수 있다. 패턴은 전체 일치(fullmatch)로 쓴다.",
+  "tokens": {
+    "masked": "[MASKED]",
+    "dropped": "[DROPPED]"
+  },
+  "pseudonym": {
+    "keys": ["session_id", "turn_id"],
+    "pattern": "p-[0-9a-f]{32}",
+    "_설명": "이 키의 문자열 값은 어디에 나오든 반드시 의사 식별자다(조회·삭제 키로 쓴다). 정책은 두 키를 모두 가명화해야 하고 keep·mask_value 로 겹쳐 지정할 수 없다."
+  },
+  "keep_patterns": {
+    "question_id": "[A-Za-z0-9][A-Za-z0-9_.\\-]{0,63}",
+    "next_item": "[A-Za-z0-9][A-Za-z0-9_.\\-]{0,63}",
+    "current_question_id": "[A-Za-z0-9][A-Za-z0-9_.\\-]{0,63}",
+    "slot_id": "[A-Za-z][A-Za-z0-9_\\-]{0,63}",
+    "repeat_key": "[A-Za-z0-9_\\-]{0,64}",
+    "code": "[A-Z][A-Z0-9_]{0,63}",
+    "action": "[A-Z][A-Z0-9_]{0,31}",
+    "path": "[A-Za-z0-9_\\[\\]\\.\\-]{0,160}"
+  },
+  "keep_patterns_설명": "keep_string_keys 로 고를 수 있는 키와 그 값 패턴. 정책의 keep_string_patterns 는 이 패턴에 더하는 거르개다(둘 다 전체 일치해야 남는다): 넓힐 수 없다. 맞지 않으면 [MASKED].",
+  "count_map": {
+    "key_pattern": "[A-Z][A-Z0-9_]{0,31}",
+    "_설명": "keep_count_map_keys 로 지정한 키가 properties 없는 객체이고 그 additionalProperties 가 정확히 integer 일 때만 건수 맵(키 패턴 전체 일치, 값 0 이상의 정수, bool 아님)으로 남긴다. 그 밖의 자유 객체는 비운다({})."
+  },
+  "pause_reason": {
+    "paths": [
+      ["frontend_input", "turn_failure_signal"],
+      ["orchestrator_output", "turn_failure_signal"],
+      ["log_entry", "turn_failure_signal"],
+      ["orchestrator_output", "log_entry", "turn_failure_signal"]
+    ],
+    "values": ["RISK", "REASK_LIMIT", "OTHER"],
+    "_설명": "keep_pause_reason 이 참이면 이 네 경로의 객체에 원본 pause_reason 을 다시 넣는다(모르는 값은 OTHER). 거짓이면 그 키를 지운다. 다른 위치에는 pause_reason 이 없다."
+  },
+  "review_utterance": {
+    "paths": [
+      ["frontend_message", "utterance"],
+      ["extract_input", "user_utterance"]
+    ],
+    "max_chars": 1000,
+    "_설명": "검토 사본(OpsFeedbackReviewTrace)에서만, 정책 review_utterance.keep 이 참이면 이 두 경로의 원문(비어 있지 않은 문자열, max_chars 까지 자른 앞부분)을 남긴다. 남기는 부분도 잔존 패턴 검사를 거친다."
+  }
+}
