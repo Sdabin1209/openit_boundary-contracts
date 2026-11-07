@@ -13,22 +13,22 @@
   "$defs": {
     "Port": {
       "type": "string",
-      "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
+      "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$(?![\\s\\S])",
       "description": "TCP 포트 1~65535"
     },
     "Int": {
       "type": "string",
-      "pattern": "^[0-9]+$",
+      "pattern": "^[0-9]+$(?![\\s\\S])",
       "description": "0 이상 정수"
     },
     "PosInt": {
       "type": "string",
-      "pattern": "^[1-9][0-9]*$",
+      "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
       "description": "1 이상 정수"
     },
     "Seconds": {
       "type": "string",
-      "pattern": "^[0-9]+(\\.[0-9]+)?$",
+      "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
       "description": "초(소수 허용, 0 이상)"
     },
     "Flag1": {
@@ -55,7 +55,7 @@
     },
     "CsvRoles": {
       "type": "string",
-      "pattern": "^[a-z0-9-]+(,[a-z0-9-]+)*$",
+      "pattern": "^[a-z0-9-]+(,[a-z0-9-]+)*$(?![\\s\\S])",
       "description": "쉼표로 구분한 역할 이름 목록"
     }
   },
@@ -162,7 +162,7 @@
     },
     "QA_FAILURES_TOKEN_ENV": {
       "type": "string",
-      "pattern": "^[A-Z][A-Z0-9_]*$",
+      "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
       "description": "I7 토큰의 비밀 이름. 이 이름의 _FILE(또는 개발용 변수)을 읽는다",
       "default": "QA_FAILURES_TOKEN"
     },
@@ -267,7 +267,7 @@
     },
     "QA_GATE_TOKEN_ENV": {
       "type": "string",
-      "pattern": "^[A-Z][A-Z0-9_]*$",
+      "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
       "description": "3.4.7: I4 읽기 토큰의 비밀 이름",
       "default": "QA_GATE_TOKEN"
     },

@@ -51,12 +51,12 @@
     "properties": {
      "name": {
       "type": "string",
-      "pattern": "^[a-z][a-z0-9_]{0,30}$",
+      "pattern": "^[a-z][a-z0-9_]{0,30}$(?![\\s\\S])",
       "description": "계정 이름. 암호 파일 이름도 이것"
      },
      "database": {
       "type": "string",
-      "pattern": "^[a-z][a-z0-9_]{0,30}$",
+      "pattern": "^[a-z][a-z0-9_]{0,30}$(?![\\s\\S])",
       "description": "접속할 데이터베이스"
      },
      "privilege": {
@@ -71,7 +71,7 @@
       "minItems": 1,
       "items": {
        "type": "string",
-       "pattern": "^[A-Z][A-Z0-9_]*_FILE$"
+       "pattern": "^[A-Z][A-Z0-9_]*_FILE$(?![\\s\\S])"
       },
       "description": "이 계정으로 접속하는 영역 컨테이너의 환경 변수 이름(그 영역 Env 스키마에 있는 *_DATABASE_URL_FILE 등). deploy 가 접속 URI 파일을 만들어 준다"
      }

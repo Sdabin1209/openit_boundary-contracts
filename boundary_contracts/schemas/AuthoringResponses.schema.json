@@ -24,7 +24,7 @@
       "properties": {
         "flag_id": {
           "type": "string",
-          "pattern": "^fl-[0-9a-f]+(-[0-9]+)?$"
+          "pattern": "^fl-[0-9a-f]+(-[0-9]+)?$(?![\\s\\S])"
         },
         "path": {
           "type": "string",
@@ -193,7 +193,7 @@
             "properties": {
               "flag_id": {
                 "type": "string",
-                "pattern": "^fl-[0-9a-f]+(-[0-9]+)?$"
+                "pattern": "^fl-[0-9a-f]+(-[0-9]+)?$(?![\\s\\S])"
               },
               "path": {
                 "type": "string",
@@ -448,7 +448,7 @@
             "properties": {
               "flag_id": {
                 "type": "string",
-                "pattern": "^fl-[0-9a-f]+(-[0-9]+)?$"
+                "pattern": "^fl-[0-9a-f]+(-[0-9]+)?$(?![\\s\\S])"
               },
               "path": {
                 "type": "string",
@@ -609,7 +609,7 @@
               },
               "version": {
                 "type": "string",
-                "pattern": "^[1-9][0-9]*$"
+                "pattern": "^[1-9][0-9]*$(?![\\s\\S])"
               },
               "title": {
                 "type": "string",

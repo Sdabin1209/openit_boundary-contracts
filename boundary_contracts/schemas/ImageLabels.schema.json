@@ -13,32 +13,32 @@
   "properties": {
     "io.openit.service": {
       "type": "string",
-      "pattern": "^[a-z][a-z0-9-]*$",
+      "pattern": "^[a-z][a-z0-9-]*$(?![\\s\\S])",
       "description": "서비스(이미지) 이름"
     },
     "io.openit.revision": {
       "type": "string",
-      "pattern": "^[0-9a-f]{7,40}$",
+      "pattern": "^[0-9a-f]{7,40}$(?![\\s\\S])",
       "description": "소스 커밋. 'unknown' 불가"
     },
     "io.openit.contracts.boundary": {
       "type": "string",
-      "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$(?![\\s\\S])",
       "description": "소비하는 boundary-contracts 태그(v 접두사 포함)"
     },
     "io.openit.contracts.survey-schema": {
       "type": "string",
-      "pattern": "^([0-9]+|n/a)$",
+      "pattern": "^([0-9]+|n/a)$(?![\\s\\S])",
       "description": "문진 스키마 패키지(openit-survey-schema) 버전의 주 번호(예: survey-schema-v2.0.0 → \"2\"). 이미지에 실제로 들어간 패키지의 버전에서 찍는다(U50). 문진 스키마의 정수 CONTRACT_VERSION(모델 런타임 호환 번호, survey-service ADR-0044)이 아니다. deploy는 기준표 태그의 주 번호와 비교한다. 쓰지 않는 영역은 n/a"
     },
     "io.openit.model-runtime": {
       "type": "string",
-      "pattern": "^(v[0-9]+\\.[0-9]+\\.[0-9]+|n/a)$",
+      "pattern": "^(v[0-9]+\\.[0-9]+\\.[0-9]+|n/a)$(?![\\s\\S])",
       "description": "model-runtime 을 쓰는 서비스만. 쓰지 않으면 라벨을 달지 않거나 n/a. v 접두사 포함"
     },
     "io.openit.variant": {
       "type": "string",
-      "pattern": "^[a-z][a-z0-9-]*$"
+      "pattern": "^[a-z][a-z0-9-]*$(?![\\s\\S])"
     },
     "io.openit.app-version": {
       "type": "string",
@@ -91,7 +91,7 @@
   ],
   "propertyNames": {
     "not": {
-      "pattern": "^io\\.openit\\.(?!(service|revision|contracts\\.boundary|contracts\\.survey-schema|model-runtime|variant|app-version|langgraph|jobs|exposure|database|inputs)$)"
+      "pattern": "^io\\.openit\\.(?!(service|revision|contracts\\.boundary|contracts\\.survey-schema|model-runtime|variant|app-version|langgraph|jobs|exposure|database|inputs)$(?![\\s\\S]))"
     }
   }
 }

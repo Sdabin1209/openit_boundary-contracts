@@ -6,7 +6,9 @@
   "x-producers": [
     "survey-service"
   ],
-  "x-consumers": ["admin-console"],
+  "x-consumers": [
+    "admin-console"
+  ],
   "type": "object",
   "required": [
     "session_id",
@@ -20,7 +22,7 @@
     },
     "status": {
       "type": "string",
-      "pattern": "^ENDED_[A-Z_]+$"
+      "pattern": "^ENDED_[A-Z_]+$(?![\\s\\S])"
     },
     "ended_at": {
       "$ref": "_common.schema.json#/$defs/Timestamp"

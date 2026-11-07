@@ -195,7 +195,7 @@
                 "required": true,
                 "schema": {
                   "type": "string",
-                  "pattern": "^[0-9]+$"
+                  "pattern": "^[0-9]+$(?![\\s\\S])"
                 }
               }
             },
@@ -384,7 +384,7 @@
                 "required": true,
                 "schema": {
                   "type": "string",
-                  "pattern": "^[0-9]+$"
+                  "pattern": "^[0-9]+$(?![\\s\\S])"
                 }
               }
             },
@@ -602,7 +602,7 @@
                 "required": true,
                 "schema": {
                   "type": "string",
-                  "pattern": "^[0-9]+$"
+                  "pattern": "^[0-9]+$(?![\\s\\S])"
                 }
               }
             },
@@ -800,7 +800,7 @@
                 "required": true,
                 "schema": {
                   "type": "string",
-                  "pattern": "^[0-9]+$"
+                  "pattern": "^[0-9]+$(?![\\s\\S])"
                 }
               }
             },
@@ -998,7 +998,7 @@
                 "required": true,
                 "schema": {
                   "type": "string",
-                  "pattern": "^[0-9]+$"
+                  "pattern": "^[0-9]+$(?![\\s\\S])"
                 }
               }
             },
@@ -1188,7 +1188,7 @@
                 "required": true,
                 "schema": {
                   "type": "string",
-                  "pattern": "^[0-9]+$"
+                  "pattern": "^[0-9]+$(?![\\s\\S])"
                 }
               }
             },

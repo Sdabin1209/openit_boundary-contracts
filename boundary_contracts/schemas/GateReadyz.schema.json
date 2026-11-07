@@ -42,7 +42,7 @@
         },
         "judging": {
           "type": "string",
-          "pattern": "^(enabled|disabled.*)$",
+          "pattern": "^(enabled|disabled.*)$(?![\\s\\S])",
           "description": "판정 Loop 상태 문자열. 'enabled' 또는 'disabled (사유)'(I1·I3 미연결). 초안은 boolean이었으나 실제 서버 출력이 문자열이라 고쳤다."
         },
         "awaiting_approval": {

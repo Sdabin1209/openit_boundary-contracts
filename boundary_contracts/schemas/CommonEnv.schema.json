@@ -21,7 +21,7 @@
     },
     "OPENIT_BACKUP_URL": {
       "type": "string",
-      "pattern": "^https://[^/\\s]+/.+$",
+      "pattern": "^https://[^/\\s]+/.+$(?![\\s\\S])",
       "description": "3.4.5(RUNTIME R10.1): 이 영역의 백업 저장소 저장 위치. restic REST 서버 프로토콜(rest:https://… 의 https 부분, restic rest-server 표준). 영역마다 다른 경로. 영역 게이트웨이 출구(external:backup)로만 닿는다"
     },
     "OPENIT_BACKUP_CREDENTIALS_FILE": {
@@ -36,7 +36,7 @@
     },
     "SSL_CERT_FILE": {
       "type": "string",
-      "pattern": "^/[^\\s]*$",
+      "pattern": "^/[^\\s]*$(?![\\s\\S])",
       "description": "3.5.0: TLS 검증에 쓸 CA 인증서 파일 경로(OpenSSL 표준 변수 이름). 배치 영역이 사설 CA 루트를 마운트하고 이 경로를 준다. 파일은 ContainerInputs.files 에 kind=ca-bundle 로 선언한다. 3.4.4 는 '표준 이름이라 다시 정하지 않는다'며 칸을 두지 않아 주입 값 하나가 계약 밖이었다"
     }
   }

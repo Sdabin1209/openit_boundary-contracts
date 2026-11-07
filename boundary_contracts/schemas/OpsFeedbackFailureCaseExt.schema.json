@@ -33,7 +33,7 @@
         "properties": {
           "rule_id": {
             "type": "string",
-            "pattern": "^[A-Z][A-Z0-9_]*$"
+            "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])"
           },
           "detail": {
             "type": "object",
@@ -44,7 +44,7 @@
     },
     "primary_rule": {
       "type": "string",
-      "pattern": "^[A-Z][A-Z0-9_]*$"
+      "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])"
     },
     "deid_policy_id": {
       "type": "string",

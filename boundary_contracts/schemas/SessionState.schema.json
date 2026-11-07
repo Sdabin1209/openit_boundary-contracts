@@ -2,8 +2,12 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "title": "SessionState",
  "description": "키오스크가 폴링하는 세션 상태(D66). 위험 정지가 풀렸는지와 이어서 할 안내 문장을 알린다.",
- "x-producers": ["survey-service"],
- "x-consumers": ["kiosk-frontend"],
+ "x-producers": [
+  "survey-service"
+ ],
+ "x-consumers": [
+  "kiosk-frontend"
+ ],
  "type": "object",
  "additionalProperties": false,
  "required": [
@@ -16,7 +20,7 @@
    "type": "string",
    "minLength": 1,
    "maxLength": 64,
-   "pattern": "^[A-Za-z0-9_-]+$"
+   "pattern": "^[A-Za-z0-9_-]+$(?![\\s\\S])"
   },
   "state": {
    "enum": [

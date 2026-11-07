@@ -3,8 +3,12 @@
   "$id": "BuildImageRequest.schema.json",
   "title": "BuildImageRequest",
   "description": "영역 빌드 진입점 입력(2.5.0, OPEN_GAPS U42). deploy가 이 JSON을 파일로 쓰고 영역 리포 루트에서 `bash scripts/build-image.sh <요청 파일>`을 부른다. 영역은 Dockerfile 인자 이름·빌드 컨텍스트·라벨 값을 스스로 정하고(구조 규칙 1), 결과를 표준 출력 마지막 줄에 BuildImageResult JSON 한 줄로 낸다(진행 기록은 표준 오류). 종료 코드 0 성공, 0이 아니면 실패. 도커 실행 파일은 표준 환경 변수 DOCKER(없으면 docker)로만 바꾼다. 비밀 값을 받지도 이미지에 넣지도 않는다. 같은 요청은 같은 이미지를 낸다(멱등).",
-  "x-producers": ["deploy"],
-  "x-consumers": ["*"],
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "*"
+  ],
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -22,7 +26,7 @@
     },
     "revision": {
       "type": "string",
-      "pattern": "^[0-9a-f]{7,40}$",
+      "pattern": "^[0-9a-f]{7,40}$(?![\\s\\S])",
       "description": "소스 커밋. 라벨 io.openit.revision"
     },
     "versions": {
@@ -35,17 +39,17 @@
       "properties": {
         "boundary": {
           "type": "string",
-          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$(?![\\s\\S])",
           "description": "boundary-contracts 태그. 라벨 io.openit.contracts.boundary"
         },
         "model_runtime": {
           "type": "string",
-          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$(?![\\s\\S])",
           "description": "model-runtime 태그. 라벨 io.openit.model-runtime"
         },
         "survey_schema": {
           "type": "string",
-          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$(?![\\s\\S])",
           "description": "문진 스키마 버전(태그 survey-schema-vX.Y.Z의 vX.Y.Z). 라벨 io.openit.contracts.survey-schema"
         }
       }
@@ -75,12 +79,12 @@
     },
     "variant": {
       "type": "string",
-      "pattern": "^[a-z0-9-]+$",
+      "pattern": "^[a-z0-9-]+$(?![\\s\\S])",
       "description": "한 리포가 이미지를 여럿 낼 때 고른다(예: model-runtime의 gpu). 없으면 기본 이미지. 영역이 모르는 값이면 실패한다"
     },
     "image_tag": {
       "type": "string",
-      "pattern": "^[a-z0-9./_-]+:[A-Za-z0-9._-]+$",
+      "pattern": "^[a-z0-9./_-]+:[A-Za-z0-9._-]+$(?![\\s\\S])",
       "description": "만들 로컬 이미지 참조"
     }
   }

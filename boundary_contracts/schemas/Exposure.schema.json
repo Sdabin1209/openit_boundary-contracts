@@ -14,7 +14,7 @@
   "properties": {
     "service": {
       "type": "string",
-      "pattern": "^[a-z][a-z0-9-]*$"
+      "pattern": "^[a-z][a-z0-9-]*$(?![\\s\\S])"
     },
     "egress": {
       "type": "array",
@@ -23,7 +23,7 @@
         "oneOf": [
           {
             "type": "string",
-            "pattern": "^[a-z][a-z0-9-]*$",
+            "pattern": "^[a-z][a-z0-9-]*$(?![\\s\\S])",
             "description": "받는 서비스 이름(INTERFACES 한눈에 표의 호출 관계 안에서만)"
           },
           {
@@ -96,7 +96,7 @@
               "uniqueItems": true,
               "items": {
                 "type": "string",
-                "pattern": "^[a-z][a-z-]*$"
+                "pattern": "^[a-z][a-z-]*$(?![\\s\\S])"
               }
             }
           },
@@ -124,7 +124,7 @@
         },
         "upstream_token": {
           "type": "string",
-          "pattern": "^[a-z][a-z0-9-]*$",
+          "pattern": "^[a-z][a-z0-9-]*$(?![\\s\\S])",
           "description": "gateway 가 상류에 붙이는 서비스 토큰의 비밀 이름(값 아님)"
         },
         "user_header": {

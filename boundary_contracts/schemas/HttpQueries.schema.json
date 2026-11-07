@@ -25,7 +25,7 @@
         },
         "limit": {
           "type": "string",
-          "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$",
+          "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$(?![\\s\\S])",
           "default": "100"
         }
       },
@@ -51,7 +51,7 @@
       "properties": {
         "question_set_id": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])"
         }
       },
       "required": [],
@@ -66,7 +66,7 @@
         },
         "limit": {
           "type": "string",
-          "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$",
+          "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$(?![\\s\\S])",
           "default": "100"
         },
         "status": {
@@ -82,11 +82,11 @@
       "properties": {
         "limit": {
           "type": "string",
-          "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$"
+          "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$(?![\\s\\S])"
         },
         "version": {
           "type": "string",
-          "pattern": "^[0-9]+$"
+          "pattern": "^[0-9]+$(?![\\s\\S])"
         },
         "latest_only": {
           "enum": [
@@ -97,7 +97,7 @@
         "updated_since": {
           "type": "string",
           "format": "date-time",
-          "pattern": "Z$"
+          "pattern": "Z$(?![\\s\\S])"
         },
         "review_status": {
           "enum": [
@@ -125,7 +125,7 @@
       "properties": {
         "version": {
           "type": "string",
-          "pattern": "^[0-9]+$"
+          "pattern": "^[0-9]+$(?![\\s\\S])"
         }
       },
       "required": [],
@@ -140,36 +140,36 @@
         },
         "limit": {
           "type": "string",
-          "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$",
+          "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$(?![\\s\\S])",
           "default": "100"
         },
         "question_set_id": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])"
         },
         "question_set_version": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])"
         },
         "lora_a_id": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])"
         },
         "lora_a_version": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])"
         },
         "lora_b_id": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])"
         },
         "lora_b_version": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])"
         },
         "submission_id": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])"
         }
       },
       "required": [],
@@ -197,12 +197,12 @@
         },
         "limit": {
           "type": "string",
-          "pattern": "^([1-9]|[1-9][0-9]|1[0-9]{2}|200)$",
+          "pattern": "^([1-9]|[1-9][0-9]|1[0-9]{2}|200)$(?![\\s\\S])",
           "default": "50"
         },
         "cursor": {
           "type": "string",
-          "pattern": "^[0-9]+$"
+          "pattern": "^[0-9]+$(?![\\s\\S])"
         }
       },
       "required": [],
@@ -213,7 +213,7 @@
       "properties": {
         "subject_ref": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9._:/#=+-]{1,128}$"
+          "pattern": "^[A-Za-z0-9._:/#=+-]{1,128}$(?![\\s\\S])"
         },
         "status": {
           "enum": [
@@ -231,12 +231,12 @@
         },
         "limit": {
           "type": "string",
-          "pattern": "^([1-9]|[1-9][0-9]|1[0-9]{2}|200)$",
+          "pattern": "^([1-9]|[1-9][0-9]|1[0-9]{2}|200)$(?![\\s\\S])",
           "default": "50"
         },
         "cursor": {
           "type": "string",
-          "pattern": "^[0-9]{1,18}$"
+          "pattern": "^[0-9]{1,18}$(?![\\s\\S])"
         }
       },
       "required": [],
@@ -261,7 +261,7 @@
       "properties": {
         "topics": {
           "type": "string",
-          "pattern": "^(alerts|result_ready)(,(alerts|result_ready))*$"
+          "pattern": "^(alerts|result_ready)(,(alerts|result_ready))*$(?![\\s\\S])"
         }
       },
       "required": [],

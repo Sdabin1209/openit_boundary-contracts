@@ -20,7 +20,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$(?![\\s\\S])",
       "maxLength": 128
     },
     "version": {
@@ -29,7 +29,7 @@
     },
     "content_hash": {
       "type": "string",
-      "pattern": "^sha256:[0-9a-f]{64}$"
+      "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])"
     }
   }
 }

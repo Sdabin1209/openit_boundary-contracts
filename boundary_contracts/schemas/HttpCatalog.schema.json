@@ -23,7 +23,7 @@
       "type": "object",
       "minProperties": 1,
       "propertyNames": {
-        "pattern": "^[a-z][a-z0-9-]*$"
+        "pattern": "^[a-z][a-z0-9-]*$(?![\\s\\S])"
       },
       "additionalProperties": {
         "type": "object",
@@ -38,7 +38,7 @@
           },
           "document": {
             "type": "string",
-            "pattern": "^[a-z][a-z0-9-]*\\.json$"
+            "pattern": "^[a-z][a-z0-9-]*\\.json$(?![\\s\\S])"
           }
         },
         "additionalProperties": false

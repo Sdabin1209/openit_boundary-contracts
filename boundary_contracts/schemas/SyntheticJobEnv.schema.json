@@ -47,7 +47,7 @@
     }
   },
   "patternProperties": {
-    "_FILE$": {
+    "_FILE$(?![\\s\\S])": {
       "type": "string",
       "pattern": "^/[^\\s\\u0000]*(?![\\s\\S])"
     }

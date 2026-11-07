@@ -26,7 +26,7 @@
     },
     "image": {
       "type": "string",
-      "pattern": "^[a-z][a-z0-9-]*$",
+      "pattern": "^[a-z][a-z0-9-]*$(?![\\s\\S])",
       "description": "게시 이미지 이름(라벨 io.openit.service 와 같다)"
     },
     "read_only_root": {
@@ -42,14 +42,14 @@
         "string",
         "null"
       ],
-      "pattern": "^[A-Z][A-Z0-9_]*$",
+      "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
       "description": "역할을 고르는 환경 변수 이름(예: STEP_ROLE). 역할이 하나면 null 이고 roles 의 키는 default 하나다"
     },
     "roles": {
       "type": "object",
       "minProperties": 1,
       "propertyNames": {
-        "pattern": "^[a-z][a-z0-9-]*$"
+        "pattern": "^[a-z][a-z0-9-]*$(?![\\s\\S])"
       },
       "additionalProperties": {
         "allOf": [
@@ -69,7 +69,7 @@
     "jobs": {
       "type": "object",
       "propertyNames": {
-        "pattern": "^[a-z][a-z0-9-]*$"
+        "pattern": "^[a-z][a-z0-9-]*$(?![\\s\\S])"
       },
       "additionalProperties": {
         "$ref": "#/$defs/InputSet"
@@ -135,12 +135,12 @@
             "string",
             "null"
           ],
-          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
           "description": "경로를 주는 환경 변수(예: DB_PASSWORD_FILE). null 이면 path 고정"
         },
         "path": {
           "type": "string",
-          "pattern": "^/[^\\s]*$",
+          "pattern": "^/[^\\s]*$(?![\\s\\S])",
           "description": "path_env 가 없을 때 이미지가 읽는 경로(path_env 가 있으면 그 기본값)"
         },
         "directory": {
@@ -163,7 +163,7 @@
             "string",
             "null"
           ],
-          "pattern": "^[A-Z][A-Za-z0-9]*$",
+          "pattern": "^[A-Z][A-Za-z0-9]*$(?![\\s\\S])",
           "description": "내용이 따르는 계약 스키마 이름(있으면)"
         },
         "required": {
@@ -186,7 +186,7 @@
       "properties": {
         "path": {
           "type": "string",
-          "pattern": "^/[^\\s]*$"
+          "pattern": "^/[^\\s]*$(?![\\s\\S])"
         },
         "persist": {
           "type": "boolean",
@@ -212,7 +212,7 @@
       "properties": {
         "env_schema": {
           "type": "string",
-          "pattern": "^[A-Z][A-Za-z0-9]*Env$",
+          "pattern": "^[A-Z][A-Za-z0-9]*Env$(?![\\s\\S])",
           "description": "이 역할이 받는 환경 변수의 계약 스키마 이름"
         },
         "process": {
@@ -265,7 +265,7 @@
           "description": "Job config directory paths. Resolve relative values against the config file container directory. Only these declared paths can be mounted; configuration content is validated against JobsDeclaration.config.schema first.",
           "propertyNames": {
             "type": "string",
-            "pattern": "^/(?:[^~/]|~[01])*(?:/(?:[^~/]|~[01])*)*$",
+            "pattern": "^/(?:[^~/]|~[01])*(?:/(?:[^~/]|~[01])*)*$(?![\\s\\S])",
             "description": "RFC 6901 JSON Pointer in the job config declared by JobsDeclaration.config."
           },
           "additionalProperties": {

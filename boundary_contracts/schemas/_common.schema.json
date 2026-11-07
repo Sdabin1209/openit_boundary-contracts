@@ -12,20 +12,20 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 128,
-      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$(?![\\s\\S])"
     },
     "Hash": {
       "type": "string",
-      "pattern": "^sha256:[0-9a-f]{64}$"
+      "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])"
     },
     "Timestamp": {
       "type": "string",
       "format": "date-time",
-      "pattern": "Z$"
+      "pattern": "Z$(?![\\s\\S])"
     },
     "PipelineSchemaVersion": {
       "type": "string",
-      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$(?![\\s\\S])"
     },
     "RuntimeContractVersion": {
       "type": "integer",
@@ -67,7 +67,7 @@
       "properties": {
         "path": {
           "type": "string",
-          "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\x00]+$",
+          "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$(?![\\s\\S])))[^\\\\\\x00]+$(?![\\s\\S])",
           "maxLength": 200,
           "description": "어댑터 디렉터리 안의 시스템 프롬프트 파일 경로(상대 경로, '/'로 구분, '..'·절대 경로·역슬래시 금지). 예: system_prompt.txt. 파일이 어댑터 디렉터리 안에 있으므로 adapter_hash에도 포함된다."
         },

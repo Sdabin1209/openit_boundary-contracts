@@ -19,12 +19,12 @@
       "properties": {
         "release_id": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$(?![\\s\\S])",
           "maxLength": 128
         },
         "question_set_id": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])",
           "description": "3.3.0: 받을 문진표 ID. 릴리스의 question_sets가 둘 이상이면 필수(없으면 400 INVALID_RECORD), 하나면 생략 가능."
         }
       }
@@ -40,16 +40,16 @@
       "properties": {
         "release_id": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$(?![\\s\\S])",
           "maxLength": 128
         },
         "question_set_id": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])"
         },
         "content_hash": {
           "type": "string",
-          "pattern": "^sha256:[0-9a-f]{64}$"
+          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])"
         },
         "question_bank": {
           "$ref": "https://openit.example/survey/v1/QuestionBank.json"

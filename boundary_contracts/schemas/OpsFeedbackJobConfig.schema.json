@@ -343,7 +343,7 @@
     },
     "salt_env": {
      "type": "string",
-     "pattern": "^[A-Z][A-Z0-9_]*$",
+     "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
      "description": "salt 비밀의 이름. 값은 <이름>_FILE 파일에서 읽는다. 기본 OPS_DEID_SALT"
     },
     "pseudonymize_keys": {

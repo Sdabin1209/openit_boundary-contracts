@@ -13,12 +13,12 @@
   "$defs": {
     "Port": {
       "type": "string",
-      "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
+      "pattern": "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$(?![\\s\\S])",
       "description": "TCP 포트 1~65535"
     },
     "PosInt": {
       "type": "string",
-      "pattern": "^[1-9][0-9]*$",
+      "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
       "description": "1 이상 정수"
     },
     "Path": {
@@ -29,27 +29,27 @@
     },
     "Duration": {
       "type": "string",
-      "pattern": "^[0-9]+(ms|s|m|h|d)$",
+      "pattern": "^[0-9]+(ms|s|m|h|d)$(?![\\s\\S])",
       "description": "기간(정수+단위 ms|s|m|h|d)"
     },
     "HostPort": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9.-]+:[0-9]{1,5}$",
+      "pattern": "^[A-Za-z0-9.-]+:[0-9]{1,5}$(?![\\s\\S])",
       "description": "<호스트>:<포트>"
     },
     "HttpsUrl": {
       "type": "string",
-      "pattern": "^https://[^\\s]+$",
+      "pattern": "^https://[^\\s]+$(?![\\s\\S])",
       "description": "https URL"
     },
     "DnsName": {
       "type": "string",
-      "pattern": "^(?=.{1,251}$)[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*(?![\\s\\S])",
+      "pattern": "^(?=.{1,251}$(?![\\s\\S]))[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*(?![\\s\\S])",
       "description": "RFC 1123 ASCII DNS hostname: labels 1..63, total 1..251 bytes; no trailing dot, space or path separators. 3.6.5: 251 = POSIX NAME_MAX 255 - len('.ott'): the name is also the token file name <name>.ott in STEP_TOKENS_DIR (RFC 1123 allows 253; longer names cannot be stored as one file)."
     },
     "DnsNameList": {
       "type": "string",
-      "pattern": "^(?=[^ ]{1,251}(?: |$))[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*(?: (?=[^ ]{1,251}(?: |$))[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*)*(?![\\s\\S])",
+      "pattern": "^(?=[^ ]{1,251}(?: |$(?![\\s\\S])))[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*(?: (?=[^ ]{1,251}(?: |$(?![\\s\\S])))[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*)*(?![\\s\\S])",
       "description": "One or more DNS hostnames (each as DnsName, 1..251 bytes) separated by one ASCII space."
     }
   },
@@ -88,7 +88,7 @@
     },
     "STEP_CA_DNS_NAMES": {
       "type": "string",
-      "pattern": "^$|^[A-Za-z0-9.-]+( [A-Za-z0-9.-]+)*$",
+      "pattern": "^$(?![\\s\\S])|^[A-Za-z0-9.-]+( [A-Za-z0-9.-]+)*$(?![\\s\\S])",
       "description": "serve 의 추가 DNS 이름(공백 구분). 없으면 step-ca"
     },
     "STEP_CA_PASSWORD_FILE": {
@@ -150,7 +150,7 @@
     },
     "STEP_CERT_GID": {
       "type": "string",
-      "pattern": "^[0-9]{1,10}$",
+      "pattern": "^[0-9]{1,10}$(?![\\s\\S])",
       "default": "10100",
       "description": "3.4.17: role=cert 가 쓰는 인증서·키 파일(키 0640)의 그룹. 그 인증서를 읽는 컨테이너는 이 그룹을 보조 그룹으로 받는다(deploy 의 group_add). 사용자 번호(UID)는 이미지가 정하고 deploy 는 알지 않는다"
     }

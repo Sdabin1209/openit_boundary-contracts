@@ -24,12 +24,12 @@
       "allOf": [
         {
           "not": {
-            "pattern": "^https://[lL][oO][cC][aA][lL][hH][oO][sS][tT]\\.?(:443)?([/?#]|$)"
+            "pattern": "^https://[lL][oO][cC][aA][lL][hH][oO][sS][tT]\\.?(:443)?([/?#]|$(?![\\s\\S]))"
           }
         },
         {
           "not": {
-            "pattern": "^https://[^/?#@:\\s]*\\.([lL][oO][cC][aA][lL]|[lL][oO][cC][aA][lL][dD][oO][mM][aA][iI][nN]|[iI][nN][tT][eE][rR][nN][aA][lL]|[lL][aA][nN]|[hH][oO][mM][eE]|[cC][oO][rR][pP]|[iI][nN][tT][rR][aA][nN][eE][tT])\\.?(:443)?([/?#]|$)"
+            "pattern": "^https://[^/?#@:\\s]*\\.([lL][oO][cC][aA][lL]|[lL][oO][cC][aA][lL][dD][oO][mM][aA][iI][nN]|[iI][nN][tT][eE][rR][nN][aA][lL]|[lL][aA][nN]|[hH][oO][mM][eE]|[cC][oO][rR][pP]|[iI][nN][tT][rR][aA][nN][eE][tT])\\.?(:443)?([/?#]|$(?![\\s\\S]))"
           }
         }
       ],
@@ -45,12 +45,12 @@
       "properties": {
         "p256dh": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9_-]+=*$",
+          "pattern": "^[A-Za-z0-9_-]+=*$(?![\\s\\S])",
           "maxLength": 200
         },
         "auth": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9_-]+=*$",
+          "pattern": "^[A-Za-z0-9_-]+=*$(?![\\s\\S])",
           "maxLength": 64
         }
       },

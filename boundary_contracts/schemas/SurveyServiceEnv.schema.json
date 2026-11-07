@@ -122,7 +122,7 @@
  "properties": {
   "SURVEY_PORT": {
    "type": "string",
-   "pattern": "^[0-9]{1,5}$",
+   "pattern": "^[0-9]{1,5}$(?![\\s\\S])",
    "description": "바인드 포트(/healthz, /readyz 포함)",
    "default": "8080"
   },
@@ -213,17 +213,17 @@
   },
   "SURVEY_RELEASE_READER_URL": {
    "type": "string",
-   "pattern": "^https?://[^\\s]+$",
+   "pattern": "^https?://[^\\s]+$(?![\\s\\S])",
    "description": "SURVEY_RELEASE_READER=http일 때 release-gate 읽기 면 주소"
   },
   "SURVEY_TRACE_INGEST_URL": {
    "type": "string",
-   "pattern": "^https?://[^\\s]+$",
+   "pattern": "^https?://[^\\s]+$(?![\\s\\S])",
    "description": "SURVEY_TRACE_INGEST=http일 때 ops-feedback 수집 주소"
   },
   "SURVEY_INFERENCE_URL": {
    "type": "string",
-   "pattern": "^https?://[^\\s]+$",
+   "pattern": "^https?://[^\\s]+$(?![\\s\\S])",
    "description": "원격 추론 서버(model-serving) 주소. SURVEY_MODEL_BACKEND와 둘 중 하나 필수(3.0.2)"
   },
   "SURVEY_SESSION_DB": {
@@ -245,276 +245,276 @@
   },
   "SURVEY_RELEASE_READER_TOKEN_ENV": {
    "type": "string",
-   "pattern": "^[A-Z][A-Z0-9_]*$",
+   "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
    "description": "I4 토큰의 비밀 이름(이 이름의 _FILE 을 읽는다)",
    "default": "SURVEY_RELEASE_READER_TOKEN"
   },
   "SURVEY_TRACE_INGEST_TOKEN_ENV": {
    "type": "string",
-   "pattern": "^[A-Z][A-Z0-9_]*$",
+   "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
    "description": "I5 토큰의 비밀 이름",
    "default": "SURVEY_TRACE_INGEST_TOKEN"
   },
   "SURVEY_INFERENCE_TOKEN_ENV": {
    "type": "string",
-   "pattern": "^[A-Z][A-Z0-9_]*$",
+   "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
    "description": "I9 토큰의 비밀 이름",
    "default": "SURVEY_INFERENCE_TOKEN"
   },
   "SURVEY_INFERENCE_TIMEOUT_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "I9 공통 HTTP 읽기 timeout(적재 상태 조회 등)",
    "default": "4.0"
   },
   "SURVEY_INFERENCE_EXTRACT_TIMEOUT_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "extract 호출 클라이언트 읽기 timeout. 서버 마감 20초보다 커야 한다(D125 사슬, U20)",
    "default": "21.0"
   },
   "SURVEY_INFERENCE_RESPOND_TIMEOUT_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "respond 호출 클라이언트 읽기 timeout. 서버 마감 25초보다 커야 한다(D125, U20)",
    "default": "26.0"
   },
   "SURVEY_INFERENCE_LOAD_TIMEOUT_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "릴리스 적재(PUT) 완료 대기 상한",
    "default": "600.0"
   },
   "SURVEY_INFERENCE_RETRIES": {
    "type": "string",
-   "pattern": "^[0-9]+$",
+   "pattern": "^[0-9]+$(?![\\s\\S])",
    "description": "모델 호출 재시도 횟수(0이면 없음)",
    "default": "1"
   },
   "SURVEY_HTTP_TIMEOUT_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "이웃 HTTP 호출(I4·I5) 읽기 timeout",
    "default": "10.0"
   },
   "SURVEY_STARTUP_WAIT_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "기동 때 이웃 준비를 기다리는 시간",
    "default": "5.0"
   },
   "SURVEY_TURN_DEADLINE_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "환자 턴 하나의 서버 쪽 전체 마감(D125 사슬: 게이트웨이 55 > 턴 50 > 모델 클라이언트 21/26)",
    "default": "50.0"
   },
   "SURVEY_SOCKET_TIMEOUT_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "연결 소켓 timeout",
    "default": "15.0"
   },
   "SURVEY_MAX_CONNECTIONS": {
    "type": "string",
-   "pattern": "^[1-9][0-9]*$",
+   "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
    "description": "동시 연결 상한",
    "default": "256"
   },
   "SURVEY_MAX_SSE_CONNECTIONS": {
    "type": "string",
-   "pattern": "^[1-9][0-9]*$",
+   "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
    "description": "직원 콘솔 SSE 동시 연결 상한",
    "default": "50"
   },
   "SURVEY_SSE_MAX_SECONDS": {
    "type": "string",
-   "pattern": "^[1-9][0-9]*$",
+   "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
    "description": "3.4.4(RUNTIME R2.4, 검토 B-08·A-19): SSE 스트림 하나의 최대 수명(초). 이 시각에 서버가 정상 종료하고 클라이언트가 새로 연결한다(인증이 끝났으면 401). platform 의 세션 갱신 주기 이하로 둔다(deploy 가 그 값 이하를 준다). 기본 300(5분): 시작값·측정 안 함",
    "default": "300"
   },
   "SURVEY_SSE_HEARTBEAT_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "SSE 심박 간격",
    "default": "15.0"
   },
   "SURVEY_API_MAX_INFLIGHT": {
    "type": "string",
-   "pattern": "^[1-9][0-9]*$",
+   "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
    "description": "동시 처리 요청 상한(넘으면 429)",
    "default": "32"
   },
   "SURVEY_API_MAX_UTTERANCE_CHARS": {
    "type": "string",
-   "pattern": "^[1-9][0-9]*$",
+   "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
    "description": "발화 문자 수 상한(문진 스키마 상한 이하)"
   },
   "SURVEY_EXTRACT_INPUT_MAX_CHARS": {
    "type": "string",
-   "pattern": "^[0-9]+$",
+   "pattern": "^[0-9]+$(?![\\s\\S])",
    "description": "모델 입력(JSON) 문자 수 상한. 모델 서버의 2500 보다 작게",
    "default": "2400"
   },
   "SURVEY_SESSION_IDLE_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+$",
+   "pattern": "^[0-9]+$(?![\\s\\S])",
    "description": "세션 무활동 만료(초)",
    "default": "300"
   },
   "SURVEY_RETRY_AFTER_SECONDS": {
    "type": "string",
-   "pattern": "^[1-9][0-9]*$",
+   "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
    "description": "429·503 응답의 Retry-After",
    "default": "1"
   },
   "SURVEY_STATE_POLL_MIN_INTERVAL_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "키오스크 상태 폴링 최소 간격",
    "default": "0.5"
   },
   "SURVEY_READYZ_DB_TIMEOUT_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "/readyz 의 DB 확인 상한",
    "default": "2.0"
   },
   "SURVEY_DB_CONNECT_TIMEOUT_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "DB 접속 상한",
    "default": "2.0"
   },
   "SURVEY_DB_STATEMENT_TIMEOUT_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "DB 문장 하나의 상한",
    "default": "2.0"
   },
   "SURVEY_DB_RECONNECT_BACKOFF_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "DB 재연결 대기",
    "default": "1.0"
   },
   "SURVEY_RELEASE_POLL_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "활성 포인터 폴링 주기",
    "default": "5.0"
   },
   "SURVEY_KEEP_RELEASES": {
    "type": "string",
-   "pattern": "^[0-9]+$",
+   "pattern": "^[0-9]+$(?![\\s\\S])",
    "description": "내리지 않고 남길 비활성 릴리스 수",
    "default": "2"
   },
   "SURVEY_RELEASE_RETRY_BASE_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "릴리스 적재 재시도 기본 간격(지수 증가)",
    "default": "5.0"
   },
   "SURVEY_RELEASE_RETRY_MAX_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "릴리스 적재 재시도 최대 간격",
    "default": "60.0"
   },
   "SURVEY_RELEASE_RETRY_GIVE_UP_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "릴리스 적재 재시도 포기 시간(0이면 포기하지 않음)",
    "default": "0"
   },
   "SURVEY_EXPORT_INTERVAL_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "Trace 전송 주기",
    "default": "1.0"
   },
   "SURVEY_EXPORT_BACKOFF_MAX_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "Trace 전송 실패 백오프 상한",
    "default": "60.0"
   },
   "SURVEY_OUTBOX_MAX_PENDING": {
    "type": "string",
-   "pattern": "^[0-9]+$",
+   "pattern": "^[0-9]+$(?![\\s\\S])",
    "description": "outbox 대기 상한(넘으면 새 턴 거부, FAULT_POLICY)",
    "default": "20000"
   },
   "SURVEY_OUTBOX_KEEP_SENT_HOURS": {
    "type": "string",
-   "pattern": "^[1-9][0-9]*$",
+   "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
    "description": "전송 완료 Trace 보관 시간",
    "default": "24"
   },
   "SURVEY_OUTBOX_STAGE_GRACE_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "outbox 단계 전환 유예",
    "default": "60.0"
   },
   "SURVEY_DEAD_OUTBOX_RETENTION_DAYS": {
    "type": "string",
-   "pattern": "^[1-9][0-9]*$",
+   "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
    "description": "전송 포기(dead) Trace 보존 일수(D88 U4 최소 보존)",
    "default": "30"
   },
   "SURVEY_SESSION_RETENTION_DAYS": {
    "type": "string",
-   "pattern": "^[1-9][0-9]*$",
+   "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
    "description": "세션 종료 후 보존 일수(D88 U4)",
    "default": "90"
   },
   "SURVEY_ACCESS_LOG_RETENTION_DAYS": {
    "type": "string",
-   "pattern": "^[1-9][0-9]*$",
+   "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
    "description": "접근 기록 보존 일수(D88 U4)",
    "default": "365"
   },
   "SURVEY_ALERT_RETENTION_DAYS": {
    "type": "string",
-   "pattern": "^[1-9][0-9]*$",
+   "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
    "description": "직원 알림 보존 일수",
    "default": "365"
   },
   "SURVEY_RETENTION_INTERVAL_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+$",
+   "pattern": "^[0-9]+$(?![\\s\\S])",
    "description": "보존 정리 주기(초)",
    "default": "3600"
   },
   "SURVEY_MAX_CONSECUTIVE_REASK": {
    "type": "string",
-   "pattern": "^[0-9]+$",
+   "pattern": "^[0-9]+$(?![\\s\\S])",
    "description": "같은 문항 연속 되묻기 한도(D95). 넘으면 빈칸 처리(U36 결정 반영 예정)",
    "default": "3"
   },
   "SURVEY_STAFF_API_TOKEN_ENV": {
    "type": "string",
-   "pattern": "^[A-Z][A-Z0-9_]*$",
+   "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
    "description": "직원 API 토큰의 비밀 이름",
    "default": "SURVEY_STAFF_API_TOKEN"
   },
   "SURVEY_STAFF_CALL_RETRY_MIN_INTERVAL_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+$",
+   "pattern": "^[0-9]+$(?![\\s\\S])",
    "description": "직원 재호출 최소 간격(L23)",
    "default": "30"
   },
   "SURVEY_STAFF_CALL_RETRY_MAX_PER_SESSION": {
    "type": "string",
-   "pattern": "^[0-9]+$",
+   "pattern": "^[0-9]+$(?![\\s\\S])",
    "description": "세션당 직원 재호출 상한",
    "default": "10"
   },
   "SURVEY_STAFF_CALL_REPORT_MAX_PER_SESSION": {
    "type": "string",
-   "pattern": "^[0-9]+$",
+   "pattern": "^[0-9]+$(?![\\s\\S])",
    "description": "세션당 직원 호출 보고 상한",
    "default": "20"
   },
@@ -525,13 +525,13 @@
   },
   "SURVEY_RESULT_READER_TOKEN_ENV": {
    "type": "string",
-   "pattern": "^[A-Z][A-Z0-9_]*$",
+   "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
    "description": "결과 읽기(GET /v1/results) 토큰의 비밀 이름",
    "default": "SURVEY_RESULT_READER_TOKEN"
   },
   "SURVEY_RISK_SOURCE_TOKEN_ENV": {
    "type": "string",
-   "pattern": "^[A-Z][A-Z0-9_]*$",
+   "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
    "description": "외부 감지기 토큰의 비밀 이름",
    "default": "SURVEY_RISK_SOURCE_TOKEN"
   },
@@ -572,7 +572,7 @@
   },
   "SURVEY_API_TOKEN_ENV": {
    "type": "string",
-   "pattern": "^[A-Z][A-Z0-9_]*$",
+   "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
    "description": "공개 API 토큰의 비밀 이름",
    "default": "SURVEY_API_TOKEN"
   },
@@ -582,7 +582,7 @@
   },
   "SURVEY_VAPID_PRIVATE_KEY_ENV": {
    "type": "string",
-   "pattern": "^[A-Z][A-Z0-9_]*$",
+   "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
    "description": "웹 푸시 VAPID 개인키의 비밀 이름",
    "default": "SURVEY_VAPID_PRIVATE_KEY"
   },
@@ -592,13 +592,13 @@
   },
   "SURVEY_PUSH_TIMEOUT_SECONDS": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "웹 푸시 전송 timeout",
    "default": "3.0"
   },
   "SURVEY_MAX_PUSH_SUBSCRIPTIONS": {
    "type": "string",
-   "pattern": "^[1-9][0-9]*$",
+   "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
    "description": "푸시 구독 상한",
    "default": "100"
   },

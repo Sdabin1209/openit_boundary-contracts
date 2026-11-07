@@ -16,24 +16,24 @@
     },
     "User": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9._@:+/#=-]{1,128}$"
+      "pattern": "^[A-Za-z0-9._@:+/#=-]{1,128}$(?![\\s\\S])"
     },
     "Id": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])"
     },
     "SessionId": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9_-]{1,64}$"
+      "pattern": "^[A-Za-z0-9_-]{1,64}$(?![\\s\\S])"
     },
     "FilePath": {
       "type": "string",
       "minLength": 1,
-      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$(?![\\s\\S])))(?!.*\\\\).+$(?![\\s\\S])"
     },
     "EventId": {
       "type": "string",
-      "pattern": "^[0-9]+$"
+      "pattern": "^[0-9]+$(?![\\s\\S])"
     }
   },
   "anyOf": [

@@ -3,8 +3,12 @@
   "$id": "PublishRequest.schema.json",
   "title": "PublishRequest",
   "description": "scripts/publish-image.sh 호출 (영역 CI -> deploy). deploy 가 받는 호출을 객체로 적은 것: `publish-image.sh <service> <image> [--registry host:port]`. 환경 변수 DEPLOY_LOCK 은 deploy 내부 사정이라 넣지 않는다. 모르는 키 거부: 호출 규약이 바뀌는 것을 CI 가 조용히 놓치지 않게 한다.",
-  "x-producers": ["*"],
-  "x-consumers": ["deploy"],
+  "x-producers": [
+    "*"
+  ],
+  "x-consumers": [
+    "deploy"
+  ],
   "type": "object",
   "properties": {
     "service": {
@@ -18,8 +22,20 @@
         "model-serving",
         "kiosk-frontend",
         "admin-console",
-        "model-serving-gpu", "area-gateway", "public-ingress", "monitoring", "backup-store", "step-ca",
-        "identity", "identity-proxy", "identity-db", "survey-db", "question-authoring-db", "ops-feedback-db", "release-gate-db"]
+        "model-serving-gpu",
+        "area-gateway",
+        "public-ingress",
+        "monitoring",
+        "backup-store",
+        "step-ca",
+        "identity",
+        "identity-proxy",
+        "identity-db",
+        "survey-db",
+        "question-authoring-db",
+        "ops-feedback-db",
+        "release-gate-db"
+      ]
     },
     "image": {
       "type": "string",
@@ -28,7 +44,7 @@
     },
     "registry": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9._-]+(:[0-9]{1,5})?$",
+      "pattern": "^[A-Za-z0-9._-]+(:[0-9]{1,5})?$(?![\\s\\S])",
       "description": "host:port, http:// 접두사 없음"
     }
   },

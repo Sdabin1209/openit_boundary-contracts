@@ -3,8 +3,12 @@
  "$id": "OpsFeedbackServerEnv.schema.json",
  "title": "OpsFeedbackServerEnv",
  "description": "ingest-api 서버·admin·잡이 읽는 환경 변수와 Dockerfile ARG (3.2.0, U73: OPS_GATE_* 선언 추가, 퇴역 TURN_ENGINE_VERSION 삭제 D109). 만드는 쪽: deploy(compose). 읽는 쪽: ops-feedback. 환경 변수는 문자열 맵으로 검증한다. 모르는 OPS_ 변수와 모르는 ARG는 거부한다(오타로 보관 경고·검토자 신원 필수 같은 설정이 조용히 꺼지는 것을 막는다). OPS_ 아닌 변수(PATH 등)는 이 스키마의 대상이 아니다: 검증할 때 OPS_ 접두 변수만 넣는다. 비밀(토큰, DB URL, salt)은 값 변수 대신 <이름>_FILE(경로)을 쓴다(D84); 값 변수(OPS_INGEST_TOKEN 등)는 개발·시험용이다.",
- "x-producers": ["deploy"],
- "x-consumers": ["ops-feedback"],
+ "x-producers": [
+  "deploy"
+ ],
+ "x-consumers": [
+  "ops-feedback"
+ ],
  "type": "object",
  "additionalProperties": false,
  "required": [
@@ -97,7 +101,7 @@
     },
     "OPS_RAW_RETENTION_DAYS": {
      "type": "string",
-     "pattern": "^\\s*\\S.*$",
+     "pattern": "^\\s*\\S.*$(?![\\s\\S])",
      "description": "선언일 뿐 서버가 지우지 않는다. 비어 있으면 /readyz warnings에 RAW_RETENTION_UNSET"
     },
     "OPS_REVIEW_REQUIRE_USER": {
@@ -180,19 +184,19 @@
   "RoleTokens": {
    "type": "string",
    "description": "역할=토큰,역할=토큰 (개발용 값 변수)",
-   "pattern": "^[^=,]+=[^,]+(,[^=,]+=[^,]+)*$"
+   "pattern": "^[^=,]+=[^,]+(,[^=,]+=[^,]+)*$(?![\\s\\S])"
   },
   "IntStr": {
    "type": "string",
-   "pattern": "^[0-9]+$"
+   "pattern": "^[0-9]+$(?![\\s\\S])"
   },
   "NumStr": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$"
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])"
   },
   "SecondsStr": {
    "type": "string",
-   "pattern": "^[0-9]+(\\.[0-9]+)?$",
+   "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
    "description": "0 초과 3600 이하(pgbase.py _setting). 이 패턴은 모양만 본다"
   }
  }
