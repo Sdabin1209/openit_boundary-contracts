@@ -44,13 +44,13 @@
     },
     "DnsName": {
       "type": "string",
-      "pattern": "^(?=.{1,253}$)[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*(?![\\s\\S])",
-      "description": "RFC 1123 ASCII DNS hostname: labels 1..63, total 1..253; no trailing dot, space or path separators."
+      "pattern": "^(?=.{1,251}$)[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*(?![\\s\\S])",
+      "description": "RFC 1123 ASCII DNS hostname: labels 1..63, total 1..251 bytes; no trailing dot, space or path separators. 3.6.5: 251 = POSIX NAME_MAX 255 - len('.ott'): the name is also the token file name <name>.ott in STEP_TOKENS_DIR (RFC 1123 allows 253; longer names cannot be stored as one file)."
     },
     "DnsNameList": {
       "type": "string",
-      "pattern": "^(?=[^ ]{1,253}(?: |$))[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*(?: (?=[^ ]{1,253}(?: |$))[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*)*(?![\\s\\S])",
-      "description": "One or more DNS hostnames separated by one ASCII space."
+      "pattern": "^(?=[^ ]{1,251}(?: |$))[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*(?: (?=[^ ]{1,251}(?: |$))[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*)*(?![\\s\\S])",
+      "description": "One or more DNS hostnames (each as DnsName, 1..251 bytes) separated by one ASCII space."
     }
   },
   "propertyNames": {
@@ -123,7 +123,7 @@
     "STEP_TOKENS_DIR": {
       "$ref": "#/$defs/Path",
       "default": "/tokens",
-      "description": "token 이 발급 토큰을 쓰고 cert 가 읽는 폴더(3.4.12)"
+      "description": "token 이 발급 토큰을 쓰고 cert 가 읽는 폴더(3.4.12). 3.6.5: 토큰 하나는 이 폴더의 파일 <이름>.ott 하나다(이름 = STEP_TOKEN_NAMES 의 항목 = 그 인증서의 STEP_CERT_NAME). 파일 이름 한도(NAME_MAX 255)에서 이름은 251바이트까지다(DnsName)"
     },
     "STEP_CA_HOME": {
       "$ref": "#/$defs/Path",

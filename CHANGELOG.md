@@ -1,6 +1,10 @@
 # 변경 이력
 
 
+## 3.6.5 (2026-11-07, PATCH: 토큰 파일 이름 규칙)
+
+- StepCaEnv: 토큰 파일 이름 규칙을 명시한다 — STEP_TOKENS_DIR/<이름>.ott(이름 = STEP_TOKEN_NAMES 항목 = STEP_CERT_NAME). 이름을 파일 이름으로 쓰므로 DnsName·DnsNameList 의 길이 상한을 253 에서 251 바이트로 둔다(POSIX NAME_MAX 255 - '.ott'). 3.6.4 는 253바이트 이름을 허용해 <이름>.ott 가 257바이트가 되어 저장할 수 없었다(2026-11-07 교차검증).
+
 ## 3.6.4 (PATCH: complete the gateway failure response contract)
 
 - GatewayErrorResponse combines the 503/504 status, GatewayError body and required Retry-After: 5 header into one machine-verifiable HTTP envelope. Application responses remain unchanged (R2.1).
