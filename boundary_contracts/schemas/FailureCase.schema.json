@@ -1,9 +1,16 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "FailureCase",
-  "description": "비식별을 마친 실패 사례. 불변이며 검토 결과는 version을 올린 새 레코드로 낸다. 실패 유형 분류체계는 미정(O11)이라 문자열이다.",
-  "x-producers": ["ops-feedback"],
-  "x-consumers": ["synthetic-data", "model-lab", "question-authoring", "admin-console"],
+  "description": "비식별을 마친 실패 사례. 불변이며 검토 결과는 version을 올린 새 레코드로 낸다. failure_type 의 값 목록은 설치처 설정(OpsFeedbackJobConfig.classification)이 정하고 형식은 FailureType 이다. 3.7.0: expected·reviewed_input 의 모양을 expected_kind 로 강제한다(LORA_A: ActionExtraction·ActionExtractionInput, LORA_B: ResponseText·ResponseRequest) — 이전에는 효과 없는 then(if 없음, 초기 초안 잔재)만 있어 아무 객체나 통과했다.",
+  "x-producers": [
+    "ops-feedback"
+  ],
+  "x-consumers": [
+    "synthetic-data",
+    "model-lab",
+    "question-authoring",
+    "admin-console"
+  ],
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -46,8 +53,7 @@
       "$ref": "_common.schema.json#/$defs/Id"
     },
     "failure_type": {
-      "type": "string",
-      "minLength": 1
+      "$ref": "_common.schema.json#/$defs/FailureType"
     },
     "detection_method": {
       "enum": [
@@ -84,16 +90,132 @@
         "LORA_A",
         "LORA_B"
       ],
-      "description": "expected가 LORA_A의 출력(ActionExtraction, 객체)인지 LORA_B의 출력(ResponseText, 문자열)인지. expected가 있으면 함께 적기를 권한다(생략하면 소비자는 expected의 형태로 판별한다: 객체면 LORA_A, 문자열이면 LORA_B). 모르는 값은 '알 수 없음'으로 처리한다. v1의 PARSER/GENERATOR는 없어졌다(2.0.0)."
+      "description": "expected·reviewed_input 이 LORA_A 의 것(ActionExtraction·ActionExtractionInput)인지 LORA_B 의 것(ResponseText·ResponseRequest)인지. 이 값이 없는 옛 레코드는 expected 의 형태로 판별한다(객체면 LORA_A, 문자열이면 LORA_B)이며 3.7.0부터 그 판별대로 expected·reviewed_input 의 모양을 스키마가 강제한다. expected 도 이 값도 없이 reviewed_input 만 있으면 판별할 수 없어 거부한다. v1의 PARSER/GENERATOR는 없어졌다(2.0.0)."
     },
     "reviewed_input": {
       "type": "object",
       "description": "검토자가 개인정보를 뺀 문장으로 직접 고쳐 쓴 입력(expected_kind가 LORA_A면 ActionExtractionInput, LORA_B면 ResponseRequest). 비식별 trace의 마스킹된 입력 대신 시드와 회귀 평가가 쓴다(D55)."
     }
   },
-  "then": {
-    "properties": {
-      "expected": {}
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "expected_kind": {
+            "const": "LORA_A"
+          }
+        },
+        "required": [
+          "expected_kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "expected": {
+            "$ref": "ActionExtraction.schema.json"
+          },
+          "reviewed_input": {
+            "$ref": "ActionExtractionInput.schema.json"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expected_kind": {
+            "const": "LORA_B"
+          }
+        },
+        "required": [
+          "expected_kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "expected": {
+            "$ref": "ResponseText.schema.json"
+          },
+          "reviewed_input": {
+            "$ref": "ResponseRequest.schema.json"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "not": {
+          "required": [
+            "expected_kind"
+          ]
+        },
+        "properties": {
+          "expected": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "expected"
+        ]
+      },
+      "then": {
+        "properties": {
+          "expected": {
+            "$ref": "ActionExtraction.schema.json"
+          },
+          "reviewed_input": {
+            "$ref": "ActionExtractionInput.schema.json"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "not": {
+          "required": [
+            "expected_kind"
+          ]
+        },
+        "properties": {
+          "expected": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected"
+        ]
+      },
+      "then": {
+        "properties": {
+          "expected": {
+            "$ref": "ResponseText.schema.json"
+          },
+          "reviewed_input": {
+            "$ref": "ResponseRequest.schema.json"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "reviewed_input"
+        ]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "required": [
+              "expected_kind"
+            ]
+          },
+          {
+            "required": [
+              "expected"
+            ]
+          }
+        ]
+      }
     }
-  }
+  ]
 }

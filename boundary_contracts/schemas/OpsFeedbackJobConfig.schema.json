@@ -3,8 +3,12 @@
  "$id": "OpsFeedbackJobConfig.schema.json",
  "title": "OpsFeedbackJobConfig",
  "description": "ops-feedback 주기 잡 설정(YAML을 객체로 읽은 것). 만드는 쪽: deploy(운영) 또는 이 영역의 예시. 읽는 쪽: ops-feedback `python -m ops_feedback.job --config`. 모르는 키는 어디서나 거부한다(오타가 조용히 무시되어 비식별·보존 설정이 꺼지는 것을 막는다). 비밀 값은 적을 수 없고 {secret: NAME}만 쓴다(D84).",
- "x-producers": ["deploy"],
- "x-consumers": ["ops-feedback"],
+ "x-producers": [
+  "deploy"
+ ],
+ "x-consumers": [
+  "ops-feedback"
+ ],
  "type": "object",
  "additionalProperties": false,
  "required": [
@@ -61,15 +65,18 @@
    ],
    "properties": {
     "default_failure_type": {
-     "type": "string",
-     "minLength": 1
+     "$ref": "_common.schema.json#/$defs/FailureType",
+     "description": "규칙에 대응이 없을 때의 실패 유형(FailureCase.failure_type). 값 목록은 설치처가 정한다"
     },
     "rule_to_type": {
      "type": "object",
+     "propertyNames": {
+      "$ref": "#/$defs/RuleId"
+     },
      "additionalProperties": {
-      "type": "string",
-      "minLength": 1
-     }
+      "$ref": "_common.schema.json#/$defs/FailureType"
+     },
+     "description": "탐지 규칙 ID -> 실패 유형(FailureCase.failure_type)"
     },
     "priority": {
      "type": "array",

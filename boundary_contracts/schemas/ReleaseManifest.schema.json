@@ -1,8 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ReleaseManifest",
-  "x-producers": ["release-gate"],
-  "x-consumers": ["survey-service", "model-runtime", "ops-feedback", "admin-console"],
+  "x-producers": [
+    "release-gate"
+  ],
+  "x-consumers": [
+    "survey-service",
+    "model-runtime",
+    "ops-feedback",
+    "admin-console"
+  ],
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -85,8 +92,8 @@
               "$ref": "_common.schema.json#/$defs/Hash"
             },
             "serving_config": {
-              "type": "object",
-              "description": "model-runtime의 ServingConfig. serving_config_hash는 canonical.sha256_hash(serving_config)이다(기본값을 채우지 않은 그대로)."
+              "$ref": "ServingConfig.schema.json",
+              "description": "계약 ServingConfig(3.7.0부터 참조로 검증). serving_config_hash는 canonical.sha256_hash(serving_config)이다(기본값을 채우지 않은 그대로)."
             },
             "serving_config_hash": {
               "$ref": "_common.schema.json#/$defs/Hash"
@@ -110,8 +117,8 @@
               "$ref": "_common.schema.json#/$defs/Hash"
             },
             "serving_config": {
-              "type": "object",
-              "description": "model-runtime의 ServingConfig. serving_config_hash는 canonical.sha256_hash(serving_config)이다(기본값을 채우지 않은 그대로)."
+              "$ref": "ServingConfig.schema.json",
+              "description": "계약 ServingConfig(3.7.0부터 참조로 검증). serving_config_hash는 canonical.sha256_hash(serving_config)이다(기본값을 채우지 않은 그대로)."
             },
             "serving_config_hash": {
               "$ref": "_common.schema.json#/$defs/Hash"

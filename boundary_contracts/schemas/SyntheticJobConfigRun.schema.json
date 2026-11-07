@@ -2,9 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "SyntheticJobConfigRun.schema.json",
   "title": "SyntheticJobConfigRun",
-  "description": "계약 승격용(CR-008 초안에서 정리, 2026-10-29). `python -m synthetic_data run --config <파일>`의 설정. 만드는 쪽: deploy 스케줄러(e2e 설정) 또는 개발자. 읽는 쪽: synthetic_data/config.py parse_config. 모르는 키 정책: 거부(ADR 0014). 현재 코드는 최상위만 거부하고 중첩 객체의 모르는 키는 무시한다; 이 초안은 중첩도 거부하는 제안이다(안전 설정이 기본값으로 조용히 돌아가는 것을 막는다는 ADR 0014와 같은 이유).",
-  "x-producers": ["deploy"],
-  "x-consumers": ["synthetic-data"],
+  "description": "`python -m synthetic_data run --config <파일>`의 설정. 만드는 쪽: deploy(E2E 설정 sd_config) 또는 개발자. 읽는 쪽: synthetic-data(run_plan.py 가 이 스키마로 먼저 검증한다). 모르는 키 정책: 최상위와 중첩 객체 모두 거부(additionalProperties false, ADR 0014). 예외는 Adapter.kwargs 하나다(factory 함수의 인자이며 모양은 factory 가 정한다). 이력: CR-008(2026-10-29)에서 계약으로 올렸다.",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "synthetic-data"
+  ],
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -184,7 +188,7 @@
   },
   "$defs": {
     "Adapter": {
-      "description": "이웃 읽기 클라이언트를 만드는 방법: 파이썬 `module:function` 문자열(factory)과 kwargs. 토큰은 kwargs의 token_env(비밀 이름)로만 받고 값은 read_secret(NAME_FILE 우선)이 읽는다(D84). CR-008 초안이 제안한 kind:http 형식은 코드에 없어 이 승격본에서 뺐다(받아들일지는 헤드 결정, SD-05).",
+      "description": "이웃 읽기 클라이언트를 만드는 방법: 파이썬 `module:function` 문자열(factory)과 kwargs. 토큰은 kwargs의 token_env(비밀 이름)로만 받고 값은 read_secret(NAME_FILE 우선)이 읽는다(D84).",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -196,7 +200,8 @@
           "pattern": "^[^:]+:[^:]+$"
         },
         "kwargs": {
-          "type": "object"
+          "type": "object",
+          "description": "factory 함수의 키워드 인자. 모양은 factory 가 정하며 이 스키마는 객체인지만 본다"
         }
       }
     }

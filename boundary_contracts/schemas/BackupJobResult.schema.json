@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "BackupJobResult.schema.json",
   "title": "BackupJobResult",
-  "description": "3.4.7(RUNTIME R10.1·R9.2): 데이터베이스를 가진 영역의 백업 잡이 표준 출력 마지막 줄에 내는 JSON 한 줄. 종료 코드: 0 = ok, 75 = 재시도 가능(백업 저장소에 닿지 못함·UNAVAILABLE, EX_TEMPFAIL), 1 = 그 밖의 실패. 비밀·저장소 주소·데이터 내용은 넣지 않는다.",
+  "description": "3.4.7(RUNTIME R10.1·R9.2): 데이터베이스를 가진 영역의 백업 잡이 표준 출력 마지막 줄에 내는 JSON 한 줄. 종료 코드: 0 = ok, 75 = 재시도 가능(백업 저장소에 닿지 못함·UNAVAILABLE, EX_TEMPFAIL), 1 = 그 밖의 실패. 비밀·저장소 주소·데이터 내용은 넣지 않는다. 3.7.0: error 를 닫힌 모양(code 는 BoundaryError 의 코드)으로 정하고 status 와 맞물렸다(ok: error 없음 또는 null·snapshot_id 있음, failed: error 객체 필수·snapshot_id null·bytes 0) — 그 전에는 error 가 자유 객체라 계약 밖 코드(platform 의 INTERNAL)를 아무도 거부하지 않았다.",
   "x-producers": [
     "*"
   ],
@@ -44,11 +44,77 @@
       "$ref": "_common.schema.json#/$defs/Timestamp"
     },
     "error": {
-      "type": [
-        "object",
-        "null"
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/JobError"
+        }
       ],
-      "description": "실패면 BoundaryError 레코드 모양(code·message·retryable), 아니면 null"
+      "description": "실패면 오류(BoundaryError 의 code·message·retryable, 필수), 성공이면 없거나 null"
     }
-  }
+  },
+  "$defs": {
+    "JobError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message",
+        "retryable"
+      ],
+      "properties": {
+        "code": {
+          "$ref": "BoundaryError.schema.json#/properties/code"
+        },
+        "message": {
+          "$ref": "BoundaryError.schema.json#/properties/message",
+          "description": "사람이 읽는 한 줄(BoundaryError.message 와 같다). 비밀·저장소 주소·데이터 내용 없음"
+        },
+        "retryable": {
+          "type": "boolean",
+          "description": "참이면 종료 코드 75(EX_TEMPFAIL)"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "error": {
+            "type": "null"
+          },
+          "snapshot_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "else": {
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "$ref": "#/$defs/JobError"
+          },
+          "snapshot_id": {
+            "type": "null"
+          },
+          "bytes": {
+            "const": 0
+          }
+        }
+      }
+    }
+  ]
 }

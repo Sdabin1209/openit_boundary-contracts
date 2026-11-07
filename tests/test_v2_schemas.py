@@ -102,6 +102,7 @@ class V1Retired(unittest.TestCase):
         f["expected_kind"], f["expected"] = "LORA_A", ex("ActionExtraction.next")
         self.assertEqual(list(validator("FailureCase").iter_errors(f)), [])
         f["expected_kind"], f["expected"] = "LORA_B", "네, 알겠습니다."
+        f["reviewed_input"] = ex("ResponseRequest.start")   # 3.7.0: reviewed_input 도 expected_kind 의 계약(LORA_B: ResponseRequest)을 따른다
         self.assertEqual(list(validator("FailureCase").iter_errors(f)), [])
 
     def test_저장소_문서에_v1_이름이_남지_않았다(self):

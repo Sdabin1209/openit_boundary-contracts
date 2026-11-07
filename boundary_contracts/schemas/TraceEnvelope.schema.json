@@ -3,9 +3,13 @@
   "title": "TraceEnvelope",
   "type": "object",
   "additionalProperties": false,
-  "description": "문진 서비스가 ops-feedback에 보내는 한 턴의 기록 봉투. 문진 스키마의 TurnTrace를 수정하지 않고 릴리스 정보를 붙인다. 수집 쪽은 (session_id, turn_id)로 중복을 제거한다. trace는 runtime_contract_version에 해당하는 문진 스키마의 TurnTrace로 별도 검증하며, 여기서는 구조만 본다.",
-  "x-producers": ["survey-service"],
-  "x-consumers": ["ops-feedback"],
+  "description": "문진 서비스가 ops-feedback에 보내는 한 턴의 기록 봉투. 문진 스키마의 TurnTrace를 수정하지 않고 릴리스 정보를 붙인다. 수집 쪽은 (session_id, turn_id)로 중복을 제거한다. trace는 runtime_contract_version 판의 문진 스키마 TurnTrace다: 판 1은 이 스키마가 직접 참조해 검증하고(3.7.0), 문진 스키마에 아직 없는 판은 생산자(survey-service link_trace_export)와 수집 쪽(ops-feedback trace_intake)이 그 판의 TurnTrace로 검증하며 수집 쪽은 모르는 판을 UNSUPPORTED_VERSION 으로 거부한다.",
+  "x-producers": [
+    "survey-service"
+  ],
+  "x-consumers": [
+    "ops-feedback"
+  ],
   "required": [
     "pipeline_schema_version",
     "release_id",
@@ -47,5 +51,26 @@
       "type": "object",
       "description": "영역이 계약을 바꾸지 않고 덧붙이는 부가 정보. 키는 영역 이름(예: 'model-lab')이고 값은 그 영역이 정한다. 다른 영역은 이해하지 못해도 보존하고 전달해야 하며, 판단에 쓰지 않는다. 여러 영역이 필요로 하게 되면 정식 필드로 올린다."
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "runtime_contract_version": {
+            "const": 1
+          }
+        },
+        "required": [
+          "runtime_contract_version"
+        ]
+      },
+      "then": {
+        "properties": {
+          "trace": {
+            "$ref": "https://openit.example/survey/v1/TurnTrace.json"
+          }
+        }
+      }
+    }
+  ]
 }

@@ -2,9 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "CaseReviewRequest.schema.json",
   "title": "CaseReviewRequest",
-  "description": "POST /v1/cases/{case_id}/review 본문(I7, Protocol 밖). 만드는 쪽: admin-console(검토자 화면). 읽는 쪽: ops-feedback. expected가 있으면 expected_kind 필수(HTTP.md I7). expected/reviewed_input의 내용 검증(ActionExtraction 등)은 이 스키마가 아니라 해당 계약 스키마와 서버의 일이다. 화면은 CONFIRMED가 아닌 결정에는 review_status만 보낸다.",
-  "x-producers": ["admin-console"],
-  "x-consumers": ["ops-feedback"],
+  "description": "POST /v1/cases/{case_id}/review 본문(I7, Protocol 밖). 만드는 쪽: admin-console(검토자 화면). 읽는 쪽: ops-feedback. expected·reviewed_input 이 있으면 expected_kind 필수(HTTP.md I7)이고, 모양은 expected_kind 가 정한다(LORA_A: ActionExtraction·ActionExtractionInput, LORA_B: ResponseText·ResponseRequest — 3.7.0, 그 전에는 객체·문자열인지만 봤다). 화면은 CONFIRMED가 아닌 결정에는 review_status만 보낸다.",
+  "x-producers": [
+    "admin-console"
+  ],
+  "x-consumers": [
+    "ops-feedback"
+  ],
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -23,7 +27,7 @@
         "object",
         "string"
       ],
-      "description": "LORA_A면 ActionExtraction(객체), LORA_B면 ResponseText(비어 있지 않은 문자열)"
+      "description": "LORA_A면 ActionExtraction, LORA_B면 ResponseText"
     },
     "expected_kind": {
       "enum": [
@@ -89,14 +93,16 @@
           }
         },
         "required": [
-          "expected_kind",
-          "expected"
+          "expected_kind"
         ]
       },
       "then": {
         "properties": {
           "expected": {
-            "type": "object"
+            "$ref": "ActionExtraction.schema.json"
+          },
+          "reviewed_input": {
+            "$ref": "ActionExtractionInput.schema.json"
           }
         }
       }
@@ -109,15 +115,16 @@
           }
         },
         "required": [
-          "expected_kind",
-          "expected"
+          "expected_kind"
         ]
       },
       "then": {
         "properties": {
           "expected": {
-            "type": "string",
-            "minLength": 1
+            "$ref": "ResponseText.schema.json"
+          },
+          "reviewed_input": {
+            "$ref": "ResponseRequest.schema.json"
           }
         }
       }

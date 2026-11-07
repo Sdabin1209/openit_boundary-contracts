@@ -2,8 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ModelPackageManifest",
   "description": "불변 모델 패키지(LoRA 어댑터 하나). 상태는 두지 않는다. 승인 여부는 GateDecision이 조합 단위로 기록한다.",
-  "x-producers": ["model-lab"],
-  "x-consumers": ["release-gate", "model-runtime"],
+  "x-producers": [
+    "model-lab"
+  ],
+  "x-consumers": [
+    "release-gate",
+    "model-runtime"
+  ],
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -69,8 +74,8 @@
       "$ref": "_common.schema.json#/$defs/Hash"
     },
     "serving_config": {
-      "type": "object",
-      "description": "추론 서버 설정. 형식은 model-runtime이 정하며 serving_config_hash로 고정한다"
+      "$ref": "ServingConfig.schema.json",
+      "description": "추론 서버 설정(계약 ServingConfig, 3.7.0부터 참조로 검증). serving_config_hash로 고정한다"
     },
     "serving_config_hash": {
       "$ref": "_common.schema.json#/$defs/Hash"

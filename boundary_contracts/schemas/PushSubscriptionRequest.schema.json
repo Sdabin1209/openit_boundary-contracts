@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "PushSubscriptionRequest.schema.json",
   "title": "PushSubscriptionRequest",
-  "description": "3.4.4(검토 B-28-5·B-24): POST /v1/staff/push-subscriptions 본문. 브라우저 PushSubscription.toJSON() 의 endpoint·keys 와 선택 topics. endpoint 는 https 이고 포트가 없거나 443 이며 호스트가 공인 주소로 해석될 때만 받는다(loopback·사설·링크로컬·특수 주소는 400 INVALID_RECORD — SSRF 방지, OWASP A10:2021). 호스트는 점이 있는 이름이어야 하고 IP 리터럴·localhost 는 스키마에서 거부한다(검토 P6-R6-15). 이름이 RFC 6890 특수 목적 주소로 해석되는지는 스키마로 못 쓰므로 서버가 등록 때와 발송 때 한다(RUNTIME R3.18).",
+  "description": "3.4.4(검토 B-28-5·B-24): POST /v1/staff/push-subscriptions 본문. 브라우저 PushSubscription.toJSON() 의 endpoint·keys 와 선택 topics. endpoint 는 https 이고 포트가 없거나 443 이며 호스트가 공인 주소로 해석될 때만 받는다(loopback·사설·링크로컬·특수 주소는 400 INVALID_RECORD — SSRF 방지, OWASP A10:2021). 호스트는 점이 있는 이름이어야 하고 IP 리터럴·localhost 는 스키마에서 거부한다(검토 P6-R6-15). 이름이 RFC 6890 특수 목적 주소로 해석되는지는 스키마로 못 쓰므로 서버가 등록 때와 발송 때 한다(RUNTIME R3.18). 3.7.0: 같은 본문을 서버(openapi: PublicApiRequests.PushSubscribeBody)와 생산자(kiosk-frontend·admin-console)가 서로 다른 스키마로 검증하던 것을 이 스키마 하나로 합쳤다(PushSubscribeBody 는 이것을 참조한다). PushSubscription.toJSON() 의 expirationTime 등 그 밖의 키는 생산자가 빼고 보낸다(닫힌 본문).",
   "x-producers": [
     "kiosk-frontend",
     "admin-console"
@@ -20,7 +20,20 @@
     "endpoint": {
       "type": "string",
       "maxLength": 2048,
-      "pattern": "^https://(?=[^/:]*[A-Za-z])[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+(:443)?/"
+      "pattern": "^https://(?=[^/:]*[A-Za-z])[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+(:443)?/\\S*$(?![\\s\\S])",
+      "allOf": [
+        {
+          "not": {
+            "pattern": "^https://[lL][oO][cC][aA][lL][hH][oO][sS][tT]\\.?(:443)?([/?#]|$)"
+          }
+        },
+        {
+          "not": {
+            "pattern": "^https://[^/?#@:\\s]*\\.([lL][oO][cC][aA][lL]|[lL][oO][cC][aA][lL][dD][oO][mM][aA][iI][nN]|[iI][nN][tT][eE][rR][nN][aA][lL]|[lL][aA][nN]|[hH][oO][mM][eE]|[cC][oO][rR][pP]|[iI][nN][tT][rR][aA][nN][eE][tT])\\.?(:443)?([/?#]|$)"
+          }
+        }
+      ],
+      "description": "웹 푸시 endpoint(PushSubscription.endpoint). https, 포트 없음 또는 443, 점이 있는 이름 호스트(IP 리터럴·localhost·.local/.localdomain/.internal/.lan/.home/.corp/.intranet 거부), 경로가 있고 공백이 없다. 3.7.0: PublicApiRequests.PushSubscribeBody 와 둘로 갈라져 있던 제약을 여기 하나로 합쳤다"
     },
     "keys": {
       "type": "object",
@@ -40,7 +53,8 @@
           "pattern": "^[A-Za-z0-9_-]+=*$",
           "maxLength": 64
         }
-      }
+      },
+      "description": "W3C Push API PushSubscriptionKeys 의 p256dh(P-256 공개키, base64url)·auth(인증 비밀, base64url). 이 둘만 보낸다"
     },
     "topics": {
       "type": "array",
@@ -51,7 +65,8 @@
           "alerts",
           "results"
         ]
-      }
+      },
+      "description": "구독 주제(계약 3.4.0). alerts=직원 알림(staff 역할), results=결과 도착(clinician 역할=result-reader 토큰). 없으면 [\"alerts\"]. 역할 확인은 서비스가 한다."
     }
   }
 }

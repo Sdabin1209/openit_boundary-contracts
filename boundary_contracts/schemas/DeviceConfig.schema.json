@@ -2,9 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "DeviceConfig.schema.json",
   "title": "DeviceConfig",
-  "description": "키오스크 기기 설정(`GET /config.json`). 쓰는 쪽: deploy(운영이 마운트하는 CONFIG_FILE 내용). 읽는 쪽: kiosk-frontend(api/device.ts loadKioskStart). 초안. 모든 키는 선택이다. device_token이 없으면 키오스크는 세션을 시작하지 않고 직원 호출 화면(NO_DEVICE_TOKEN)을 보인다. 이 문서의 값은 비밀(device_token)·개인정보 참조(subject_ref)를 담을 수 있으므로 로그·오류 응답에 쓰지 않는다. [3.4.4 검토 B-28-9: 기기 인증은 mTLS 가 기본이고(PUBLIC_API F절) 기기 토큰 필드는 F-1 호환용으로 남긴다. 제거는 다음 MAJOR 4.0.0.]",
-  "x-producers": ["deploy"],
-  "x-consumers": ["kiosk-frontend"],
+  "description": "키오스크 기기 설정(`GET /config.json`). 쓰는 쪽: deploy(운영이 마운트하는 CONFIG_FILE 내용). 읽는 쪽: kiosk-frontend(api/device.ts loadKioskStart). 모든 키는 선택이다. device_token이 없으면 키오스크는 세션을 시작하지 않고 직원 호출 화면(NO_DEVICE_TOKEN)을 보인다. 이 문서의 값은 비밀(device_token)·개인정보 참조(subject_ref)를 담을 수 있으므로 로그·오류 응답에 쓰지 않는다. [3.4.4 검토 B-28-9: 기기 인증은 mTLS 가 기본이고(PUBLIC_API F절) 기기 토큰 필드는 F-1 호환용으로 남긴다. 제거는 다음 MAJOR 4.0.0.]",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "kiosk-frontend"
+  ],
   "type": "object",
   "properties": {
     "device_token": {
@@ -16,7 +20,7 @@
     "subject_ref": {
       "type": "string",
       "pattern": "^[A-Za-z0-9._:/#=+-]{1,128}$",
-      "description": "병원 접수가 넘긴 환자 참조(PUBLIC_API.md 추가 인터페이스 A의 형식). 기기당 고정 참조인지 환자마다 새 값인지는 미정(사용자 확인 대기). 시작 URL 조각의 subject_ref가 있으면 그것이 먼저다."
+      "description": "병원 접수가 넘긴 환자 참조(PUBLIC_API.md 추가 인터페이스 A의 형식). 시작 URL 조각의 subject_ref가 있으면 그것이 먼저다. 키오스크는 이 값을 페이지를 연 뒤 서버가 접수한 첫 세션 시작 한 번에만 쓰고 비운다(다음 환자에게 이전 참조가 붙지 않게, kiosk-frontend start_values.ts createStartHolder). 그래서 이 파일에 고정 값을 두면 페이지를 새로 열 때마다 첫 세션에만 붙는다. 접수 연동이 기기당 고정 참조를 쓸지 환자마다 새 URL 을 쓸지는 설치처 결정이다(head OPEN_GAPS G-SUBJ-1)."
     },
     "allow_remote_stt": {
       "type": "boolean",

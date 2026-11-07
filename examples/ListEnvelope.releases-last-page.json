@@ -28,9 +28,34 @@
         "LORA_A": {
           "adapter_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
           "serving_config": {
-            "protection_policy_version": "protect-1"
+            "prompt_template_version": "prompt-4",
+            "decoding": {
+              "constraint_mode": "constrained",
+              "temperature": 0,
+              "seed": 1000,
+              "max_tokens": 512
+            },
+            "max_attempts": 3,
+            "constraint": {
+              "backend": "fake",
+              "backend_version": "1",
+              "supported_features": [
+                "$defs",
+                "$ref",
+                "additionalProperties",
+                "anyOf",
+                "enum",
+                "items",
+                "properties",
+                "required",
+                "type"
+              ],
+              "relax_policy_version": "relax-3"
+            },
+            "output_contract": 1,
+            "protection_policy_version": "protect-2"
           },
-          "serving_config_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "serving_config_hash": "sha256:0e487c9c100bac46c66b425b5971cdb43948b4c9dcde0df14651e9108163fc6a",
           "system_prompt": {
             "path": "system_prompt.txt",
             "sha256": "sha256:3def1bd06bba07ed86b77771064fc0dc969cc80f2997f159ee80b3de5b228b93"
@@ -39,9 +64,34 @@
         "LORA_B": {
           "adapter_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
           "serving_config": {
-            "protection_policy_version": "protect-1"
+            "prompt_template_version": "prompt-4",
+            "decoding": {
+              "constraint_mode": "constrained",
+              "temperature": 0,
+              "seed": 1000,
+              "max_tokens": 512
+            },
+            "max_attempts": 3,
+            "constraint": {
+              "backend": "fake",
+              "backend_version": "1",
+              "supported_features": [
+                "$defs",
+                "$ref",
+                "additionalProperties",
+                "anyOf",
+                "enum",
+                "items",
+                "properties",
+                "required",
+                "type"
+              ],
+              "relax_policy_version": "relax-3"
+            },
+            "output_contract": 1,
+            "protection_policy_version": "protect-2"
           },
-          "serving_config_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "serving_config_hash": "sha256:0e487c9c100bac46c66b425b5971cdb43948b4c9dcde0df14651e9108163fc6a",
           "system_prompt": {
             "path": "system_prompt.txt",
             "sha256": "sha256:3def1bd06bba07ed86b77771064fc0dc969cc80f2997f159ee80b3de5b228b93"
@@ -77,9 +127,34 @@
         "LORA_A": {
           "adapter_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
           "serving_config": {
-            "protection_policy_version": "protect-1"
+            "prompt_template_version": "prompt-4",
+            "decoding": {
+              "constraint_mode": "constrained",
+              "temperature": 0,
+              "seed": 1000,
+              "max_tokens": 512
+            },
+            "max_attempts": 3,
+            "constraint": {
+              "backend": "fake",
+              "backend_version": "1",
+              "supported_features": [
+                "$defs",
+                "$ref",
+                "additionalProperties",
+                "anyOf",
+                "enum",
+                "items",
+                "properties",
+                "required",
+                "type"
+              ],
+              "relax_policy_version": "relax-3"
+            },
+            "output_contract": 1,
+            "protection_policy_version": "protect-2"
           },
-          "serving_config_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "serving_config_hash": "sha256:0e487c9c100bac46c66b425b5971cdb43948b4c9dcde0df14651e9108163fc6a",
           "system_prompt": {
             "path": "system_prompt.txt",
             "sha256": "sha256:3def1bd06bba07ed86b77771064fc0dc969cc80f2997f159ee80b3de5b228b93"
@@ -88,9 +163,34 @@
         "LORA_B": {
           "adapter_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
           "serving_config": {
-            "protection_policy_version": "protect-1"
+            "prompt_template_version": "prompt-4",
+            "decoding": {
+              "constraint_mode": "constrained",
+              "temperature": 0,
+              "seed": 1000,
+              "max_tokens": 512
+            },
+            "max_attempts": 3,
+            "constraint": {
+              "backend": "fake",
+              "backend_version": "1",
+              "supported_features": [
+                "$defs",
+                "$ref",
+                "additionalProperties",
+                "anyOf",
+                "enum",
+                "items",
+                "properties",
+                "required",
+                "type"
+              ],
+              "relax_policy_version": "relax-3"
+            },
+            "output_contract": 1,
+            "protection_policy_version": "protect-2"
           },
-          "serving_config_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "serving_config_hash": "sha256:0e487c9c100bac46c66b425b5971cdb43948b4c9dcde0df14651e9108163fc6a",
           "system_prompt": {
             "path": "system_prompt.txt",
             "sha256": "sha256:3def1bd06bba07ed86b77771064fc0dc969cc80f2997f159ee80b3de5b228b93"
