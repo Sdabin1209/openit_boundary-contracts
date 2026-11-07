@@ -247,20 +247,6 @@
       "required": [],
       "additionalProperties": false
     },
-    "Endpoint": {
-      "type": "object",
-      "properties": {
-        "endpoint": {
-          "type": "string",
-          "format": "uri",
-          "pattern": "^https://"
-        }
-      },
-      "required": [
-        "endpoint"
-      ],
-      "additionalProperties": false
-    },
     "Stream": {
       "type": "object",
       "properties": {
@@ -312,9 +298,6 @@
     },
     {
       "$ref": "#/$defs/Results"
-    },
-    {
-      "$ref": "#/$defs/Endpoint"
     },
     {
       "$ref": "#/$defs/Stream"

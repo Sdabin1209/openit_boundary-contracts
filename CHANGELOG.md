@@ -1,6 +1,10 @@
 # 변경 이력
 
 
+## 4.0.1 (2026-11-08, PATCH: 4.0.0 의미 빈칸 두 곳)
+- 4.0.0 에서 제거하기로 예고한 `DELETE /v1/staff/push-subscriptions?endpoint=`의 정의가 openapi 와 PUBLIC_API 에 남아 있었다. 경로 정의와 그것만 쓰던 `HttpQueries.$defs.Endpoint`를 지웠다(4.0.0 의 제거 약속을 완결하는 것이며 새 제거가 아니다). 해지는 `POST /v1/staff/push-subscriptions/unsubscribe`뿐이다.
+- 서버 발급 세션 ID(4.0.0)와 "같은 `turn_id` 재전송은 같은 응답" 규칙이 세션 시작에서 충돌했다. 멱등 범위를 `(session_id, turn_id)`로 명시하고 세션 시작은 멱등이 아님을 적었다. `SessionStartBody.turn_id`는 새 세션의 첫 턴 ID로 기록할 뿐이다.
+
 ## 4.0.0 (2026-11-07, MAJOR: 계약 전수 검토 수정 — 병행 기간 없음, CONVENTIONS 1.4 기록)
 
 전수 검토(헤드·Codex 교차검증)에서 찾은 결함을 고친다. 허용 범위 축소·필드 삭제·의미 변경이 있어 MAJOR 다. 운영 데이터가 없어 3.x 를 읽는 병행 경로를 두지 않는다(PIPELINE_SCHEMA_VERSION 4.0).
