@@ -2,10 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "RuntimeFlowFile.schema.json",
   "title": "RuntimeFlowFile",
-  "description": "3.4.4(검토 A-23): model-runtime 의 시험 전용 백엔드(fake·mimic) 설정 파일(MODEL_RUNTIME_FAKE_FLOW_FILE, MODEL_RUNTIME_MIMIC_FLOW_FILE). 제품 배포(GPU 추론)에서는 쓰지 않는다. `order`·`skips` 의 정본은 계약 QuestionFlowTable 이다(문진 스키마 QuestionFlow 는 survey-schema 4.0.0 에서 없어졌다). 두 형식: 문항 ID 목록(배열) 또는 객체. 객체의 모르는 키는 거부한다.",
+  "description": "3.4.4(검토 A-23): model-runtime 의 시험 전용 백엔드(fake·mimic) 설정 파일(MODEL_RUNTIME_FAKE_FLOW_FILE, MODEL_RUNTIME_MIMIC_FLOW_FILE). 제품 배포(GPU 추론)에서는 쓰지 않는다. `order`·`skips` 의 정본은 계약 QuestionFlowTable 이다(문진 스키마 QuestionFlow 는 survey-schema 4.0.0 에서 없어졌다). 두 형식: 문항 ID 목록(배열) 또는 객체. 객체의 모르는 키는 거부한다. 4.0.0: 생산자는 deploy(시험·데모 설정 test/fake-model)뿐이다(survey-service 는 이 파일을 만들지 않는다).",
   "x-producers": [
-    "deploy",
-    "survey-service"
+    "deploy"
   ],
   "x-consumers": [
     "model-runtime"

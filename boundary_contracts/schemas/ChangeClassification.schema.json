@@ -49,8 +49,7 @@
     "affected_slots": {
       "type": "array",
       "items": {
-        "type": "string",
-        "minLength": 1
+        "$ref": "_common.schema.json#/$defs/SlotRefString"
       },
       "description": "문진 스키마 SlotRef를 문자열로 직렬화한 값"
     },

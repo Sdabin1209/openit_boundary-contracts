@@ -157,14 +157,16 @@
             "integer",
             "null"
           ],
-          "description": "dry-run이면 null"
+          "minimum": 0,
+          "description": "applied 이면 지운 바이트(0 이상), dry-run 이면 null"
         },
         "attempts_purged": {
           "type": [
             "integer",
             "null"
           ],
-          "description": "dry-run이면 null"
+          "minimum": 0,
+          "description": "applied 이면 지운 시도 수(0 이상), dry-run 이면 null"
         },
         "skipped_protected": {
           "type": "array",
@@ -181,7 +183,43 @@
         "freed_bytes",
         "attempts_purged"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "applied": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "freed_bytes": {
+                "type": "integer"
+              },
+              "attempts_purged": {
+                "type": "integer"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "freed_bytes": {
+                "type": "null"
+              },
+              "attempts_purged": {
+                "type": "null"
+              }
+            },
+            "not": {
+              "required": [
+                "skipped_protected"
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "title": "failed (BoundaryError, 설정 오류, 예기치 못한 예외)",

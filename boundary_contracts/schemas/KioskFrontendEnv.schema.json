@@ -2,7 +2,7 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "https://openit.example/schemas/KioskFrontendEnv.schema.json",
  "title": "KioskFrontendEnv",
- "description": "kiosk-frontend 컨테이너(Caddy 정적 서버)의 환경 변수 선언 (3.2.0, U73: 영역 사이 설정 이름은 이 선언에만 있다. deploy 는 여기 있는 이름만 주고, 서비스는 기동 때 자기 environ 을 이 스키마로 검증한다. 접두사가 붙은 이름 중 여기 없는 것은 거부, 접두사 없는 다른 변수(PATH 등)는 보지 않는다.)",
+ "description": "kiosk-frontend 컨테이너(Caddy 정적 서버)의 환경 변수 선언 (3.2.0, U73: 영역 사이 설정 이름은 이 선언에만 있다. deploy 는 여기 있는 이름만 준다. 접두사가 붙은 이름 중 여기 없는 것은 거부, 접두사 없는 다른 변수(PATH 등)는 보지 않는다.) 이 이미지는 Caddy 정적 서버라 이미지 안에 계약 검증 도구가 없다: 이 스키마의 검증은 deploy 가 기동 전에 한다(up.sh 의 ContainerInputs 대조가 env_schema 로 환경을 검증, deploy ADR 0068). 4.0.0 에서 '서비스는 기동 때 검증한다'던 문장을 실제에 맞췄다.",
  "x-producers": [
   "deploy"
  ],

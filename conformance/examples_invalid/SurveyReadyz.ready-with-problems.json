@@ -37,7 +37,6 @@
   },
   "secrets": {
     "api_token": "env",
-    "kiosk_device_tokens": "unset",
     "staff_api_token": "env",
     "vapid_private_key": "unset",
     "result_reader_token": "unset",

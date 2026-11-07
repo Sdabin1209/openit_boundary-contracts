@@ -1,6 +1,6 @@
 {
-  "base_url": "https://dataset-store",
   "kind": "http",
-  "timeout": 60,
-  "token_env": "DATASET_STORE_WRITE_TOKEN"
+  "base_url": "https://dataset-store",
+  "token_secret": "DATASET_STORE_WRITE_TOKEN",
+  "timeout_seconds": 60
 }

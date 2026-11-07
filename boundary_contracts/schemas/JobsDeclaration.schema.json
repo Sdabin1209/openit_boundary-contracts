@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "JobsDeclaration.schema.json",
   "title": "JobsDeclaration",
-  "description": "영역이 이미지로 선언하는 잡 (라벨 io.openit.jobs 의 내용). 영역이 내고 deploy 가 읽어 compose 잡 정의(command, 비밀 파일 마운트, 네트워크)와 config/jobs.yaml 을 만든다. 지금은 deploy 가 영역의 파이썬 모듈 경로와 서브커맨드를 compose.yaml 에 직접 적는다(예: python -m release_gate collect). 잡은 멱등이어야 한다(워크스페이스 규칙 D39). 모르는 키 거부: 선언에 없는 능력을 deploy 가 짐작해 쓰지 않게 한다.",
+  "description": "영역이 이미지로 선언하는 잡 (라벨 io.openit.jobs 의 내용). 영역이 내고 deploy 가 읽어 compose 잡 정의(command, 비밀 파일 마운트, 네트워크)와 config/jobs.yaml 을 만든다. deploy 는 잡 명령을 이 선언의 argv 로만 정하고(scripts/gen-jobs.py, run-job.sh 는 다른 인자를 거부한다) 영역의 모듈 경로를 따로 적지 않는다. 잡은 멱등이어야 한다(워크스페이스 규칙 D39). 모르는 키 거부: 선언에 없는 능력을 deploy 가 짐작해 쓰지 않게 한다.",
   "x-producers": [
     "*"
   ],

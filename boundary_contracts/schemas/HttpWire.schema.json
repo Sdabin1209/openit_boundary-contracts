@@ -15,8 +15,7 @@
       "format": "binary"
     },
     "User": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9._@:+/#=-]{1,128}$(?![\\s\\S])"
+      "$ref": "_common.schema.json#/$defs/HumanUserId"
     },
     "Id": {
       "type": "string",

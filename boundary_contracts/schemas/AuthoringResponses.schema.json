@@ -28,7 +28,7 @@
         },
         "path": {
           "type": "string",
-          "pattern": "^/"
+          "pattern": "^(?:/(?:[^~/]|~[01])*)+$(?![\\s\\S])"
         },
         "kind": {
           "enum": [
@@ -496,7 +496,7 @@
               },
               "path": {
                 "type": "string",
-                "pattern": "^/"
+                "pattern": "^(?:/(?:[^~/]|~[01])*)+$(?![\\s\\S])"
               },
               "kind": {
                 "enum": [
@@ -586,7 +586,45 @@
           "description": "초안의 fallback 을 그대로 옮긴다(Draft.fallback 과 같은 모양, 3.7.0)"
         },
         "ready_to_confirm": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "참이면 확정할 수 있다: OPEN 이고 열린 플래그·검증 오류가 없고, 변경 분류가 없거나(새 문항 세트) change_kinds 가 비어 있지 않다(4.0.0: question-authoring preview_build 의 조건을 스키마로)"
+        }
+      },
+      "if": {
+        "properties": {
+          "ready_to_confirm": {
+            "const": true
+          }
+        },
+        "required": [
+          "ready_to_confirm"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "OPEN"
+          },
+          "open_flags": {
+            "maxItems": 0
+          },
+          "validation_errors": {
+            "maxItems": 0
+          },
+          "change": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "properties": {
+                  "change_kinds": {
+                    "minItems": 1
+                  }
+                }
+              }
+            ]
+          }
         }
       }
     },

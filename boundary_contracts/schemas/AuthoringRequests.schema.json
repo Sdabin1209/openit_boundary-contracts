@@ -22,8 +22,15 @@
           "$ref": "_common.schema.json#/$defs/Id"
         },
         "base_version": {
+          "anyOf": [
+            {
+              "const": "latest"
+            },
+            {
+              "$ref": "_common.schema.json#/$defs/Id"
+            }
+          ],
           "description": "'latest'(기본) 또는 버전 Id. 새 문항 세트면 'latest'는 기반 없음",
-          "type": "string",
           "default": "latest"
         }
       }
@@ -45,7 +52,14 @@
           "minLength": 1
         },
         "base_version": {
-          "type": "string"
+          "anyOf": [
+            {
+              "const": "latest"
+            },
+            {
+              "$ref": "_common.schema.json#/$defs/Id"
+            }
+          ]
         },
         "extractor": {
           "type": "string"
@@ -92,7 +106,8 @@
         },
         "path": {
           "type": "string",
-          "pattern": "^/"
+          "pattern": "^(?:/(?:[^~/]|~[01])*)+$(?![\\s\\S])",
+          "description": "초안(QuestionBank 모양)에 대한 JSON 포인터(RFC 6901: '/' 로 시작, ~ 는 ~0·~1 만). value 를 생략하면 그 위치에 null 을 넣는다"
         },
         "value": {}
       }

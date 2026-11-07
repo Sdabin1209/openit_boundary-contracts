@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "CommonEnv.schema.json",
   "title": "CommonEnv",
-  "description": "3.4.4(검토 A-1): 모든 영역 컨테이너(서비스·잡)가 공통으로 받는 환경 변수. 각 영역의 `*Env` 스키마와 함께 지킨다(영역 Env 는 자기 접두사 이름만 검사하므로 OPENIT_ 이름과 겹치지 않는다). deploy 가 배포 때 준다(CONVENTIONS 13절 예외). 3.4.5: 데이터베이스를 가진 영역의 백업 출력 이름(RUNTIME R10.1)을 더했다(ops-feedback 담당이 코드 단계에서 찾은 계약 빈칸). SSL_CERT_FILE 은 표준 이름이라 여기서 다시 정하지 않는다(RUNTIME IN-ROOT).",
+  "description": "3.4.4(검토 A-1): 모든 영역 컨테이너(서비스·잡)가 공통으로 받는 환경 변수. 각 영역의 `*Env` 스키마와 함께 지킨다(영역 Env 는 자기 접두사 이름만 검사하므로 OPENIT_ 이름과 겹치지 않는다). deploy 가 배포 때 준다(CONVENTIONS 13절 예외). 3.4.5: 데이터베이스를 가진 영역의 백업 출력 이름(RUNTIME R10.1)을 더했다(ops-feedback 담당이 코드 단계에서 찾은 계약 빈칸). SSL_CERT_FILE 은 OpenSSL 표준 이름 그대로 쓰며(RUNTIME IN-ROOT) 형식(절대 경로)만 여기서 정한다.",
   "x-producers": [
     "deploy"
   ],

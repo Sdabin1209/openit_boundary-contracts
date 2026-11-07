@@ -2,7 +2,7 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "https://openit.example/schemas/AdminConsoleEnv.schema.json",
  "title": "AdminConsoleEnv",
- "description": "admin-console 컨테이너(Caddy 정적 서버)의 환경 변수 선언(3.4.3, U99). 만드는 쪽: deploy(compose). 읽는 쪽: admin-console serve/Caddyfile. 영역 사이 설정 이름은 이 선언에만 있다. 값은 모두 문자열.",
+ "description": "admin-console 컨테이너(Caddy 정적 서버)의 환경 변수 선언(3.4.3, U99). 만드는 쪽: deploy(compose). 읽는 쪽: admin-console serve/Caddyfile. 영역 사이 설정 이름은 이 선언에만 있다. 값은 모두 문자열. 이 이미지는 Caddy 정적 서버라 이미지 안에 계약 검증 도구가 없다: 이 스키마의 검증은 deploy 가 기동 전에 한다(up.sh 의 ContainerInputs 대조가 env_schema 로 환경을 검증, deploy ADR 0068). 4.0.0 에서 '서비스는 기동 때 검증한다'던 문장을 실제에 맞췄다.",
  "x-producers": [
   "deploy"
  ],
