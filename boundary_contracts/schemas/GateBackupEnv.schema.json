@@ -121,17 +121,11 @@
     "GATE_RETAIN_ATTEMPTS_DAYS": {
       "$ref": "GateEnv.schema.json#/properties/GATE_RETAIN_ATTEMPTS_DAYS"
     },
-    "GATE_READ_TOKEN": {
-      "$ref": "GateEnv.schema.json#/properties/GATE_READ_TOKEN"
-    },
     "PORT": {
       "$ref": "GateEnv.schema.json#/properties/PORT"
     },
     "GATE_HOST": {
       "$ref": "GateEnv.schema.json#/properties/GATE_HOST"
-    },
-    "GATE_READ_TOKEN_FILE": {
-      "$ref": "GateEnv.schema.json#/properties/GATE_READ_TOKEN_FILE"
     }
   },
   "propertyNames": {

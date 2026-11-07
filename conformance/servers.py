@@ -680,9 +680,12 @@ class PublicApiReferenceServer(StaffCallReferenceServer):
     모사하지 않는 것: 결과 조회(B), 직원 세션 조회(C), 위험 신호 입력(D), `X-Openit-User` 행위자 기록(E), 푸시/SSE.
     """
 
-    def __init__(self, tokens: dict[str, str], retry_after_s: int = 30, max_retries: int = 10):
+    def __init__(self, tokens: dict[str, str], retry_after_s: int = 30, max_retries: int = 10, session_ids=None):
         super().__init__(tokens, retry_after_s, max_retries)
         self.states: dict[str, dict] = {}
+        # 4.0.0(D106): 세션 ID 는 서버가 발급한다. 시험이 값을 알 수 있게 기본은 s1, s2, ... 순서(참조 서버일 뿐, 운영 서비스는 CSPRNG)
+        import itertools
+        self._session_ids = iter(session_ids) if session_ids is not None else (f"s{i}" for i in itertools.count(1))
         # 3.3.0: 활성 릴리스의 문진표 목록(GET /v1/question-sets). 기본은 하나라 question_set_id 없는 시작이 그대로 동작한다.
         self.question_sets_active: list[dict] = [{"question_set_id": "qs-main", "title": "시험 문진표", "version": "3"}]
         self.trust_device_header = True   # 2.3.0: 키오스크는 X-Openit-Device(게이트웨이 mTLS)로도 식별된다
@@ -716,8 +719,9 @@ class PublicApiReferenceServer(StaffCallReferenceServer):
             if not role.startswith("kiosk"):
                 raise BoundaryError("PERMISSION_DENIED", "키오스크 토큰만 호출할 수 있다")
             b = self._body(body)
-            sid = b.get("session_id")
-            self._msg(b, sid, "SESSION_START", ("subject_ref", "question_set_id"))
+            if "session_id" in b:
+                raise BoundaryError("INVALID_RECORD", "세션 ID 는 서버가 발급한다(4.0.0, D106): 본문에 session_id 를 보내지 않는다")
+            self._msg(dict(b, session_id="pending"), "pending", "SESSION_START", ("subject_ref", "question_set_id"))
             if "subject_ref" in b and not (isinstance(b["subject_ref"], str) and _SUBJECT_REF.match(b["subject_ref"])):
                 raise BoundaryError("INVALID_RECORD", "subject_ref 형식이 아니다")
             qsid = b.get("question_set_id")      # 3.3.0: 세션의 문진표. 활성 세트가 하나면 생략 가능, 둘 이상이면 필수
@@ -728,12 +732,11 @@ class PublicApiReferenceServer(StaffCallReferenceServer):
                 qsid = active[0]
             elif qsid not in active:
                 raise BoundaryError("INVALID_RECORD", "활성 릴리스에 없는 문진표다", {"reason": "UNKNOWN_QUESTION_SET"})
-            if sid in self.states:
-                raise BoundaryError("CONFLICT", "이미 있는 세션이다")
+            sid = next(self._session_ids)      # 검사를 모두 통과한 뒤에 발급한다(거부된 요청이 번호를 쓰지 않게)
             self.sessions[sid] = role
             self.states[sid] = {"state": "ACTIVE", "resume_text": None, "pause_reason": None, "turns": {}, "inflight": set(),
                                 "subject_ref": b.get("subject_ref"), "question_set_id": qsid}
-            return self._j(self._fi("안녕하세요. 문진을 시작하겠습니다."), 201)
+            return self._j(dict(self._fi("안녕하세요. 문진을 시작하겠습니다."), session_id=sid), 201)
         g = re.fullmatch(r"/v1/sessions/([^/]+)/(turns|end|state|intervention)", path)
         if not g:
             return super()._route(method, path, q, body, role)

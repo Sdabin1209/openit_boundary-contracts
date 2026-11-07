@@ -38,21 +38,21 @@ class PublicApiQuestionSets(unittest.TestCase):
 
     def test_single_active_set_allows_omission(self):
         self.assertEqual([x["question_set_id"] for x in self.c.list_question_sets()], ["qs-main"])
-        self.c.start_session("s1")
+        self.c.start_session()
         self.assertEqual(self.srv.states["s1"]["question_set_id"], "qs-main")
 
     def test_two_active_sets_require_choice(self):
         self.srv.question_sets_active.append({"question_set_id": "qs-b", "title": "순서 B", "version": "1"})
         with self.assertRaises(BoundaryError) as cm:
-            self.c.start_session("s1")
+            self.c.start_session()
         self.assertEqual((cm.exception.code, cm.exception.details.get("reason")), ("INVALID_RECORD", "QUESTION_SET_REQUIRED"))
         with self.assertRaises(BoundaryError) as cm:
-            self.c.start_session("s1", question_set_id="qs-none")
+            self.c.start_session(question_set_id="qs-none")
         self.assertEqual(cm.exception.details.get("reason"), "UNKNOWN_QUESTION_SET")
-        self.c.start_session("s1", question_set_id="qs-b")
+        self.c.start_session(question_set_id="qs-b")
         self.assertEqual(self.srv.states["s1"]["question_set_id"], "qs-b")
         with self.assertRaises(BoundaryError):
-            self.c.start_session("s2", question_set_id="bad id")
+            self.c.start_session(question_set_id="bad id")
 
 
 class Examples330(unittest.TestCase):

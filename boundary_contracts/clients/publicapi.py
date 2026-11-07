@@ -56,12 +56,10 @@ class HttpPublicApi(HttpClientBase):
         body = self._json("GET", "/v1/question-sets")
         return check_record("QuestionSetList", body)["items"]
 
-    def start_session(self, session_id: Optional[str] = None, subject_ref: Optional[str] = None, question_set_id: Optional[str] = None) -> dict:
-        """`POST /v1/sessions`. 첫 안내 문장이 든 FrontendInput. session_id는 생략한다: 서버가 발급해 응답에 돌려준다(D106, PUBLIC_API.md 7행).
-        주는 것은 2.x 호환으로만 받는다. question_set_id(3.3.0): 이 세션의 문진표. 활성 문진표가 하나면 생략 가능, 둘 이상이면 필수(서버 400 INVALID_RECORD)."""
+    def start_session(self, *, subject_ref: Optional[str] = None, question_set_id: Optional[str] = None) -> dict:
+        """`POST /v1/sessions`. 첫 안내 문장과 서버가 발급한 session_id 가 든 FrontendInput(D106, PUBLIC_API.md 7행).
+        4.0.0: 세션 ID 를 클라이언트가 정해 보내는 방식(2.x 호환)을 없앴다. question_set_id(3.3.0): 이 세션의 문진표. 활성 문진표가 하나면 생략 가능, 둘 이상이면 필수(서버 400 INVALID_RECORD)."""
         body = {"kind": "SESSION_START"}
-        if session_id is not None:
-            body["session_id"] = _sid(session_id)
         if subject_ref is not None:
             if not isinstance(subject_ref, str) or not _SUBJECT_REF.match(subject_ref):
                 raise BoundaryError("INVALID_RECORD", "subject_ref 형식이 아니다")
@@ -71,7 +69,10 @@ class HttpPublicApi(HttpClientBase):
                 raise BoundaryError("INVALID_RECORD", "question_set_id 형식이 아니다")
             body["question_set_id"] = question_set_id
         check_outgoing("PublicApiRequests#/$defs/SessionStartBody", body)
-        return check_frontend_input(self._json("POST", "/v1/sessions", body=body))
+        out = check_frontend_input(self._json("POST", "/v1/sessions", body=body))
+        if not isinstance(out.get("session_id"), str):
+            raise integrity("세션 시작 응답에 서버가 발급한 session_id 가 없다(D106)")
+        return out
 
     def send_utterance(self, session_id: str, utterance: str, turn_id: str) -> dict:
         """`POST /v1/sessions/{id}/turns`. 응답을 받지 못한 재전송에만 같은 turn_id를 쓴다(멱등)."""

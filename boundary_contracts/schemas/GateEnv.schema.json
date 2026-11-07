@@ -2,7 +2,7 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "https://openit.example/schemas/GateEnv.schema.json",
  "title": "GateEnv",
- "description": "release-gate 서비스(및 collect/judge/prune 잡) 컨테이너의 환경 변수 선언 (3.2.0, U73: 영역 사이 설정 이름은 이 선언에만 있다. deploy 는 여기 있는 이름만 주고, 서비스는 기동 때 자기 environ 을 이 스키마로 검증한다. 접두사가 붙은 이름 중 여기 없는 것은 거부, 접두사 없는 다른 변수(PATH 등)는 보지 않는다.) 3.7.0(D9): GATE_I1_FACTORY·GATE_I3_FACTORY 를 없앴다(역할이 계약 클라이언트를 정한다). 3.7.0: 서비스(serve) 전용이다. 잡은 GateJobEnv.",
+ "description": "release-gate 서비스(및 collect/judge/prune 잡) 컨테이너의 환경 변수 선언 (3.2.0, U73: 영역 사이 설정 이름은 이 선언에만 있다. deploy 는 여기 있는 이름만 주고, 서비스는 기동 때 자기 environ 을 이 스키마로 검증한다. 접두사가 붙은 이름 중 여기 없는 것은 거부, 접두사 없는 다른 변수(PATH 등)는 보지 않는다.) 3.7.0(D9): GATE_I1_FACTORY·GATE_I3_FACTORY 를 없앴다(역할이 계약 클라이언트를 정한다). 3.7.0: 서비스(serve) 전용이다. 잡은 GateJobEnv. 4.0.0: 이전 호환 단일 읽기 토큰 GATE_READ_TOKEN·GATE_READ_TOKEN_FILE 을 없앴다(폐기 예고대로, 읽기 토큰은 GATE_READ_TOKENS_FILE).",
  "x-producers": [
   "deploy"
  ],
@@ -87,10 +87,8 @@
      "GATE_POLICY_FILE",
      "GATE_POLL_SECONDS",
      "GATE_READYZ_DB_TIMEOUT_SECONDS",
-     "GATE_READ_TOKEN",
      "GATE_READ_TOKENS",
      "GATE_READ_TOKENS_FILE",
-     "GATE_READ_TOKEN_FILE",
      "GATE_REQUEST_DEADLINE_SECONDS",
      "GATE_REQUEST_TIMEOUT_SECONDS",
      "GATE_RETAIN_ATTEMPTS_DAYS",
@@ -269,11 +267,6 @@
    "description": "보존: 시도 기록 일수",
    "default": "365"
   },
-  "GATE_READ_TOKEN": {
-   "type": "string",
-   "minLength": 1,
-   "description": "이전 호환: 단일 읽기 토큰(역할 reader 로 등록). GATE_READ_TOKENS 가 있으면 필요 없다. 폐기 예정"
-  },
   "PORT": {
    "$ref": "#/$defs/Port",
    "description": "바인드 포트",
@@ -284,10 +277,6 @@
    "minLength": 1,
    "description": "바인드 주소(3.4.2, U99). TLS 사이드카 뒤에서는 127.0.0.1(같은 네트워크 공간의 사이드카만 닿는다). 기본 0.0.0.0(사이드카 없는 단독 실행)",
    "default": "0.0.0.0"
-  },
-  "GATE_READ_TOKEN_FILE": {
-   "$ref": "#/$defs/Path",
-   "description": "이전 호환: 단일 읽기 토큰 파일. 폐기 예정"
   }
  },
  "allOf": [
