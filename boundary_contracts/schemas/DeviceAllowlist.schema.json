@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "DeviceAllowlist.schema.json",
   "title": "DeviceAllowlist",
-  "description": "키오스크 기기 인증서 허용 목록(4.0.0, D136). 공개 입구는 기기 경로(Exposure auth device)의 요청마다 클라이언트 인증서의 주체 CN(=device_id)과 일련번호를 이 목록과 대조한다. 신뢰 CA(PublicIngressEnv.INGRESS_DEVICE_CA_FILE)로 검증된 인증서라도 목록에 없으면 403 PERMISSION_DENIED(BoundaryError 본문). 등록은 항목 추가, 회전은 같은 device_id 에 새 일련번호를 더한 뒤 옛 것을 빼는 것, 폐기는 항목이나 일련번호를 빼는 것이다. 대조를 요청마다 하므로 목록에서 빠진 인증서는 이미 열린 TLS 연결에서도 다음 요청부터 거부된다. 인증서 발급·갱신은 조직 PKI/MDM 이 하고(D113), 이 목록은 deploy 가 발급된 인증서의 일련번호로 만든다. 비밀이 아니다.",
+  "description": "키오스크 기기 인증서 허용 목록(4.0.0, D136). 공개 입구는 기기 경로(Exposure auth device)의 요청마다 클라이언트 인증서의 주체 CN(=device_id)과 일련번호를 이 목록과 대조한다. 신뢰 CA(PublicIngressEnv.INGRESS_DEVICE_CA_FILE)로 검증된 인증서라도 목록에 없으면 403 PERMISSION_DENIED(BoundaryError 본문). 등록은 항목 추가, 회전은 같은 device_id 에 새 일련번호를 더한 뒤 옛 것을 빼는 것, 폐기는 항목이나 일련번호를 빼는 것이다. 대조를 요청마다 하므로 목록에서 빠진 인증서는 이미 열린 TLS 연결에서도 다음 요청부터 거부된다. 인증서 발급·갱신은 조직 PKI/MDM 이 하고(D113), 이 목록은 deploy 가 발급된 인증서의 일련번호로 만든다. 비밀이 아니다. 소비자 동작: 시작할 때 파일이 없거나 계약을 어기거나 device_id 가 겹치면 공개 입구는 시작하지 않는다. 시작한 뒤 목록을 읽지 못하거나 계약을 어기면 기기 경로는 503 UNAVAILABLE 로 닫는다(fail-closed, 이미 열린 연결의 다음 요청도 같다) — 다음에 정상 파일을 읽으면 회복한다. 파일은 통째로 교체되므로 deploy 는 파일의 부모 디렉터리를 마운트한다(ContainerInputs 에 디렉터리로 선언).",
   "x-producers": [
     "deploy"
   ],

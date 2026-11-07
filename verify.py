@@ -110,6 +110,7 @@ for _label, _mut in (("모르는 action NOPE 로 규칙을 비움", lambda r: r[
                      ("flow_next 규칙에 base_item 없음", lambda r: r["next_item"]["by_action"][2].pop("base_item"))):
     _r = copy.deepcopy(_rules); _mut(_r)
     _rej = bool(list(val("ActionExtractionRules").iter_errors(_r))); print("OK  " if _rej else "FAIL", "거부되어야 함(4.0.0):", _label); bad += not _rej
+neg("서비스 주소 호스트 254자(RFC 1035, 4.0.0)", "SurveyServiceEnv", "SurveyServiceEnv", lambda d: d.update(SURVEY_RELEASE_READER_URL="https://" + ".".join(["a" * 63] * 4)))
 neg("failure_type 끝 개행", "FailureCase", "FailureCase", lambda d: d.update(failure_type="UNCLASSIFIED\n"))
 neg("failure_type 에 공백(3.7.0 FailureType)", "FailureCase", "FailureCase", lambda d: d.update(failure_type="a b"))
 neg("CaseReviewRequest LORA_A 인데 expected 가 ActionExtraction 이 아님(3.7.0)", "CaseReviewRequest", "CaseReviewRequest.confirmed-lora-a", lambda d: d.update(expected={"x": 1}))
