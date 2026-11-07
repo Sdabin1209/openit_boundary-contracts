@@ -2,9 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "OpsFeedbackReadyz.schema.json",
   "title": "OpsFeedbackReadyz",
-  "description": "ingest-api GET /readyz 본문. 만드는 쪽: ops-feedback. 읽는 쪽: deploy(상태 확인), gateway. 인증이 없는 경로라 비밀·개인정보·건수 이외의 값을 싣지 않는다. 읽는 쪽은 상태 코드(200/503)로 판단하고 본문은 보조다. 모르는 키: 읽는 쪽 무시(additionalProperties 허용), 쓰는 쪽은 아래 키만 쓴다. warnings는 서버가 켜져 있어도 설정이 열려 있음을 알리는 값이며 상태 코드에 영향이 없다.",
-  "x-producers": ["ops-feedback"],
-  "x-consumers": ["platform", "deploy"],
+  "description": "ingest-api GET /readyz 본문. 만드는 쪽: ops-feedback. 읽는 쪽: deploy(상태 확인), gateway. 인증이 없는 경로라 비밀·개인정보·건수 이외의 값을 싣지 않는다. 읽는 쪽은 상태 코드(200/503)로 판단하고 본문은 보조다. 쓰는 쪽은 아래 키만 쓴다(3.7.0에서 닫아 생산자 검증이 강제한다). warnings는 서버가 켜져 있어도 설정이 열려 있음을 알리는 값이며 상태 코드에 영향이 없다.",
+  "x-producers": [
+    "ops-feedback"
+  ],
+  "x-consumers": [
+    "platform",
+    "deploy"
+  ],
   "oneOf": [
     {
       "type": "object",
@@ -15,7 +20,7 @@
         "supported_runtime_contract_versions",
         "counters"
       ],
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "status": {
           "const": "ready"
@@ -88,10 +93,13 @@
         "status",
         "code"
       ],
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "status": {
-          "enum": ["not_ready", "not-ready"]
+          "enum": [
+            "not_ready",
+            "not-ready"
+          ]
         },
         "code": {
           "enum": [

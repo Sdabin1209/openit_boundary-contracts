@@ -60,6 +60,12 @@ class DeidView(unittest.TestCase):
     def test_비식별_뷰는_원문을_전혀_허용하지_않는다(self):
         self.assertTrue(errs("OpsFeedbackDeidentifiedTrace", ex("OpsFeedbackReviewTrace.utterance")), "검토 사본의 원문은 비식별 뷰에서 거부")
 
+    def test_네_경로_밖의_pause_reason_은_일반_걷기(self):
+        # PauseEntry(session_before/after.progress_record.pause_history[]) 의 pause_reason 은 비식별기가 enum 으로 보존한다(Codex 실행 대조 2026-11-07)
+        import json as _j
+        schema = _j.loads((ROOT / "boundary_contracts/schemas/OpsFeedbackDeidentifiedTrace.schema.json").read_text(encoding="utf-8"))
+        self.assertIn('"pause_reason"', _j.dumps(schema["$defs"]) + _j.dumps(schema["properties"]["session_before"]))
+
 
 if __name__ == "__main__":
     unittest.main()

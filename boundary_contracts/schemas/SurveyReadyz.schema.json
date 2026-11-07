@@ -3,8 +3,13 @@
   "$id": "SurveyReadyz.schema.json",
   "title": "SurveyReadyz",
   "description": "GET /readyz 응답 본문(200 또는 503). 만드는 쪽: survey-service(service.py readiness). 읽는 쪽: deploy(경보·점검). 필수 키는 deploy 경보와 점검이 읽는 것만, 나머지는 있으면 형식만 확인한다. 모르는 키는 읽는 쪽이 무시한다(이 서비스가 진단 필드를 더해도 deploy가 깨지지 않게). 비밀 값은 어떤 키에도 없다.",
-  "x-producers": ["survey-service"],
-  "x-consumers": ["platform", "deploy"],
+  "x-producers": [
+    "survey-service"
+  ],
+  "x-consumers": [
+    "platform",
+    "deploy"
+  ],
   "type": "object",
   "required": [
     "ready",
@@ -47,7 +52,8 @@
         "detail": {
           "type": "string"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "service_version": {
       "type": "string"
@@ -118,7 +124,8 @@
             "null"
           ]
         }
-      }
+      },
+      "additionalProperties": false
     },
     "staff_alerts": {
       "type": "object",
@@ -130,7 +137,8 @@
           "type": "integer",
           "minimum": 0
         }
-      }
+      },
+      "description": "진단 수치. 계약은 위 키만 정하고, 그 밖의 키는 생산자가 진단용으로 더할 수 있으며 읽는 쪽은 무시한다(생산자가 카운터 사전을 그대로 낸다)."
     },
     "staff_alert_source": {
       "type": "object",
@@ -144,7 +152,8 @@
         "provisional": {
           "type": "boolean"
         }
-      }
+      },
+      "description": "진단 수치. 계약은 위 키만 정하고, 그 밖의 키는 생산자가 진단용으로 더할 수 있으며 읽는 쪽은 무시한다(생산자가 카운터 사전을 그대로 낸다)."
     },
     "kiosk_tokens": {
       "type": "object",
@@ -166,7 +175,8 @@
             "null"
           ]
         }
-      }
+      },
+      "additionalProperties": false
     },
     "api": {
       "type": "object",
@@ -178,7 +188,8 @@
         "idle_expiry_seconds": {
           "type": "number"
         }
-      }
+      },
+      "description": "진단 수치. 계약은 위 키만 정하고, 그 밖의 키는 생산자가 진단용으로 더할 수 있으며 읽는 쪽은 무시한다(생산자가 카운터 사전을 그대로 낸다)."
     },
     "release_loader": {
       "type": "object",
@@ -198,8 +209,25 @@
         },
         "warnings": {
           "type": "array"
+        },
+        "unavailable_releases": {
+          "type": "array"
+        },
+        "last_pointer_version": {
+          "type": [
+            "integer",
+            "string",
+            "null"
+          ]
+        },
+        "last_poll_error": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
-      }
+      },
+      "description": "진단 수치. 계약은 위 키만 정하고, 그 밖의 키는 생산자가 진단용으로 더할 수 있으며 읽는 쪽은 무시한다(생산자가 카운터 사전을 그대로 낸다)."
     },
     "secrets": {
       "type": "object",

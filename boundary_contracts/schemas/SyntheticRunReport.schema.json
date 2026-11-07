@@ -108,7 +108,8 @@
           }
         }
       },
-      "description": "시드 개인정보 의심 패턴 검사 요약(값 없음). seeds.enabled일 때만."
+      "description": "시드 개인정보 의심 패턴 검사 요약(값 없음). seeds.enabled일 때만.",
+      "additionalProperties": false
     }
   },
   "allOf": [

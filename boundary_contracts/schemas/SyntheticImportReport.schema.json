@@ -48,8 +48,17 @@
         },
         "max_invalid_rate": {
           "type": "number"
+        },
+        "max_pii_suspect_rows": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "개인정보 의심 행 허용치(설정 tolerance.max_pii_suspect_rows, 없으면 0)"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "inputs": {
       "type": "object",
@@ -74,7 +83,8 @@
           "invalid": {
             "type": "integer"
           }
-        }
+        },
+        "additionalProperties": false
       }
     },
     "total_rows": {
@@ -153,7 +163,8 @@
         "reason": {
           "type": "string"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "pii_suspect": {
       "type": "object",
@@ -176,7 +187,8 @@
             "type": "string"
           }
         }
-      }
+      },
+      "additionalProperties": false
     },
     "cross_split_duplicate_utterances": {
       "type": "object",

@@ -7,6 +7,7 @@
   "pseudonym": {
     "keys": ["session_id", "turn_id"],
     "pattern": "p-[0-9a-f]{32}",
+    "defs": ["SessionId"],
     "_설명": "이 키의 문자열 값은 어디에 나오든 반드시 의사 식별자다(조회·삭제 키로 쓴다). 정책은 두 키를 모두 가명화해야 하고 keep·mask_value 로 겹쳐 지정할 수 없다."
   },
   "keep_patterns": {
@@ -32,7 +33,7 @@
       ["orchestrator_output", "log_entry", "turn_failure_signal"]
     ],
     "values": ["RISK", "REASK_LIMIT", "OTHER"],
-    "_설명": "keep_pause_reason 이 참이면 이 네 경로의 객체에 원본 pause_reason 을 다시 넣는다(모르는 값은 OTHER). 거짓이면 그 키를 지운다. 다른 위치에는 pause_reason 이 없다."
+    "_설명": "keep_pause_reason 이 참이면 이 네 경로의 객체에 원본 pause_reason 을 다시 넣는다(모르는 값은 OTHER). 거짓이면 그 키를 지운다. 다른 위치의 pause_reason(예: PauseEntry)은 일반 규칙대로 남는다(열거값)."
   },
   "review_utterance": {
     "paths": [

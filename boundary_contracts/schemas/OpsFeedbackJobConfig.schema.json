@@ -443,7 +443,11 @@
      "description": "키별 추가 거르개(3.7.0): 값은 deid_rules.json 의 기본 패턴과 이 패턴 둘 다에 전체 일치해야 남는다. 기본보다 넓힐 수 없다(그 전에는 기본을 바꿔치기해 출력 계약 밖 값을 낼 수 있었다)"
     },
     "keep_count_map_keys": {
-     "$ref": "#/$defs/StrList"
+     "type": "array",
+     "uniqueItems": true,
+     "items": {
+      "$ref": "#/$defs/DeidCountMapKey"
+     }
     },
     "keep_pause_reason": {
      "type": "boolean"
@@ -454,25 +458,19 @@
     },
     "mask_defs": {
      "type": "array",
+     "uniqueItems": true,
      "items": {
-      "type": "string",
-      "minLength": 1,
-      "not": {
-       "const": "SessionId"
-      }
+      "$ref": "#/$defs/DeidDefName"
      },
-     "description": "문진 스키마 TurnTrace 의 정의 이름. 그 정의를 거친 위치를 통째로 [MASKED] 로 바꾼다(가명 키의 정의 SessionId 는 안 된다)"
+     "description": "문진 스키마 TurnTrace 의 정의 이름. 그 정의를 거친 위치를 통째로 [MASKED] 로 바꾼다"
     },
     "drop_defs": {
      "type": "array",
+     "uniqueItems": true,
      "items": {
-      "type": "string",
-      "minLength": 1,
-      "not": {
-       "const": "SessionId"
-      }
+      "$ref": "#/$defs/DeidDefName"
      },
-     "description": "문진 스키마 TurnTrace 의 정의 이름. 그 정의를 거친 위치를 통째로 [DROPPED] 로 바꾼다(가명 키의 정의 SessionId 는 안 된다)"
+     "description": "문진 스키마 TurnTrace 의 정의 이름. 그 정의를 거친 위치를 통째로 [DROPPED] 로 바꾼다"
     },
     "mask_value_keys": {
      "type": "array",
@@ -528,6 +526,70 @@
     "type": "string",
     "format": "regex"
    }
+  },
+  "DeidDefName": {
+   "enum": [
+    "AlertKind",
+    "AnswerUpdate",
+    "CodedValue",
+    "CurrentValue",
+    "Decision",
+    "DispatchInput",
+    "DispatchOutput",
+    "DispatchRecord",
+    "ExtractionInputRecord",
+    "ExtractionRecord",
+    "FailedStep",
+    "FrontendInput",
+    "FrontendMessage",
+    "HistoryEntry",
+    "InputKind",
+    "InterventionDecision",
+    "InterventionResult",
+    "LogEntry",
+    "OpenSlot",
+    "OrchestratorInput",
+    "OrchestratorOutput",
+    "PauseEntry",
+    "PauseKind",
+    "PauseReason",
+    "Precision",
+    "ProgressRecord",
+    "ProgressRecordUpdate",
+    "Protections",
+    "QuestionId",
+    "ResponseRequestRecord",
+    "RevisionToken",
+    "RiskResponse",
+    "SessionCommitRequest",
+    "SessionCommitResult",
+    "SessionInfo",
+    "SessionLoadRequest",
+    "SessionLoadResult",
+    "SessionStatus",
+    "SessionStore",
+    "SkipEntry",
+    "SkipReason",
+    "SlotRecord",
+    "SlotRef",
+    "SourceText",
+    "StaffAlert",
+    "StaffAlertReason",
+    "StaffConsoleInput",
+    "TurnFailureSignal",
+    "TurnKind",
+    "TurnWriteSet",
+    "Value",
+    "ViolationRecord"
+   ],
+   "description": "문진 스키마 TurnTrace v1 에서 $ref 로 도달하는 정의 이름(가명 키의 SessionId 제외). 생성: tools/gen_deid_view.py"
+  },
+  "DeidCountMapKey": {
+   "enum": [
+    "extract_protections",
+    "response_protections"
+   ],
+   "description": "건수 맵으로 남길 수 있는 키(properties 없고 additionalProperties 가 integer 인 위치의 키). 생성: tools/gen_deid_view.py"
   }
  }
 }
