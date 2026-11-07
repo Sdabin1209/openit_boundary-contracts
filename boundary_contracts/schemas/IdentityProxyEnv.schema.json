@@ -12,10 +12,7 @@
  "type": "object",
  "$defs": {
   "Path": {
-   "type": "string",
-   "pattern": "^/",
-   "minLength": 1,
-   "description": "컨테이너 안 절대 경로"
+   "$ref": "_common.schema.json#/$defs/AbsolutePath"
   },
   "HttpsUrl": {
    "$ref": "_common.schema.json#/$defs/HttpsOrigin"

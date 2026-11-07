@@ -33,7 +33,7 @@
           }
         }
       ],
-      "description": "웹 푸시 endpoint(PushSubscription.endpoint). https, 포트 없음 또는 443, 점이 있는 이름 호스트(IP 리터럴·localhost·.local/.localdomain/.internal/.lan/.home/.corp/.intranet 거부), 경로가 있고 공백이 없다. 3.7.0: PublicApiRequests.PushSubscribeBody 와 둘로 갈라져 있던 제약을 여기 하나로 합쳤다"
+      "description": "웹 푸시 endpoint(PushSubscription.endpoint). https, 포트 없음 또는 443, 점이 있는 이름 호스트(IP 리터럴·localhost·.local/.localdomain/.internal/.lan/.home/.corp/.intranet 거부), 경로가 있고 공백이 없다. 3.7.0: PublicApiRequests.PushSubscribeBody 와 둘로 갈라져 있던 제약을 여기 하나로 합쳤다 근거: 상한 2048 은 브라우저·프록시가 넘기는 URL 길이의 관례적 하한(측정 안 함)"
     },
     "keys": {
       "type": "object",
@@ -46,12 +46,14 @@
         "p256dh": {
           "type": "string",
           "pattern": "^[A-Za-z0-9_-]+=*$(?![\\s\\S])",
-          "maxLength": 200
+          "maxLength": 200,
+          "description": "근거: RFC 8291: P-256 공개키 65바이트 = base64url 87자. 상한 200 은 여유를 둔 설계값"
         },
         "auth": {
           "type": "string",
           "pattern": "^[A-Za-z0-9_-]+=*$(?![\\s\\S])",
-          "maxLength": 64
+          "maxLength": 64,
+          "description": "근거: RFC 8291: 인증 비밀 16바이트 = base64url 22자. 상한 64 는 여유를 둔 설계값"
         }
       },
       "description": "W3C Push API PushSubscriptionKeys 의 p256dh(P-256 공개키, base64url)·auth(인증 비밀, base64url). 이 둘만 보낸다"

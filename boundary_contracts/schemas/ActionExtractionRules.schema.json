@@ -156,7 +156,7 @@
        "actions": {
         "type": "array",
         "items": {
-         "type": "string"
+         "$ref": "ActionExtraction.schema.json#/properties/action"
         },
         "minItems": 1,
         "uniqueItems": true
@@ -175,8 +175,134 @@
         "const": "item_of_values"
        }
       },
-      "additionalProperties": false
-     }
+      "additionalProperties": false,
+      "allOf": [
+       {
+        "if": {
+         "properties": {
+          "next_item_is": {
+           "const": "flow_next"
+          }
+         }
+        },
+        "then": {
+         "required": [
+          "base_item"
+         ]
+        },
+        "else": {
+         "not": {
+          "anyOf": [
+           {
+            "required": [
+             "base_item"
+            ]
+           },
+           {
+            "required": [
+             "also_allowed"
+            ]
+           }
+          ]
+         }
+        }
+       }
+      ]
+     },
+     "allOf": [
+      {
+       "contains": {
+        "properties": {
+         "actions": {
+          "contains": {
+           "const": "NEXT"
+          }
+         }
+        }
+       },
+       "minContains": 1,
+       "maxContains": 1
+      },
+      {
+       "contains": {
+        "properties": {
+         "actions": {
+          "contains": {
+           "const": "CORRECT"
+          }
+         }
+        }
+       },
+       "minContains": 1,
+       "maxContains": 1
+      },
+      {
+       "contains": {
+        "properties": {
+         "actions": {
+          "contains": {
+           "const": "REASK"
+          }
+         }
+        }
+       },
+       "minContains": 1,
+       "maxContains": 1
+      },
+      {
+       "contains": {
+        "properties": {
+         "actions": {
+          "contains": {
+           "const": "CONFIRM"
+          }
+         }
+        }
+       },
+       "minContains": 1,
+       "maxContains": 1
+      },
+      {
+       "contains": {
+        "properties": {
+         "actions": {
+          "contains": {
+           "const": "HOLD"
+          }
+         }
+        }
+       },
+       "minContains": 1,
+       "maxContains": 1
+      },
+      {
+       "contains": {
+        "properties": {
+         "actions": {
+          "contains": {
+           "const": "SKIP"
+          }
+         }
+        }
+       },
+       "minContains": 1,
+       "maxContains": 1
+      },
+      {
+       "contains": {
+        "properties": {
+         "actions": {
+          "contains": {
+           "const": "REDIRECT"
+          }
+         }
+        }
+       },
+       "minContains": 1,
+       "maxContains": 1
+      }
+     ],
+     "description": "A 출력 action 마다 정확히 한 규칙(4.0.0: 모든 action 이 한 번씩 걸리게 스키마로 강제 — 그 전에는 모르는 action 이름으로 규칙 검사를 비울 수 있었다). flow_next 규칙만 base_item·also_allowed 를 쓴다"
     },
     "derived_by": {
      "const": "server",

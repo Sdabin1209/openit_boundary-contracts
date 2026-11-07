@@ -70,7 +70,8 @@
                           "type": "string",
                           "minLength": 1,
                           "maxLength": 500,
-                          "pattern": "\\S"
+                          "pattern": "\\S",
+                          "description": "근거: 상한 500 은 설계 상한(측정 안 함)"
                         }
                       }
                     },
@@ -85,7 +86,8 @@
                           "type": "string",
                           "minLength": 1,
                           "maxLength": 500,
-                          "pattern": "\\S"
+                          "pattern": "\\S",
+                          "description": "근거: 상한 500 은 설계 상한(정규식 비용을 묶는다, 측정 안 함)"
                         }
                       }
                     }

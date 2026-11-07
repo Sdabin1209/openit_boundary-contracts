@@ -20,7 +20,8 @@
     "requested_by": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 256
+      "maxLength": 256,
+      "description": "근거: 상한 256 은 설계 상한(측정 안 함)"
     },
     "requested_by_role": {
       "type": "string",

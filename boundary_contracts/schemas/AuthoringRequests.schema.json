@@ -257,7 +257,8 @@
         },
         "cursor": {
           "type": "string",
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "근거: 불투명 커서, 상한 512 는 설계 상한(측정 안 함)"
         },
         "limit": {
           "type": "string",
@@ -275,7 +276,8 @@
         },
         "cursor": {
           "type": "string",
-          "maxLength": 512
+          "maxLength": 512,
+          "description": "근거: 불투명 커서, 상한 512 는 설계 상한(측정 안 함)"
         },
         "limit": {
           "type": "string",

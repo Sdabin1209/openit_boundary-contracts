@@ -22,10 +22,7 @@
    "description": "1 이상 정수"
   },
   "Path": {
-   "type": "string",
-   "pattern": "^/",
-   "minLength": 1,
-   "description": "컨테이너 안 절대 경로"
+   "$ref": "_common.schema.json#/$defs/AbsolutePath"
   },
   "Duration": {
    "type": "string",

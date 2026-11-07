@@ -167,7 +167,8 @@
         "per_kind": {
           "type": "integer",
           "default": 2,
-          "minimum": 0
+          "minimum": 0,
+          "description": "근거: 기본 2 는 synthetic-data 의 검토 표본 기본값(설계값, 측정 안 함)"
         }
       }
     },

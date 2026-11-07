@@ -41,7 +41,8 @@
     "gpu_memory_utilization": {
      "type": "number",
      "exclusiveMinimum": 0,
-     "maximum": 1
+     "maximum": 1,
+     "description": "근거: 비율 0~1(vLLM gpu_memory_utilization 정의)"
     },
     "max_num_seqs": {
      "type": "integer",

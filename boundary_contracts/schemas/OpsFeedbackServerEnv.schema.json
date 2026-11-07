@@ -178,8 +178,7 @@
  },
  "$defs": {
   "Path": {
-   "type": "string",
-   "pattern": "^/.+"
+   "$ref": "_common.schema.json#/$defs/AbsolutePath"
   },
   "RoleTokens": {
    "type": "string",

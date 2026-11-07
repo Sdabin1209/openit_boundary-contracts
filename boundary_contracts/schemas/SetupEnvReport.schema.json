@@ -26,7 +26,8 @@
     "exit_code": {
       "type": "integer",
       "minimum": 0,
-      "maximum": 255
+      "maximum": 255,
+      "description": "근거: POSIX 종료 상태 0~255"
     },
     "seconds": {
       "type": "integer",

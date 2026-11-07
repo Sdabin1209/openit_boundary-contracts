@@ -39,9 +39,7 @@
    "description": "켜려면 정확히 '1'. 없음 = 꺼짐"
   },
   "Path": {
-   "type": "string",
-   "minLength": 1,
-   "description": "컨테이너 안 절대 경로"
+   "$ref": "_common.schema.json#/$defs/AbsolutePath"
   },
   "RoleTokenList": {
    "type": "string",

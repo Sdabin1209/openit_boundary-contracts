@@ -151,7 +151,8 @@
     "max_failure_rate": {
      "type": "number",
      "minimum": 0,
-     "maximum": 1
+     "maximum": 1,
+     "description": "근거: 비율이라 0~1(정의상 상한)"
     },
     "counted_review_statuses": {
      "type": "array",
@@ -470,7 +471,8 @@
        "type": "integer",
        "minimum": 1,
        "maximum": 1000,
-       "default": 1000
+       "default": 1000,
+       "description": "근거: 상한 1000 은 문진 스키마 UtteranceBody 상한과 같다(OpsFeedbackReviewTrace)"
       }
      },
      "description": "3.2.0(L12, 사용자 결정 2026-11-03): keep=true 면 검토 사본(OpsFeedbackReviewTrace, GET /v1/review-traces/{ref})에 발화 두 칸(frontend_message.utterance, extract_input.user_utterance)만 원문으로 보존한다. 경로 지정이며 키 이름 기준(keep_string_keys)이 아니다. 비식별 뷰(get_trace)는 영향 없음. 정책 지문이 바뀌므로 기존 PENDING 사례는 재처리되지 않는다"

@@ -3,8 +3,13 @@
   "$id": "ServingConfig.schema.json",
   "title": "ServingConfig",
   "description": "모델 서빙 설정. model-lab이 모델 패키지(ModelPackageManifest.adapters[역할].serving_config)에 쓰고, release-gate가 릴리스 번들(ReleaseManifest)에 그대로 담고, model-runtime이 load에서 읽는다. 해시(serving_config_hash)는 받은 객체 그대로(기본값을 채우지 않고) JCS 해시이므로 모르는 키를 허용하면 해시가 달라질 수 있어 거부한다. 지금 model-runtime 코드의 SERVING_CONFIG_SCHEMA(serving_config.py)와 같은 뜻이다.",
-  "x-producers": ["model-lab"],
-  "x-consumers": ["release-gate", "model-runtime"],
+  "x-producers": [
+    "model-lab"
+  ],
+  "x-consumers": [
+    "release-gate",
+    "model-runtime"
+  ],
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -39,12 +44,14 @@
         "temperature": {
           "type": "number",
           "minimum": 0,
-          "maximum": 2
+          "maximum": 2,
+          "description": "근거: 0~2(vLLM·OpenAI 호환 샘플링 범위)"
         },
         "seed": {
           "type": "integer",
           "minimum": 0,
-          "maximum": 2147483647
+          "maximum": 2147483647,
+          "description": "근거: 0~2^31-1(vLLM seed 는 32비트 정수)"
         },
         "max_tokens": {
           "type": "integer",
@@ -53,19 +60,22 @@
         "retry_temperature": {
           "type": "number",
           "minimum": 0,
-          "maximum": 2
+          "maximum": 2,
+          "description": "근거: 0~2(vLLM·OpenAI 호환 샘플링 범위)"
         },
         "top_p": {
           "type": "number",
           "exclusiveMinimum": 0,
-          "maximum": 1
+          "maximum": 1,
+          "description": "근거: 비율 0~1(정의상 상한)"
         }
       }
     },
     "max_attempts": {
       "type": "integer",
       "minimum": 1,
-      "maximum": 5
+      "maximum": 5,
+      "description": "근거: 상한 5 는 설계 상한(응답 시간 예산 안에서의 재시도 수, 측정 안 함)"
     },
     "constraint": {
       "type": "object",

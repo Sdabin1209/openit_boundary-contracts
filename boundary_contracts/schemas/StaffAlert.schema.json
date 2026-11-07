@@ -27,7 +27,8 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 64,
-      "pattern": "^[A-Za-z0-9_-]+$(?![\\s\\S])"
+      "pattern": "^[A-Za-z0-9_-]+$(?![\\s\\S])",
+      "description": "근거: 1~64자(PUBLIC_API.md 세션 ID 형식)"
     },
     "kind": {
       "type": "string",

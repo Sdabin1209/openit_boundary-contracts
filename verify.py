@@ -102,6 +102,14 @@ neg("PASS 인데 approval_id 없음(3.7.0)", "GateDecision", "GateDecision.pass"
 neg("시험용 memory 저장소는 설정에서 거부(4.0.0)", "SyntheticDefs#/$defs/Store", "SyntheticDefs.Store.file", lambda d: (d.clear(), d.update(kind="memory")))
 neg("prune dry-run 인데 freed_bytes 값(4.0.0)", "GateJobResult", "GateJobResult.prune-dry-run", lambda d: (d.clear(), d.update(job="prune", status="ok", applied=False, bundle_release_ids=[], submission_ids=[], freed_bytes=-1, attempts_purged=None)))
 neg("affected_slots 점 없는 값(4.0.0 SlotRefString)", "ChangeClassification", "ChangeClassification", lambda d: d.update(affected_slots=["Q1"]))
+neg("KioskFrontendEnv 접두사 오타 KIOSK_HSOT(4.0.0)", "KioskFrontendEnv", "KioskFrontendEnv", lambda d: d.update(KIOSK_HSOT="127.0.0.1"))
+import json as _json
+_rules = _json.load(open(here + "/boundary_contracts/data/action_extraction_rules.json"))
+for _label, _mut in (("모르는 action NOPE 로 규칙을 비움", lambda r: r["next_item"]["by_action"].__setitem__(0, {"actions": ["NOPE"], "next_item_is": "flow_next", "base_item": "last_in_flow_order_among_values_and_targets"})),
+                     ("NEXT 가 규칙 두 개에 걸림", lambda r: r["next_item"]["by_action"][0]["actions"].append("NEXT")),
+                     ("flow_next 규칙에 base_item 없음", lambda r: r["next_item"]["by_action"][2].pop("base_item"))):
+    _r = copy.deepcopy(_rules); _mut(_r)
+    _rej = bool(list(val("ActionExtractionRules").iter_errors(_r))); print("OK  " if _rej else "FAIL", "거부되어야 함(4.0.0):", _label); bad += not _rej
 neg("failure_type 끝 개행", "FailureCase", "FailureCase", lambda d: d.update(failure_type="UNCLASSIFIED\n"))
 neg("failure_type 에 공백(3.7.0 FailureType)", "FailureCase", "FailureCase", lambda d: d.update(failure_type="a b"))
 neg("CaseReviewRequest LORA_A 인데 expected 가 ActionExtraction 이 아님(3.7.0)", "CaseReviewRequest", "CaseReviewRequest.confirmed-lora-a", lambda d: d.update(expected={"x": 1}))

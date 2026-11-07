@@ -111,12 +111,14 @@
         "uid": {
           "type": "integer",
           "minimum": 0,
-          "maximum": 2147483647
+          "maximum": 2147483647,
+          "description": "근거: Linux uid_t(32비트)의 음이 아닌 범위 0~2^31-1(POSIX)"
         },
         "gid": {
           "type": "integer",
           "minimum": 0,
-          "maximum": 2147483647
+          "maximum": 2147483647,
+          "description": "근거: Linux gid_t(32비트)의 음이 아닌 범위 0~2^31-1(POSIX)"
         }
       }
     },

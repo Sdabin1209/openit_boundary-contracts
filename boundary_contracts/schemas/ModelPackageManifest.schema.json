@@ -62,7 +62,7 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 200,
-          "description": "기반 모델 이름. 허브의 이름(예: 'Qwen/Qwen2.5-1.5B-Instruct')을 그대로 쓸 수 있도록 Id 패턴이 아니라 비어 있지 않은 문자열이다(1.2에서 넓힘)."
+          "description": "기반 모델 이름. 허브의 이름(예: 'Qwen/Qwen2.5-1.5B-Instruct')을 그대로 쓸 수 있도록 Id 패턴이 아니라 비어 있지 않은 문자열이다(1.2에서 넓힘). 근거: 상한 200 은 Hugging Face 저장소 이름(조직/이름)을 담는 설계 상한(측정 안 함)"
         },
         "revision": {
           "type": "string",

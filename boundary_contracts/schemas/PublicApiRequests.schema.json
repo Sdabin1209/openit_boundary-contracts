@@ -78,7 +78,7 @@
           "type": "string",
           "maxLength": 1000,
           "pattern": "\\S",
-          "description": "공백만으로 이뤄지면 거부한다(strip 뒤 빈 문자열)"
+          "description": "공백만으로 이뤄지면 거부한다(strip 뒤 빈 문자열) 근거: 상한 1000 은 문진 스키마 UtteranceBody 상한과 같다(PUBLIC_API.md)"
         }
       }
     },
