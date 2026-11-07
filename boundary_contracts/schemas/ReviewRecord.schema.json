@@ -2,8 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ReviewRecord",
   "description": "문항 세트 버전 하나에 대한 검수 결과. 불변이며 재검수는 새 레코드다. 임상 기준 승인 여부는 별도 필드로 둔다(O12).",
-  "x-producers": ["question-authoring"],
-  "x-consumers": ["release-gate", "synthetic-data"],
+  "x-producers": [
+    "question-authoring"
+  ],
+  "x-consumers": [
+    "release-gate",
+    "synthetic-data"
+  ],
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -51,7 +56,13 @@
     },
     "ext": {
       "type": "object",
-      "description": "영역이 계약을 바꾸지 않고 덧붙이는 부가 정보. 키는 영역 이름(예: 'model-lab')이고 값은 그 영역이 정한다. 다른 영역은 이해하지 못해도 보존하고 전달해야 하며, 판단에 쓰지 않는다. 여러 영역이 필요로 하게 되면 정식 필드로 올린다."
+      "description": "영역이 계약을 바꾸지 않고 덧붙이는 부가 정보. 키는 영역 이름(예: 'model-lab')이고 값은 그 영역이 정한다. 다른 영역은 이해하지 못해도 보존하고 전달해야 하며, 판단에 쓰지 않는다. 여러 영역이 필요로 하게 되면 정식 필드로 올린다.",
+      "properties": {
+        "question-authoring": {
+          "$ref": "QuestionAuthoringExt.schema.json#/$defs/ReviewExt",
+          "description": "question-authoring 가 쓰는 값(4.0.0: 계약 QuestionAuthoringExt 을 이 칸에 연결해, 레코드를 검증하면 ext 도 검증된다)"
+        }
+      }
     }
   },
   "if": {

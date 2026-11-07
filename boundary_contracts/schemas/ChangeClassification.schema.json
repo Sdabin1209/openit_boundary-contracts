@@ -2,8 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ChangeClassification",
   "description": "문항 세트의 한 버전 변경이 무엇을 바꿨는지와 필요한 후속 작업. 문구 / 선택지·단위 / 슬롯 / 분기의 4종으로 시작한다(D17).",
-  "x-producers": ["question-authoring"],
-  "x-consumers": ["release-gate", "synthetic-data"],
+  "x-producers": [
+    "question-authoring"
+  ],
+  "x-consumers": [
+    "release-gate",
+    "synthetic-data"
+  ],
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -66,7 +71,13 @@
     },
     "ext": {
       "type": "object",
-      "description": "영역이 계약을 바꾸지 않고 덧붙이는 부가 정보. 키는 영역 이름(예: 'model-lab')이고 값은 그 영역이 정한다. 다른 영역은 이해하지 못해도 보존하고 전달해야 하며, 판단에 쓰지 않는다. 여러 영역이 필요로 하게 되면 정식 필드로 올린다."
+      "description": "영역이 계약을 바꾸지 않고 덧붙이는 부가 정보. 키는 영역 이름(예: 'model-lab')이고 값은 그 영역이 정한다. 다른 영역은 이해하지 못해도 보존하고 전달해야 하며, 판단에 쓰지 않는다. 여러 영역이 필요로 하게 되면 정식 필드로 올린다.",
+      "properties": {
+        "question-authoring": {
+          "$ref": "QuestionAuthoringExt.schema.json#/$defs/ChangeExt",
+          "description": "question-authoring 가 쓰는 값(4.0.0: 계약 QuestionAuthoringExt 을 이 칸에 연결해, 레코드를 검증하면 ext 도 검증된다)"
+        }
+      }
     }
   }
 }

@@ -15,9 +15,7 @@
   ],
   "properties": {
     "endpoint": {
-      "type": "string",
-      "pattern": "^https://",
-      "maxLength": 2048
+      "$ref": "PushSubscriptionRequest.schema.json#/properties/endpoint"
     },
     "deleted": {
       "type": "boolean"
