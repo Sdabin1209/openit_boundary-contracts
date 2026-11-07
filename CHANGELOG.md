@@ -1,6 +1,9 @@
 # 변경 이력
 
 
+## 4.0.2 (2026-11-08, PATCH: 4.0.1 문구 한정)
+- 4.0.1 의 "응답 못 받은 세션은 유휴 만료로 닫힌다"는 `SURVEY_SESSION_IDLE_SECONDS=0`(만료 끔, 허용 값)과 모순이었다. 만료가 켜진 경우로 한정했다. 스키마 변경 없음.
+
 ## 4.0.1 (2026-11-08, PATCH: 4.0.0 의미 빈칸 두 곳)
 - 4.0.0 에서 제거하기로 예고한 `DELETE /v1/staff/push-subscriptions?endpoint=`의 정의가 openapi 와 PUBLIC_API 에 남아 있었다. 경로 정의와 그것만 쓰던 `HttpQueries.$defs.Endpoint`를 지웠다(4.0.0 의 제거 약속을 완결하는 것이며 새 제거가 아니다). 해지는 `POST /v1/staff/push-subscriptions/unsubscribe`뿐이다.
 - 서버 발급 세션 ID(4.0.0)와 "같은 `turn_id` 재전송은 같은 응답" 규칙이 세션 시작에서 충돌했다. 멱등 범위를 `(session_id, turn_id)`로 명시하고 세션 시작은 멱등이 아님을 적었다. `SessionStartBody.turn_id`는 새 세션의 첫 턴 ID로 기록할 뿐이다.
