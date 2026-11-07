@@ -183,11 +183,28 @@
           "description": "불리언만. 문자열 'false'는 거부한다"
         },
         "reason": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1,
+          "description": "승인(APPROVED)이 아니면 필수(ReviewRecord 와 같은 규칙)"
         },
         "review_id": {
           "$ref": "_common.schema.json#/$defs/Id"
         }
+      },
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "APPROVED"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "else": {
+        "required": [
+          "reason"
+        ]
       }
     },
     "SignalsQuery": {

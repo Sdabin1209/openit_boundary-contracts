@@ -87,6 +87,15 @@ neg("백업 오류 코드가 BoundaryError 밖(INTERNAL, 3.7.0)", "BackupJobResu
 for _bad in ("https://:", "https://[]", "https://host:bad", "https://host:99999", "http://host", "https://host?x=1"):
     neg(f"HttpClientSettings base_url 거부: {_bad}", "_common#/$defs/HttpClientSettings", "GateJobConfig", lambda d, b=_bad: (d.clear(), d.update(kind="http", base_url=b, token_secret="T")))
 neg("HttpClientSettings token_secret 끝 개행", "_common#/$defs/HttpClientSettings", "GateJobConfig", lambda d: (d.clear(), d.update(kind="http", base_url="https://release-gate", token_secret="TOKEN\n")))
+neg("CommonEnv 접두사 오타 OPENIT_EGRESS_PR0XY(3.7.0)", "CommonEnv", "CommonEnv", lambda d: d.update(OPENIT_EGRESS_PR0XY="x"))
+neg("AdminConsoleEnv 접두사 오타 ADMIN_H0ST(3.7.0)", "AdminConsoleEnv", "AdminConsoleEnv", lambda d: d.update(ADMIN_H0ST="x"))
+neg("DATASET_STORE_PORT 99999(3.7.0)", "DatasetStoreEnv", "DatasetStoreEnv", lambda d: d.update(DATASET_STORE_PORT="99999"))
+neg("백업 오류 UNAVAILABLE 인데 retryable false(3.7.0)", "BackupJobResult", "BackupJobResult", lambda d: d.update(status="failed", snapshot_id=None, bytes=0, error={"code": "UNAVAILABLE", "message": "x", "retryable": False}))
+neg("검수 거부인데 reason 없음(3.7.0)", "AuthoringRequests#/$defs/AddReviewRequest", "AuthoringRequests.AddReviewRequest", lambda d: (d.update(decision="REJECTED", clinical_basis_approved=False), d.pop("reason", None)))
+for _bad in ("https://:", "https://host:bad", "https://host:99999", "https://identity.example/sub"):
+    neg(f"IDENTITY_PUBLIC_URL 거부(HttpsOrigin): {_bad}", "IdentityEnv", "IdentityEnv", lambda d, b=_bad: d.update(IDENTITY_PUBLIC_URL=b))
+for _bad in ("http://release-gate:8080", "https://release-gate/v1", "https://release-gate?x=1"):
+    neg(f"서비스 주소 거부(ServiceUrl, R1.1): {_bad}", "SurveyServiceEnv", "SurveyServiceEnv", lambda d, b=_bad: d.update(SURVEY_RELEASE_READER_URL=b))
 neg("failure_type 끝 개행", "FailureCase", "FailureCase", lambda d: d.update(failure_type="UNCLASSIFIED\n"))
 neg("failure_type 에 공백(3.7.0 FailureType)", "FailureCase", "FailureCase", lambda d: d.update(failure_type="a b"))
 neg("CaseReviewRequest LORA_A 인데 expected 가 ActionExtraction 이 아님(3.7.0)", "CaseReviewRequest", "CaseReviewRequest.confirmed-lora-a", lambda d: d.update(expected={"x": 1}))

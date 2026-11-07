@@ -39,5 +39,27 @@
       "pattern": "^/[^\\s]*$(?![\\s\\S])",
       "description": "3.5.0: TLS 검증에 쓸 CA 인증서 파일 경로(OpenSSL 표준 변수 이름). 배치 영역이 사설 CA 루트를 마운트하고 이 경로를 준다. 파일은 ContainerInputs.files 에 kind=ca-bundle 로 선언한다. 3.4.4 는 '표준 이름이라 다시 정하지 않는다'며 칸을 두지 않아 주입 값 하나가 계약 밖이었다"
     }
+  },
+  "propertyNames": {
+    "anyOf": [
+      {
+        "not": {
+          "pattern": "^OPENIT_"
+        }
+      },
+      {
+        "enum": [
+          "OPENIT_BACKUP_AREAS_DIR",
+          "OPENIT_BACKUP_CREDENTIALS_FILE",
+          "OPENIT_BACKUP_PORT",
+          "OPENIT_BACKUP_REPO_PASSWORD_FILE",
+          "OPENIT_BACKUP_TLS_DIR",
+          "OPENIT_BACKUP_URL",
+          "OPENIT_EGRESS_PROXY",
+          "SSL_CERT_FILE"
+        ]
+      }
+    ],
+    "description": "접두사가 같은 이름은 아래 목록만(오타가 조용히 무시되지 않게, 3.7.0) — OPENIT_BACKUP_AREAS_DIR·PORT·TLS_DIR 은 BackupStoreEnv 가 정한다"
   }
 }

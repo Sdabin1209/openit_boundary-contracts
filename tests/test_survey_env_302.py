@@ -8,13 +8,13 @@ def errs(env):
     return [e.message for e in validator("SurveyServiceEnv").iter_errors(env)]
 
 
-BASE = {"SURVEY_RELEASE_READER": "http", "SURVEY_RELEASE_READER_URL": "http://release-gate:8080",
-        "SURVEY_TRACE_INGEST": "http", "SURVEY_TRACE_INGEST_URL": "http://ops-feedback-ingest:8080"}
+BASE = {"SURVEY_RELEASE_READER": "http", "SURVEY_RELEASE_READER_URL": "https://release-gate",
+        "SURVEY_TRACE_INGEST": "http", "SURVEY_TRACE_INGEST_URL": "https://ops-feedback-ingest"}
 
 
 class Env302(unittest.TestCase):
     def test_원격_추론만_줘도_된다(self):
-        self.assertEqual(errs(dict(BASE, SURVEY_INFERENCE_URL="http://model-serving:8080")), [])
+        self.assertEqual(errs(dict(BASE, SURVEY_INFERENCE_URL="https://model-serving")), [])
 
     def test_내장_백엔드만_줘도_된다(self):
         self.assertEqual(errs(dict(BASE, SURVEY_MODEL_BACKEND="fake")), [])

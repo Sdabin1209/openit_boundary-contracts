@@ -43,11 +43,6 @@
    "minLength": 1,
    "description": "컨테이너 안 절대 경로"
   },
-  "Url": {
-   "type": "string",
-   "pattern": "^https?://",
-   "description": "전체 URL(스킴 포함)"
-  },
   "RoleTokenList": {
    "type": "string",
    "minLength": 1,
@@ -125,8 +120,7 @@
    "default": "0.0.0.0"
   },
   "DATASET_STORE_PORT": {
-   "type": "string",
-   "pattern": "^[0-9]{1,5}$(?![\\s\\S])",
+   "$ref": "_common.schema.json#/$defs/BindPort",
    "description": "바인드 포트. 0이면 빈 포트. 주의: Dockerfile 의 HEALTHCHECK 는 8080 고정",
    "default": "8080"
   },

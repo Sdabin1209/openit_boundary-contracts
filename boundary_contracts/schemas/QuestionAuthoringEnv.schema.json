@@ -44,9 +44,7 @@
       "description": "컨테이너 안 절대 경로"
     },
     "Url": {
-      "type": "string",
-      "pattern": "^https?://",
-      "description": "전체 URL(스킴 포함)"
+      "$ref": "_common.schema.json#/$defs/ServiceUrl"
     },
     "RoleTokenList": {
       "type": "string",

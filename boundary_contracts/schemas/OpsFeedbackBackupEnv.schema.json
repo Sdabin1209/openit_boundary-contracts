@@ -106,5 +106,48 @@
   },
   "required": [
     "OPENIT_EGRESS_PROXY"
-  ]
+  ],
+  "propertyNames": {
+    "anyOf": [
+      {
+        "not": {
+          "pattern": "^OPS_"
+        }
+      },
+      {
+        "enum": [
+          "OPS_DB_CONNECT_TIMEOUT",
+          "OPS_DB_DDL_TIMEOUT",
+          "OPS_DB_PROBE_TIMEOUT",
+          "OPS_DB_SCHEMA",
+          "OPS_DB_STATEMENT_TIMEOUT",
+          "OPS_DEID_SALT",
+          "OPS_DEID_SALT_FILE",
+          "OPS_FAILURE_DATABASE_URL",
+          "OPS_FAILURE_DATABASE_URL_FILE",
+          "OPS_FAILURE_DB",
+          "OPS_GATE_READ_TOKEN",
+          "OPS_GATE_READ_TOKEN_FILE",
+          "OPS_GATE_WRITE_TOKEN",
+          "OPS_GATE_WRITE_TOKEN_FILE",
+          "OPS_HOST",
+          "OPS_INGEST_TOKEN",
+          "OPS_INGEST_TOKEN_FILE",
+          "OPS_LOG_DATABASE_URL",
+          "OPS_LOG_DATABASE_URL_FILE",
+          "OPS_LOG_DB",
+          "OPS_MAX_CONNECTIONS",
+          "OPS_PORT",
+          "OPS_RAW_RETENTION_DAYS",
+          "OPS_READYZ_CACHE_SECONDS",
+          "OPS_READ_TOKENS",
+          "OPS_READ_TOKENS_FILE",
+          "OPS_REVIEW_REQUIRE_USER",
+          "OPS_REVIEW_TOKENS",
+          "OPS_REVIEW_TOKENS_FILE"
+        ]
+      }
+    ],
+    "description": "접두사가 같은 이름은 아래 목록만(오타가 조용히 무시되지 않게, 3.7.0)"
+  }
 }

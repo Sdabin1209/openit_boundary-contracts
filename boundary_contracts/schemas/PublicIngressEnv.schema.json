@@ -38,9 +38,7 @@
       "description": "<호스트>:<포트>"
     },
     "HttpsUrl": {
-      "type": "string",
-      "pattern": "^https://[^\\s]+$(?![\\s\\S])",
-      "description": "https URL"
+      "$ref": "_common.schema.json#/$defs/HttpsUrl"
     }
   },
   "propertyNames": {

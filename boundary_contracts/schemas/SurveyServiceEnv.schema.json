@@ -121,8 +121,7 @@
  },
  "properties": {
   "SURVEY_PORT": {
-   "type": "string",
-   "pattern": "^[0-9]{1,5}$(?![\\s\\S])",
+   "$ref": "_common.schema.json#/$defs/TcpPort",
    "description": "바인드 포트(/healthz, /readyz 포함)",
    "default": "8080"
   },
@@ -212,18 +211,15 @@
    "description": "I6 trace 수집: 'http'(계약 HTTP 클라이언트, 짝이 되는 *_URL 필수). 3.7.0(D9): '모듈:함수' 선택지를 없앴다 — 시험 대역은 설정이 아니라 배선 인자로 주입한다"
   },
   "SURVEY_RELEASE_READER_URL": {
-   "type": "string",
-   "pattern": "^https?://[^\\s]+$(?![\\s\\S])",
+   "$ref": "_common.schema.json#/$defs/ServiceUrl",
    "description": "SURVEY_RELEASE_READER=http일 때 release-gate 읽기 면 주소"
   },
   "SURVEY_TRACE_INGEST_URL": {
-   "type": "string",
-   "pattern": "^https?://[^\\s]+$(?![\\s\\S])",
+   "$ref": "_common.schema.json#/$defs/ServiceUrl",
    "description": "SURVEY_TRACE_INGEST=http일 때 ops-feedback 수집 주소"
   },
   "SURVEY_INFERENCE_URL": {
-   "type": "string",
-   "pattern": "^https?://[^\\s]+$(?![\\s\\S])",
+   "$ref": "_common.schema.json#/$defs/ServiceUrl",
    "description": "원격 추론 서버(model-serving) 주소. SURVEY_MODEL_BACKEND와 둘 중 하나 필수(3.0.2)"
   },
   "SURVEY_SESSION_DB": {

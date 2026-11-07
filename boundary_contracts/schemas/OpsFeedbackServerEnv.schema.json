@@ -82,7 +82,7 @@
      "description": "개발·시험용"
     },
     "OPS_PORT": {
-     "$ref": "#/$defs/IntStr",
+     "$ref": "_common.schema.json#/$defs/BindPort",
      "description": "기본 8080"
     },
     "OPS_HOST": {

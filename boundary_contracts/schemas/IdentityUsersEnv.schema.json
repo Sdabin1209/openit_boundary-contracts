@@ -26,5 +26,21 @@
   "required": [
     "IDENTITY_ADMIN_PASSWORD_FILE",
     "IDENTITY_ROOT_CA"
-  ]
+  ],
+  "propertyNames": {
+    "anyOf": [
+      {
+        "not": {
+          "pattern": "^IDENTITY_"
+        }
+      },
+      {
+        "enum": [
+          "IDENTITY_ADMIN_PASSWORD_FILE",
+          "IDENTITY_ROOT_CA"
+        ]
+      }
+    ],
+    "description": "접두사가 같은 이름은 아래 목록만(오타가 조용히 무시되지 않게, 3.7.0)"
+  }
 }

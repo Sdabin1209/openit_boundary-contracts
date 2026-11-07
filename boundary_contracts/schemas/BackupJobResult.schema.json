@@ -76,7 +76,13 @@
           "type": "boolean",
           "description": "참이면 종료 코드 75(EX_TEMPFAIL)"
         }
-      }
+      },
+      "allOf": [
+        {
+          "$ref": "BoundaryError.schema.json#/allOf/0",
+          "description": "code 와 retryable 의 짝은 BoundaryError 와 같다(UNAVAILABLE 만 재시도 가능)"
+        }
+      ]
     }
   },
   "allOf": [
