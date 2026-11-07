@@ -12,12 +12,12 @@ from typing import Optional
 from ..errors import BoundaryError
 from ._http import HttpClientBase, check_record, check_outgoing, integrity
 
-_SESSION_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
-_SUBJECT_REF = re.compile(r"^[A-Za-z0-9._:/#=+-]{1,128}$")
-_QUESTION_SET_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")   # 3.3.0 DeviceConfig.question_set_id 와 같다
+_SESSION_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}\Z")
+_SUBJECT_REF = re.compile(r"^[A-Za-z0-9._:/#=+-]{1,128}\Z")
+_QUESTION_SET_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}\Z")   # 3.3.0 DeviceConfig.question_set_id 와 같다
 
 
-_DEVICE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")   # 인증서 주체 CN에서 온 기기 ID(ADR 0012)
+_DEVICE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}\Z")   # 인증서 주체 CN에서 온 기기 ID(ADR 0012)
 
 
 def _sid(session_id) -> str:

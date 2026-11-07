@@ -8,7 +8,8 @@
   ],
   "x-consumers": [
     "admin-console",
-    "kiosk-frontend"
+    "kiosk-frontend",
+    "question-authoring"
   ],
   "type": "object",
   "additionalProperties": true,

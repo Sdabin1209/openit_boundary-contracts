@@ -58,6 +58,19 @@
             "EDITED"
           ]
         }
+      },
+      "if": {
+        "properties": {
+          "resolved": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "resolved_by",
+          "resolution"
+        ]
       }
     },
     "MaterialIngested": {
@@ -381,7 +394,38 @@
         "discarded_by": {
           "$ref": "_common.schema.json#/$defs/Id"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "CONFIRMED"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "confirmed"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "DISCARDED"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "discard_reason",
+              "discarded_by"
+            ]
+          }
+        }
+      ]
     },
     "DraftList": {
       "description": "GET /v1/drafts",
@@ -538,14 +582,8 @@
           }
         },
         "fallback": {
-          "oneOf": [
-            {
-              "type": "null"
-            },
-            {
-              "type": "object"
-            }
-          ]
+          "$ref": "#/$defs/Draft/properties/fallback",
+          "description": "초안의 fallback 을 그대로 옮긴다(Draft.fallback 과 같은 모양, 3.7.0)"
         },
         "ready_to_confirm": {
           "type": "boolean"

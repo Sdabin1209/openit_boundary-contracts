@@ -58,8 +58,8 @@
  },
  "properties": {
   "AREA_GATEWAY_UPSTREAM": {
-   "$ref": "#/$defs/HostPort",
-   "description": "들어오는 요청을 넘길 같은 pod 안 영역 서비스(루프백)",
+   "$ref": "_common.schema.json#/$defs/LoopbackHostPort",
+   "description": "들어오는 요청을 넘길 같은 pod 안 영역 서비스(루프백). 평문으로 넘기므로 loopback 만(3.7.0)",
    "default": "127.0.0.1:8080"
   },
   "AREA_GATEWAY_INGRESS_PORT": {

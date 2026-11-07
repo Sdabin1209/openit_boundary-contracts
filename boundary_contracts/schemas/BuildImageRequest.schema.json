@@ -83,8 +83,7 @@
       "description": "한 리포가 이미지를 여럿 낼 때 고른다(예: model-runtime의 gpu). 없으면 기본 이미지. 영역이 모르는 값이면 실패한다"
     },
     "image_tag": {
-      "type": "string",
-      "pattern": "^[a-z0-9./_-]+:[A-Za-z0-9._-]+$(?![\\s\\S])",
+      "$ref": "_common.schema.json#/$defs/ImageRef",
       "description": "만들 로컬 이미지 참조"
     }
   }

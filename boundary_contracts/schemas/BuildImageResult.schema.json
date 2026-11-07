@@ -12,8 +12,7 @@
   "type": "object",
   "properties": {
     "image": {
-      "type": "string",
-      "pattern": "^[a-z0-9./_-]+:[A-Za-z0-9._-]+$(?![\\s\\S])"
+      "$ref": "_common.schema.json#/$defs/ImageRef"
     },
     "image_id": {
       "$ref": "_common.schema.json#/$defs/Hash"

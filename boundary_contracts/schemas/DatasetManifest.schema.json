@@ -2,8 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "DatasetManifest",
   "description": "불변 데이터셋 버전. 평가셋이 학습·검증과 시나리오를 공유하지 않음을 게시 시점에 확인한 것만 게시한다(경계 규칙 9).",
-  "x-producers": ["synthetic-data"],
-  "x-consumers": ["model-lab"],
+  "x-producers": [
+    "synthetic-data"
+  ],
+  "x-consumers": [
+    "model-lab"
+  ],
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -28,8 +32,8 @@
       "$ref": "_common.schema.json#/$defs/Id"
     },
     "version": {
-      "type": "string",
-      "minLength": 1
+      "$ref": "_common.schema.json#/$defs/Id",
+      "description": "데이터셋 버전(Id 형식, dataset-store 게시가 같은 규칙으로 거부한다). 3.7.0"
     },
     "created_at": {
       "$ref": "_common.schema.json#/$defs/Timestamp"
@@ -76,8 +80,8 @@
         ],
         "properties": {
           "path": {
-            "type": "string",
-            "minLength": 1
+            "$ref": "_common.schema.json#/$defs/RelativePath",
+            "description": "데이터셋 안 상대 경로. 3.7.0: 경로 탈출 금지 규칙을 계약에 올렸다(그 전에는 dataset-store 내부 스키마만 막았다)"
           },
           "role": {
             "enum": [

@@ -27,9 +27,7 @@
       "pattern": "^[A-Za-z0-9_-]{1,64}$(?![\\s\\S])"
     },
     "FilePath": {
-      "type": "string",
-      "minLength": 1,
-      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$(?![\\s\\S])))(?!.*\\\\).+$(?![\\s\\S])"
+      "$ref": "_common.schema.json#/$defs/RelativePath"
     },
     "EventId": {
       "type": "string",

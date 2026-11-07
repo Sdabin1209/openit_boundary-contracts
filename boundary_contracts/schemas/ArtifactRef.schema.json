@@ -24,8 +24,8 @@
       "maxLength": 128
     },
     "version": {
-      "type": "string",
-      "minLength": 1
+      "$ref": "_common.schema.json#/$defs/Id",
+      "description": "버전(경로에 쓰므로 Id 형식). 3.7.0 에서 Id 로 좁혔다"
     },
     "content_hash": {
       "type": "string",

@@ -14,7 +14,7 @@ from ._http import HttpClientBase, _validator, check_id, check_outgoing, check_r
 
 OUTCOME_HEADER = "X-Openit-Outcome"
 OUTPUT_INVALID = "OUTPUT_INVALID"   # 503 UNAVAILABLE의 details.reason(D75)
-_PROTECTION = re.compile(r"^[A-Za-z][A-Za-z0-9_]*:[0-9]+(,[A-Za-z][A-Za-z0-9_]*:[0-9]+)*$")
+_PROTECTION = re.compile(r"^[A-Za-z][A-Za-z0-9_]*:[0-9]+(,[A-Za-z][A-Za-z0-9_]*:[0-9]+)*\Z")
 
 
 class RuntimeResult(NamedTuple):

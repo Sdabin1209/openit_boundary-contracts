@@ -25,8 +25,9 @@ from ..schemas_api import PIPELINE_SCHEMA_VERSION, schema_dir, validator, format
 _STATUS_CODE = {400: "INVALID_RECORD", 401: "PERMISSION_DENIED", 403: "PERMISSION_DENIED", 404: "NOT_FOUND",
                 409: "CONFLICT", 412: "FAILED_PRECONDITION", 429: "UNAVAILABLE", 503: "UNAVAILABLE"}
 _TRANSPORT_LIMIT = (413, 414, 431)   # RFC 9110 15.5.14·15.5.15, RFC 6585 5
-_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]*$")
-_HASH = re.compile(r"^sha256:[0-9a-f]{64}$")
+# 끝은 \Z(문자열 끝만): 파이썬 re 의 $ 는 끝 개행 앞에서도 맞아 계약(ECMA $(?![\s\S]))과 집합이 갈라진다(3.7.0, 교차검증)
+_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]*\Z")
+_HASH = re.compile(r"^sha256:[0-9a-f]{64}\Z")
 _MAX_ERROR_BODY = 64 * 1024
 _MAX_MESSAGE = 300
 TAR_TYPE = "application/x-tar"
@@ -105,7 +106,7 @@ def check_record(schema: str, rec: Any, *, hashed: bool = False) -> dict:
     if not isinstance(rec, dict):
         raise integrity(f"{schema} 응답이 객체가 아니다")
     ver = rec.get("pipeline_schema_version")
-    if isinstance(ver, str) and re.match(r"^\d+\.\d+$", ver) and ver.split(".")[0] != PIPELINE_SCHEMA_VERSION.split(".")[0]:
+    if isinstance(ver, str) and re.match(r"^\d+\.\d+\Z", ver) and ver.split(".")[0] != PIPELINE_SCHEMA_VERSION.split(".")[0]:
         raise BoundaryError("UNSUPPORTED_VERSION", f"{schema}의 계약 MAJOR가 다르다: {ver}")
     errs = sorted(_reader(schema).iter_errors(rec), key=lambda e: list(e.path))
     if errs:
