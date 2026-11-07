@@ -119,6 +119,16 @@
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
                 }
               }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
+                }
+              }
             }
           },
           "412": {
@@ -159,6 +169,16 @@
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
                 }
               }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
+                }
+              }
             }
           },
           "503": {
@@ -167,6 +187,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
                 }
               }
             }
@@ -375,6 +405,16 @@
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
                 }
               }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
+                }
+              }
             }
           },
           "412": {
@@ -415,6 +455,16 @@
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
                 }
               }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
+                }
+              }
             }
           },
           "503": {
@@ -423,6 +473,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
                 }
               }
             }
@@ -573,6 +633,16 @@
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
                 }
               }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
+                }
+              }
             }
           },
           "412": {
@@ -613,6 +683,16 @@
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
                 }
               }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
+                }
+              }
             }
           },
           "503": {
@@ -621,6 +701,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
                 }
               }
             }
@@ -763,6 +853,16 @@
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
                 }
               }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
+                }
+              }
             }
           },
           "412": {
@@ -803,6 +903,16 @@
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
                 }
               }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
+                }
+              }
             }
           },
           "503": {
@@ -811,6 +921,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
                 }
               }
             }
@@ -953,6 +1073,16 @@
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
                 }
               }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
+                }
+              }
             }
           },
           "412": {
@@ -993,6 +1123,16 @@
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
                 }
               }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
+                }
+              }
             }
           },
           "503": {
@@ -1001,6 +1141,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
                 }
               }
             }
@@ -1158,6 +1308,16 @@
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/409"
                 }
               }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
+                }
+              }
             }
           },
           "412": {
@@ -1198,6 +1358,16 @@
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/429"
                 }
               }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
+                }
+              }
             }
           },
           "503": {
@@ -1206,6 +1376,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
                 }
               }
             }
@@ -1307,6 +1487,16 @@
                   "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
                 }
               }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
+                }
+              }
             }
           }
         },
@@ -1354,6 +1544,16 @@
                       "$ref": "../schemas/HttpErrors.schema.json#/$defs/503"
                     }
                   ]
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "required": false,
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$(?![\\s\\S])",
+                  "description": "초 단위 대기(RFC 9110 10.2.3, delta-seconds). 재시도 여부는 code·details.reason 이 정한다(PUBLIC_API 오류 표, CONVENTIONS 9절; 4.0.5 선언)"
                 }
               }
             }

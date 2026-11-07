@@ -5,7 +5,6 @@
   "SURVEY_TRACE_INGEST": "http",
   "SURVEY_TRACE_INGEST_URL": "https://ops-feedback",
   "SURVEY_TRACE_INGEST_TOKEN_FILE": "/run/secrets/trace-ingest-token",
-  "SURVEY_MODEL_BACKEND": "http",
   "SURVEY_INFERENCE_URL": "https://inference",
   "SURVEY_INFERENCE_TOKEN_FILE": "/run/secrets/inference-token",
   "SURVEY_DATABASE_URL_FILE": "/run/secrets/db-survey-dsn",

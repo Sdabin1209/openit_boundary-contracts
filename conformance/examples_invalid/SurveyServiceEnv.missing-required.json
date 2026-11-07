@@ -1,9 +1,9 @@
 {
   "SURVEY_RELEASE_READER": "http",
-  "SURVEY_RELEASE_READER_URL": "http://release-gate:8080",
+  "SURVEY_RELEASE_READER_URL": "https://release-gate",
   "SURVEY_RELEASE_READER_TOKEN_FILE": "/run/secrets/release-reader-token",
   "SURVEY_TRACE_INGEST": "http",
-  "SURVEY_TRACE_INGEST_URL": "http://ops-feedback:8080",
+  "SURVEY_TRACE_INGEST_URL": "https://ops-feedback",
   "SURVEY_TRACE_INGEST_TOKEN_FILE": "/run/secrets/trace-ingest-token",
   "SURVEY_INFERENCE_TOKEN_FILE": "/run/secrets/inference-token",
   "SURVEY_DATABASE_URL_FILE": "/run/secrets/db-survey-dsn",

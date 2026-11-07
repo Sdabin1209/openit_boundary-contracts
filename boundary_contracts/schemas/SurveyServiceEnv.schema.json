@@ -142,9 +142,11 @@
    "default": "INFO"
   },
   "SURVEY_MODEL_BACKEND": {
-   "type": "string",
-   "minLength": 1,
-   "description": "모델 백엔드 팩토리 '모듈:함수'(개발·시험). 운영은 SURVEY_INFERENCE_URL(HTTP 추론 서버)을 쓰고 이 값은 두지 않는다. 둘 중 하나는 필수"
+   "description": "내장 백엔드 이름(현재 `fake` 하나, 개발·시험용, 운영 안전 아님; 3.7.0 D9 부터 '모듈:함수' 팩토리는 받지 않는다). 운영은 SURVEY_INFERENCE_URL(HTTP 추론 서버)을 쓰고 이 값은 두지 않는다. 둘 중 하나는 필수",
+   "enum": [
+    "fake"
+   ],
+   "type": "string"
   },
   "SURVEY_API_TOKEN_FILE": {
    "type": "string",

@@ -1,6 +1,14 @@
 # 변경 이력
 
 
+## 4.0.5 (2026-11-08, PATCH: 문서·openapi 서술 빈칸, DeviceConfig.subject_ref 제거·SURVEY_MODEL_BACKEND enum 으로 받던 값 일부를 거부 — 비호환 범위는 아래 각 항목)
+- openapi: model-serving extract·respond 200 응답에 `X-Openit-Outcome`(필수, extract 는 ok, respond 는 ok|fallback)·`X-Openit-Attempts`(양의 정수)·`X-Openit-Protections`(선택, 코드 문법은 SDK 와 같다)를 선언했다(HTTP.md I9 에만 있었다). 모든 서비스의 409·429·503 응답에 선택 헤더 `Retry-After`(delta-seconds)를 선언했다(PUBLIC_API 오류 표에만 있었다).
+- DeviceConfig.subject_ref 를 없앴다: `/config.json` 은 기기마다 같은 정적 파일이고 공개 입구에서 인증 없이 읽혀 환자 참조가 노출될 수 있었다(교차검토 지적). 환자 참조는 시작 URL 조각(KioskStartFragment)으로만 넘긴다. **비호환 범위:** DeviceConfig 는 additionalProperties:false 라 `subject_ref` 가 든 기존 `/config.json` 은 이제 계약 위반이다. deploy 설정·데모는 이 키를 쓰지 않는다. deploy 시험 1건(scripts/test_config_contract_gate.py)은 위반 기대값을 고쳐야 한다. 이행: 기기 설정에서 `subject_ref` 를 지우고 환자 참조는 시작 URL 조각 `#subject_ref=` 로 넘긴다. 소비자 kiosk-frontend 는 config 의 subject_ref 읽기를 지운다.
+- SurveyServiceEnv.SURVEY_MODEL_BACKEND 를 `enum ["fake"]` 로 좁혔다(설명은 내장 이름만이라 했으나 스키마는 임의 문자열을 받았다; 구현 link_inference.py KNOWN_BACKENDS 와 일치). **비호환 범위:** 'fake' 밖의 값(옛 '모듈:함수')을 거부한다. deploy·영역 운영 설정은 이 값을 쓰지 않는다(survey 스모크는 fake).
+- PUBLIC_API 프론트 규칙: TLS 핸드셰이크 거부를 '재시도 없음'이라 했던 것을 R3.13·R3.15·MATRIX-CELLS C15 와 맞춰 네트워크 오류와 같은 재시도로 고쳤다(브라우저는 원인을 구분하지 못한다).
+- 문서: RUNTIME R3.23·CONVENTIONS 13절의 없어진 `machine-token` 서술과 R3.23 의 "기기 토큰 경로는 Bearer", CONVENTIONS 13절의 INGRESS_DEVICE_TOKENS_DIR, PUBLIC_API 의 폐지된 `skipped`(→ `skipped_details`), CONVENTIONS 10절의 `ext."synthetic-data".dataset_digest`(ext 는 만드는 영역 소유라 계약이 선언하지 않음)를 바로잡았다. 문서 토큰 전수 분류(506건)에서 나온 계약 쪽 결함이다.
+- 계약 리포 md 12개 전부(토큰 6489개)를 다시 분류한 2차 검증의 지적: SurveyServiceEnv.SURVEY_MODEL_BACKEND 설명의 없앤 '모듈:함수' 팩토리, KioskStartFragment 설명의 낡은 경로와 우선순위, RUNTIME-MATRIX-CELLS 의 정본 열 정의("갱신(정본)" 열만 정본, 인용 열은 대조 시점 기록), README 의 스키마 개수 복사와 낡은 미정 항목·U14 상태, V2_DRAFT 상태 줄(2.0.2 시점 기록), R3.23 의 닫히지 않은 괄호.
+
 ## 4.0.4 (2026-11-08, PATCH: 계약 확정 — 전수 감사의 계약 쪽 항목)
 - PUBLIC_API F절: 게이트웨이→survey-service 구간의 서비스 토큰(키오스크 경로 포함)이 필수임을 명시했다. 4.0.0 의 "범위 밖이며 그대로" 문구 때문에 deploy 가 키오스크 경로의 서비스 토큰을 빼는 것과 서비스가 그 토큰을 요구하는 것이 둘 다 계약을 따른다고 읽혔다(감사 1번).
 - 알림 SSE 쿼리 `topics`를 없앴다(`HttpQueries.$defs.Stream`, openapi 매개변수). 받는 쪽도 보내는 쪽도 쓰지 않았고, 이벤트는 역할로 거른다는 실제 규칙을 PUBLIC_API 에 적었다.

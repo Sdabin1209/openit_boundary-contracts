@@ -11,7 +11,7 @@
         "kiosk-frontend"
       ],
       "unknown_keys": "reject",
-      "note": "ADR 0012로 변경 예정: 키오스크 기기 인증이 mTLS 인증서가 되면 device_token 필드는 구현 때 사라진다. 지금 스키마는 현재 필드(device_token, subject_ref, allow_remote_stt)를 쓴다. 읽는 쪽 코드(api/device.ts)는 모르는 키를 무시하고 스키마는 거부한다(쓰는 쪽 검증용). allow_remote_stt는 JSON true일 때만 켜진다. deploy가 이 파일을 실제로 이 모양으로 만드는지는 이웃 쪽 미확인."
+      "note": "4.0.0(D136)에서 device_token 을 없앴고 기기 인증은 mTLS 다. 4.0.5 에서 subject_ref 를 없앴다(공개 정적 파일이라 환자 참조를 싣지 않는다)."
     },
     {
       "name": "KioskStartFragment",

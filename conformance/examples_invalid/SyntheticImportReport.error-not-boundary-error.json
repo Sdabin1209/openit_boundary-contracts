@@ -16,7 +16,7 @@
     "code": "OOPS",
     "message": "저장소에 연결할 수 없다",
     "pipeline_schema_version": "4.0",
-    "retryable": true
+    "retryable": false
   },
   "first_invalid_line": {},
   "format_assumption": "행 형식은 C1 빌드 실제 파일로 확인(docs/design.md 부록 A). 다른 빌드는 이 보고서의 invalid 건수로 확인",

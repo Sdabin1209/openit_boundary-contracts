@@ -57,7 +57,7 @@
 
 ## 프론트가 지킬 것
 - STT 결과가 비었거나 신뢰할 수 없으면 서버로 보내지 않고 "다시 말씀해 주세요"를 프론트에서 안내해도 된다.
-- 응답이 없거나 일시 장애(429·502·503·504·네트워크 오류)면 같은 `turn_id`로 지수 백오프(지터 포함)로 재시도하고, 총 재시도 예산(120초 = 대기의 2배, CONVENTIONS 시간 상한 사슬 D125)을 넘기면 직원 호출 화면을 보인다. 요청 타임아웃(키오스크 대기)은 60초다(D125, D119 대체). 기기 인증 실패(403 `PERMISSION_DENIED`, 또는 TLS 핸드셰이크 거부 — F절)는 재시도로 풀리지 않으므로 재시도 없이 직원 호출 화면을 보인다(RUNTIME R3.13). 허용 목록을 읽지 못한 503 은 일시 장애로 본다(F절).
+- 응답이 없거나 일시 장애(429·502·503·504·네트워크 오류)면 같은 `turn_id`로 지수 백오프(지터 포함)로 재시도하고, 총 재시도 예산(120초 = 대기의 2배, CONVENTIONS 시간 상한 사슬 D125)을 넘기면 직원 호출 화면을 보인다. 요청 타임아웃(키오스크 대기)은 60초다(D125, D119 대체). 기기 인증 실패 403 `PERMISSION_DENIED`(인증서 없음·허용 목록 밖, F절)는 재시도로 풀리지 않으므로 재시도 없이 직원 호출 화면을 보인다(RUNTIME R3.13). TLS 핸드셰이크 거부(틀림·만료·모르는 CA)는 브라우저가 원인 없는 네트워크 오류로만 알리므로(WHATWG Fetch network error) 위의 네트워크 오류와 같이 같은 `turn_id` 로 재시도하고 총 예산 120초 뒤 직원 호출 화면이다(R3.13·R3.15, 4.0.5 정정). 허용 목록을 읽지 못한 503 은 일시 장애로 본다(F절).
 - 408 을 받거나 요청이 한도 안에 도착하지 못해 연결이 끊기면 일시 장애와 같다(같은 `turn_id`, 위 재시도 규칙). 413·414·431 은 재시도하지 않고(같은 요청은 같은 결과) 기기 인증 실패와 같이 직원 호출 화면을 보인다(RFC 9110 15.5.9·15.5.14, RUNTIME R3.5·R3.6·R3.17).
 - 한 세션의 요청은 순서대로 하나씩 보낸다(동시에 두 턴을 보내지 않는다).
 - 200 이고 `turn_failure_signal.write_committed=NOT_COMMITTED` 이면(RUNTIME R3.20) 일시 장애와 같게 같은 `turn_id` 로 재시도한다(총 예산 120초 뒤 직원 호출 화면). 400·403·404·409(`TURN_IN_PROGRESS` 제외; 이것은 잠시 뒤 같은 `turn_id` 로 재시도)·422 는 재시도 없이 직원 호출 화면을 보이고, 다음 환자는 새 세션으로 시작한다(같은 요청은 같은 결과, 검토 A-18).
@@ -73,7 +73,7 @@
 아래는 서비스(survey-service), 게이트웨이(deploy), 프론트(kiosk-frontend, admin-console), 게이트(release-gate)가 같은 모양으로 구현하는 합의다. 세션 응답 스키마는 survey-service의 문진 스키마(`schema/schemas/`)에 둔다.
 
 ## A. 환자 참조 `subject_ref` (세션 시작)
-- `POST /v1/sessions` 본문에 선택 필드 `"subject_ref"`: 병원이 정한 **불투명 문자열**(환자·방문을 가리키는 참조, 1~128자, `[A-Za-z0-9._:/#=+-]`). 서비스는 의미를 해석하지 않는다. 프론트가 시작 때 가지고 있는 값(병원 접수가 키오스크를 띄울 때 넘긴 값)을 그대로 보낸다.
+- `POST /v1/sessions` 본문에 선택 필드 `"subject_ref"`: 병원이 정한 **불투명 문자열**(환자·방문을 가리키는 참조, 1~128자, `[A-Za-z0-9._:/#=+-]`). 서비스는 의미를 해석하지 않는다. 프론트가 시작 때 가지고 있는 값(병원 접수가 키오스크를 띄울 때 시작 URL 조각 `KioskStartFragment` 로 넘긴 값)을 그대로 보낸다. 기기 설정 `/config.json`(DeviceConfig)에는 두지 않는다(인증 없이 읽히는 공개 정적 파일, 4.0.5).
 - 서비스는 세션별로 저장한다(세션 문서 스키마를 바꾸지 않고 세션 메타로). 설정 `SURVEY_REQUIRE_SUBJECT_REF`가 켜져 있으면 없을 때 400(`INVALID_RECORD`). 기본은 꺼짐(데모용).
 - `subject_ref`는 환자를 식별하는 값이다: 로그·알림 본문·푸시에 넣지 않고, 아래 조회 API와 접근 기록(세션 ID 기준)에서만 다룬다.
 
@@ -84,7 +84,7 @@
 - 접근 기록: 결과 읽기·확인 표시마다 아래 접근 기록(계정 ID 포함)을 남기고 보존 365일(감사 기록).
 역할 `result-reader` 토큰(상류·기계용). 이 역할은 `GET /v1/results*` 와 `POST /v1/results/{session_id}/ack` 를 부를 수 있다: ack 는 결과 값을 바꾸지 않고 확인 표시(`acknowledged_by`·`acknowledged_at`)만 더하는 쓰기라서 읽기 역할에 함께 둔 예외다(HTTP.md 공통 읽기/쓰기 구분의 예외, 3.4.4 검토 B-17). 호출마다 접근 기록(시각, 역할 이름, 게이트웨이가 인증한 행위자 `X-Openit-User`가 있으면 그 계정 ID, session_id 또는 조회 조건, 결과; 토큰·발화 제외)을 남기고, 기록을 못 남기면 데이터를 주지 않는다(503).
 - `GET /v1/results/{session_id}` → `SessionResult`: `{"session_id", "subject_ref": str|null, "status": "IN_PROGRESS|PAUSED_RISK|ENDED_COMPLETE|ENDED_STAFF|ENDED_LEFT|ENDED_USER_STOP", "started_at": ISO|null, "ended_at": ISO|null, "release_id": str|null, "question_set_id": str|null, "question_set_title": str|null, "question_bank_version": str|null, "answers": [{"key","value","status","precision"}], "skipped_details": [{"item", "slot"?, "reason": "UNKNOWN|REJECTED|UNCLEAR|REASK_LIMIT|..."}]}`. 끝나지 않은 세션과 직원·이탈로 끝난 세션의 **부분 결과도 상태와 함께** 돌려준다. 환자 발화 원문과 대화 로그는 포함하지 않는다(직원 세션 조회에만 있다).
-- **`status`의 뜻** (survey-service CR-014 반영): `ENDED_COMPLETE` 문진을 끝까지 마침(**완료는 이것뿐**). `ENDED_LEFT` 환자가 끝나기 전에 떠남(키오스크 종료 요청 또는 유휴 만료). `ENDED_STAFF` 직원이 종료. `ENDED_USER_STOP` 예약된 값으로 지금 만들어지지 않는다. `IN_PROGRESS`·`PAUSED_RISK` 아직 끝나지 않음. 완료가 아닌 상태의 `answers`는 그때까지 저장된 부분 결과이고, `skipped`는 건너뛴 문항 ID일 뿐 미응답 문항 목록이 아니다. 완료 여부는 `status == "ENDED_COMPLETE"`로만 판단한다.
+- **`status`의 뜻** (survey-service CR-014 반영): `ENDED_COMPLETE` 문진을 끝까지 마침(**완료는 이것뿐**). `ENDED_LEFT` 환자가 끝나기 전에 떠남(키오스크 종료 요청 또는 유휴 만료). `ENDED_STAFF` 직원이 종료. `ENDED_USER_STOP` 예약된 값으로 지금 만들어지지 않는다. `IN_PROGRESS`·`PAUSED_RISK` 아직 끝나지 않음. 완료가 아닌 상태의 `answers`는 그때까지 저장된 부분 결과이고, `skipped_details`(문진 스키마 SessionResult, 2.0.0 에서 문자열 목록 `skipped` 를 대체)는 건너뛴 문항일 뿐 미응답 문항 목록이 아니다. 완료 여부는 `status == "ENDED_COMPLETE"`로만 판단한다.
 - `GET /v1/results?subject_ref=&status=&updated_after=&limit=&cursor=` → `{"items": [SessionResult], "next_cursor": str|null}` (`limit` 기본 50 최대 200).
 - 빈칸 사유(3.2.0, U36·G12·U35): 같은 문항을 3번 되물어도 답을 얻지 못하면 직원을 부르지 않고 그 칸을 빈칸으로 두고 다음 문항으로 간다. 사유는 `skipped_details[].reason`(UNKNOWN 모름, REJECTED 거부, UNCLEAR 모호, REASK_LIMIT 되묻기 한도 뒤 빈칸)에 남는다. 문진 스키마 SessionResult 가 정본.
 - 오류: 401/403(`PERMISSION_DENIED`), 404(`NOT_FOUND`), 400(`INVALID_RECORD`), 503(`UNAVAILABLE`).

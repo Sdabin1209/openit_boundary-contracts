@@ -16,7 +16,6 @@
     "COMMIT": "f139ba6",
     "CONTRACTS_VERSION": "v2.1.1",
     "SURVEY_SCHEMA_VERSION": "1",
-    "TURN_ENGINE_VERSION": "none",
     "MODEL_RUNTIME_VERSION": "none"
   }
 }
