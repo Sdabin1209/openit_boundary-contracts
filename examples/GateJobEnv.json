@@ -1,0 +1,10 @@
+{
+  "GATE_DATABASE_URL_FILE": "/run/secrets/gate-database-url",
+  "GATE_I1_URL": "https://question-authoring",
+  "GATE_I1_TOKEN_FILE": "/run/secrets/gate-i1-token",
+  "GATE_I3_URL": "https://model-registry",
+  "GATE_I3_TOKEN_FILE": "/run/secrets/gate-i3-token",
+  "GATE_REQUEST_DEADLINE_SECONDS": "170.0",
+  "PORT": "8080",
+  "GATE_SUPPORTED_RUNTIME_CONTRACT_VERSION": "1"
+}

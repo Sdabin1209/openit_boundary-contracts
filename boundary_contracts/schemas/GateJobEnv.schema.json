@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "GateJobEnv.schema.json",
+  "title": "GateJobEnv",
+  "description": "release-gate 잡(collect·judge·prune) 컨테이너의 환경 변수(3.7.0). 이름·형식은 GateEnv 와 같고(참조), 서비스(serve)만의 필수 조건(읽기·쓰기 토큰 목록)은 없다: 잡은 들어오는 요청을 받지 않아 토큰을 읽지 않는다. 그 전에는 잡이 GateEnv 를 쓰면서 기동 검증 때 allOf 를 지워 계약과 다른 규칙으로 검증했다(교차검증). deploy 는 잡 선언의 env_schema 로 이 스키마를 준다.",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "release-gate"
+  ],
+  "type": "object",
+  "propertyNames": {
+    "$ref": "GateEnv.schema.json#/propertyNames"
+  },
+  "properties": {
+    "GATE_READ_TOKENS_FILE": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_READ_TOKENS_FILE"
+    },
+    "GATE_READ_TOKENS": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_READ_TOKENS"
+    },
+    "GATE_WRITE_TOKENS_FILE": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_WRITE_TOKENS_FILE"
+    },
+    "GATE_WRITE_TOKENS": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_WRITE_TOKENS"
+    },
+    "GATE_DATABASE_URL_FILE": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_DATABASE_URL_FILE"
+    },
+    "GATE_DATABASE_URL": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_DATABASE_URL"
+    },
+    "GATE_DATA_DIR": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_DATA_DIR"
+    },
+    "GATE_SURVEY_SCHEMA_DIR": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_SURVEY_SCHEMA_DIR"
+    },
+    "GATE_SUPPORTED_RUNTIME_CONTRACT_VERSION": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_SUPPORTED_RUNTIME_CONTRACT_VERSION"
+    },
+    "GATE_MODEL_RUNTIME_VERSION": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_MODEL_RUNTIME_VERSION"
+    },
+    "GATE_POLICY_FILE": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_POLICY_FILE"
+    },
+    "GATE_CONFIG": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_CONFIG"
+    },
+    "GATE_I1_URL": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_I1_URL"
+    },
+    "GATE_I1_TOKEN_FILE": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_I1_TOKEN_FILE"
+    },
+    "GATE_I1_TOKEN": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_I1_TOKEN"
+    },
+    "GATE_I1_TIMEOUT": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_I1_TIMEOUT"
+    },
+    "GATE_I3_URL": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_I3_URL"
+    },
+    "GATE_I3_TOKEN_FILE": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_I3_TOKEN_FILE"
+    },
+    "GATE_I3_TOKEN": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_I3_TOKEN"
+    },
+    "GATE_I3_TIMEOUT": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_I3_TIMEOUT"
+    },
+    "GATE_SERVICE_ROLES": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_SERVICE_ROLES"
+    },
+    "GATE_ACTIVATE_ROLES": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_ACTIVATE_ROLES"
+    },
+    "GATE_ROLLBACK_ROLES": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_ROLLBACK_ROLES"
+    },
+    "GATE_DB_CONNECT_TIMEOUT_SECONDS": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_DB_CONNECT_TIMEOUT_SECONDS"
+    },
+    "GATE_DB_STATEMENT_TIMEOUT_SECONDS": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_DB_STATEMENT_TIMEOUT_SECONDS"
+    },
+    "GATE_READYZ_DB_TIMEOUT_SECONDS": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_READYZ_DB_TIMEOUT_SECONDS"
+    },
+    "GATE_REQUEST_TIMEOUT_SECONDS": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_REQUEST_TIMEOUT_SECONDS"
+    },
+    "GATE_REQUEST_DEADLINE_SECONDS": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_REQUEST_DEADLINE_SECONDS"
+    },
+    "GATE_MAX_CONNECTIONS": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_MAX_CONNECTIONS"
+    },
+    "GATE_SHUTDOWN_GRACE_SECONDS": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_SHUTDOWN_GRACE_SECONDS"
+    },
+    "GATE_MAX_PENDING_SUBMISSIONS": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_MAX_PENDING_SUBMISSIONS"
+    },
+    "GATE_POLL_SECONDS": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_POLL_SECONDS"
+    },
+    "GATE_RETAIN_KEEP_RELEASES": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_RETAIN_KEEP_RELEASES"
+    },
+    "GATE_RETAIN_REJECTED_DAYS": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_RETAIN_REJECTED_DAYS"
+    },
+    "GATE_RETAIN_ATTEMPTS_DAYS": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_RETAIN_ATTEMPTS_DAYS"
+    },
+    "GATE_READ_TOKEN": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_READ_TOKEN"
+    },
+    "PORT": {
+      "$ref": "GateEnv.schema.json#/properties/PORT"
+    },
+    "GATE_HOST": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_HOST"
+    },
+    "GATE_READ_TOKEN_FILE": {
+      "$ref": "GateEnv.schema.json#/properties/GATE_READ_TOKEN_FILE"
+    }
+  },
+  "required": [
+    "GATE_SUPPORTED_RUNTIME_CONTRACT_VERSION"
+  ]
+}

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "DeviceConfig.schema.json",
   "title": "DeviceConfig",
-  "description": "키오스크 기기 설정(`GET /config.json`). 쓰는 쪽: deploy(운영이 마운트하는 CONFIG_FILE 내용). 읽는 쪽: kiosk-frontend(api/device.ts loadKioskStart). 모든 키는 선택이다. device_token이 없으면 키오스크는 세션을 시작하지 않고 직원 호출 화면(NO_DEVICE_TOKEN)을 보인다. 이 문서의 값은 비밀(device_token)·개인정보 참조(subject_ref)를 담을 수 있으므로 로그·오류 응답에 쓰지 않는다. [3.4.4 검토 B-28-9: 기기 인증은 mTLS 가 기본이고(PUBLIC_API F절) 기기 토큰 필드는 F-1 호환용으로 남긴다. 제거는 다음 MAJOR 4.0.0.]",
+  "description": "키오스크 기기 설정(`GET /config.json`). 쓰는 쪽: deploy(운영이 마운트하는 CONFIG_FILE 내용). 읽는 쪽: kiosk-frontend(src/wiring/kiosk.ts loadKioskStart → src/components/link_device_config_receive.ts). 모든 키는 선택이다. 기기 인증은 게이트웨이의 클라이언트 인증서(mTLS, PUBLIC_API F절)가 기본이라 device_token 이 없어도 키오스크는 세션을 시작한다(토큰 없이 요청). 이 문서의 값은 비밀(device_token)·개인정보 참조(subject_ref)를 담을 수 있으므로 로그·오류 응답에 쓰지 않는다.",
   "x-producers": [
     "deploy"
   ],
@@ -14,7 +14,7 @@
     "device_token": {
       "type": "string",
       "pattern": "^[\\x21-\\x7e]{1,512}$(?![\\s\\S])",
-      "description": "(폐기 예정, 2.3.0) 기기 토큰. 2.3.0부터 키오스크 기기 인증은 게이트웨이의 클라이언트 인증서(mTLS, ADR 0012)라 이 값이 필요 없다. 2.x 호환으로만 남고 3.0.0에서 없어진다. 있으면 /v1/sessions* 요청에 `Authorization: Bearer`로 실린다. 비밀 값.",
+      "description": "(폐기 예정) 기기 토큰. 2.3.0부터 기기 인증은 mTLS 라 필요 없고 PUBLIC_API F-1 호환으로만 남는다(3.4.4 검토 B-28-9). 제거는 다음 MAJOR(4.0.0). 있으면 /v1/sessions* 요청에 `Authorization: Bearer` 로 실린다. 비밀 값.",
       "deprecated": true
     },
     "subject_ref": {
