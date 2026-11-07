@@ -112,13 +112,13 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 2147483647,
-          "description": "근거: Linux uid_t(32비트)의 음이 아닌 범위 0~2^31-1(POSIX)"
+          "description": "근거: 2^31-1 은 호환성을 위한 프로젝트 상한이다(부호 있는 32비트 정수로 다루는 도구가 있어도 안전하게; Linux 의 uid_t 자체는 부호 없는 32비트라 최대치가 아니다, 측정 안 함)"
         },
         "gid": {
           "type": "integer",
           "minimum": 0,
           "maximum": 2147483647,
-          "description": "근거: Linux gid_t(32비트)의 음이 아닌 범위 0~2^31-1(POSIX)"
+          "description": "근거: 2^31-1 은 호환성을 위한 프로젝트 상한이다(부호 있는 32비트 정수로 다루는 도구가 있어도 안전하게; Linux 의 gid_t 자체는 부호 없는 32비트라 최대치가 아니다, 측정 안 함)"
         }
       }
     },
