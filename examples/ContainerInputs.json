@@ -67,15 +67,6 @@
      "opened_by": "start-process"
     },
     {
-     "path_env": "SURVEY_KIOSK_DEVICE_TOKENS_FILE",
-     "path": "/run/secrets/survey-kiosk-device-tokens",
-     "directory": false,
-     "kind": "secret",
-     "schema": null,
-     "required": true,
-     "opened_by": "start-process"
-    },
-    {
      "path_env": "SURVEY_RESULT_READER_TOKEN_FILE",
      "path": "/run/secrets/survey-result-reader",
      "directory": false,
@@ -302,15 +293,6 @@
     {
      "path_env": "SURVEY_STAFF_API_TOKEN_FILE",
      "path": "/run/secrets/survey-api-staff",
-     "directory": false,
-     "kind": "secret",
-     "schema": null,
-     "required": true,
-     "opened_by": "start-process"
-    },
-    {
-     "path_env": "SURVEY_KIOSK_DEVICE_TOKENS_FILE",
-     "path": "/run/secrets/survey-kiosk-device-tokens",
      "directory": false,
      "kind": "secret",
      "schema": null,

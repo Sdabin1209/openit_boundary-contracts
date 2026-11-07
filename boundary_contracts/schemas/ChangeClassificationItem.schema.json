@@ -6,7 +6,8 @@
     "question-authoring"
   ],
   "x-consumers": [
-    "release-gate"
+    "release-gate",
+    "synthetic-data"
   ],
   "type": "object",
   "additionalProperties": false,

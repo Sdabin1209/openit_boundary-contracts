@@ -51,8 +51,6 @@
      "SURVEY_INFERENCE_TOKEN_FILE",
      "SURVEY_INFERENCE_URL",
      "SURVEY_KEEP_RELEASES",
-     "SURVEY_KIOSK_DEVICE_TOKENS",
-     "SURVEY_KIOSK_DEVICE_TOKENS_FILE",
      "SURVEY_LOG_LEVEL",
      "SURVEY_MAX_CONNECTIONS",
      "SURVEY_MAX_CONSECUTIVE_REASK",
@@ -154,11 +152,6 @@
    "description": "비밀이 든 파일의 절대 경로. 값 자체가 아니다."
   },
   "SURVEY_STAFF_API_TOKEN_FILE": {
-   "type": "string",
-   "pattern": "^/",
-   "description": "비밀이 든 파일의 절대 경로. 값 자체가 아니다."
-  },
-  "SURVEY_KIOSK_DEVICE_TOKENS_FILE": {
    "type": "string",
    "pattern": "^/",
    "description": "비밀이 든 파일의 절대 경로. 값 자체가 아니다."
@@ -572,10 +565,6 @@
    "description": "공개 API 토큰의 비밀 이름",
    "default": "SURVEY_API_TOKEN"
   },
-  "SURVEY_KIOSK_DEVICE_TOKENS": {
-   "type": "string",
-   "description": "개발·시험 호환: 기기 토큰 목록 값. 운영 금지"
-  },
   "SURVEY_VAPID_PRIVATE_KEY_ENV": {
    "type": "string",
    "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
@@ -686,14 +675,6 @@
       "required": [
        "SURVEY_STAFF_API_TOKEN",
        "SURVEY_STAFF_API_TOKEN_FILE"
-      ]
-     }
-    },
-    {
-     "not": {
-      "required": [
-       "SURVEY_KIOSK_DEVICE_TOKENS",
-       "SURVEY_KIOSK_DEVICE_TOKENS_FILE"
       ]
      }
     },

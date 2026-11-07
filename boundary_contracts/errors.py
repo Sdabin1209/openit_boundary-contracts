@@ -21,6 +21,8 @@ class BoundaryError(Exception):
     def __init__(self, code: str, message: str, details: dict[str, Any] | None = None):
         if code not in CODES:
             raise ValueError(f"알 수 없는 오류 코드: {code}")
+        if not isinstance(message, str) or not message:
+            raise ValueError("BoundaryError.message 는 비어 있지 않은 문자열이다(계약 BoundaryError.message minLength 1)")   # 4.0.0: 만들 때 막아 직렬화가 계약을 어기지 않게
         super().__init__(f"{code}: {message}")
         self.code = code
         self.message = message
@@ -37,6 +39,10 @@ class BoundaryError(Exception):
                "message": self.message, "retryable": self.retryable}
         if self.details:
             rec["details"] = self.details
+        from .schemas_api import validator
+        errs = sorted("/".join(map(str, e.absolute_path)) or "(최상위)" for e in validator("BoundaryError").iter_errors(rec))
+        if errs:   # 생산자 검증(R7): 계약을 어긴 오류 레코드를 내보내지 않는다(값은 싣지 않고 위치만)
+            raise ValueError("BoundaryError 레코드가 계약을 어긴다: " + ", ".join(errs[:5]))
         return rec
 
     @classmethod

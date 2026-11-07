@@ -144,7 +144,7 @@ I3와 같은 형식이다(목록·단일 레코드·tar 묶음·멱등 게시). 
 - 클라이언트 `boundary_contracts.clients.HttpPublicApi`(`list_question_sets`(3.3.0), `start_session(question_set_id=)`, `send_utterance`, `end_session`, `get_state`, `intervene`, `healthz`)와 `HttpStaffCall`(`retry`, `report`). 토큰은 키오스크 기기 토큰이고 `intervene`은 staff 토큰이다.
 - `turn_id`는 API 봉투 필드다. 본문 스키마(`FrontendMessage`, `FrontendInput`)는 문진 스키마라 클라이언트는 필수 필드와 타입만 확인하고(위반은 `INTEGRITY_ERROR`), `SessionState`는 이 패키지 스키마로 검증한다.
 - `/healthz`, `/readyz`는 인증이 없다. 429·503은 `UNAVAILABLE`이고 `details.reason`을 먼저 본다(PUBLIC_API.md G절).
-- 참조 서버 `conformance.servers.PublicApiReferenceServer`는 상태 기계(ACTIVE/PAUSED_RISK/ENDED), `turn_id` 멱등, 확정되지 못한 턴의 재처리, 기기 토큰 소유 확인(다른 기기 404, staff 403)을 모사한다. 모사하지 않는 것: 결과 조회(B), 직원 세션 조회(C), 위험 신호 입력(D), `X-Openit-User` 행위자 기록(E), SSE·푸시 구독.
+- 참조 서버 `conformance.servers.PublicApiReferenceServer`는 상태 기계(ACTIVE/PAUSED_RISK/ENDED), `turn_id` 멱등, 확정되지 못한 턴의 재처리, 기기 소유 확인(다른 기기 404, staff 403), 서버 발급 세션 ID(4.0.0)을 모사한다. 모사하지 않는 것: 결과 조회(B), 직원 세션 조회(C), 위험 신호 입력(D), `X-Openit-User` 행위자 기록(E), SSE·푸시 구독.
 
 ## 적합성
 

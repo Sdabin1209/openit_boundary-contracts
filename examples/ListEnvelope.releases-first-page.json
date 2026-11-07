@@ -1,7 +1,7 @@
 {
   "items": [
     {
-      "pipeline_schema_version": "3.0",
+      "pipeline_schema_version": "4.0",
       "release_id": "rel-0004",
       "created_at": "2026-10-08T00:00:00Z",
       "gate_decision_id": "gd-0004",
@@ -100,7 +100,7 @@
       }
     },
     {
-      "pipeline_schema_version": "3.0",
+      "pipeline_schema_version": "4.0",
       "release_id": "rel-0003",
       "created_at": "2026-10-06T00:00:00Z",
       "gate_decision_id": "gd-0003",

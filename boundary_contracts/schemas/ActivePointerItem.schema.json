@@ -1,15 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ActivePointerItem",
-  "description": "3.4.18: GET /v1/active-pointer 응답 감싸기(HTTP.md I4). 이전에는 문서에만 있었다. 포인터가 없으면 item 은 null 이다.",
+  "description": "3.4.18: GET /v1/active-pointer 응답 감싸기(HTTP.md I4). 이전에는 문서에만 있었다. 포인터가 없으면 item 은 null 이다. 4.0.0: 소비자에서 model-runtime 을 뺐다(활성 포인터를 읽는 경로가 없다: 릴리스는 survey-service 가 적재 요청으로 넘긴다).",
   "x-producers": [
     "release-gate"
   ],
   "x-consumers": [
     "survey-service",
     "ops-feedback",
-    "admin-console",
-    "model-runtime"
+    "admin-console"
   ],
   "type": "object",
   "additionalProperties": false,

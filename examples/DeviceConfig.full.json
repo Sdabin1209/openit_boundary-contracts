@@ -1,5 +1,4 @@
 {
-  "device_token": "tok-FAKE",
   "subject_ref": "pt:abc/1",
   "allow_remote_stt": false,
   "question_set_id": "health-screening"

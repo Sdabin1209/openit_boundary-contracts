@@ -213,7 +213,7 @@ SUPPORTED_RUNTIME_CONTRACT_VERSION: int
 
 ## I10. 공개 API (survey-service ↔ Frontend)
 
-전송(HTTP/JSON), 인증(Bearer 토큰, 키오스크는 기기 토큰), 오류와 재시도, 세션 시작·발화·종료·상태·개입 결정·직원 알림·직원 호출 재알림의 호출 모양은 **`PUBLIC_API.md`가 정본**이다(이 절은 복사하지 않고 가리킨다). HTTP 규약만 `HTTP.md ## I10`에 있다. 읽는 쪽은 kiosk-frontend(환자 화면, 직원 콘솔)다. 메시지의 본문은 문진 스키마의 `FrontendMessage`·`FrontendInput`이다. 클라이언트 `HttpPublicApi`·`HttpStaffCall`(Protocol `sdk.PublicApi`·`sdk.StaffCall`)과 참조 서버 `conformance.servers.PublicApiReferenceServer`가 있다.
+전송(HTTP/JSON), 인증(Bearer 토큰, 키오스크는 기기 인증서 mTLS), 오류와 재시도, 세션 시작·발화·종료·상태·개입 결정·직원 알림·직원 호출 재알림의 호출 모양은 **`PUBLIC_API.md`가 정본**이다(이 절은 복사하지 않고 가리킨다). HTTP 규약만 `HTTP.md ## I10`에 있다. 읽는 쪽은 kiosk-frontend(환자 화면, 직원 콘솔)다. 메시지의 본문은 문진 스키마의 `FrontendMessage`·`FrontendInput`이다. 클라이언트 `HttpPublicApi`·`HttpStaffCall`(Protocol `sdk.PublicApi`·`sdk.StaffCall`)과 참조 서버 `conformance.servers.PublicApiReferenceServer`가 있다.
 
 ## 영역별 책임 요약 (받는 것 / 내는 것)
 

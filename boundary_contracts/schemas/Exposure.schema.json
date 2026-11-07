@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "Exposure.schema.json",
   "title": "Exposure",
-  "description": "서비스(영역)의 게이트웨이 노출 표(라벨 io.openit.exposure 의 내용). 영역이 들어오는 쪽(routes: 어느 경로를 어떤 인증으로 platform 공개 입구에 내는가)과 나가는 쪽(egress: 영역 게이트웨이가 CONNECT 터널을 열어 줄 상대)을 선언한다. deploy 가 배포 때 이 선언으로 게이트웨이 설정을 만들거나 대조한다(게이트웨이 제품·설정 파일은 platform·deploy 내부, 3.4.4 검토 B-19). 역할 이름은 CONVENTIONS 6절의 역할 집합이어야 한다(여기서는 형식만 본다). 노출하지 않는 경로는 auth.kind=denied 로 적는다: 목록에 없는 /v1/* 는 404 가 기본이다. 게이트웨이는 모든 경로에서 클라이언트가 보낸 X-Openit-User·X-Openit-Roles·X-Openit-Device 를 지운다(CONVENTIONS 6절). 3.6.3 clarification: routes[].auth governs the platform public entrance only. An area gateway forwards every listed route (including denied) to its owning service; the service validates machine tokens. Public denied routes remain unavailable through the public entrance.",
+  "description": "서비스(영역)의 게이트웨이 노출 표(라벨 io.openit.exposure 의 내용). 영역이 들어오는 쪽(routes: 어느 경로를 어떤 인증으로 platform 공개 입구에 내는가)과 나가는 쪽(egress: 영역 게이트웨이가 CONNECT 터널을 열어 줄 상대)을 선언한다. deploy 가 배포 때 이 선언으로 게이트웨이 설정을 만들거나 대조한다(게이트웨이 제품·설정 파일은 platform·deploy 내부, 3.4.4 검토 B-19). 역할 이름은 CONVENTIONS 6절의 역할 집합이어야 한다(여기서는 형식만 본다). 노출하지 않는 경로는 auth.kind=denied 로 적는다: 목록에 없는 /v1/* 는 404 가 기본이다. 게이트웨이는 모든 경로에서 클라이언트가 보낸 X-Openit-User·X-Openit-Roles·X-Openit-Device 를 지운다(CONVENTIONS 6절). 3.6.3 명확화: routes[].auth 는 platform 공개 입구에만 적용된다. 영역 게이트웨이는 목록의 모든 경로(denied 포함)를 소유 서비스로 넘기고, 서비스 토큰 대조는 그 서비스가 한다. denied 경로는 공개 입구로는 닿지 않는다. 4.0.0: auth.kind 의 machine-token(공개 입구에서 denied 와 같았다, 4.0.0 제거 예고)을 없앴다 — 영역 사이 기계 호출은 받는 서비스가 서비스 토큰을 대조한다(RUNTIME R3.23).",
   "x-producers": [
     "*"
   ],
@@ -82,14 +82,13 @@
           "properties": {
             "kind": {
               "enum": [
-                "device-token",
+                "device",
                 "account",
                 "authenticated",
-                "machine-token",
                 "none",
                 "denied"
               ],
-              "description": "device-token: 키오스크 기기(mTLS/기기 토큰). account: 사람 계정(roles 필수). authenticated: 로그인한 사람 계정이면 역할과 무관하게 연다(3.4.0, U82: 데이터 없는 화면 정적 파일 — 가입 승인 대기 계정에게 안내를 보이려면 화면이 열려야 한다; roles 를 쓰지 않는다). machine-token: (3.4.7 정정) 비사람 호출자의 경로. 게이트웨이는 토큰을 대조하지 않고 받는 서비스가 대조한다(RUNTIME R3.23). platform 공개 입구는 이 경로를 내보내지 않는다(denied 와 같다): compose 밖 호출자는 R1.5 의 hosts 표로 받는 영역의 게이트웨이에 바로 간다. 값은 4.0.0 에서 뺀다. none: 인증 없음(/healthz 등). (3.4.9) 영역의 /healthz·/readyz·/metrics 는 영역 게이트웨이 용이고 platform 공개 입구는 내보내지 않는다(CONVENTIONS 2절 상태 경로 규칙). denied: 밖에서 닿을 수 없음 denied 는 platform 공개 입구에서 내보내지 않는다는 뜻이다. 영역 게이트웨이에서 이 경로를 제거하지 않는다. 영역 간 요청의 서비스 토큰은 받는 서비스가 검사한다(R3.23)."
+              "description": "device: 키오스크 기기(mTLS 기기 인증서 + 허용 목록 DeviceAllowlist; 4.0.0 에서 device-token 이름을 바꿨다). account: 사람 계정(roles 필수). authenticated: 로그인한 사람 계정이면 역할과 무관하게 연다(3.4.0, U82: 데이터 없는 화면 정적 파일 — 가입 승인 대기 계정에게 안내를 보이려면 화면이 열려야 한다; roles 를 쓰지 않는다). none: 인증 없음(/healthz 등). (3.4.9) 영역의 /healthz·/readyz·/metrics 는 영역 게이트웨이 용이고 platform 공개 입구는 내보내지 않는다(CONVENTIONS 2절 상태 경로 규칙). denied: 밖에서 닿을 수 없음 denied 는 platform 공개 입구에서 내보내지 않는다는 뜻이다. 영역 게이트웨이에서 이 경로를 제거하지 않는다. 영역 간 요청의 서비스 토큰은 받는 서비스가 검사한다(R3.23)."
             },
             "roles": {
               "type": "array",

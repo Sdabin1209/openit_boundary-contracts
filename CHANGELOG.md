@@ -1,6 +1,19 @@
 # 변경 이력
 
 
+## 4.0.0 (2026-11-07, MAJOR: 계약 전수 검토 수정 — 병행 기간 없음, CONVENTIONS 1.4 기록)
+
+전수 검토(헤드·Codex 교차검증)에서 찾은 결함을 고친다. 허용 범위 축소·필드 삭제·의미 변경이 있어 MAJOR 다. 운영 데이터가 없어 3.x 를 읽는 병행 경로를 두지 않는다(PIPELINE_SCHEMA_VERSION 4.0).
+- 기기 인증은 mTLS 하나(D136): DeviceAllowlist 신설, DeviceConfig.device_token·KioskStartFragment.device·INGRESS_DEVICE_TOKENS_DIR·SURVEY_KIOSK_DEVICE_TOKENS(_FILE)·SurveyReadyz.kiosk_tokens.device_tokens 제거, Exposure auth device-token→device, 인증서 없음·목록 밖 403. Exposure auth machine-token 제거(4.0.0 예고).
+- 잡 설정의 구현 모듈 경로 factory 제거(D135): _common.HttpClientSettings, SURVEY_STAFF_CONSOLE·RESULT_DISPATCHER·RISK_SOURCE·GATE_I1/I3_FACTORY 제거.
+- 세션 ID 는 서버 발급만(SessionStartBody.session_id 제거), GATE_READ_TOKEN·_FILE 제거, GateJobEnv 분리.
+- 공통 정의: ServiceUrl(R1.1)·HttpsOrigin·HttpsUrl·TcpPort·BindPort·RelativePath·ImageRef·LoopbackHostPort·FailureType, ArtifactRef·QuestionSetRef·매니페스트 version 은 Id.
+- 모든 pattern 의 끝 고정을 $(?![\s\S]) 로(끝 개행 통과 차단), SDK 수기 정규식 \Z, check_ref 는 계약 검증기.
+- 비식별 뷰는 생성물(tools/gen_deid_view.py + data/deid_rules.json), Deid 정책은 공개 규칙 안에서만.
+- 조건부 규칙을 스키마로: FailureCase·CaseReviewRequest expected_kind, GateDecision PASS 필수 검사, BackupJobResult status↔error·retryable, AddReviewRequest reason, AuthoringResponses 상태별 필수 키.
+- 닫음·통일: PushSubscription 본문 하나로, SurveyQuestionBankRead·OpsFeedbackFailureCaseExt·Readyz 안쪽·Synthetic 보고서 안쪽, TraceEnvelope.trace→TurnTrace v1, serving_config→ServingConfig, Env 접두사 오타 거부, 설명 없는 스키마 10개·영문 설명 정리, 빈칸 표지 정리.
+- BoundaryError: 빈 message 와 계약 위반 레코드 직렬화 거부.
+
 ## 3.6.5 (2026-11-07, PATCH: 토큰 파일 이름 규칙)
 
 - StepCaEnv: 토큰 파일 이름 규칙을 명시한다 — STEP_TOKENS_DIR/<이름>.ott(이름 = STEP_TOKEN_NAMES 항목 = STEP_CERT_NAME). 이름을 파일 이름으로 쓰므로 DnsName·DnsNameList 의 길이 상한을 253 에서 251 바이트로 둔다(POSIX NAME_MAX 255 - '.ott'). 3.6.4 는 253바이트 이름을 허용해 <이름>.ott 가 257바이트가 되어 저장할 수 없었다(2026-11-07 교차검증).

@@ -40,9 +40,6 @@
     "INGRESS_EXPOSURES": {
       "$ref": "PublicIngressEnv.schema.json#/properties/INGRESS_EXPOSURES"
     },
-    "INGRESS_DEVICE_TOKENS_DIR": {
-      "$ref": "PublicIngressEnv.schema.json#/properties/INGRESS_DEVICE_TOKENS_DIR"
-    },
     "INGRESS_UPSTREAM_TOKENS_DIR": {
       "$ref": "PublicIngressEnv.schema.json#/properties/INGRESS_UPSTREAM_TOKENS_DIR"
     },
@@ -60,6 +57,9 @@
     },
     "INGRESS_ROOT_EXPORT_DIR": {
       "$ref": "PublicIngressEnv.schema.json#/properties/INGRESS_ROOT_EXPORT_DIR"
+    },
+    "INGRESS_DEVICE_ALLOWLIST_FILE": {
+      "$ref": "PublicIngressEnv.schema.json#/properties/INGRESS_DEVICE_ALLOWLIST_FILE"
     }
   },
   "propertyNames": {

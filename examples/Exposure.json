@@ -7,7 +7,7 @@
         "/v1/sessions/*"
       ],
       "auth": {
-        "kind": "device-token"
+        "kind": "device"
       },
       "user_header": "strip",
       "timeouts_ms": {

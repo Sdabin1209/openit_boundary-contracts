@@ -34,9 +34,6 @@
     "SURVEY_STAFF_API_TOKEN_FILE": {
       "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_STAFF_API_TOKEN_FILE"
     },
-    "SURVEY_KIOSK_DEVICE_TOKENS_FILE": {
-      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_KIOSK_DEVICE_TOKENS_FILE"
-    },
     "SURVEY_RESULT_READER_TOKEN_FILE": {
       "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_RESULT_READER_TOKEN_FILE"
     },
@@ -240,9 +237,6 @@
     },
     "SURVEY_API_TOKEN_ENV": {
       "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_API_TOKEN_ENV"
-    },
-    "SURVEY_KIOSK_DEVICE_TOKENS": {
-      "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_KIOSK_DEVICE_TOKENS"
     },
     "SURVEY_VAPID_PRIVATE_KEY_ENV": {
       "$ref": "SurveyServiceEnv.schema.json#/properties/SURVEY_VAPID_PRIVATE_KEY_ENV"

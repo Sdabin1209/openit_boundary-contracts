@@ -158,16 +158,11 @@
     "kiosk_tokens": {
       "type": "object",
       "required": [
-        "shared_kiosk_token",
-        "device_tokens"
+        "shared_kiosk_token"
       ],
       "properties": {
         "shared_kiosk_token": {
           "type": "boolean"
-        },
-        "device_tokens": {
-          "type": "integer",
-          "minimum": 0
         },
         "warning": {
           "type": [

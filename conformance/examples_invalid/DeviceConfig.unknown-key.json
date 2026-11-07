@@ -1,1 +1,3 @@
-{"device_token": "tok-FAKE", "patient_name": "홍길동"}
+{
+ "patient_name": "홍길동"
+}

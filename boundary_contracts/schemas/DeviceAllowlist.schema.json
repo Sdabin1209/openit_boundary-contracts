@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "DeviceAllowlist.schema.json",
+  "title": "DeviceAllowlist",
+  "description": "키오스크 기기 인증서 허용 목록(4.0.0, D136). 공개 입구는 기기 경로(Exposure auth device)의 요청마다 클라이언트 인증서의 주체 CN(=device_id)과 일련번호를 이 목록과 대조한다. 신뢰 CA(PublicIngressEnv.INGRESS_DEVICE_CA_FILE)로 검증된 인증서라도 목록에 없으면 403 PERMISSION_DENIED(BoundaryError 본문). 등록은 항목 추가, 회전은 같은 device_id 에 새 일련번호를 더한 뒤 옛 것을 빼는 것, 폐기는 항목이나 일련번호를 빼는 것이다. 대조를 요청마다 하므로 목록에서 빠진 인증서는 이미 열린 TLS 연결에서도 다음 요청부터 거부된다. 인증서 발급·갱신은 조직 PKI/MDM 이 하고(D113), 이 목록은 deploy 가 발급된 인증서의 일련번호로 만든다. 비밀이 아니다.",
+  "x-producers": ["deploy"],
+  "x-consumers": ["platform"],
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "devices"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "devices": {
+      "type": "array",
+      "description": "기기 ID 마다 한 항목. 같은 device_id 가 두 번 나오면 공개 입구는 시작을 거부한다(스키마로 표현할 수 없는 유일성, 소비자가 강제한다). 0개면 어떤 기기도 통과하지 않는다",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["device_id", "serials"],
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])",
+            "description": "인증서 주체 CN 과 같은 기기 ID(PUBLIC_API F절, 서비스에는 X-Openit-Device 로 넘어간다)"
+          },
+          "serials": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "description": "이 기기에 허용하는 인증서 일련번호. 회전 중에는 둘 이상일 수 있다",
+            "items": {
+              "type": "string",
+              "pattern": "^(?:0|[1-9a-f][0-9a-f]{0,39})$(?![\\s\\S])",
+              "description": "인증서 일련번호: 앞자리 0 없는 소문자 16진수(RFC 5280 4.1.2.2: 양의 정수, 최대 20옥텟 = 40자리)"
+            }
+          }
+        }
+      }
+    }
+  }
+}

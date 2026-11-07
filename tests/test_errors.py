@@ -39,3 +39,17 @@ class Errors(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_빈_message_는_만들_수_없다_4_0_0():
+    import pytest
+    from boundary_contracts import BoundaryError
+    with pytest.raises(ValueError):
+        BoundaryError("UNAVAILABLE", "")
+
+
+def test_to_record_는_계약을_어기는_판_번호를_거부한다_4_0_0():
+    import pytest
+    from boundary_contracts import BoundaryError
+    with pytest.raises(ValueError):
+        BoundaryError("UNAVAILABLE", "x").to_record(pipeline_schema_version="bad")

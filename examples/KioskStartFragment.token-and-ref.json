@@ -1,1 +1,3 @@
-{"device": "tok-FAKE", "subject_ref": "pt:abc/1"}
+{
+ "subject_ref": "pt:abc/1"
+}

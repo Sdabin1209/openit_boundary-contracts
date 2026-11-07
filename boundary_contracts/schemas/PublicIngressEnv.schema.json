@@ -57,8 +57,8 @@
           "GATEWAY_PROBE_SITE",
           "GATEWAY_PUBLIC_TLS_PORT",
           "GATEWAY_TLS_MODE",
+          "INGRESS_DEVICE_ALLOWLIST_FILE",
           "INGRESS_DEVICE_CA_FILE",
-          "INGRESS_DEVICE_TOKENS_DIR",
           "INGRESS_EXPOSURES",
           "INGRESS_ROOT_CA",
           "INGRESS_ROOT_EXPORT_DIR",
@@ -114,11 +114,6 @@
       "description": "영역 Exposure 선언 폴더(파일마다 Exposure 스키마 하나, 영역 이미지 라벨에서 deploy 가 꺼낸다). 없으면 종료 64, 위반·같은 공개 경로 중복이면 65",
       "default": "/etc/openit/exposures"
     },
-    "INGRESS_DEVICE_TOKENS_DIR": {
-      "$ref": "#/$defs/Path",
-      "description": "키오스크 기기 토큰(PUBLIC_API F-1 호환) 폴더: 기기마다 파일 하나, 파일 이름 = device_id(PUBLIC_API F절 패턴), 내용 = 토큰 한 줄(비밀, D84). 파일을 지우면 그 기기는 폐기. 0개도 유효",
-      "default": "/run/secrets/devices"
-    },
     "INGRESS_UPSTREAM_TOKENS_DIR": {
       "$ref": "#/$defs/Path",
       "description": "게이트웨이 토큰 폴더: Exposure.routes[].upstream_token 이름마다 파일 하나(비밀, D84)",
@@ -142,16 +137,21 @@
     "INGRESS_DEVICE_CA_FILE": {
       "$ref": "#/$defs/Path",
       "default": "/etc/openit/device-ca.pem",
-      "description": "3.4.13: 키오스크 기기 인증서(mTLS, PUBLIC_API F절 — 기본 기기 인증)를 검증할 기기 CA(PEM). 기기 경로(Exposure auth device-token)는 이 CA 로 서명된 클라이언트 인증서가 있으면 그 CN 을 X-Openit-Device 로 붙이고, 없으면 F-1 호환 기기 토큰(INGRESS_DEVICE_TOKENS_DIR)을 본다. 필수: 기본 기기 인증이 조용히 꺼지지 않게 한다. 기기 CA 와 기기 인증서 발급은 운영(설치처)이 deploy 로 준다"
+      "description": "키오스크 기기 인증서(mTLS, PUBLIC_API F절)를 검증할 기기 CA(PEM). 기기 경로(Exposure auth device)는 이 CA 로 검증된 클라이언트 인증서 중 허용 목록(INGRESS_DEVICE_ALLOWLIST_FILE)에 있는 것만 통과시키고 그 CN 을 X-Openit-Device 로 붙인다. 필수(4.0.0: 기기 토큰 호환 경로를 없앴다, D136)"
     },
     "INGRESS_ROOT_EXPORT_DIR": {
       "$ref": "#/$defs/Path",
       "description": "3.4.16: internal 모드에서 공개 입구가 자기 사설 CA 의 루트 인증서(공개)를 root_ca.crt 로 써 두는 폴더(deploy 가 연결하는 출력 마운트, RUNTIME OUT-FILE). 루트가 생기거나 바뀔 때마다 같은 폴더에 쓰고 rename 으로 바꿔 넣는다(쓰는 도중 파일을 읽히지 않는다). deploy 는 이 파일을 감시·키오스크·직원 PC 에 나눠 준다. 이미지 안 경로나 부명령에 기대지 않게 한다(구조 규칙 1)",
       "default": "/etc/openit/root-out"
+    },
+    "INGRESS_DEVICE_ALLOWLIST_FILE": {
+      "$ref": "#/$defs/Path",
+      "description": "4.0.0(D136): 기기 인증서 허용 목록 파일(계약 DeviceAllowlist, JSON). 없거나 계약을 어기면 시작하지 않는다(기기 인증이 조용히 열리지 않게). 바뀌면 다시 읽는다"
     }
   },
   "required": [
     "GATEWAY_HOSTS",
+    "INGRESS_DEVICE_ALLOWLIST_FILE",
     "INGRESS_DEVICE_CA_FILE"
   ],
   "allOf": [

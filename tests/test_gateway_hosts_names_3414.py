@@ -3,7 +3,7 @@ from boundary_contracts import validator
 
 
 def _errs(v):
-    return [e.message for e in validator("PublicIngressEnv").iter_errors({"GATEWAY_HOSTS": v, "INGRESS_DEVICE_CA_FILE": "/etc/openit/device-ca.pem"})]
+    return [e.message for e in validator("PublicIngressEnv").iter_errors({"GATEWAY_HOSTS": v, "INGRESS_DEVICE_CA_FILE": "/etc/openit/device-ca.pem", "INGRESS_DEVICE_ALLOWLIST_FILE": "/etc/openit/device-allowlist.json"})]
 
 
 def test_dns_names_are_accepted():

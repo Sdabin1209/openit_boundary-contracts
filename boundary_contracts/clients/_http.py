@@ -80,11 +80,8 @@ def integrity(message: str, **details) -> BoundaryError:
 
 
 def check_ref(ref: Any, what: str = "ref") -> dict:
-    """ArtifactRef 형태 검사(요청에 쓰는 것은 INVALID_RECORD가 아니라 호출자 오류이므로 ValueError가 아닌 BoundaryError)."""
-    if (not isinstance(ref, dict) or set(ref) != {"id", "version", "content_hash"}
-            or not isinstance(ref["id"], str) or not _ID.match(ref["id"]) or len(ref["id"]) > 128
-            or not isinstance(ref["version"], str) or not ref["version"]
-            or not isinstance(ref["content_hash"], str) or not _HASH.match(ref["content_hash"])):
+    """ArtifactRef 형태 검사(요청에 쓰는 것은 호출자 오류이므로 BoundaryError INVALID_RECORD). 4.0.0: 수기 정규식 대신 계약 ArtifactRef 를 그대로 쓴다(version 의 Id 규칙 등이 갈라지지 않게)."""
+    if not isinstance(ref, dict) or list(validator("ArtifactRef").iter_errors(ref)):
         raise BoundaryError("INVALID_RECORD", f"{what}가 ArtifactRef 형식이 아니다")
     return ref
 
@@ -413,8 +410,8 @@ class HttpClientBase:
 
     def _optional(self, path: str, schema: str) -> Optional[dict]:
         body = self._json("GET", path)
-        if not isinstance(body, dict) or set(body) != {"item"}:
-            raise integrity("{\"item\": ...} 형식이 아니다")
+        if not isinstance(body, dict) or "item" not in body:
+            raise integrity("{\"item\": ...} 형식이 아니다")      # 4.0.0: 같은 MAJOR 의 다른 키는 읽기 관용으로 무시한다(CONVENTIONS 1.3)
         return None if body["item"] is None else check_record(schema, body["item"])
 
     def _page(self, path: str, cursor: Optional[str], limit: int, extra: Optional[dict] = None, schema: Optional[str] = None,

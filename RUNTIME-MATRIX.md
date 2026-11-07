@@ -24,7 +24,7 @@ RUNTIME.md 의 조항은 이 표의 칸을 묶은 것이다. 칸이 비면 계�
 | C12 | survey-service → release-gate | I4 활성 포인터·문진표 | 서비스 토큰 | 4·5 |
 | C13 | 추론 서버(model-runtime 영역, 다른 서버일 수 있음) → release-gate | I4 번들 | 서비스 토큰 | 5 |
 | C14 | survey-service → 추론 서버 | I9 적재·extract·respond·정보·준비 | 서비스 토큰 | 5 |
-| C15 | 키오스크(기기) → 게이트웨이 → survey-service | I10 문진표 목록·세션·발화·종료 | 기기 토큰(또는 기기 인증서) | 4·5 |
+| C15 | 키오스크(기기) → 게이트웨이 → survey-service | I10 문진표 목록·세션·발화·종료 | 기기 인증서(mTLS + 허용 목록, 4.0.0) | 4·5 |
 | C16 | 직원(브라우저) → 게이트웨이 → survey-service | I10 직원 화면·알림 SSE·개입·호출 | 사람 | 5 |
 | C17 | 의사(브라우저) → 게이트웨이 → survey-service | I10 결과·확인·결과 SSE·푸시 구독 | 사람 | 6 |
 | C18 | survey-service → ops-feedback | I6 Trace 수집 | 서비스 토큰 | 5·7 |

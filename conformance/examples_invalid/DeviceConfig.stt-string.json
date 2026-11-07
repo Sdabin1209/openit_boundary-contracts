@@ -1,1 +1,3 @@
-{"device_token": "tok-FAKE", "allow_remote_stt": "true"}
+{
+ "allow_remote_stt": "true"
+}
