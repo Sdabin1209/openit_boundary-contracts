@@ -172,7 +172,7 @@
   },
   "GATE_I1_TIMEOUT": {
    "$ref": "#/$defs/Seconds",
-   "description": "I1 HTTP 읽기 timeout(소켓 읽기 단위)",
+   "description": "I1 HTTP 읽기 timeout(소켓 읽기 단위) 근거: RUNTIME R10.3 시작값(사슬 표에 없는 서비스 사이 호출의 기본), 측정 안 함",
    "default": "10"
   },
   "GATE_I3_URL": {
@@ -190,7 +190,7 @@
   },
   "GATE_I3_TIMEOUT": {
    "$ref": "#/$defs/Seconds",
-   "description": "I3 HTTP 읽기 timeout",
+   "description": "I3 HTTP 읽기 timeout 근거: 기본값은 release-gate 가 정한 설계값(측정 기록 없음)",
    "default": "10"
   },
   "GATE_SERVICE_ROLES": {
@@ -215,7 +215,7 @@
   },
   "GATE_DB_STATEMENT_TIMEOUT_SECONDS": {
    "$ref": "#/$defs/Seconds",
-   "description": "문장 하나의 상한(statement_timeout)",
+   "description": "문장 하나의 상한(statement_timeout) 근거: 기본값은 release-gate 가 정한 설계값(측정 기록 없음)",
    "default": "3"
   },
   "GATE_READYZ_DB_TIMEOUT_SECONDS": {
@@ -247,22 +247,22 @@
   },
   "GATE_POLL_SECONDS": {
    "$ref": "#/$defs/Seconds",
-   "description": "판정 루프 주기",
+   "description": "판정 루프 주기 근거: 기본값은 release-gate 가 정한 설계값(측정 기록 없음)",
    "default": "60"
   },
   "GATE_RETAIN_KEEP_RELEASES": {
    "$ref": "#/$defs/PosInt",
-   "description": "보존: 남길 릴리스 수. 무기한 값 거부",
+   "description": "보존: 남길 릴리스 수. 무기한 값 거부 근거: 기본값은 release-gate 가 정한 설계값(측정 기록 없음)",
    "default": "3"
   },
   "GATE_RETAIN_REJECTED_DAYS": {
    "$ref": "#/$defs/PosInt",
-   "description": "보존: 반려 제출 일수",
+   "description": "보존: 반려 제출 일수 근거: 기본값은 release-gate 가 정한 설계값(측정 기록 없음)",
    "default": "90"
   },
   "GATE_RETAIN_ATTEMPTS_DAYS": {
    "$ref": "#/$defs/PosInt",
-   "description": "보존: 시도 기록 일수",
+   "description": "보존: 시도 기록 일수 근거: 기본값은 release-gate 가 정한 설계값(측정 기록 없음)",
    "default": "365"
   },
   "PORT": {

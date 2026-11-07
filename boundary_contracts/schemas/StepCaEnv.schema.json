@@ -147,7 +147,7 @@
       "type": "string",
       "pattern": "^[0-9]{1,10}$(?![\\s\\S])",
       "default": "10100",
-      "description": "3.4.17: role=cert 가 쓰는 인증서·키 파일(키 0640)의 그룹. 그 인증서를 읽는 컨테이너는 이 그룹을 보조 그룹으로 받는다(deploy 의 group_add). 사용자 번호(UID)는 이미지가 정하고 deploy 는 알지 않는다"
+      "description": "3.4.17: role=cert 가 쓰는 인증서·키 파일(키 0640)의 그룹. 그 인증서를 읽는 컨테이너는 이 그룹을 보조 그룹으로 받는다(deploy 의 group_add). 사용자 번호(UID)는 이미지가 정하고 deploy 는 알지 않는다 근거: 기본값은 platform 가 정한 설계값(측정 기록 없음)"
     }
   },
   "x-argv": {

@@ -126,7 +126,7 @@
   },
   "MODEL_REGISTRY_MAX_CONNECTIONS": {
    "$ref": "#/$defs/PosInt",
-   "description": "동시 연결 상한(넘으면 backlog 대기, 503 아님)",
+   "description": "동시 연결 상한(넘으면 backlog 대기, 503 아님) 근거: model-lab ADR 0023(waitress connection_limit), 측정 기록 없음",
    "default": "32"
   },
   "MODEL_REGISTRY_THREADS": {
@@ -136,12 +136,12 @@
   },
   "MODEL_REGISTRY_MAX_PUBLISHES": {
    "$ref": "#/$defs/PosInt",
-   "description": "동시 게시 상한. 넘으면 503",
+   "description": "동시 게시 상한. 넘으면 503 근거: 기본값은 model-lab 가 정한 설계값(측정 기록 없음)",
    "default": "1"
   },
   "MODEL_REGISTRY_AUTH_FAIL_LIMIT": {
    "$ref": "#/$defs/PosInt",
-   "description": "같은 주소의 인증 실패 상한(60초 창). 넘으면 잠시 503",
+   "description": "같은 주소의 인증 실패 상한(60초 창). 넘으면 잠시 503 근거: 기본값은 model-lab 가 정한 설계값(측정 기록 없음)",
    "default": "10"
   },
   "MODEL_REGISTRY_SHUTDOWN_GRACE": {

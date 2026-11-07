@@ -178,7 +178,7 @@
   },
   "MODEL_RUNTIME_READY_PROBE_TTL_S": {
    "$ref": "#/$defs/Seconds",
-   "description": "/readyz 의 I4 도달성 확인 캐시 시간",
+   "description": "/readyz 의 I4 도달성 확인 캐시 시간 근거: 기본값은 model-runtime 이 정한 설계값(측정 기록 없음)",
    "default": "5"
   },
   "MODEL_RUNTIME_EXTRACT_DEADLINE_S": {
@@ -193,17 +193,17 @@
   },
   "MODEL_RUNTIME_QUEUE_WAIT_S": {
    "$ref": "#/$defs/Seconds",
-   "description": "예상 대기가 이보다 길면 큐에 넣지 않고 503",
+   "description": "예상 대기가 이보다 길면 큐에 넣지 않고 503 근거: 기본값은 model-runtime 이 정한 설계값(측정 기록 없음)",
    "default": "3.0"
   },
   "MODEL_RUNTIME_PUT_WAIT_S": {
    "$ref": "#/$defs/Seconds",
-   "description": "PUT 응답이 적재 완료를 기다리는 시간. 넘으면 202 LOADING",
+   "description": "PUT 응답이 적재 완료를 기다리는 시간. 넘으면 202 LOADING 근거: 기본값은 model-runtime 이 정한 설계값(측정 기록 없음)",
    "default": "3.0"
   },
   "MODEL_RUNTIME_MAX_RELEASES": {
    "$ref": "#/$defs/PosInt",
-   "description": "동시에 적재해 두는 릴리스 수",
+   "description": "동시에 적재해 두는 릴리스 수 근거: 기본값은 model-runtime 가 정한 설계값(측정 기록 없음)",
    "default": "4"
   },
   "MODEL_RUNTIME_MAX_INPUT_CHARS": {
@@ -213,32 +213,32 @@
   },
   "MODEL_RUNTIME_MAX_CONNECTIONS": {
    "$ref": "#/$defs/PosInt",
-   "description": "동시 연결 상한",
+   "description": "동시 연결 상한 근거: 기본값은 model-runtime 가 정한 설계값(측정 기록 없음)",
    "default": "32"
   },
   "MODEL_RUNTIME_MAX_LOADING": {
    "$ref": "#/$defs/PosInt",
-   "description": "동시 적재 상한",
+   "description": "동시 적재 상한 근거: 기본값은 model-runtime 가 정한 설계값(측정 기록 없음)",
    "default": "2"
   },
   "MODEL_RUNTIME_CONN_TIMEOUT_S": {
    "$ref": "#/$defs/Seconds",
-   "description": "연결 소켓 timeout",
+   "description": "연결 소켓 timeout 근거: 기본값은 model-runtime 가 정한 설계값(측정 기록 없음)",
    "default": "15"
   },
   "MODEL_RUNTIME_SHUTDOWN_GRACE_S": {
    "$ref": "#/$defs/Seconds",
-   "description": "종료 신호 뒤 진행 중 요청을 기다리는 시간",
+   "description": "종료 신호 뒤 진행 중 요청을 기다리는 시간 근거: 기본값은 model-runtime 가 정한 설계값(측정 기록 없음)",
    "default": "5"
   },
   "MODEL_RUNTIME_BACKEND_RETRY_S": {
    "$ref": "#/$defs/Seconds",
-   "description": "백엔드 기동 실패 후 재시도 간격. 0이면 재시도 없음",
+   "description": "백엔드 기동 실패 후 재시도 간격. 0이면 재시도 없음 근거: 기본값은 model-runtime 이 정한 설계값(측정 기록 없음)",
    "default": "30"
   },
   "MODEL_RUNTIME_RELEASE_READ_TIMEOUT_S": {
    "$ref": "#/$defs/Seconds",
-   "description": "I4 번들 읽기 소켓 timeout",
+   "description": "I4 번들 읽기 소켓 timeout 근거: 기본값은 model-runtime 이 정한 설계값(측정 기록 없음)",
    "default": "120"
   },
   "MODEL_RUNTIME_HOST": {
@@ -259,7 +259,7 @@
   "MODEL_RUNTIME_FAKE_EXTRACTION": {
    "type": "string",
    "minLength": 2,
-   "description": "fake 전용: LORA_A 고정 출력 JSON 문자열. 운영 금지"
+   "description": "fake 전용: LORA_A 고정 출력 JSON 문자열. 운영 금지 근거: 기본값은 model-runtime 가 정한 설계값(측정 기록 없음)"
   },
   "MODEL_RUNTIME_MIMIC_FLOW_FILE": {
    "$ref": "#/$defs/Path",

@@ -129,52 +129,52 @@
   },
   "DATASET_STORE_SOCKET_TIMEOUT": {
    "$ref": "#/$defs/Seconds",
-   "description": "유휴 연결 timeout 초",
+   "description": "유휴 연결 timeout 초 근거: 기본값은 synthetic-data 가 정한 설계값(측정 기록 없음)",
    "default": "30"
   },
   "DATASET_STORE_MAX_CONNECTIONS": {
    "$ref": "#/$defs/PosInt",
-   "description": "동시 연결 상한",
+   "description": "동시 연결 상한 근거: 기본값은 synthetic-data 가 정한 설계값(측정 기록 없음)",
    "default": "32"
   },
   "DATASET_STORE_THREADS": {
    "$ref": "#/$defs/PosInt",
-   "description": "작업 스레드 수(동시 게시 8 + 동시 다운로드 8)",
+   "description": "작업 스레드 수(동시 게시 8 + 동시 다운로드 8) 근거: 기본값은 synthetic-data 가 정한 설계값(측정 기록 없음)",
    "default": "16"
   },
   "DATASET_STORE_DRAIN_GRACE": {
    "$ref": "#/$defs/Seconds",
-   "description": "종료 신호 뒤 진행 중 요청을 기다리는 최대 초",
+   "description": "종료 신호 뒤 진행 중 요청을 기다리는 최대 초 근거: 기본값은 synthetic-data 가 정한 설계값(측정 기록 없음)",
    "default": "8"
   },
   "DATASET_STORE_MAX_PUBLISHES": {
    "$ref": "#/$defs/PosInt",
-   "description": "동시 게시 상한",
+   "description": "동시 게시 상한 근거: 기본값은 synthetic-data 가 정한 설계값(측정 기록 없음)",
    "default": "8"
   },
   "DATASET_STORE_MAX_DOWNLOADS": {
    "$ref": "#/$defs/PosInt",
-   "description": "동시 다운로드 상한",
+   "description": "동시 다운로드 상한 근거: 기본값은 synthetic-data 가 정한 설계값(측정 기록 없음)",
    "default": "8"
   },
   "DATASET_STORE_MAX_ENTRIES": {
    "$ref": "#/$defs/PosInt",
-   "description": "게시 tar 안 항목 수 상한(푸는 도중 넘으면 거부)",
+   "description": "게시 tar 안 항목 수 상한(푸는 도중 넘으면 거부) 근거: 기본값은 synthetic-data 가 정한 설계값(측정 기록 없음)",
    "default": "1000"
   },
   "DATASET_STORE_AUTH_FAIL_LIMIT": {
    "$ref": "#/$defs/PosInt",
-   "description": "같은 주소의 인증 실패 상한(60초 창)",
+   "description": "같은 주소의 인증 실패 상한(60초 창) 근거: 기본값은 synthetic-data 가 정한 설계값(측정 기록 없음)",
    "default": "10"
   },
   "DATASET_STORE_MIN_FREE_GB": {
    "$ref": "#/$defs/Seconds",
-   "description": "게시 전 요구 여유 공간 GB",
+   "description": "게시 전 요구 여유 공간 GB 근거: 기본값은 synthetic-data 가 정한 설계값(측정 기록 없음)",
    "default": "1"
   },
   "DATASET_STORE_MIN_TOKEN_LEN": {
    "$ref": "#/$defs/PosInt",
-   "description": "토큰 최소 길이(128비트 16진수)",
+   "description": "토큰 최소 길이(128비트 16진수) 근거: 기본값은 synthetic-data 가 정한 설계값(측정 기록 없음)",
    "default": "32"
   }
  },

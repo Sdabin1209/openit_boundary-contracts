@@ -173,7 +173,7 @@
     },
     "QA_FAILURES_TIMEOUT_SECONDS": {
       "$ref": "#/$defs/Seconds",
-      "description": "I7 호출 하나의 읽기 상한",
+      "description": "I7 호출 하나의 읽기 상한 근거: RUNTIME R10.3 시작값(사슬 표에 없는 서비스 사이 호출의 기본), 측정 안 함",
       "default": "5"
     },
     "QA_SIGNALS_DEADLINE_SECONDS": {
@@ -210,12 +210,12 @@
     },
     "QA_DRAFT_RETENTION_DAYS": {
       "$ref": "#/$defs/PosInt",
-      "description": "purge 의 초안 보존 일수(무기한 불가)",
+      "description": "purge 의 초안 보존 일수(무기한 불가) 근거: 기본값은 question-authoring 가 정한 설계값(측정 기록 없음)",
       "default": "30"
     },
     "QA_SOURCE_RETENTION_DAYS": {
       "$ref": "#/$defs/PosInt",
-      "description": "purge 의 원본 자료 보존 일수(무기한 불가)",
+      "description": "purge 의 원본 자료 보존 일수(무기한 불가) 근거: 기본값은 question-authoring 가 정한 설계값(측정 기록 없음)",
       "default": "30"
     },
     "QA_DB_CONNECT_TIMEOUT_SECONDS": {
@@ -225,22 +225,22 @@
     },
     "QA_DB_STATEMENT_TIMEOUT_SECONDS": {
       "$ref": "#/$defs/Seconds",
-      "description": "문장 하나의 상한(statement_timeout). 호출 하나는 이 값 + 1초 안에 끝난다",
+      "description": "문장 하나의 상한(statement_timeout). 호출 하나는 이 값 + 1초 안에 끝난다 근거: 기본값은 question-authoring 가 정한 설계값(측정 기록 없음)",
       "default": "3"
     },
     "QA_DB_LARGE_STATEMENT_TIMEOUT_SECONDS": {
       "$ref": "#/$defs/Seconds",
-      "description": "큰 자료(원본·초안·문항 세트 버전) 쓰기의 문장 상한",
+      "description": "큰 자료(원본·초안·문항 세트 버전) 쓰기의 문장 상한 근거: 기본값은 question-authoring 가 정한 설계값(측정 기록 없음)",
       "default": "30"
     },
     "QA_READYZ_DB_TIMEOUT_SECONDS": {
       "$ref": "#/$defs/Seconds",
-      "description": "/readyz 의 DB 확인 상한",
+      "description": "/readyz 의 DB 확인 상한 근거: 기본값은 question-authoring 가 정한 설계값(측정 기록 없음)",
       "default": "2"
     },
     "QA_REQUEST_TIMEOUT_SECONDS": {
       "$ref": "#/$defs/Seconds",
-      "description": "HTTP 요청 소켓이 이 시간 멈추면 끊는다(멈춘 업로드)",
+      "description": "HTTP 요청 소켓이 이 시간 멈추면 끊는다(멈춘 업로드) 근거: 기본값은 question-authoring 가 정한 설계값(측정 기록 없음)",
       "default": "30"
     },
     "QA_REQUEST_DEADLINE_SECONDS": {
@@ -250,7 +250,7 @@
     },
     "QA_SHUTDOWN_GRACE_SECONDS": {
       "$ref": "#/$defs/Seconds",
-      "description": "종료 신호 뒤 진행 중 요청을 기다리는 시간",
+      "description": "종료 신호 뒤 진행 중 요청을 기다리는 시간 근거: 기본값은 question-authoring 가 정한 설계값(측정 기록 없음)",
       "default": "8"
     },
     "QA_SCHEMA_DIR": {

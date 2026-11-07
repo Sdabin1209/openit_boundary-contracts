@@ -253,7 +253,7 @@
   "SURVEY_INFERENCE_TIMEOUT_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "I9 공통 HTTP 읽기 timeout(적재 상태 조회 등)",
+   "description": "I9 공통 HTTP 읽기 timeout(적재 상태 조회 등) 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "4.0"
   },
   "SURVEY_INFERENCE_EXTRACT_TIMEOUT_SECONDS": {
@@ -271,25 +271,25 @@
   "SURVEY_INFERENCE_LOAD_TIMEOUT_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "릴리스 적재(PUT) 완료 대기 상한",
+   "description": "릴리스 적재(PUT) 완료 대기 상한 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "600.0"
   },
   "SURVEY_INFERENCE_RETRIES": {
    "type": "string",
    "pattern": "^[0-9]+$(?![\\s\\S])",
-   "description": "모델 호출 재시도 횟수(0이면 없음)",
+   "description": "모델 호출 재시도 횟수(0이면 없음) 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "1"
   },
   "SURVEY_HTTP_TIMEOUT_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "이웃 HTTP 호출(I4·I5) 읽기 timeout",
+   "description": "이웃 HTTP 호출(I4·I5) 읽기 timeout 근거: RUNTIME R10.3 시작값(사슬 표에 없는 서비스 사이 호출의 기본), 측정 안 함",
    "default": "10.0"
   },
   "SURVEY_STARTUP_WAIT_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "기동 때 이웃 준비를 기다리는 시간",
+   "description": "기동 때 이웃 준비를 기다리는 시간 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "5.0"
   },
   "SURVEY_TURN_DEADLINE_SECONDS": {
@@ -301,19 +301,19 @@
   "SURVEY_SOCKET_TIMEOUT_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "연결 소켓 timeout",
+   "description": "연결 소켓 timeout 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "15.0"
   },
   "SURVEY_MAX_CONNECTIONS": {
    "type": "string",
    "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
-   "description": "동시 연결 상한",
+   "description": "동시 연결 상한 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "256"
   },
   "SURVEY_MAX_SSE_CONNECTIONS": {
    "type": "string",
    "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
-   "description": "직원 콘솔 SSE 동시 연결 상한",
+   "description": "직원 콘솔 SSE 동시 연결 상한 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "50"
   },
   "SURVEY_SSE_MAX_SECONDS": {
@@ -325,13 +325,13 @@
   "SURVEY_SSE_HEARTBEAT_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "SSE 심박 간격",
+   "description": "SSE 심박 간격 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "15.0"
   },
   "SURVEY_API_MAX_INFLIGHT": {
    "type": "string",
    "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
-   "description": "동시 처리 요청 상한(넘으면 429)",
+   "description": "동시 처리 요청 상한(넘으면 429) 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "32"
   },
   "SURVEY_API_MAX_UTTERANCE_CHARS": {
@@ -342,79 +342,79 @@
   "SURVEY_EXTRACT_INPUT_MAX_CHARS": {
    "type": "string",
    "pattern": "^[0-9]+$(?![\\s\\S])",
-   "description": "모델 입력(JSON) 문자 수 상한. 모델 서버의 2500 보다 작게",
+   "description": "모델 입력(JSON) 문자 수 상한. 모델 서버의 2500 보다 작게 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "2400"
   },
   "SURVEY_SESSION_IDLE_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+$(?![\\s\\S])",
-   "description": "세션 무활동 만료(초)",
+   "description": "세션 무활동 만료(초) 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "300"
   },
   "SURVEY_RETRY_AFTER_SECONDS": {
    "type": "string",
    "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
-   "description": "429·503 응답의 Retry-After",
+   "description": "429·503 응답의 Retry-After 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "1"
   },
   "SURVEY_STATE_POLL_MIN_INTERVAL_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "키오스크 상태 폴링 최소 간격",
+   "description": "키오스크 상태 폴링 최소 간격 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "0.5"
   },
   "SURVEY_READYZ_DB_TIMEOUT_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "/readyz 의 DB 확인 상한",
+   "description": "/readyz 의 DB 확인 상한 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "2.0"
   },
   "SURVEY_DB_CONNECT_TIMEOUT_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "DB 접속 상한",
+   "description": "DB 접속 상한 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "2.0"
   },
   "SURVEY_DB_STATEMENT_TIMEOUT_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "DB 문장 하나의 상한",
+   "description": "DB 문장 하나의 상한 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "2.0"
   },
   "SURVEY_DB_RECONNECT_BACKOFF_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "DB 재연결 대기",
+   "description": "DB 재연결 대기 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "1.0"
   },
   "SURVEY_RELEASE_POLL_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "활성 포인터 폴링 주기",
+   "description": "활성 포인터 폴링 주기 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "5.0"
   },
   "SURVEY_KEEP_RELEASES": {
    "type": "string",
    "pattern": "^[0-9]+$(?![\\s\\S])",
-   "description": "내리지 않고 남길 비활성 릴리스 수",
+   "description": "내리지 않고 남길 비활성 릴리스 수 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "2"
   },
   "SURVEY_RELEASE_RETRY_BASE_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "릴리스 적재 재시도 기본 간격(지수 증가)",
+   "description": "릴리스 적재 재시도 기본 간격(지수 증가) 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "5.0"
   },
   "SURVEY_RELEASE_RETRY_MAX_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "릴리스 적재 재시도 최대 간격",
+   "description": "릴리스 적재 재시도 최대 간격 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "60.0"
   },
   "SURVEY_RELEASE_RETRY_GIVE_UP_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "릴리스 적재 재시도 포기 시간(0이면 포기하지 않음)",
+   "description": "릴리스 적재 재시도 포기 시간(0이면 포기하지 않음) 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "0"
   },
   "SURVEY_EXPORT_INTERVAL_SECONDS": {
@@ -432,19 +432,19 @@
   "SURVEY_OUTBOX_MAX_PENDING": {
    "type": "string",
    "pattern": "^[0-9]+$(?![\\s\\S])",
-   "description": "outbox 대기 상한(넘으면 새 턴 거부, FAULT_POLICY)",
+   "description": "outbox 대기 상한(넘으면 새 턴 거부, FAULT_POLICY) 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "20000"
   },
   "SURVEY_OUTBOX_KEEP_SENT_HOURS": {
    "type": "string",
    "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
-   "description": "전송 완료 Trace 보관 시간",
+   "description": "전송 완료 Trace 보관 시간 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "24"
   },
   "SURVEY_OUTBOX_STAGE_GRACE_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "outbox 단계 전환 유예",
+   "description": "outbox 단계 전환 유예 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "60.0"
   },
   "SURVEY_DEAD_OUTBOX_RETENTION_DAYS": {
@@ -468,13 +468,13 @@
   "SURVEY_ALERT_RETENTION_DAYS": {
    "type": "string",
    "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
-   "description": "직원 알림 보존 일수",
+   "description": "직원 알림 보존 일수 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "365"
   },
   "SURVEY_RETENTION_INTERVAL_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+$(?![\\s\\S])",
-   "description": "보존 정리 주기(초)",
+   "description": "보존 정리 주기(초) 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "3600"
   },
   "SURVEY_MAX_CONSECUTIVE_REASK": {
@@ -498,7 +498,7 @@
   "SURVEY_STAFF_CALL_RETRY_MAX_PER_SESSION": {
    "type": "string",
    "pattern": "^[0-9]+$(?![\\s\\S])",
-   "description": "세션당 직원 재호출 상한",
+   "description": "세션당 직원 재호출 상한 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "10"
   },
   "SURVEY_STAFF_CALL_REPORT_MAX_PER_SESSION": {
@@ -556,7 +556,7 @@
     "on",
     "off"
    ],
-   "description": "세션 시작에 subject_ref 를 요구할지",
+   "description": "세션 시작에 subject_ref 를 요구할지 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "0"
   },
   "SURVEY_API_TOKEN_ENV": {
@@ -578,13 +578,13 @@
   "SURVEY_PUSH_TIMEOUT_SECONDS": {
    "type": "string",
    "pattern": "^[0-9]+(\\.[0-9]+)?$(?![\\s\\S])",
-   "description": "웹 푸시 전송 timeout",
+   "description": "웹 푸시 전송 timeout 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "3.0"
   },
   "SURVEY_MAX_PUSH_SUBSCRIPTIONS": {
    "type": "string",
    "pattern": "^[1-9][0-9]*$(?![\\s\\S])",
-   "description": "푸시 구독 상한",
+   "description": "푸시 구독 상한 근거: 기본값은 survey-service 가 정한 설계값(측정 기록 없음)",
    "default": "100"
   },
   "SURVEY_API_TOKEN": {
