@@ -43,36 +43,20 @@ def _validator(name: str):
     return validator(name)
 
 
-def _relax(node):
-    """읽기 모드 스키마(CONVENTIONS 1절 3항): 모르는 필드를 허용하고 열거값은 문자열 형태만 본다. const·필수·타입·패턴은 그대로."""
-    if isinstance(node, list):
-        return [_relax(x) for x in node]
-    if not isinstance(node, dict):
-        return node
-    out = {}
-    for k, v in node.items():
-        if k == "additionalProperties" and v is False:
-            continue
-        if k == "enum" and isinstance(v, list) and all(isinstance(x, str) or x is None for x in v) and any(isinstance(x, str) for x in v):
-            out["type"] = ["string", "null"] if None in v else "string"  # 왜: null을 허용하는 열거(pause_reason 등)도 모르는 값은 받아들인다
-            continue
-        out[k] = _relax(v)
-    return out
-
-
 @lru_cache(maxsize=None)
 def _reader(name: str):
-    import jsonschema
-    from ..schemas_api import schema_registry, load_schema
+    """읽기 모드 검증기(CONVENTIONS 1절 3항). 넓히는 규칙과 엄격 ⊆ 읽기 불변식은 _reader_schema 가 정본이다(4.0.3)."""
+    from ._reader_schema import reader_validator
     if name.startswith("survey:"):
         from ..schema_sources import SURVEY_URI
-        schema = {"$ref": SURVEY_URI + name.removeprefix("survey:") + ".json"}
-    else:
-        name, _, fragment = name.partition("#")
-        uri = (schema_dir() / f"{name}.schema.json").as_uri()
-        schema = {"$ref": uri + "#" + fragment} if fragment else {**_relax(load_schema(name)), "$id": uri}
-    return jsonschema.Draft202012Validator(schema, registry=schema_registry(transform=_relax),
-                                          format_checker=format_checker(schema))
+        uri = (schema_dir() / "_survey_reader.schema.json").as_uri()
+        return reader_validator({"$ref": SURVEY_URI + name.removeprefix("survey:") + ".json"}, uri)
+    name, _, fragment = name.partition("#")
+    from ..schemas_api import load_schema
+    uri = (schema_dir() / f"{name}.schema.json").as_uri()
+    if fragment:
+        return reader_validator({"$ref": uri + "#" + fragment}, (schema_dir() / f"_reader_{name}.schema.json").as_uri())
+    return reader_validator(load_schema(name), uri)
 
 
 def integrity(message: str, **details) -> BoundaryError:

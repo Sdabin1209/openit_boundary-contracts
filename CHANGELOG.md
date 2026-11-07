@@ -1,6 +1,10 @@
 # 변경 이력
 
 
+## 4.0.3 (2026-11-08, PATCH: 읽기 모드 검증기 결함 — 정상 응답 거절)
+- `clients` 의 읽기 모드 검증(`_reader`, CONVENTIONS 1절 3항)이 모든 자리의 문자열 열거를 넓혀 `if`·`not`·`oneOf`·`contains` 의 뜻을 바꿨다. ActionExtraction 의 조건 규칙이 늘 참이 되어 정상 FailureCase 를 INTEGRITY_ERROR 로 거절했다(synthetic-data CR-S-003, model-lab 변경 요청).
+- 새 구현 `clients/_reader_schema.py`: 불변식 엄격 ⊆ 읽기. 조건 자리(if·not·contains)와 그 안의 `$ref`(같은 문서·다른 계약·문진 스키마)는 엄격 사본으로 평가하고, 넓힌 사본은 포인터 자리를 보존한다. 지원하지 않는 구문(동적 참조, oneOf 안 포인터, 비계층 URI)은 조용히 넘기지 않고 멈추며, 계약·문진 스키마에 없음을 시험이 확인한다. 스키마 변경 없음.
+
 ## 4.0.2 (2026-11-08, PATCH: 4.0.1 문구 한정)
 - 4.0.1 의 "응답 못 받은 세션은 유휴 만료로 닫힌다"는 `SURVEY_SESSION_IDLE_SECONDS=0`(만료 끔, 허용 값)과 모순이었다. 만료가 켜진 경우로 한정했다. 스키마 변경 없음.
 
