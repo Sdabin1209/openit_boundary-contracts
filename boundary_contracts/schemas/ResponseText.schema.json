@@ -1,9 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ResponseText",
-  "description": "LoRA-B 출력(2.0.0, D74). 응답 문장 그대로의 텍스트(JSON으로 감싸지 않아 바로 스트리밍한다). 데이터 확인: 24~122자(전수), 한국어 존댓말 1~3문장. 길이 상한은 계약이 아니라 평가 지표로 둔다(미정).",
-  "x-producers": ["model-runtime", "synthetic-data"],
-  "x-consumers": ["survey-service", "model-lab"],
+  "description": "LoRA-B 출력(2.0.0, D74). 응답 문장 그대로의 텍스트(JSON으로 감싸지 않아 바로 스트리밍한다). 데이터 확인: 24~122자(전수), 한국어 존댓말 1~3문장. 길이 상한은 계약에 두지 않는다(평가 지표로 본다): 데이터 범위(24~122자)를 넘는 출력도 계약 위반이 아니다.",
+  "x-producers": [
+    "model-runtime",
+    "synthetic-data"
+  ],
+  "x-consumers": [
+    "survey-service",
+    "model-lab"
+  ],
   "type": "string",
   "minLength": 1
 }

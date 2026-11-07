@@ -2,7 +2,7 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "OpsFeedbackJobConfig.schema.json",
  "title": "OpsFeedbackJobConfig",
- "description": "ops-feedback 주기 잡 설정(YAML을 객체로 읽은 것). 만드는 쪽: deploy(운영) 또는 이 영역의 예시. 읽는 쪽: ops-feedback `python -m ops_feedback.job --config`. 모르는 키는 어디서나 거부한다(오타가 조용히 무시되어 비식별·보존 설정이 꺼지는 것을 막는다). 비밀 값은 적을 수 없고 {secret: NAME}만 쓴다(D84).",
+ "description": "ops-feedback 주기 잡 설정(YAML을 객체로 읽은 것). 만드는 쪽: deploy(운영) 또는 이 영역의 예시. 읽는 쪽: ops-feedback `python -m ops_feedback.job --config`. 모르는 키는 어디서나 거부한다(오타가 조용히 무시되어 비식별·보존 설정이 꺼지는 것을 막는다). 비밀 값은 적을 수 없고 {secret: NAME}만 쓴다(D84). 3.7.0(D9): release_reader·gate_service 는 HttpClientSettings(구현 모듈 경로 factory 를 없앴다), detection.detectors 는 내장 규칙 탐지기(type rule)만(임의 factory 탐지기는 운영 사용처가 없고 시험 대역 주입 칸이었다).",
  "x-producers": [
   "deploy"
  ],
@@ -175,10 +175,12 @@
    }
   },
   "release_reader": {
-   "$ref": "#/$defs/Factory"
+   "$ref": "_common.schema.json#/$defs/HttpClientSettings",
+   "description": "릴리스 읽기(release-gate I4, 계약 클라이언트 HttpReleaseReader). 롤백 평가를 할 때 필요"
   },
   "gate_service": {
-   "$ref": "#/$defs/Factory"
+   "$ref": "_common.schema.json#/$defs/HttpClientSettings",
+   "description": "롤백 요청 제출(release-gate, 계약 클라이언트 HttpGateService). rollback.auto_submit 일 때 필요"
   }
  },
  "$defs": {
@@ -218,62 +220,24 @@
     }
    }
   },
-  "Factory": {
+  "Detector": {
    "type": "object",
    "additionalProperties": false,
    "required": [
-    "factory"
+    "type",
+    "rules"
    ],
-   "description": "\"모듈:함수\". 이웃 패키지 경로가 설정에 들어가는 결합이다(제안: 계약 클라이언트 이름만 허용하도록 좁히는 것은 헤드 결정).",
    "properties": {
-    "factory": {
-     "type": "string",
-     "pattern": "^[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*$"
+    "type": {
+     "const": "rule"
     },
-    "args": {
-     "type": "object",
-     "description": "문자열 값에 이름이 token/secret/password/credential/api_key/authorization/private_key를 포함하는 키는 {secret: NAME}만 허용(config.py check_inline_secrets)."
+    "rules": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/Rule"
+     }
     }
    }
-  },
-  "Detector": {
-   "oneOf": [
-    {
-     "type": "object",
-     "additionalProperties": false,
-     "required": [
-      "type",
-      "rules"
-     ],
-     "properties": {
-      "type": {
-       "const": "rule"
-      },
-      "rules": {
-       "type": "array",
-       "items": {
-        "$ref": "#/$defs/Rule"
-       }
-      }
-     }
-    },
-    {
-     "type": "object",
-     "additionalProperties": false,
-     "required": [
-      "factory"
-     ],
-     "properties": {
-      "factory": {
-       "type": "string",
-       "pattern": "^[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*$"
-      },
-      "args": {
-       "type": "object"
-      }
-     }
-    }
-   ]
   },
   "Rule": {
    "type": "object",

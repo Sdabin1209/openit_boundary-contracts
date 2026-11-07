@@ -64,9 +64,6 @@
     "GATE_I1_TIMEOUT": {
       "$ref": "GateEnv.schema.json#/properties/GATE_I1_TIMEOUT"
     },
-    "GATE_I1_FACTORY": {
-      "$ref": "GateEnv.schema.json#/properties/GATE_I1_FACTORY"
-    },
     "GATE_I3_URL": {
       "$ref": "GateEnv.schema.json#/properties/GATE_I3_URL"
     },
@@ -78,9 +75,6 @@
     },
     "GATE_I3_TIMEOUT": {
       "$ref": "GateEnv.schema.json#/properties/GATE_I3_TIMEOUT"
-    },
-    "GATE_I3_FACTORY": {
-      "$ref": "GateEnv.schema.json#/properties/GATE_I3_FACTORY"
     },
     "GATE_SERVICE_ROLES": {
       "$ref": "GateEnv.schema.json#/properties/GATE_SERVICE_ROLES"

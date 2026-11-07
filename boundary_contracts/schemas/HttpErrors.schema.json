@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "HttpErrors.schema.json",
   "title": "HttpErrors",
+  "description": "HTTP 오류 응답 본문 묶음(상태 코드별 $defs). 모든 오류 본문은 BoundaryError 레코드이고, 상태 코드마다 허용하는 code 를 좁힌다(CONVENTIONS 9절, HTTP.md). openapi 문서의 오류 응답이 이 $defs 를 가리키고 openit_link 계약 모드가 내는 쪽에서 검증한다.",
   "x-producers": [
     "*"
   ],

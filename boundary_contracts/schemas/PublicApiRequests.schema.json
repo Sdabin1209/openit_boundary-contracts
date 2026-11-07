@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "PublicApiRequests.schema.json",
   "title": "PublicApiRequests",
+  "description": "survey-service 공개 API(PUBLIC_API.md) 요청 본문 묶음(호출별 $defs). 생산자(kiosk-frontend, admin-console, 설치처 연동)는 각 본문의 정본 계약(예: PushSubscriptionRequest, StaffCallRetryRequest)으로 보내기 전에 검증하고, 서버는 openit_link 계약 모드가 openapi/survey-service.json 을 통해 이 $defs 로 검증한다.",
   "x-producers": [
     "kiosk-frontend",
     "admin-console",

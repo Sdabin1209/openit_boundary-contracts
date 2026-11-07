@@ -2,9 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "GateJobConfig.schema.json",
   "title": "GateJobConfig",
-  "description": "release-gate run-once 잡(collect, judge, prune)과 serve가 GATE_CONFIG/--config로 읽는 설정 파일. deploy가 만들어 배치하고 release-gate가 읽는다. 비밀 값은 직접 적지 않고 {\"secret\": NAME}으로만 가리킨다(D84).",
-  "x-producers": ["deploy"],
-  "x-consumers": ["release-gate"],
+  "description": "release-gate run-once 잡(collect, judge, prune)과 serve가 GATE_CONFIG/--config로 읽는 설정 파일. deploy가 만들어 배치하고 release-gate가 읽는다. 비밀 값은 적지 않는다: 토큰은 HttpClientSettings.token_secret 이름으로만 가리킨다(D84). 3.7.0(D9): 이웃 클라이언트는 i1·i3 의 HttpClientSettings 로 고른다(그 전의 i1_factory·i3_factory 'module:callable' 과 자유 인자 i*_options 를 없앴다: 설정이 구현 모듈 경로를 알았다).",
+  "x-producers": [
+    "deploy"
+  ],
+  "x-consumers": [
+    "release-gate"
+  ],
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -13,19 +17,13 @@
       "minLength": 1,
       "description": "저장소 디렉터리(SQLite+번들 파일). GATE_DATABASE_URL이 있으면 PostgreSQL이고 번들 파일만 여기 둔다."
     },
-    "i1_factory": {
-      "$ref": "#/$defs/FactorySpec",
-      "description": "I1 QuestionReader 만드는 함수. 없으면 환경 변수 GATE_I1_FACTORY."
+    "i1": {
+      "$ref": "_common.schema.json#/$defs/HttpClientSettings",
+      "description": "I1 문항 세트 읽기(question-authoring, 계약 클라이언트 QuestionReader). 없으면 환경 변수 GATE_I1_URL·GATE_I1_TOKEN_FILE·GATE_I1_TIMEOUT"
     },
-    "i1_options": {
-      "$ref": "#/$defs/Options"
-    },
-    "i3_factory": {
-      "$ref": "#/$defs/FactorySpec",
-      "description": "I3 ModelRegistry 만드는 함수. 없으면 환경 변수 GATE_I3_FACTORY."
-    },
-    "i3_options": {
-      "$ref": "#/$defs/Options"
+    "i3": {
+      "$ref": "_common.schema.json#/$defs/HttpClientSettings",
+      "description": "I3 모델 패키지 읽기(model-registry, 계약 클라이언트 ModelRegistry). 없으면 환경 변수 GATE_I3_URL·GATE_I3_TOKEN_FILE·GATE_I3_TIMEOUT"
     },
     "watch": {
       "type": "object",
@@ -64,39 +62,6 @@
   "$defs": {
     "Id": {
       "$ref": "_common.schema.json#/$defs/Id"
-    },
-    "FactorySpec": {
-      "type": "string",
-      "pattern": "^[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*$",
-      "description": "module:callable. 호출 결과가 Protocol 구현이다."
-    },
-    "SecretRef": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "secret"
-      ],
-      "properties": {
-        "secret": {
-          "type": "string",
-          "pattern": "^[A-Z][A-Z0-9_]*$",
-          "description": "NAME. 값은 NAME_FILE이 가리키는 파일에서 read_secret(NAME)으로 읽는다."
-        }
-      }
-    },
-    "Options": {
-      "type": "object",
-      "description": "팩토리의 키워드 인자. 문자열 값으로 비밀을 직접 적는 것은 코드가 거부한다(키 이름에 token/secret/password/key 계열이 있는 문자열 값). 스키마가 표현할 수 있는 만큼만 막는다.",
-      "additionalProperties": {
-        "not": {
-          "type": "null"
-        }
-      },
-      "patternProperties": {
-        "(?i)(token|secret|password|passwd|credential|api_?key)": {
-          "$ref": "#/$defs/SecretRef"
-        }
-      }
     }
   }
 }

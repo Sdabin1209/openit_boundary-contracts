@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "HttpWire.schema.json",
   "title": "HttpWire",
+  "description": "HTTP 경로 매개변수·헤더·바이너리 본문의 공통 형식 묶음($defs: Binary, User(X-Openit-User), Id, SessionId, FilePath, EventId). openapi 문서와 http_contracts 가 가리킨다.",
   "x-producers": [
     "*"
   ],

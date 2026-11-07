@@ -1,8 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "StaffAlertPage",
-  "x-producers": ["survey-service"],
-  "x-consumers": ["kiosk-frontend", "admin-console"],
+  "description": "GET 직원 알림 목록 응답 본문(survey-service → 직원 콘솔). 알림 원소는 계약 StaffAlert. 서버는 openit_link 계약 모드가 내는 쪽에서 검증한다.",
+  "x-producers": [
+    "survey-service"
+  ],
+  "x-consumers": [
+    "kiosk-frontend",
+    "admin-console"
+  ],
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -2,9 +2,13 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "https://openit.example/schemas/GateEnv.schema.json",
  "title": "GateEnv",
- "description": "release-gate 서비스(및 collect/judge/prune 잡) 컨테이너의 환경 변수 선언 (3.2.0, U73: 영역 사이 설정 이름은 이 선언에만 있다. deploy 는 여기 있는 이름만 주고, 서비스는 기동 때 자기 environ 을 이 스키마로 검증한다. 접두사가 붙은 이름 중 여기 없는 것은 거부, 접두사 없는 다른 변수(PATH 등)는 보지 않는다.)",
- "x-producers": ["deploy"],
- "x-consumers": ["release-gate"],
+ "description": "release-gate 서비스(및 collect/judge/prune 잡) 컨테이너의 환경 변수 선언 (3.2.0, U73: 영역 사이 설정 이름은 이 선언에만 있다. deploy 는 여기 있는 이름만 주고, 서비스는 기동 때 자기 environ 을 이 스키마로 검증한다. 접두사가 붙은 이름 중 여기 없는 것은 거부, 접두사 없는 다른 변수(PATH 등)는 보지 않는다.) 3.7.0(D9): GATE_I1_FACTORY·GATE_I3_FACTORY 를 없앴다(역할이 계약 클라이언트를 정한다).",
+ "x-producers": [
+  "deploy"
+ ],
+ "x-consumers": [
+  "release-gate"
+ ],
  "type": "object",
  "$defs": {
   "Port": {
@@ -71,12 +75,10 @@
      "GATE_DATA_DIR",
      "GATE_DB_CONNECT_TIMEOUT_SECONDS",
      "GATE_DB_STATEMENT_TIMEOUT_SECONDS",
-     "GATE_I1_FACTORY",
      "GATE_I1_TIMEOUT",
      "GATE_I1_TOKEN",
      "GATE_I1_TOKEN_FILE",
      "GATE_I1_URL",
-     "GATE_I3_FACTORY",
      "GATE_I3_TIMEOUT",
      "GATE_I3_TOKEN",
      "GATE_I3_TOKEN_FILE",
@@ -159,7 +161,7 @@
   },
   "GATE_CONFIG": {
    "$ref": "#/$defs/Path",
-   "description": "잡 설정 파일(GateJobConfig). i1_factory·i3_factory 가 환경 변수보다 우선"
+   "description": "잡 설정 파일(GateJobConfig). i1·i3(HttpClientSettings)가 GATE_I1_*·GATE_I3_* 환경 변수보다 우선"
   },
   "GATE_I1_URL": {
    "$ref": "#/$defs/Url",
@@ -179,11 +181,6 @@
    "description": "I1 HTTP 읽기 timeout(소켓 읽기 단위)",
    "default": "10"
   },
-  "GATE_I1_FACTORY": {
-   "type": "string",
-   "pattern": "^[A-Za-z_][\\w.]*:[A-Za-z_]\\w*$",
-   "description": "module:callable. 설정 파일의 i1_factory 가 우선"
-  },
   "GATE_I3_URL": {
    "$ref": "#/$defs/Url",
    "description": "I3(model-registry) 주소"
@@ -201,11 +198,6 @@
    "$ref": "#/$defs/Seconds",
    "description": "I3 HTTP 읽기 timeout",
    "default": "10"
-  },
-  "GATE_I3_FACTORY": {
-   "type": "string",
-   "pattern": "^[A-Za-z_][\\w.]*:[A-Za-z_]\\w*$",
-   "description": "module:callable. 설정 파일의 i3_factory 가 우선"
   },
   "GATE_SERVICE_ROLES": {
    "$ref": "#/$defs/CsvRoles",

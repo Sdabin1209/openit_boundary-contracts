@@ -1,15 +1,14 @@
 {
   "data_dir": "/data",
-  "i1_factory": "release_gate.factories:http_question_reader",
-  "i1_options": {
-    "base_url": "http://question-authoring:8080",
-    "token": {
-      "secret": "GATE_I1_TOKEN"
-    }
+  "i1": {
+    "kind": "http",
+    "base_url": "https://question-authoring",
+    "token_secret": "GATE_I1_TOKEN"
   },
-  "i3_factory": "release_gate.factories:http_model_registry",
-  "i3_options": {
-    "base_url": "http://model-registry:8080"
+  "i3": {
+    "kind": "http",
+    "base_url": "https://model-registry",
+    "token_secret": "GATE_I3_TOKEN"
   },
   "watch": {
     "question_sets": [

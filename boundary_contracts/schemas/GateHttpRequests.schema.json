@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "GateHttpRequests.schema.json",
   "title": "GateHttpRequests",
+  "description": "release-gate HTTP 요청 본문 묶음(openapi/release-gate.json 의 요청 본문이 $defs 를 가리킨다). Rollback: POST 롤백 요청 본문 — 계약 RollbackRequest 의 필드 중 요청자가 보내는 것(각 필드의 정본은 RollbackRequest). 생산자(admin-console, ops-feedback)는 계약 클라이언트·생성 검증기로 보내기 전에 검증하고, 서버는 openit_link 계약 모드가 요청을 검증한다.",
   "x-producers": [
     "admin-console",
     "ops-feedback"

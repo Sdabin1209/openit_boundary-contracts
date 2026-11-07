@@ -104,12 +104,8 @@
   "auto_submit": false
  },
  "release_reader": {
-  "factory": "boundary_contracts.clients:HttpReleaseReader",
-  "args": {
-   "base_url": "http://release-gate:8080",
-   "token": {
-    "secret": "OPS_GATE_READ_TOKEN"
-   }
-  }
+  "kind": "http",
+  "base_url": "https://release-gate",
+  "token_secret": "OPS_GATE_READ_TOKEN"
  }
 }

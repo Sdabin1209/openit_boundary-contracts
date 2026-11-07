@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "HttpPages.schema.json",
   "title": "HttpPages",
+  "description": "HTTP 목록 응답 본문 묶음: 계약 ListEnvelope({items, next_cursor})에 호출별 items 원소 계약을 붙인 것($defs 마다 하나). openapi 문서의 목록 응답이 가리키고 openit_link 계약 모드가 내는 쪽에서 검증한다. ListEnvelope 의 모르는 키 정책(읽기 쪽 관용)을 따른다.",
   "x-producers": [
     "question-authoring",
     "synthetic-data",

@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "HttpQueries.schema.json",
   "title": "HttpQueries",
+  "description": "HTTP 쿼리 문자열 묶음(호출별 $defs). 쿼리 값은 문자열로 오며 형식·허용 키를 여기서 정한다. openapi 문서의 x-query-schema 가 가리키고 openit_link 계약 모드가 요청을 검증한다.",
   "x-producers": [
     "*"
   ],
