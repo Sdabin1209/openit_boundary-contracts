@@ -62,7 +62,7 @@
   },
   "kiosk_tokens": {
     "shared_kiosk_token": true,
-    "warning": "공유 키오스크 토큰 사용 중: 기기별 토큰으로 바꾸는 것을 권고(ADR-0016)"
+    "warning": null
   },
   "api": {
     "idle_expiry_seconds": 0

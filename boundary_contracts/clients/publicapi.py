@@ -2,7 +2,7 @@
 
 API 봉투 본문은 PublicApiRequests, 응답은 소유 패키지의 FrontendInput을 참조한다.
 본문을 보내기 전에 계약으로 검증하고, 응답은 동일 정본의 읽기 모드로 검증한다.
-`SessionState`는 이 패키지 스키마로 검증한다. 키오스크는 기기 토큰, 개입 결정은 staff 토큰으로 부른다.
+`SessionState`는 이 패키지 스키마로 검증한다. 키오스크 호출은 게이트웨이를 거칠 때 자격 없이(기기 인증은 mTLS, PUBLIC_API F절), 개입 결정은 사람 계정(staff) 경로로 부른다.
 """
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ class HttpPublicApi(HttpClientBase):
                  *, egress_proxy: Optional[str] = None):
         """2.3.0: 키오스크 기기 인증은 게이트웨이의 클라이언트 인증서(mTLS, ADR 0012)다. 게이트웨이를 거치면 token도 device_id도 주지 않는다.
         게이트웨이 토큰(CONVENTIONS 6절)으로 부를 때만 device_id 로 `X-Openit-Device`를 싣는 것이 효과가 있다(CONVENTIONS 6절, 3.4.4; 서비스는 그때만 이 헤더를 믿는다).
-        token(기기 토큰 Bearer)은 호환용으로 남긴다(3.1.1, PUBLIC_API.md F절)."""
+        token 은 게이트웨이 뒤에서 직접 부르는 시험용(그 서비스 Exposure 의 upstream_token, PUBLIC_API.md F절)이다."""
         super().__init__(base_url, token, timeout, egress_proxy=egress_proxy)
         if device_id is not None:
             if not _DEVICE_ID.match(device_id):

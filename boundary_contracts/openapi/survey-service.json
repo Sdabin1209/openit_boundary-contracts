@@ -1802,14 +1802,6 @@
     },
     "parameters": [
      {
-      "name": "topics",
-      "in": "query",
-      "required": false,
-      "schema": {
-       "$ref": "../schemas/HttpQueries.schema.json#/$defs/Stream/properties/topics"
-      }
-     },
-     {
       "name": "Last-Event-ID",
       "in": "header",
       "schema": {

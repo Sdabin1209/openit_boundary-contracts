@@ -1,4 +1,4 @@
-"""직원 호출 재알림·실패 기록의 HTTP 클라이언트(PUBLIC_API.md G절, CR-H001). 키오스크 기기 토큰으로 호출한다."""
+"""직원 호출 재알림·실패 기록의 HTTP 클라이언트(PUBLIC_API.md G절, CR-H001). 키오스크 경로로 호출한다(기기 인증은 게이트웨이 mTLS, PUBLIC_API F절)."""
 from __future__ import annotations
 
 from ._http import HttpClientBase, check_outgoing, check_record

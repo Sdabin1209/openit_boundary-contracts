@@ -5,7 +5,7 @@
 
 ## 원칙
 - 요청-응답 HTTP/JSON(UTF-8). 프론트는 **STT로 음성을 텍스트로 바꾼 문장**을 보낸다. 서버는 음성을 받지 않는다.
-- 세션 ID는 **서버가 발급한다**(D106, 2.2.0): `POST /v1/sessions` 본문에서 `session_id`를 생략하면 서버가 CSPRNG로 만든 값을 응답의 `session_id`로 돌려준다(문자열 1~64자, 영문·숫자·`-_`; OWASP 세션 관리 권고: 예측할 수 없는 값, 원문 대조 전). **프론트가 `session_id`를 보내는 방식은 폐기 예정 방식**이다(3.x 에서는 받는다; 3.0.0 제거 약속은 지키지 않았고 제거는 다음 MAJOR 4.0.0). 환자 번호나 개인 식별 정보는 어느 쪽이든 넣지 않는다.
+- 세션 ID는 **서버가 발급한다**(D106, 2.2.0): `POST /v1/sessions` 에서 서버가 CSPRNG로 만든 값을 응답의 `session_id`로 돌려준다(문자열 1~64자, 영문·숫자·`-_`; OWASP 세션 관리 권고: 예측할 수 없는 값, 원문 대조 전). **프론트가 `session_id`를 보내는 방식은 4.0.0 에서 없앴다**(`SessionStartBody` 가 거부한다). 서버가 발급한 뒤 내부 메시지·Trace 에는 서버가 넣는다. 환자 번호나 개인 식별 정보는 어느 쪽이든 넣지 않는다.
 - 인증: 키오스크는 기기 인증서(mTLS, F절), 직원·의사 화면은 사람 로그인(E절, CONVENTIONS 6절, `HumanAuthEndpoints`). 기기 토큰(F-1)은 4.0.0 에서 없앴다(D136).
 - 오류는 `BoundaryError` 본문과 상태 코드이고, **클라이언트는 상태 코드로 분기한다**(D66):
 
@@ -25,8 +25,8 @@
 | 활성 문진표 목록 (3.3.0, I절) | `GET /v1/question-sets` | `{"items": [{"question_set_id", "title", "version"}]}` 활성 릴리스의 문진표 전부(`ReleaseManifest.question_sets`, 1개 이상). 인증은 `/v1/sessions`와 같다. 활성 릴리스가 없으면(활성 포인터 없음, 또는 적재가 끝난 릴리스가 없음) 503 `UNAVAILABLE` + `details.reason=NO_ACTIVE_RELEASE` + `Retry-After` 다(빈 목록 200 이 아니다). `POST /v1/sessions` 도 같다(3.4.4, 검토 B-01) |
 | 세션 시작 | `POST /v1/sessions` 본문 `{"kind": "SESSION_START", "question_set_id"?: "..."}`(`session_id`는 생략한다: 서버가 발급해 응답의 `session_id`로 돌려준다, 위 7행·D106. `question_set_id`(3.3.0, I절): 이 세션의 문진표. 활성 문진표가 하나면 생략 가능, 둘 이상이면 필수. 생략·불일치는 400 `INVALID_RECORD`에 `details.reason` `QUESTION_SET_REQUIRED`·`UNKNOWN_QUESTION_SET`) | `FrontendInput` (`response_text`: 첫 안내 문장, 그 문진표 순서의 첫 문항). **세션 시작은 멱등이 아니다**(4.0.1): 세션 ID를 서버가 발급하므로 요청마다 새 세션이 생기고, 본문의 `turn_id`는 그 새 세션의 첫 턴 ID로 기록될 뿐 재전송 판별에 쓰지 않는다. 아래 `turn_id` 멱등 규칙은 `(session_id, turn_id)` 범위이며 `session_id`가 있는 경로(발화·개입·직원 호출)에만 적용된다. 시작 응답을 받지 못해 다시 보내면 새 세션이 생긴다. 응답을 받지 못한 세션은 유휴 만료가 켜져 있으면(`SurveyServiceEnv.SURVEY_SESSION_IDLE_SECONDS` > 0) 그 만료로 닫히고, 꺼져 있으면(0) 열린 채 남는다 |
 | 환자 발화 | `POST /v1/sessions/{session_id}/turns` 본문 `{"session_id", "kind": "UTTERANCE", "utterance": "STT 텍스트", "turn_id": "..."}` | `FrontendInput` |
-| 세션 종료 | `POST /v1/sessions/{session_id}/end` 본문 `{"session_id", "kind": "SESSION_END"}` | `FrontendInput` (`response_text`는 null일 수 있음) |
-| 세션 상태 (D66) | `GET /v1/sessions/{session_id}/state` | `SessionState`. 키오스크가 위험 정지 중에 2초 간격으로 폴링한다. 직원이 재개하면 `state=ACTIVE`와 `resume_text`(이어서 할 안내 문장)가 오고, 다음 발화 턴이 접수되면 `resume_text`는 null이 된다. 직원이 종료하면 `ENDED` |
+| 세션 종료 | `POST /v1/sessions/{session_id}/end` 본문 `{"session_id", "kind": "SESSION_END"}` | `FrontendInput` (`response_text`는 null일 수 있음). 종료는 멱등이다: 이미 `ENDED_*` 인 세션에 그 세션을 만든 기기가 다시 보내면 200 과 같은 결과(말할 것 없음, 4.0.4 명시) |
+| 세션 상태 (D66) | `GET /v1/sessions/{session_id}/state` | `SessionState`. `FrontendInput` 에는 세션 상태 필드가 없으므로 키오스크는 발화 응답만으로 정지(`PAUSED_RISK`)·종료(`ENDED`)를 확정할 수 없으면(예: `turn_failure_signal.staff_alert` 로 정지가 이미 확정된 경우가 아니면) 이 경로로 확인하고(4.0.4 명시), 위험 정지 중에는 2초 간격으로 폴링한다. 직원이 재개하면 `state=ACTIVE`와 `resume_text`(이어서 할 안내 문장)가 오고, 다음 발화 턴이 접수되면 `resume_text`는 null이 된다. 직원이 종료하면 `ENDED` |
 | 상태 확인 | `GET /healthz`, `GET /readyz` | 200 |
 
 `turn_id`는 프론트가 만든 턴별 고유 문자열이며 **API 봉투 필드**다: 문진 스키마(`FrontendMessage`, `InterventionDecision`)에는 없고, 서버는 본문에서 `turn_id`를 떼어 낸 나머지를 해당 스키마로 검증한다. 클라이언트도 같은 방식으로 검증한다(D66). **같은 세션에 같은 `turn_id`로 다시 보내면 서버는 확정된 턴이면 같은 응답을 돌려주고 한 번만 처리한다**(네트워크 재시도 안전). **확정되지 못한 턴**(`write_committed`가 `NOT_COMMITTED`)은 결과를 고정하지 않아 같은 `turn_id` 재전송이 **다시 처리**된다(D86: 일시 장애로 실패한 턴이 영구 실패로 굳지 않게). 처리 중인 같은 `turn_id`는 409 `TURN_IN_PROGRESS`다. 위험 선별(D88)은 재전송에도 알림을 중복 만들지 않는다(알림은 세션·턴 기준 멱등).
@@ -37,12 +37,12 @@
 - 스키마 원문은 `boundary_contracts` 패키지의 문진 스키마(`FrontendMessage`, `FrontendInput`, `TurnFailureSignal`)다.
 
 ## 직원 콘솔 (D58, D64: 웹 화면 + 푸시 알림, 가정이며 바뀔 수 있음)
-위험 신호로 멈춘 세션은 직원이 풀어야 한다. 직원이 쓰는 웹 화면(직원 콘솔)과 푸시 알림을 가정한다. 이 호출들은 역할 `staff` 토큰만 쓸 수 있다(키오스크 토큰은 403). 서버 쪽만 정하며 화면 자체는 이 계약의 범위 밖이다.
+위험 신호로 멈춘 세션은 직원이 풀어야 한다. 직원이 쓰는 웹 화면(직원 콘솔)과 푸시 알림을 가정한다. 이 호출들은 게이트웨이를 거친 사람 계정(역할 `staff`; 알림 SSE 의 `result_ready`·`push-config`·결과 도착 푸시 구독은 `clinician` 도)만 쓸 수 있다(키오스크 경로의 요청은 403). 서버 쪽만 정하며 화면 자체는 이 계약의 범위 밖이다.
 
 | 목적 | 요청 | 응답 |
 | --- | --- | --- |
 | 알림 목록 | `GET /v1/staff/alerts?status=OPEN\|RESOLVED&limit=&cursor=` | `StaffAlertPage`(`limit` 기본 50, 최대 200, 최신부터, `next_cursor`는 불투명 문자열 또는 null) |
-| 알림 실시간 구독 | `GET /v1/staff/alerts/stream` (`text/event-stream`) | 이벤트 이름 `alert`(새 알림), `resolved`(해결), `result_ready`(문진 결과 도착, 3.2.0 U83; B절), `id:`는 이벤트 순번(알림과 해결 이벤트가 각각 증가하는 번호를 받는다). `data:`는 이벤트 이름별 스키마다(3.4.4, 검토 B-05): `alert`·`resolved`는 `StaffAlert`, `result_ready`는 `ResultReadyEvent`, `heartbeat`는 `HeartbeatEvent`, `resync`는 `ResyncEvent`. 스트림은 연결한 계정의 `X-Openit-Roles`로 이벤트를 거른다(B-06, 최소 권한): `staff`에는 `alert`·`resolved`, `clinician`에는 `result_ready`, 둘 다 있으면 둘 다, `heartbeat`·`resync`는 모두에게. 15초마다 `: ping` 주석 줄을 보낸다. 스트림의 최대 수명은 `SURVEY_SSE_MAX_SECONDS`(기본 300초, 시작값·측정 안 함)이고 platform 의 세션 갱신 주기(RUNTIME R3.12) 이하로 둔다(검토 P6-R6-11), 그 시각에 서버가 정상 종료한다: 클라이언트는 새로 연결하고, 인증이 끝났으면 그 연결은 401(RUNTIME R2.4·R3.23, B-08). `EventSource` 는 상태 코드를 알려 주지 않으므로(WHATWG) 연결이 닫혀 다시 열리지 않으면 같은 인증으로 `GET /v1/staff/alerts?status=OPEN&limit=1` 을 한 번 불러 상태와 `Retry-After` 만 읽는다(구독이 아니라서 `staff_alert` 전달 판정에 세지 않는다, 검토 P6-R6-3)(401 → 로그인, 429·503 → `Retry-After` 뒤 새 연결). 끊기면 `Last-Event-ID`로 이어 받는다. 추가 이벤트(하위 호환, 모르는 클라이언트는 무시한다, `id:`가 없어 `Last-Event-ID`를 바꾸지 않는다): `heartbeat`(`data: {"ts": "<UTC ISO>"}`, 연결 직후 한 번과 이후 15초마다(ping 과 같은 주기) — 브라우저 `EventSource`는 주석 줄을 보여 주지 않으므로 앱이 연결 생존을 알 수 있게 한다)와 `resync`(`data: {"reason": "EVENTS_NOT_RESUMABLE"}`, `Last-Event-ID`로 이어 받을 수 없는 재연결에 한 번 — 클라이언트는 `GET /v1/staff/alerts?status=OPEN`으로 다시 맞춘다) |
+| 알림 실시간 구독 | `GET /v1/staff/alerts/stream` (`text/event-stream`, 쿼리 없음 — 4.0.4) | 이벤트 이름 `alert`(새 알림), `resolved`(해결), `result_ready`(문진 결과 도착, 3.2.0 U83; B절), `id:`는 알림 저장소의 이벤트 순번이다(`alert`·`resolved` 가 하나의 증가 순번을 함께 쓰고, `result_ready`·`heartbeat`·`resync` 에는 `id:` 가 없다, 4.0.4). `data:`는 이벤트 이름별 스키마다(3.4.4, 검토 B-05): `alert`·`resolved`는 `StaffAlert`, `result_ready`는 `ResultReadyEvent`, `heartbeat`는 `HeartbeatEvent`, `resync`는 `ResyncEvent`. 스트림은 연결한 계정의 `X-Openit-Roles`로 이벤트를 거른다(B-06, 최소 권한): `staff`에는 `alert`·`resolved`, `clinician`에는 `result_ready`, 둘 다 있으면 둘 다, `heartbeat`·`resync`는 모두에게(헤더가 없으면 `staff` 몫). 15초마다 `: ping` 주석 줄을 보낸다. 스트림의 최대 수명은 `SURVEY_SSE_MAX_SECONDS`(기본 300초, 시작값·측정 안 함)이고 platform 의 세션 갱신 주기(RUNTIME R3.12) 이하로 둔다(검토 P6-R6-11), 그 시각에 서버가 정상 종료한다: 클라이언트는 새로 연결하고, 인증이 끝났으면 그 연결은 401(RUNTIME R2.4·R3.23, B-08). `EventSource` 는 상태 코드를 알려 주지 않으므로(WHATWG) 연결이 닫혀 다시 열리지 않으면 같은 인증으로 `GET /v1/staff/alerts?status=OPEN&limit=1` 을 한 번 불러 상태와 `Retry-After` 만 읽는다(구독이 아니라서 `staff_alert` 전달 판정에 세지 않는다, 검토 P6-R6-3)(401 → 로그인, 429·503 → `Retry-After` 뒤 새 연결). 끊기면 `Last-Event-ID`로 이어 받는다. 추가 이벤트(하위 호환, 모르는 클라이언트는 무시한다, `id:`가 없어 `Last-Event-ID`를 바꾸지 않는다): `heartbeat`(`data: {"ts": "<UTC ISO>"}`, 연결 직후 한 번과 이후 15초마다(ping 과 같은 주기) — 브라우저 `EventSource`는 주석 줄을 보여 주지 않으므로 앱이 연결 생존을 알 수 있게 한다)와 `resync`(`data: {"reason": "EVENTS_NOT_RESUMABLE"}`, `Last-Event-ID`로 이어 받을 수 없는 재연결에 한 번 — 클라이언트는 `GET /v1/staff/alerts?status=OPEN`으로 다시 맞춘다) |
 | 푸시 설정 | `GET /v1/staff/push-config` | `PushConfig`(웹 푸시 공개키). `vapid_public_key`가 null이면 푸시는 꺼져 있고 SSE만 동작한다 |
 | 푸시 구독 등록 | `POST /v1/staff/push-subscriptions` 본문 `PushSubscriptionRequest`(웹 푸시 구독 객체 `endpoint`, `keys`와 선택 `topics`; `endpoint` 는 https·포트 443·공인 주소만, 아니면 400 `INVALID_RECORD` — SSRF 방지, RUNTIME R3.18)(3.4.0: `["alerts"]`·`["results"]`·둘 다, 없으면 `["alerts"]`. `alerts`는 staff 역할, `results`는 clinician 역할만 등록할 수 있고 다른 역할이면 403) | 201. 같은 `endpoint`는 갱신(멱등). 해지는 `POST /v1/staff/push-subscriptions/unsubscribe` 본문 `{"endpoint": "..."}`(2.2.0, 204. 푸시 엔드포인트 URL은 그 자체가 푸시 권한을 주는 값이라 URL에 싣지 않는다). `DELETE /v1/staff/push-subscriptions?endpoint=`는 4.0.0에서 제거됐다(예고대로; 4.0.1에서 4.0.0 본문에 남아 있던 경로 정의를 지웠다). 서버는 이 메서드를 정의되지 않은 경로와 같이 다룬다 |
 | 개입 결정 | `POST /v1/sessions/{session_id}/intervention` 본문 `{"session_id", "decision": "RESUME"\|"END", "turn_id": "..."}` | `FrontendInput` (RESUME이면 이어서 할 안내 문장, END면 종료) |
@@ -57,8 +57,8 @@
 
 ## 프론트가 지킬 것
 - STT 결과가 비었거나 신뢰할 수 없으면 서버로 보내지 않고 "다시 말씀해 주세요"를 프론트에서 안내해도 된다.
-- 응답이 없거나 일시 장애(429·502·503·504·네트워크 오류)면 같은 `turn_id`로 지수 백오프(지터 포함)로 재시도하고, 총 재시도 예산(120초 = 대기의 2배, CONVENTIONS 시간 상한 사슬 D125)을 넘기면 직원 호출 화면을 보인다. 요청 타임아웃(키오스크 대기)은 60초다(D125, D119 대체). 401(기기 인증 실패)은 재시도로 풀리지 않으므로 재시도 없이 직원 호출 화면을 보인다(RUNTIME R3.13).
-- 408 을 받거나 요청이 한도 안에 도착하지 못해 연결이 끊기면 일시 장애와 같다(같은 `turn_id`, 위 재시도 규칙). 413·414·431 은 재시도하지 않고(같은 요청은 같은 결과) 401 과 같이 직원 호출 화면을 보인다(RFC 9110 15.5.9·15.5.14, RUNTIME R3.5·R3.6·R3.17).
+- 응답이 없거나 일시 장애(429·502·503·504·네트워크 오류)면 같은 `turn_id`로 지수 백오프(지터 포함)로 재시도하고, 총 재시도 예산(120초 = 대기의 2배, CONVENTIONS 시간 상한 사슬 D125)을 넘기면 직원 호출 화면을 보인다. 요청 타임아웃(키오스크 대기)은 60초다(D125, D119 대체). 기기 인증 실패(403 `PERMISSION_DENIED`, 또는 TLS 핸드셰이크 거부 — F절)는 재시도로 풀리지 않으므로 재시도 없이 직원 호출 화면을 보인다(RUNTIME R3.13). 허용 목록을 읽지 못한 503 은 일시 장애로 본다(F절).
+- 408 을 받거나 요청이 한도 안에 도착하지 못해 연결이 끊기면 일시 장애와 같다(같은 `turn_id`, 위 재시도 규칙). 413·414·431 은 재시도하지 않고(같은 요청은 같은 결과) 기기 인증 실패와 같이 직원 호출 화면을 보인다(RFC 9110 15.5.9·15.5.14, RUNTIME R3.5·R3.6·R3.17).
 - 한 세션의 요청은 순서대로 하나씩 보낸다(동시에 두 턴을 보내지 않는다).
 - 200 이고 `turn_failure_signal.write_committed=NOT_COMMITTED` 이면(RUNTIME R3.20) 일시 장애와 같게 같은 `turn_id` 로 재시도한다(총 예산 120초 뒤 직원 호출 화면). 400·403·404·409(`TURN_IN_PROGRESS` 제외; 이것은 잠시 뒤 같은 `turn_id` 로 재시도)·422 는 재시도 없이 직원 호출 화면을 보이고, 다음 환자는 새 세션으로 시작한다(같은 요청은 같은 결과, 검토 A-18).
 
@@ -88,7 +88,7 @@
 - `GET /v1/results?subject_ref=&status=&updated_after=&limit=&cursor=` → `{"items": [SessionResult], "next_cursor": str|null}` (`limit` 기본 50 최대 200).
 - 빈칸 사유(3.2.0, U36·G12·U35): 같은 문항을 3번 되물어도 답을 얻지 못하면 직원을 부르지 않고 그 칸을 빈칸으로 두고 다음 문항으로 간다. 사유는 `skipped_details[].reason`(UNKNOWN 모름, REJECTED 거부, UNCLEAR 모호, REASK_LIMIT 되묻기 한도 뒤 빈칸)에 남는다. 문진 스키마 SessionResult 가 정본.
 - 오류: 401/403(`PERMISSION_DENIED`), 404(`NOT_FOUND`), 400(`INVALID_RECORD`), 503(`UNAVAILABLE`).
-- 결과를 EMR 로 **밀어 넣는** 전달기(FHIR QuestionnaireResponse push)는 연동 옵션이며 수신처가 정해지면 붙인다(다음 판). `/readyz`의 `result_dispatcher`는 그때까지 `attached:false, status:NO_TARGET`.
+- 결과를 EMR 로 **밀어 넣는** 전달기(FHIR QuestionnaireResponse push)는 연동 옵션이며 수신처가 정해지면 붙인다(다음 판). 4.0.0(D135)에서 전달기 설정(SURVEY_RESULT_DISPATCHER)을 없앴다. `SurveyReadyz` 계약에는 전달기 항목이 없다(서비스가 더 내는 키는 계약 밖이며 읽는 쪽은 무시한다).
 
 ## C. 직원 세션 조회 (CR-013 반영)
 `GET /v1/staff/sessions/{session_id}` (역할 staff) → `StaffSessionView`. 모양의 정본은 문진 스키마 `StaffSessionView`(헤드 목록 EXTERNAL_SCHEMAS.json, 3.4.4 검토 B-20; 다른 리포의 변경 요청 문서를 정본으로 삼지 않는다)이고, 아래 두 가지를 더한다: 응답 최상위에 `"subject_ref": str|null`, `alerts[]`에 `"resolved_by": str|null`(해결한 직원 ID). 시각·turn_id가 null일 수 있고 `values[].status`는 `ANSWERED|CORRECTION`이라는 CR-013의 제안을 채택한다.
@@ -96,7 +96,7 @@
 ## D. 위험 신호 입력 API (입력원은 외부에 있다)
 위험을 **감지하는 쪽**(키워드 규칙, 별도 분류 모델, LoRA-A 출력 확장 등)이 서비스에 신호를 쏜다.
 - `POST /v1/sessions/{session_id}/risk-signals` (역할 `risk-source` 토큰) 본문 `RiskSignal`: `{"signal_id": str(1~64, 감지기가 만드는 고유값), "source": str(1~64, 감지기 이름), "code": str(1~64, 규칙·분류 코드), "severity": "RISK"|"CALL_STAFF"(기본 RISK), "occurred_at": ISO8601(선택)}`. 환자 발화·자유 문장 필드는 없다.
-- 효과: 기존 위험 처리와 같다. 알림(`kind` = severity 값, `rule_id`에 `source:code`)을 만들고 세션을 `PAUSED_RISK`로 멈추며, **직원 콘솔(SSE/푸시)이 받고** 직원이 `GET /v1/staff/sessions/{id}`로 기록을 본다. 응답 201 `{"alert_id","session_status"}`. 같은 `signal_id` 재전송은 200과 같은 `alert_id`(멱등).
+- 효과: 기존 위험 처리와 같다. 알림(`kind`는 신호의 severity 를 공개 이름으로 바꾼 값: `RISK`→`RISK_STOP`, `CALL_STAFF`→`CALL_STAFF`; `pause_reason`은 RISK 신호면 `RISK`, CALL_STAFF 신호면 `OTHER`; `rule_id`에 `source:code`)을 만들고 어느 쪽이든 세션을 `PAUSED_RISK`로 멈추며, **직원 콘솔(SSE/푸시)이 받고** 직원이 `GET /v1/staff/sessions/{id}`로 기록을 본다. 응답 201 `{"alert_id","session_status"}`. 같은 `signal_id` 재전송은 200과 같은 `alert_id`(멱등).
 - 오류: 404(세션 없음), 409(이미 끝난 세션), 400, 401/403.
 - 서비스 내부 규칙 엔진(`SURVEY_RISK_RULES_FILE`)은 같은 경로로 신호를 만드는 기본 감지기 하나일 뿐이다.
 
@@ -112,7 +112,7 @@
 - 출력: (1) 신뢰 CA 가 아니거나 만료·아직 유효 전·서명이 틀린 인증서는 TLS 핸드셰이크에서 거부된다(HTTP 응답 없음, RUNTIME R3.13). (2) 인증서 없이, 또는 허용 목록에 없는 인증서로 키오스크 경로를 부르면 공개 입구가 `403 PERMISSION_DENIED`(BoundaryError 본문)를 낸다. (3) 공개 입구가 기동 뒤 허용 목록을 읽지 못하거나 목록이 계약을 어기면 기기 경로는 `503 UNAVAILABLE` 로 닫히고(fail-closed), 정상 목록을 다시 읽으면 회복한다 — 401 이 아니다: TLS 인증서는 HTTP 인증 challenge(RFC 9110 11.6.1 WWW-Authenticate)로 다시 낼 수 있는 자격이 아니기 때문이다.
 - 게이트웨이는 클라이언트가 보낸 `X-Openit-Device`를 지우고, 통과한 요청에만 CN 을 `X-Openit-Device: <device_id>`(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`)로 붙여 서비스에 넘긴다. 서비스(survey-service)는 이 값을 믿고(서비스는 게이트웨이 뒤 내부망에만 있다, ADR 0005) 세션을 만든 기기 ID만 그 세션에 접근시킨다(다른 기기는 404). 서비스에는 기기 자격 표가 없다.
 - 키오스크 앱은 기기 자격을 보내지 않는다(브라우저가 TLS 에서 인증서를 낸다). `boundary_contracts.clients.HttpPublicApi`는 게이트웨이를 거칠 때 자격 없이 부른다. `device_id` 인자는 게이트웨이 토큰(CONVENTIONS 6절)과 함께일 때만 효과가 있다(서비스는 그 밖의 토큰의 `X-Openit-Device` 를 무시한다, CONVENTIONS 6절, 검토 A-25).
-- 게이트웨이→서비스의 서비스 토큰(기계 대 기계)과 직원 계정 인증(OIDC)은 이 절의 범위가 아니며 그대로다.
+- **게이트웨이→서비스 구간은 서비스 토큰이 필수다(4.0.4 명시).** 키오스크 경로(Exposure auth `device`)도 게이트웨이가 survey-service 의 Exposure 가 선언한 `upstream_token`(키오스크 공유 서비스 토큰. survey-service 는 `SurveyServiceEnv.SURVEY_API_TOKEN_ENV`(기본 `SURVEY_API_TOKEN`)가 가리키는 이름의 `_FILE`, 기본으로는 `SURVEY_API_TOKEN_FILE` 에서 읽는다)을 `Authorization: Bearer` 로 붙여 넘긴다. survey-service 는 이 토큰이 붙은 요청의 `X-Openit-Device` 만 믿는다(CONVENTIONS 6절). 이 토큰은 기기마다 다른 자격이 아니라 게이트웨이와 서비스 사이의 기계 자격이며(기기 인증은 위 mTLS 하나), `SurveyReadyz.kiosk_tokens.shared_kiosk_token` 은 이 토큰이 설정됐는지(정상 배포에서 `true`)를 알린다. 직원 계정 인증(OIDC)은 이 절의 범위가 아니다.
 
 ---
 
@@ -121,7 +121,7 @@
 기존 요청·응답의 의미는 바뀌지 않는다. 새 필드는 optional이고 새 경로만 더한다. 모르는 필드를 무시하는 읽기 규칙(CONVENTIONS 1절)을 따르는 기존 클라이언트는 깨지지 않는다. 근거와 대안은 `docs/adr/0010`, `0011`.
 
 ## G. 직원 호출 재알림과 실패 기록 (CR-H001)
-`TurnFailureSignal.staff_alert`가 `DELIVERY_FAILED`이면 키오스크는 현장 직원 호출 화면을 보여 주면서 아래 두 호출을 쓸 수 있다. 역할은 키오스크이고 **그 세션을 만든 기기(X-Openit-Device)만** 호출할 수 있다(다른 기기는 404, 직원 토큰은 403, F절). 두 호출 모두 환자 발화나 자유 문장을 받지 않는다.
+`TurnFailureSignal.staff_alert`가 `DELIVERY_FAILED`이면 키오스크는 현장 직원 호출 화면을 보여 주면서 아래 두 호출을 쓸 수 있다. 역할은 키오스크이고 **그 세션을 만든 기기(X-Openit-Device)만** 호출할 수 있다(다른 기기는 404, 사람 계정 경로의 요청은 403, F절). 두 호출 모두 환자 발화나 자유 문장을 받지 않는다.
 
 | 목적 | 요청 | 응답 |
 | --- | --- | --- |

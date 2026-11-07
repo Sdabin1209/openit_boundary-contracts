@@ -1,6 +1,13 @@
 # 변경 이력
 
 
+## 4.0.4 (2026-11-08, PATCH: 계약 확정 — 전수 감사의 계약 쪽 항목)
+- PUBLIC_API F절: 게이트웨이→survey-service 구간의 서비스 토큰(키오스크 경로 포함)이 필수임을 명시했다. 4.0.0 의 "범위 밖이며 그대로" 문구 때문에 deploy 가 키오스크 경로의 서비스 토큰을 빼는 것과 서비스가 그 토큰을 요구하는 것이 둘 다 계약을 따른다고 읽혔다(감사 1번).
+- 알림 SSE 쿼리 `topics`를 없앴다(`HttpQueries.$defs.Stream`, openapi 매개변수). 받는 쪽도 보내는 쪽도 쓰지 않았고, 이벤트는 역할로 거른다는 실제 규칙을 PUBLIC_API 에 적었다.
+- `StaffAlert.kind` 알려진 값과 PUBLIC_API D절 문구(kind = RISK_STOP, severity 는 별도)를 맞췄다.
+- 정상 흐름 전수 대조(독립 검토)의 계약 쪽 지적 반영: D절 알림 kind·pause_reason 규칙(RISK→RISK_STOP/RISK, CALL_STAFF→CALL_STAFF/OTHER), F절 서비스 토큰 읽는 방법(SURVEY_API_TOKEN_ENV), 세션 상태 확인 시점(응답만으로 확정할 수 없으면 GET /state), 세션 종료 멱등, SessionStartBody.subject_ref 는 문자열만(null 제거, FrontendMessage 와 일치), Exposure upstream_token·user_header 의미(같은 경로 중복 선언 규칙, set 은 User·Roles 둘 다), 기기 토큰 폐지 뒤 남은 문구(HTTP.md·PUBLIC_API 8(session_id)·40·60·124행, clients·conformance 문구, SurveyReadyz 예시의 기기별 토큰 권고), SSE id 순번 규칙, SurveyServiceEnv 의 I6 표기, BoundaryError.details 의 reason·http_status·attempts 문서화, HTTP.md 의 없는 SDK 메서드 표기, /readyz 전달기 문구.
+- 개발 환경 설치(scripts/setup-env.sh)의 문진 스키마 고정이 survey-schema-v4.1.1 로 낡아 있었다: survey-schema-v4.1.4 로 맞췄다.
+
 ## 4.0.3 (2026-11-08, PATCH: 읽기 모드 검증기 결함 — 정상 응답 거절)
 - `clients` 의 읽기 모드 검증(`_reader`, CONVENTIONS 1절 3항)이 모든 자리의 문자열 열거를 넓혀 `if`·`not`·`oneOf`·`contains` 의 뜻을 바꿨다. ActionExtraction 의 조건 규칙이 늘 참이 되어 정상 FailureCase 를 INTEGRITY_ERROR 로 거절했다(synthetic-data CR-S-003, model-lab 변경 요청).
 - 새 구현 `clients/_reader_schema.py`: 불변식 엄격 ⊆ 읽기. 조건 자리(if·not·contains)와 그 안의 `$ref`(같은 문서·다른 계약·문진 스키마)는 엄격 사본으로 평가하고, 넓힌 사본은 포인터 자리를 보존한다. 지원하지 않는 구문(동적 참조, oneOf 안 포인터, 비계층 URI)은 조용히 넘기지 않고 멈추며, 계약·문진 스키마에 없음을 시험이 확인한다. 스키마 변경 없음.

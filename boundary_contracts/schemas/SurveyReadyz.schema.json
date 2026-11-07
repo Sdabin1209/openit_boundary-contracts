@@ -162,13 +162,15 @@
       ],
       "properties": {
         "shared_kiosk_token": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "게이트웨이→survey-service 키오스크 경로 서비스 토큰(Exposure upstream_token, PUBLIC_API F절)이 설정됐는가. 정상 배포에서 true(4.0.4)"
         },
         "warning": {
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "description": "4.0.4: 기기별 토큰이 없어졌으므로(D136) 값은 null 이다. 옛 서비스가 내면 읽는 쪽은 무시한다"
         }
       },
       "additionalProperties": false

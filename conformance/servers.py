@@ -625,7 +625,7 @@ class StaffCallReferenceServer(ReferenceServer):
             raise BoundaryError("NOT_FOUND", "경로가 없다")
         sid, op = g[1], g[2]
         if not role.startswith("kiosk"):
-            raise BoundaryError("PERMISSION_DENIED", "키오스크 토큰만 호출할 수 있다")
+            raise BoundaryError("PERMISSION_DENIED", "키오스크 경로만 호출할 수 있다")
         if self.sessions.get(sid) != role:
             raise BoundaryError("NOT_FOUND", "세션이 없다")  # 다른 기기의 세션도 404
         b = self._body(body)
@@ -672,7 +672,7 @@ _SUBJECT_REF = re.compile(r"^[A-Za-z0-9._:/#=+-]{1,128}$")
 class PublicApiReferenceServer(StaffCallReferenceServer):
     """PUBLIC_API.md 전체(I10) 중 화면 쪽 호출의 최소 모사: 세션 시작·발화·종료·상태·개입 결정. 직원 알림 목록과 재알림·실패 기록은
     부모 `StaffCallReferenceServer`가 이미 구현하므로 합쳐서 쓴다. 상태 기계(ACTIVE -> PAUSED_RISK -> ACTIVE|ENDED), turn_id 멱등,
-    확정되지 않은 턴(NOT_COMMITTED)의 재처리, 기기 토큰 소유 확인(다른 기기 404, staff 403)을 모사한다.
+    확정되지 않은 턴(NOT_COMMITTED)의 재처리, 세션을 만든 기기 확인(X-Openit-Device, 다른 기기 404, 사람 계정 403)을 모사한다.
 
     `turn_fn(utterance) -> (response_text, committed: bool, risk: bool)`로 서비스 판단을 대신한다(기본: 안내 문장, 확정, 위험 아님).
     `states[session_id]["inflight"]`에 turn_id를 넣으면 같은 turn_id가 처리 중인 것으로 보고 409 TURN_IN_PROGRESS를 낸다.
@@ -699,7 +699,7 @@ class PublicApiReferenceServer(StaffCallReferenceServer):
 
     def _own(self, sid, role):
         if not role.startswith("kiosk"):
-            raise BoundaryError("PERMISSION_DENIED", "키오스크 토큰만 호출할 수 있다")
+            raise BoundaryError("PERMISSION_DENIED", "키오스크 경로만 호출할 수 있다")
         if self.sessions.get(sid) != role or sid not in self.states:
             raise BoundaryError("NOT_FOUND", "세션이 없다")  # 다른 기기의 세션도 404
         return self.states[sid]
@@ -713,11 +713,11 @@ class PublicApiReferenceServer(StaffCallReferenceServer):
     def _route(self, method, path, q, body, role):
         if path == "/v1/question-sets" and method == "GET":      # 3.3.0 I10: 활성 문진표 목록(기기 인증은 /v1/sessions와 같다)
             if not role.startswith("kiosk"):
-                raise BoundaryError("PERMISSION_DENIED", "키오스크 토큰만 호출할 수 있다")
+                raise BoundaryError("PERMISSION_DENIED", "키오스크 경로만 호출할 수 있다")
             return self._j({"items": [dict(x) for x in self.question_sets_active]})
         if path == "/v1/sessions" and method == "POST":
             if not role.startswith("kiosk"):
-                raise BoundaryError("PERMISSION_DENIED", "키오스크 토큰만 호출할 수 있다")
+                raise BoundaryError("PERMISSION_DENIED", "키오스크 경로만 호출할 수 있다")
             b = self._body(body)
             if "session_id" in b:
                 raise BoundaryError("INVALID_RECORD", "세션 ID 는 서버가 발급한다(4.0.0, D106): 본문에 session_id 를 보내지 않는다")

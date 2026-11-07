@@ -40,7 +40,24 @@
       "type": "boolean"
     },
     "details": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": "string",
+          "description": "세분 사유. 기계가 분기하는 코드 값의 정본 목록은 CONVENTIONS 10절(예: OUTPUT_INVALID, EGRESS_DENIED, TURN_IN_PROGRESS, STALE_REPORT, ALREADY_DECIDED, QUESTION_SET_REQUIRED, UNKNOWN_QUESTION_SET, NO_OPEN_ALERT, INTERVAL, RETRY_LIMIT, ACCOUNT_PENDING_APPROVAL, NO_ACTIVE_RELEASE). 코드가 아닌 사람용 설명이 올 수도 있으며 읽는 쪽은 모르는 값을 무시한다(4.0.4)"
+        },
+        "http_status": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 599,
+          "description": "클라이언트가 옮겨 적은 원래 HTTP 상태 코드(CONVENTIONS 9절, 2.4.2)"
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "재시도 포함 시도 횟수(HTTP.md, 4.0.4)"
+        }
+      }
     },
     "ext": {
       "type": "object",

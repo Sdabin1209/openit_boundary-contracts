@@ -249,14 +249,10 @@
     },
     "Stream": {
       "type": "object",
-      "properties": {
-        "topics": {
-          "type": "string",
-          "pattern": "^(alerts|result_ready)(,(alerts|result_ready))*$(?![\\s\\S])"
-        }
-      },
+      "properties": {},
       "required": [],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "알림 SSE 는 쿼리를 받지 않는다(4.0.4). 받을 이벤트는 호출자의 역할(X-Openit-Roles)로 서버가 정한다: staff 는 alert·resolved, clinician 은 result_ready, heartbeat·resync 는 모두. 헤더가 없으면 staff 몫(PUBLIC_API B절 알림 실시간 구독). 이어 받기는 Last-Event-ID 헤더"
     },
     "AuthoringDrafts": {
       "type": "object",

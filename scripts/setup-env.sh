@@ -12,7 +12,7 @@ report() {   # $1 status, $2 exit_code
   printf '{"area":"boundary-contracts","status":"%s","exit_code":%d,"seconds":%d%s}\n' "$1" "$2" "$(( $(date +%s) - start ))" "$env"
 }
 { [ -d .venv ] || python3 -m venv .venv; } >&2 || { report fail 20; exit 20; }
-install() { .venv/bin/pip install -q -e . pytest "openit-survey-schema @ git+ssh://git@github.com/Sdabin1209/openit_survey-service.git@survey-schema-v4.1.1#subdirectory=schema" >&2; }
+install() { .venv/bin/pip install -q -e . pytest "openit-survey-schema @ git+ssh://git@github.com/Sdabin1209/openit_survey-service.git@survey-schema-v4.1.4#subdirectory=schema" >&2; }
 # 왜 한 번 재시도: 네트워크가 잠깐 끊겨 받기 실패하는 경우가 흔하다. 두 번째도 실패하면 이유를 내고 멈춘다.
 if ! install; then
   echo "setup-env: 설치 실패, 5초 뒤 한 번 다시 시도한다" >&2; sleep 5

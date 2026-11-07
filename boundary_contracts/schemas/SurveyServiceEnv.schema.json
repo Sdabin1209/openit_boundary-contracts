@@ -241,7 +241,7 @@
   "SURVEY_TRACE_INGEST_TOKEN_ENV": {
    "type": "string",
    "pattern": "^[A-Z][A-Z0-9_]*$(?![\\s\\S])",
-   "description": "I5 토큰의 비밀 이름",
+   "description": "I6(트레이스 수집) 토큰의 비밀 이름",
    "default": "SURVEY_TRACE_INGEST_TOKEN"
   },
   "SURVEY_INFERENCE_TOKEN_ENV": {
