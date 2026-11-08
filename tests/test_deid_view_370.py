@@ -1,4 +1,6 @@
 """3.7.0 비식별 뷰(생성물): 저장본이 생성물과 같고, 자유 문장·모르는 키·허용 경로 밖 원문·가명 아닌 식별자를 거부한다(2026-11-07 Codex 반례)."""
+import sys as _sys, pathlib as _pl; _sys.path.insert(0, str(_pl.Path(__file__).parent))
+from _minimal_env import minimal_env
 import copy
 import json
 import pathlib
@@ -21,7 +23,7 @@ def errs(schema, doc):
 
 class DeidView(unittest.TestCase):
     def test_저장본은_생성물과_같다(self):
-        r = subprocess.run([sys.executable, str(ROOT / "tools/gen_deid_view.py"), "--check"], capture_output=True, text=True)
+        r = subprocess.run([sys.executable, str(ROOT / "tools/gen_deid_view.py"), "--check"], capture_output=True, text=True, env=minimal_env())
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
 
     def test_예시는_통과(self):

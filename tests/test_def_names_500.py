@@ -1,4 +1,6 @@
 """같은 이름 다른 타입 정의 점검(tools/check_def_names.py, 5.0.0)과 ActionExtraction 상한(헤드 결정 2026-11-08)."""
+import sys as _sys, pathlib as _pl; _sys.path.insert(0, str(_pl.Path(__file__).parent))
+from _minimal_env import minimal_env
 import json
 import pathlib
 import shutil
@@ -21,7 +23,7 @@ class CheckDefNames(unittest.TestCase):
         return d
 
     def _run(self, d):
-        return subprocess.run([sys.executable, str(TOOL), "--root", str(d)], capture_output=True, text=True)
+        return subprocess.run([sys.executable, str(TOOL), "--root", str(d)], capture_output=True, text=True, env=minimal_env())
 
     def _edit(self, d, rel, fn):
         p = d / rel; doc = json.loads(p.read_text(encoding="utf-8")); fn(doc); p.write_text(json.dumps(doc), encoding="utf-8")

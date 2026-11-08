@@ -1,3 +1,5 @@
+import sys as _sys, pathlib as _pl; _sys.path.insert(0, str(_pl.Path(__file__).parent))
+from _minimal_env import minimal_env
 import copy
 import json
 import os
@@ -57,7 +59,7 @@ class Metrics(unittest.TestCase):
             self.assertEqual(list(validator(kind).iter_errors(d)), [])  # 스키마는 자유 문자열이라 통과: 이름 검사는 레지스트리 몫
 
     def test_METRICS_md는_레지스트리에서_생성한_것과_같다(self):
-        r = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "gen_metrics_md.py"), "--check"])
+        r = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "gen_metrics_md.py"), "--check"], env=minimal_env())
         self.assertEqual(r.returncode, 0, "python3 tools/gen_metrics_md.py 를 실행해 METRICS.md를 다시 생성하라")
 
     def test_패키지_데이터에_들어_있다(self):

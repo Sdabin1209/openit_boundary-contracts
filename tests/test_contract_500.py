@@ -1,4 +1,6 @@
 """계약 5.0.0: ID 타입 통일(D117)·envelope_id 정본 함수·사람 입구 입력 상한(결함 대장 #10·#18·#22)."""
+import sys as _sys, pathlib as _pl; _sys.path.insert(0, str(_pl.Path(__file__).parent))
+from _minimal_env import minimal_env
 import json
 import pathlib
 import shutil
@@ -128,7 +130,7 @@ class CheckIdDefsTool(unittest.TestCase):
         return d
 
     def _run(self, d):
-        return subprocess.run([sys.executable, str(TOOL), "--root", str(d)], capture_output=True, text=True)
+        return subprocess.run([sys.executable, str(TOOL), "--root", str(d)], capture_output=True, text=True, env=minimal_env())
 
     def test_현재_계약은_통과(self):
         r = self._run(self._copy())
