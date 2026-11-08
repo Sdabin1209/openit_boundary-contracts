@@ -56,7 +56,7 @@ def schema_registry(*, schema_sources=None, transform=None):
     from referencing import Registry, Resource
     from referencing.jsonschema import DRAFT202012
     from urllib.parse import urljoin
-    from .schema_sources import external_schema
+    from .schema_sources import external_schema, CONTRACT_URI
 
     def resource(doc, uri):
         format_checker(doc)
@@ -73,6 +73,9 @@ def schema_registry(*, schema_sources=None, transform=None):
         doc = json.loads(path.read_text(encoding="utf-8"))
         value = resource(doc, path.as_uri())
         registry = registry.with_resource(path.as_uri(), value)
+        # 안정 URI(5.0.1): 외부 문서가 설치 경로와 무관하게 가리킨다. 이 주소로 열린 문서 안의 상대 $ref 도 같은 접두로 풀린다
+        stable = CONTRACT_URI + path.name
+        registry = registry.with_resource(stable, resource(doc, stable))
         if "$id" in doc:
             registry = registry.with_resource(urljoin(base, doc["$id"]), value)
     return registry

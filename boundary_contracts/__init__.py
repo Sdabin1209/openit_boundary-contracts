@@ -5,6 +5,7 @@ from .secrets import read_secret, secret_source, SecretError
 from .metrics_registry import metrics, metric_name_problems
 from .canonical import canonicalize, sha256_hash, content_hash, file_hash, directory_hash
 from .ids import envelope_id, is_id
+from .schema_sources import contract_uri, CONTRACT_URI
 from . import strict_json, review_input
 
-__all__ = ["format_checker", "BoundaryError", "schema_dir", "load_schema", "validator", "PIPELINE_SCHEMA_VERSION", "canonicalize", "sha256_hash", "content_hash", "file_hash", "directory_hash", "read_secret", "secret_source", "SecretError", "metrics", "metric_name_problems", "envelope_id", "is_id", "validate", "strict_json", "review_input"]
+__all__ = ["format_checker", "BoundaryError", "schema_dir", "load_schema", "validator", "PIPELINE_SCHEMA_VERSION", "canonicalize", "sha256_hash", "content_hash", "file_hash", "directory_hash", "read_secret", "secret_source", "SecretError", "metrics", "metric_name_problems", "envelope_id", "is_id", "validate", "strict_json", "review_input", "contract_uri", "CONTRACT_URI"]

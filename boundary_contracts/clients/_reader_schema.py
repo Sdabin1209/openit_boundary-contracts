@@ -120,11 +120,13 @@ def _resource(doc: dict, uri: str, strict: bool):
 @lru_cache(maxsize=1)
 def _local_docs() -> dict:
     from ..schemas_api import schema_dir
+    from ..schema_sources import CONTRACT_URI
     docs = {}
     base = schema_dir().as_uri() + "/"
     for path in schema_dir().glob("*.schema.json"):
         doc = json.loads(path.read_text(encoding="utf-8"))
         docs[path.as_uri()] = doc
+        docs[CONTRACT_URI + path.name] = doc   # 안정 URI(5.0.1)
         if isinstance(doc.get("$id"), str):
             docs.setdefault(urljoin(base, doc["$id"]), doc)
     return docs
