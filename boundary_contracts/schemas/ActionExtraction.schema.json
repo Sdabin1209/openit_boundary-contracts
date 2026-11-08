@@ -73,9 +73,11 @@
    "items": {
     "$comment": "모델 키 문법(CONVENTIONS 10절): 문항.칸 또는 문항[종류].칸. 문항 ID는 Q1.D01, Q4_1, Q10 형태. 종류 괄호는 술 칸에만 붙고, 종류를 모르는 술 칸(BEVERAGE_MISSING)은 괄호 없는 Q7_1.amount 형태로 낸다(계약으로 인정, 2.0.0). SlotRef 문자열(ChangeClassification.affected_slots)과는 다른 문법이다.",
     "type": "string",
-    "pattern": "^Q[0-9]+(\\.D[0-9]{2})?(_[0-9]+)?(\\[(soju|beer|spirits|makgeolli|wine)\\])?\\.[a-z][a-z_]*$(?![\\s\\S])"
+    "pattern": "^Q[0-9]+(\\.D[0-9]{2})?(_[0-9]+)?(\\[(soju|beer|spirits|makgeolli|wine)\\])?\\.[a-z][a-z_]*$(?![\\s\\S])",
+    "maxLength": 128
    },
-   "description": "REASK·CONFIRM·HOLD·SKIP만. 항목은 values의 key 중 하나(스키마로 표현 못 함, 의미 검증)."
+   "description": "REASK·CONFIRM·HOLD·SKIP만. 항목은 values의 key 중 하나(스키마로 표현 못 함, 의미 검증). 근거: 상한 256 은 측정 최대(슬롯 52)의 약 5배 여유를 둔 설계 상한(D125 '상한은 측정 최악 위 여유'). 측정: 현재 운영 문진표 2종(question-authoring/forms/health-screening-v1.txt, health-screening-short-order.txt) 각각 문항 31·슬롯 52·문항당 최대 4(2026-11-08 헤드 grep 측정). 학습 데이터 최종본(reference/openit-server/data/final lora_a_*.jsonl 32,170행, 2026-11-08 측정)의 최대는 targets 4·values 4·key 22자로 이 상한 안이다. 모델 입출력 정본(labels.py)에는 숫자 상한이 없고 값이 문항 은행의 칸에서만 나온다는 구조적 상한뿐이다. 문진표가 커지면 다시 잰다.",
+   "maxItems": 256
   },
   "values": {
    "type": "array",
@@ -93,7 +95,9 @@
      "key": {
       "$comment": "모델 키 문법(CONVENTIONS 10절): 문항.칸 또는 문항[종류].칸. 문항 ID는 Q1.D01, Q4_1, Q10 형태. 종류 괄호는 술 칸에만 붙고, 종류를 모르는 술 칸(BEVERAGE_MISSING)은 괄호 없는 Q7_1.amount 형태로 낸다(계약으로 인정, 2.0.0). SlotRef 문자열(ChangeClassification.affected_slots)과는 다른 문법이다.",
       "type": "string",
-      "pattern": "^Q[0-9]+(\\.D[0-9]{2})?(_[0-9]+)?(\\[(soju|beer|spirits|makgeolli|wine)\\])?\\.[a-z][a-z_]*$(?![\\s\\S])"
+      "pattern": "^Q[0-9]+(\\.D[0-9]{2})?(_[0-9]+)?(\\[(soju|beer|spirits|makgeolli|wine)\\])?\\.[a-z][a-z_]*$(?![\\s\\S])",
+      "maxLength": 128,
+      "description": "근거: 길이 상한 128 은 계약 Id 상한과 같은 설계 상한(CONVENTIONS 2절, 측정 안 함; 학습 데이터 최대 22자, 2026-11-08). 5.0.0(CaseReviewRequest.expected 로 사람이 넣는 경로의 상한, 결함 대장 #10)."
      },
      "precision": {
       "enum": [
@@ -198,7 +202,8 @@
      }
     ]
    },
-   "description": "이번 말에서 정한 칸 값들. REDIRECT는 빈 목록."
+   "description": "이번 말에서 정한 칸 값들. REDIRECT는 빈 목록. 근거: 상한 256 은 측정 최대(슬롯 52)의 약 5배 여유를 둔 설계 상한(D125). 측정: 현재 운영 문진표 2종(question-authoring/forms/health-screening-v1.txt, health-screening-short-order.txt) 각각 문항 31·슬롯 52·문항당 최대 4(2026-11-08 헤드 grep 측정). 학습 데이터 최종본(reference/openit-server/data/final lora_a_*.jsonl 32,170행, 2026-11-08 측정)의 최대는 targets 4·values 4·key 22자로 이 상한 안이다. 모델 입출력 정본(labels.py)에는 숫자 상한이 없고 값이 문항 은행의 칸에서만 나온다는 구조적 상한뿐이다. 문진표가 커지면 다시 잰다.",
+   "maxItems": 256
   }
  },
  "allOf": [

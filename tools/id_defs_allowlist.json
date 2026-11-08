@@ -110,12 +110,6 @@
  ],
  "id_registry": [
   {
-   "file": "schemas/ArtifactRef.schema.json",
-   "pointer": "/properties/id",
-   "endpoint": "schemas/_common.schema.json#/$defs/Id",
-   "means": "불변 산출물 ID(문항 세트·모델 패키지 등)"
-  },
-  {
    "file": "schemas/_common.schema.json",
    "pointer": "/$defs/ArtifactRef/properties/id",
    "endpoint": "schemas/_common.schema.json#/$defs/Id",

@@ -634,27 +634,8 @@
       "$ref": "ReviewRecord.schema.json"
     },
     "Decisions": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "items",
-        "next_cursor"
-      ],
-      "description": "3.4.7: 판정 조회 응답. items 는 release-gate 의 GateDecision 그대로(최신부터; 받은 값을 다시 검증하지 않는다, ADR 0010 R7)",
-      "properties": {
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "GateDecision.schema.json"
-          }
-        },
-        "next_cursor": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      }
+      "$ref": "HttpPages.schema.json#/$defs/Decisions",
+      "description": "3.4.7: 판정 조회 응답. items 는 release-gate 의 GateDecision 그대로(최신부터; 받은 값을 다시 검증하지 않는다, ADR 0010 R7) 5.0.0: release-gate /v1/decisions 의 목록 응답(HttpPages.Decisions)과 같은 뜻이라 그 별칭으로 바꿨다(같은 이름 두 정의 금지, D117). 4.x 의 닫힌 봉투(additionalProperties false)보다 넓다(ListEnvelope 는 모르는 키 허용)."
     },
     "QuestionSetVersions": {
       "type": "object",

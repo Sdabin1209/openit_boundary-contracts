@@ -148,4 +148,7 @@ print("OK  " if not removed else "FAIL", "v1 스키마 ParserSample/GeneratorSam
 # 5.0.0: 같은 이름(_id) 다른 정의 점검(D117). 허용 목록과 근거는 tools/id_defs_allowlist.json
 _r = subprocess.run([sys.executable, here + "/tools/check_id_defs.py"])
 print("OK  " if _r.returncode == 0 else "FAIL", "같은 이름의 ID 칸은 한 정의를 참조한다(tools/check_id_defs.py)"); bad += _r.returncode != 0
+# 5.0.0: 같은 이름의 타입($defs·최상위 스키마)이 서로 다른 정의인지(D117). 허용 목록은 tools/def_names_allowlist.json
+_r = subprocess.run([sys.executable, here + "/tools/check_def_names.py"])
+print("OK  " if _r.returncode == 0 else "FAIL", "같은 이름의 타입은 한 정의다(tools/check_def_names.py)"); bad += _r.returncode != 0
 sys.exit(1 if bad else 0)

@@ -34,7 +34,7 @@
       "pattern": "^[A-Za-z0-9.-]+:[0-9]{1,5}$(?![\\s\\S])",
       "description": "<호스트>:<포트>"
     },
-    "HttpsUrl": {
+    "ServiceUrl": {
       "$ref": "_common.schema.json#/$defs/ServiceUrl"
     },
     "DnsName": {
@@ -92,7 +92,7 @@
       "default": "/run/secrets/step-ca-password"
     },
     "STEP_CA_URL": {
-      "$ref": "#/$defs/HttpsUrl",
+      "$ref": "#/$defs/ServiceUrl",
       "description": "token·cert 가 부를 인증기관 주소",
       "default": "https://step-ca:9000"
     },

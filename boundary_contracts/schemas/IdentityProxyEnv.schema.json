@@ -14,10 +14,10 @@
   "Path": {
    "$ref": "_common.schema.json#/$defs/AbsolutePath"
   },
-  "HttpsUrl": {
+  "HttpsOrigin": {
    "$ref": "_common.schema.json#/$defs/HttpsOrigin"
   },
-  "Duration": {
+  "DurationSmh": {
    "type": "string",
    "pattern": "^[0-9]+(s|m|h)$(?![\\s\\S])",
    "description": "기간(정수+단위 s|m|h)"
@@ -44,7 +44,7 @@
  },
  "properties": {
   "IDENTITY_PUBLIC_URL": {
-   "$ref": "#/$defs/HttpsUrl",
+   "$ref": "#/$defs/HttpsOrigin",
    "description": "공개 입구의 공개 주소(PublicIngressEnv.GATEWAY_HOSTS 첫 항목 + GATEWAY_PUBLIC_TLS_PORT). 사람 인증 경로(HumanAuthEndpoints)는 이 아래다. 발급자·되돌아올 주소 등은 이미지가 이 값과 HumanAuthEndpoints 에서 만든다"
   },
   "IDENTITY_CLIENT_SECRET_FILE": {
@@ -63,12 +63,12 @@
    "description": "세션 쿠키 서명 비밀 파일(32바이트, 비밀 D84). deploy 가 무작위로 만든다"
   },
   "IDENTITY_SESSION_MAX": {
-   "$ref": "#/$defs/Duration",
+   "$ref": "#/$defs/DurationSmh",
    "default": "8h",
    "description": "로그인 세션 최대 수명. platform ADR 0003, 측정 안 함"
   },
   "IDENTITY_SESSION_REFRESH": {
-   "$ref": "#/$defs/Duration",
+   "$ref": "#/$defs/DurationSmh",
    "default": "5m",
    "description": "세션 갱신 주기. SurveyServiceEnv.SURVEY_SSE_MAX_SECONDS 는 이 값 이하(RUNTIME R2.4). platform ADR 0003"
   }

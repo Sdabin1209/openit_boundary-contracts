@@ -1,0 +1,30 @@
+{
+ "description": "tools/check_def_names.py 의 허용 목록(5.0.0). 이름이 같고 뜻이 다른 파일 범위 타입만 둔다. 근거 필수, 쓰이지 않는 항목은 실패.",
+ "same_name_different_meaning": [
+  {
+   "name": "Cases",
+   "files": [
+    "HttpPages.schema.json",
+    "HttpQueries.schema.json"
+   ],
+   "reason": "이름만 같고 뜻이 다르다: HttpPages 의 Cases 은 목록 응답 본문(ListEnvelope + 원소 계약), HttpQueries 의 Cases 은 같은 호출의 쿼리 문자열 묶음이다. 두 파일이 '호출 이름 = $defs 이름' 규칙으로 짝을 이루므로(openapi 가 응답은 HttpPages, x-query-schema 는 HttpQueries 를 가리킨다) 이름을 바꾸지 않는다."
+  },
+  {
+   "name": "Results",
+   "files": [
+    "HttpPages.schema.json",
+    "HttpQueries.schema.json"
+   ],
+   "reason": "이름만 같고 뜻이 다르다: HttpPages 의 Results 은 목록 응답 본문(ListEnvelope + 원소 계약), HttpQueries 의 Results 은 같은 호출의 쿼리 문자열 묶음이다. 두 파일이 '호출 이름 = $defs 이름' 규칙으로 짝을 이루므로(openapi 가 응답은 HttpPages, x-query-schema 는 HttpQueries 를 가리킨다) 이름을 바꾸지 않는다."
+  },
+  {
+   "name": "Decisions",
+   "files": [
+    "AuthoringResponses.schema.json",
+    "HttpPages.schema.json",
+    "HttpQueries.schema.json"
+   ],
+   "reason": "이름만 같고 뜻이 다르다: HttpPages 의 Decisions 는 목록 응답 본문(AuthoringResponses.Decisions 는 그 별칭), HttpQueries 의 Decisions 는 같은 호출의 쿼리 문자열 묶음이다. HttpPages·HttpQueries 는 '호출 이름 = $defs 이름' 규칙으로 짝을 이룬다."
+  }
+ ]
+}
