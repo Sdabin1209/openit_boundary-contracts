@@ -151,4 +151,7 @@ print("OK  " if _r.returncode == 0 else "FAIL", "같은 이름의 ID 칸은 한 
 # 5.0.0: 같은 이름의 타입($defs·최상위 스키마)이 서로 다른 정의인지(D117). 허용 목록은 tools/def_names_allowlist.json
 _r = subprocess.run([sys.executable, here + "/tools/check_def_names.py"])
 print("OK  " if _r.returncode == 0 else "FAIL", "같은 이름의 타입은 한 정의다(tools/check_def_names.py)"); bad += _r.returncode != 0
+# 비식별 뷰는 생성물이다: 저장본이 생성기 출력과 같아야 한다(check_id_defs 의 비식별 칸 면제는 이 게이트가 함께 있을 때만 의미가 있다)
+_r = subprocess.run([sys.executable, here + "/tools/gen_deid_view.py", "--check"])
+print("OK  " if _r.returncode == 0 else "FAIL", "비식별 뷰 스키마는 생성기 출력과 같다(tools/gen_deid_view.py --check)"); bad += _r.returncode != 0
 sys.exit(1 if bad else 0)

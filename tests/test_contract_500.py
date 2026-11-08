@@ -124,6 +124,7 @@ class CheckIdDefsTool(unittest.TestCase):
         for sub in ("schemas", "openapi"):
             shutil.copytree(ROOT / "boundary_contracts" / sub, d / sub)
         (d / "tools").mkdir(); shutil.copy(ROOT / "tools/id_defs_allowlist.json", d / "tools/id_defs_allowlist.json")
+        shutil.copytree(ROOT / "boundary_contracts/data", d / "data")
         return d
 
     def _run(self, d):
@@ -197,6 +198,24 @@ class CheckIdDefsTool(unittest.TestCase):
         self._edit(d, "schemas/OpsFeedbackDeidentifiedTrace.schema.json", lambda o: o["properties"].update(session_id={"type": "string"}))
         r = self._run(d)
         self.assertEqual(r.returncode, 1); self.assertIn("생성물", r.stdout)
+
+    def test_우회6_비식별_합집합에_무제약_가지(self):
+        # codex 3차: Masked 가지 하나만 보면 {} 가지를 더해도 통과했다
+        d = self._copy()
+        def add_any(o):
+            q = o["properties"]["extract_input"]["anyOf"][0]["anyOf"][2]["properties"]["question_id"]
+            q["anyOf"].append({})
+        self._edit(d, "schemas/OpsFeedbackDeidentifiedTrace.schema.json", add_any)
+        r = self._run(d)
+        self.assertEqual(r.returncode, 1); self.assertIn("생성물", r.stdout)
+
+    def test_우회7_비식별_합집합에_다른_패턴(self):
+        d = self._copy()
+        def other_pat(o):
+            q = o["properties"]["extract_input"]["anyOf"][0]["anyOf"][2]["properties"]["question_id"]
+            q["anyOf"][1]["anyOf"][0]["pattern"] = ".*"
+        self._edit(d, "schemas/OpsFeedbackDeidentifiedTrace.schema.json", other_pat)
+        self.assertEqual(self._run(d).returncode, 1)
 
     def test_if_판별은_정의가_아니다(self):
         d = self._copy()

@@ -119,7 +119,32 @@ class ContractValidator:
         self._inner = inner
 
     def __getattr__(self, name):
+        # 값 데이터·설정만 넘긴다(schema, format_checker, is_type 등). 검증기를 돌려주거나 오류를 내는 메서드는 아래에 모두 명시했다:
+        # evolve·descend·iter_errors·is_valid·validate. 그 밖의 공개 메서드(check_schema·is_type)는 검증기를 돌려주지 않는다.
         return getattr(self._inner, name)
+
+    def evolve(self, **changes):
+        """안쪽 검증기의 evolve(schema·format_checker·registry 등 인자 그대로 보존) 결과를 다시 감싼다.
+        왜: evolve 가 표준 검증기를 그대로 돌려주면 그 뒤의 검증이 비유한 수 검사를 건너뛴다(codex 3차 검토, link _resolve·question-authoring 이 evolve 를 쓴다)."""
+        return ContractValidator(self._inner.evolve(**changes))
+
+    def descend(self, instance, schema, path=None, schema_path=None, resolver=None):
+        """하위 스키마 검증도 같은 정책: 그 하위 값의 비유한 수 오류를 먼저 내고(오류 경로 앞에 path 를 붙인다) 안쪽 descend 를 잇는다."""
+        for e in nonfinite_errors(instance):
+            if path is not None:
+                e.path.appendleft(path)
+            if schema_path is not None:
+                e.schema_path.appendleft(schema_path)
+            yield e
+        kw = {"path": path, "schema_path": schema_path}
+        if resolver is not None:
+            kw["resolver"] = resolver
+        yield from self._inner.descend(instance, schema, **kw)
+
+    @property
+    def inner(self):
+        """안쪽 표준 Draft 2020-12 검증기(읽기 전용). 이것으로 직접 검증하면 비유한 수 검사가 없다는 것을 호출자가 안다."""
+        return self._inner
 
     def iter_errors(self, instance, *args, **kwargs):
         yield from nonfinite_errors(instance)

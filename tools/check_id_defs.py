@@ -109,20 +109,47 @@ def _walk(o, ptr, out, rel):
 DEID_REFS = {"#/$defs/Masked", "#/$defs/Redacted"}
 
 
-def _deid_kind(node) -> str:
-    """생성물 칸의 끝점 종류를 구조로 판정한다(문자열 접두어가 아니라): 의사 식별자 참조, 마스킹 참조, 또는
-    anyOf 가지 집합에 마스킹·제거 참조가 들어 있는 비식별 합집합(gen_deid_view.py 가 만드는 모양)."""
+def _keep_patterns(root: pathlib.Path) -> dict:
+    p = root / "boundary_contracts/data/deid_rules.json"
+    if not p.exists():
+        p = root / "data/deid_rules.json"
+    return json.loads(p.read_text(encoding="utf-8")).get("keep_patterns", {}) if p.exists() else {}
+
+
+def _deid_branch_ok(node, name: str, keep: dict) -> bool:
+    """비식별 합집합의 가지 하나가 허용 구조인가: 마스킹·제거 참조, null, 그 이름의 공개 keep 패턴 문자열, 또는 그런 가지만 가진 anyOf.
+    무제약 가지({} 등)나 다른 패턴은 허용하지 않는다(codex 3차 검토: 가지 하나만 보면 {} 를 더해도 통과했다)."""
+    if not isinstance(node, dict):
+        return False
+    body = {k: v for k, v in node.items() if k not in ANNOT}
+    if set(body) == {"$ref"}:
+        return body["$ref"] in DEID_REFS
+    if body == {"type": "null"}:
+        return True
+    if set(body) == {"type", "pattern"} and body["type"] == "string" and name in keep:
+        return body["pattern"] == f"^(?:{keep[name]})$(?![\\s\\S])"
+    if set(body) == {"anyOf"} and isinstance(body["anyOf"], list) and body["anyOf"]:
+        return all(_deid_branch_ok(a, name, keep) for a in body["anyOf"])
+    return False
+
+
+def _deid_kind(node, name: str = "", keep: dict | None = None) -> str:
+    """생성물 칸의 끝점 종류를 구조로 판정한다: 의사 식별자 참조, 마스킹 참조, 또는 모든 가지가 허용 구조이고 마스킹·제거 참조를
+    하나 이상 가진 비식별 합집합(gen_deid_view.py 가 만드는 모양). 그 밖은 other(실패)."""
+    keep = keep or {}
     if isinstance(node, dict) and set(node) - ANNOT == {"$ref"}:
         r = node["$ref"]
         return "Pseudonym" if r == "#/$defs/Pseudonym" else "Masked" if r == "#/$defs/Masked" else "other"
     if isinstance(node, dict) and set(node) - ANNOT == {"anyOf"} and isinstance(node["anyOf"], list):
-        refs = {a.get("$ref") for a in node["anyOf"] if isinstance(a, dict) and set(a) == {"$ref"}}
-        return "deid-anyof" if refs & DEID_REFS else "other"
+        refs = {a.get("$ref") for a in node["anyOf"] if isinstance(a, dict) and set(a) - ANNOT == {"$ref"}}
+        if refs & DEID_REFS and all(_deid_branch_ok(a, name, keep) for a in node["anyOf"]):
+            return "deid-anyof"
     return "other"
 
 
 def check(root: pathlib.Path, allow: dict) -> list[str]:
     repo = Repo(root)
+    keep = _keep_patterns(root)
     gen_files = {g["file"] for g in allow.get("generated", [])}
     gen_ok = {(g["file"], g["name"], g["kind"]) for g in allow.get("generated", [])}
     ref_ok = {(l["file"], l["pointer"]) for l in allow.get("refinements", [])}
@@ -146,7 +173,7 @@ def check(root: pathlib.Path, allow: dict) -> list[str]:
         end, refs, inline = repo.definition(rel, ptr, node)
         loc = f"{rel}#{ptr}"
         if rel in gen_files:
-            k = (rel, name, _deid_kind(node))
+            k = (rel, name, _deid_kind(node, name, keep))
             if k not in gen_ok:
                 problems.append(f"{loc}: 생성물 안의 {name} 이 허용 목록 generated 에 없는 끝점 {end[:80]}")
             used_gen.add(k)

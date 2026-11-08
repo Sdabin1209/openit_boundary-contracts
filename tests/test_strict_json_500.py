@@ -81,6 +81,40 @@ class Numbers(unittest.TestCase):
                 with self.assertRaises(Exception):
                     v.validate(d)
 
+    def test_evolve_와_descend_뒤에도_비유한_수를_거부한다(self):
+        # codex 3차: evolve 가 표준 검증기를 돌려줘 검사를 건너뛰었다(link _resolve, question-authoring wiring/contract.py 경로)
+        import copy
+        import jsonschema
+        from boundary_contracts import validator
+        from boundary_contracts.schemas_api import ContractValidator
+        ex = json.loads((ROOT / "examples/ActionExtractionSample.json").read_text(encoding="utf-8"))
+        base = validator("ActionExtractionSample")
+        whole = base.evolve(schema=base.schema)                                        # 파일 참조(expected -> ActionExtraction.schema.json)
+        frag = validator("ActionExtraction").evolve(schema={"$ref": validator("ActionExtraction").schema["$id"] + "#/properties/values"})
+        self.assertIsInstance(whole, ContractValidator); self.assertIsInstance(frag, ContractValidator)
+        self.assertIs(whole.format_checker, base.format_checker)
+        self.assertTrue(whole.is_valid(ex))
+        for bad in (float("nan"), float("inf"), float("-inf")):
+            d = copy.deepcopy(ex); d["expected"]["values"][0]["value"] = bad
+            vals = [dict(ex["expected"]["values"][0], value=bad)]
+            with self.subTest(bad=bad):
+                for v, inst in ((whole, d), (frag, vals)):
+                    self.assertFalse(v.is_valid(inst))
+                    self.assertTrue(any(e.validator == "finite" for e in v.iter_errors(inst)))
+                    self.assertIsNotNone(jsonschema.exceptions.best_match(v.iter_errors(inst)))
+                    with self.assertRaises(jsonschema.ValidationError):
+                        v.validate(inst)
+                errs = list(base.descend(d["expected"], {"type": "object"}, path="expected"))
+                self.assertTrue(errs and all(e.validator == "finite" for e in errs))
+                self.assertEqual(list(errs[0].absolute_path)[0], "expected")
+        # format_checker 가 evolve 뒤에도 강제된다(format uri)
+        push = validator("PushSubscriptionRequest")
+        ev = push.evolve(schema=push.schema)
+        good = json.loads((ROOT / "examples/PushSubscriptionRequest.json").read_text(encoding="utf-8"))
+        self.assertTrue(ev.is_valid(good))
+        bad = dict(good, endpoint=good["endpoint"] + "%zz")
+        self.assertEqual([e.validator for e in ev.iter_errors(bad)], ["format"])
+
     def test_조각_참조와_HTTP_계약도_비유한_수를_거부한다(self):
         from boundary_contracts import validator
         from boundary_contracts.http_contracts import ContractViolation, HttpContract
