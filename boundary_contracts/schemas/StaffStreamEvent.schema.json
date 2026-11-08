@@ -18,7 +18,7 @@
           "const": "alert"
         },
         "data": {
-          "$ref": "../schemas/StaffAlert.schema.json"
+          "$ref": "StaffAlert.schema.json"
         }
       },
       "required": [
@@ -34,7 +34,7 @@
           "const": "resolved"
         },
         "data": {
-          "$ref": "../schemas/StaffAlert.schema.json"
+          "$ref": "StaffAlert.schema.json"
         }
       },
       "required": [
@@ -50,7 +50,7 @@
           "const": "result_ready"
         },
         "data": {
-          "$ref": "../schemas/ResultReadyEvent.schema.json"
+          "$ref": "ResultReadyEvent.schema.json"
         }
       },
       "required": [
@@ -66,7 +66,7 @@
           "const": "heartbeat"
         },
         "data": {
-          "$ref": "../schemas/HeartbeatEvent.schema.json"
+          "$ref": "HeartbeatEvent.schema.json"
         }
       },
       "required": [
@@ -82,7 +82,7 @@
           "const": "resync"
         },
         "data": {
-          "$ref": "../schemas/ResyncEvent.schema.json"
+          "$ref": "ResyncEvent.schema.json"
         }
       },
       "required": [

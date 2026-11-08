@@ -68,7 +68,7 @@
 | `openit_model_engine_duration_seconds` | model-runtime | 서버 쪽 호출 하나(대기+추론+재시도) | `op`, `outcome`, `attempts` | — |
 | `openit_model_queue_wait_seconds` | model-runtime | 엔진 큐 대기 | `op` | p95 ≤ 0.3 |
 | `openit_next_item_overridden_total` | model-runtime | 모델이 낸 next_item 과 서버가 채운 값이 다른 횟수(카운터, ADR 0014 과도기 신호) | `op` | 추세 관찰 |
-| `openit_job_last_exit_status` | deploy(잡 실행기, scripts/job-metrics.sh) | 마지막 실행 결과: 0 성공, 1 실패(종료 코드·신호·제한 시간 초과 모두 실패, 5.0.1) | `job_name`(잡 이름) | 경보: 1 |
+| `openit_job_last_exit_status` | deploy(잡 실행기, scripts/job-metrics.sh) | (게이지 — 이 표의 다른 지표와 달리 히스토그램이 아니다. 아래 `openit_job_*` 넷 모두 게이지, 5.0.1) 마지막 실행 결과: 0 성공, 1 실패(종료 코드·신호·제한 시간 초과 모두 실패, 5.0.1) | `job_name`(잡 이름) | 경보: 1 |
 | `openit_job_last_run_timestamp_seconds` | deploy | 마지막 실행이 끝난 시각(유닉스 초) | `job_name` | — |
 | `openit_job_last_success_timestamp_seconds` | deploy | 마지막 성공 시각. 실패하면 이전 값을 유지하고, 한 번도 성공하지 않았으면 쓰지 않는다(경보 규칙은 값이 없으면 판정하지 않는다) | `job_name` | 경보: 지금 − 값 > 주기×2 |
 | `openit_job_interval_seconds` | deploy | 잡 주기(타이머 OnUnitActiveSec 과 같은 값). 경보의 '주기의 2배' 기준 | `job_name` | — |

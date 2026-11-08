@@ -43,16 +43,29 @@ class StableUri(unittest.TestCase):
                 self.assertFalse(v.is_valid(bad))
 
     def test_relative_refs_inside_stable_uri_documents_resolve(self):
-        # 안정 URI 로 연 계약 문서 안의 상대 $ref(다른 계약 파일)도 같은 접두로 풀린다
+        # 안정 URI 로 연 계약 문서 안의 모든 다른 파일 상대 $ref 가 같은 접두로 풀린다(파일 전부, 참조 전부)
         reg = schema_registry()
+        checked = 0
         for path in schema_dir().glob("*.schema.json"):
             doc = json.loads(path.read_text(encoding="utf-8"))
-            if '"$ref": "_common.schema.json' not in json.dumps(doc):
-                continue
-            with self.subTest(path.name):
-                v = jsonschema.Draft202012Validator({"$ref": bc.CONTRACT_URI + path.name}, registry=reg)
-                list(v.iter_errors({}))   # 해석 실패면 Unresolvable 이 난다
-            break
+            refs = set()
+            def walk(o):
+                if isinstance(o, dict):
+                    r = o.get("$ref")
+                    if isinstance(r, str) and not r.startswith("#") and "://" not in r:
+                        refs.add(r)
+                    for v in o.values():
+                        walk(v)
+                elif isinstance(o, list):
+                    for v in o:
+                        walk(v)
+            walk(doc)
+            resolver = reg.resolver(base_uri=bc.CONTRACT_URI + path.name)
+            for r in refs:
+                with self.subTest(path.name, ref=r):
+                    resolver.lookup(r)
+                    checked += 1
+        self.assertGreater(checked, 50)
 
     def test_without_contract_registry_it_fails_loudly_not_silently(self):
         v = jsonschema.Draft202012Validator(self._external())
@@ -88,12 +101,41 @@ class GatewayDefaults(unittest.TestCase):
         self.assertEqual(ex["max_body_bytes"]["default"], g["max_body_bytes"])
         conv = (ROOT / "CONVENTIONS.md").read_text(encoding="utf-8")
         # 사람이 읽는 표의 값과 같은지(표가 정본 파일과 어긋나면 실패)
+        # 서비스와 값의 짝을 표의 행으로 대조(값만 있는지가 아니라 그 서비스 행에 그 값이 있는지)
+        rows = {line.split("|")[1].strip(): line for line in conv.splitlines() if line.startswith("| ") and "초(" in line}
         for svc, ms in g["timeouts_ms"]["response_header"]["by_service"].items():
             with self.subTest(svc):
-                self.assertIn(f"초({ms // 1000})", conv)
+                row = next((v for k, v in rows.items() if k.startswith(svc)), None)
+                self.assertIsNotNone(row, svc)
+                self.assertIn(f"초({ms // 1000})", row)
         self.assertIn(f"응답 헤더 {g['timeouts_ms']['response_header']['default'] // 1000}초", conv)
         self.assertIn(f"연결 {g['timeouts_ms']['dial'] // 1000}초", conv)
 
     def test_returns_copy(self):
         bc.gateway_defaults()["max_body_bytes"] = 1
         self.assertEqual(bc.gateway_defaults()["max_body_bytes"], 8388608)
+
+
+class SecretFormats(unittest.TestCase):
+    def test_formats(self):
+        f = bc.secret_format_problems
+        self.assertEqual(f("token_list", "abc123"), [])
+        self.assertEqual(f("token_list", "a,b,c"), [])
+        for bad in ("a,,b", "r=a", "a b", "a:b"):
+            with self.subTest(bad):
+                self.assertEqual(f("token_list", bad), ["FORMAT"])
+        self.assertEqual(f("role_token_list", "reviewer=t1,operator=t2"), [])
+        self.assertEqual(f("role_token_list", "t1"), ["FORMAT"])
+        self.assertEqual(f("token_actor_role_list", "t:author-e2e:question-author"), [])
+        self.assertEqual(f("token_actor_role_list", "t:author"), ["FORMAT"])
+        self.assertEqual(f("credentials_line", "user:pa:ss"), [])
+        self.assertEqual(f("credentials_line", "user"), ["FORMAT"])
+        self.assertEqual(f("token_list", ""), ["EMPTY"])
+        with self.assertRaises(ValueError):
+            f("nope", "x")
+
+    def test_schema_acceptance_not_narrowed(self):
+        # PATCH: TokenList 는 4.x 의 RoleTokenList 처럼 비어 있지 않은 문자열을 모두 받는다
+        d = bc.load_schema("QuestionAuthoringEnv")["$defs"]["TokenList"]
+        self.assertEqual({k: d[k] for k in ("type", "minLength")}, {"type": "string", "minLength": 1})
+        self.assertNotIn("pattern", d)

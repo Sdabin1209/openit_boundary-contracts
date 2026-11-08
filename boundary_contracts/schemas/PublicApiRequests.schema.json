@@ -127,7 +127,7 @@
     "StaffCallRetryBody": {
       "allOf": [
         {
-          "$ref": "../schemas/StaffCallRetryRequest.schema.json"
+          "$ref": "StaffCallRetryRequest.schema.json"
         },
         {
           "type": "object",
@@ -153,7 +153,7 @@
     "StaffCallReportBody": {
       "allOf": [
         {
-          "$ref": "../schemas/StaffCallReport.schema.json"
+          "$ref": "StaffCallReport.schema.json"
         },
         {
           "type": "object",

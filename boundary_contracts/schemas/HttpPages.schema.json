@@ -18,7 +18,7 @@
     "Ids": {
       "allOf": [
         {
-          "$ref": "../schemas/ListEnvelope.schema.json"
+          "$ref": "ListEnvelope.schema.json"
         },
         {
           "properties": {
@@ -36,14 +36,14 @@
     "ArtifactRefs": {
       "allOf": [
         {
-          "$ref": "../schemas/ListEnvelope.schema.json"
+          "$ref": "ListEnvelope.schema.json"
         },
         {
           "properties": {
             "items": {
               "type": "array",
               "items": {
-                "$ref": "../schemas/ArtifactRef.schema.json"
+                "$ref": "ArtifactRef.schema.json"
               }
             }
           }
@@ -53,14 +53,14 @@
     "Reviews": {
       "allOf": [
         {
-          "$ref": "../schemas/ListEnvelope.schema.json"
+          "$ref": "ListEnvelope.schema.json"
         },
         {
           "properties": {
             "items": {
               "type": "array",
               "items": {
-                "$ref": "../schemas/ReviewRecord.schema.json"
+                "$ref": "ReviewRecord.schema.json"
               }
             }
           }
@@ -70,14 +70,14 @@
     "Releases": {
       "allOf": [
         {
-          "$ref": "../schemas/ListEnvelope.schema.json"
+          "$ref": "ListEnvelope.schema.json"
         },
         {
           "properties": {
             "items": {
               "type": "array",
               "items": {
-                "$ref": "../schemas/ReleaseManifest.schema.json"
+                "$ref": "ReleaseManifest.schema.json"
               }
             }
           }
@@ -87,14 +87,14 @@
     "Submissions": {
       "allOf": [
         {
-          "$ref": "../schemas/ListEnvelope.schema.json"
+          "$ref": "ListEnvelope.schema.json"
         },
         {
           "properties": {
             "items": {
               "type": "array",
               "items": {
-                "$ref": "../schemas/SubmissionView.schema.json"
+                "$ref": "SubmissionView.schema.json"
               }
             }
           }
@@ -104,14 +104,14 @@
     "Decisions": {
       "allOf": [
         {
-          "$ref": "../schemas/ListEnvelope.schema.json"
+          "$ref": "ListEnvelope.schema.json"
         },
         {
           "properties": {
             "items": {
               "type": "array",
               "items": {
-                "$ref": "../schemas/GateDecision.schema.json"
+                "$ref": "GateDecision.schema.json"
               }
             }
           }
@@ -121,14 +121,14 @@
     "Cases": {
       "allOf": [
         {
-          "$ref": "../schemas/ListEnvelope.schema.json"
+          "$ref": "ListEnvelope.schema.json"
         },
         {
           "properties": {
             "items": {
               "type": "array",
               "items": {
-                "$ref": "../schemas/FailureCase.schema.json"
+                "$ref": "FailureCase.schema.json"
               }
             }
           }
@@ -138,7 +138,7 @@
     "Results": {
       "allOf": [
         {
-          "$ref": "../schemas/ListEnvelope.schema.json"
+          "$ref": "ListEnvelope.schema.json"
         },
         {
           "properties": {
