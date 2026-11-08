@@ -138,6 +138,10 @@ get_trace(deidentified_trace_ref: str) -> dict         # 비식별 TurnTrace(Dei
 
 소비자가 지키는 것: `review_status`가 CONFIRMED이고 `expected`가 있는 것만 정답 있는 회귀 케이스로 쓴다.
 
+**검토 게시 값의 판정 기준(5.0.0, D117).** `POST /v1/cases/{case_id}/review` 본문(`CaseReviewRequest`)의 `expected`·`reviewed_input` 은 사람이 직접 쓰므로 스키마 밖의 두 규칙을 더 지킨다. 어기면 400 `INVALID_RECORD` 이고 오류에 값을 싣지 않는다.
+1. 공개 검사 `boundary_contracts.review_input.review_value_problems(value)` 가 빈 목록이어야 한다: 계약 JSON 공통 규칙(CONVENTIONS 1절, 깊이 64 등), 문자열 하나 20,000자, 개인정보 패턴(이메일·전화·주민번호, 규칙 `data/review_input_rules.json`). 사람 입구(admin-console)는 같은 함수의 규칙으로 미리 알릴 수 있다.
+2. 그 사례의 검토 사본에만 있는 환자 발화 원문을 `reviewed_input` 이 그대로 담으면 안 된다(원문을 가진 ops-feedback 이 판정한다): 공백을 뺀 원문과 같은 문자열, 또는 공백을 뺀 길이 10자 이상 원문을 부분으로 포함하는 문자열이 있으면 거부. 바꿔 쓴 문장은 막지 못한다(검토자 책임). 10자는 ops-feedback 의 설계 값(측정 안 함)이다.
+
 ## I8. turn-engine — 3.0.0 폐기 (D109)
 
 > 3.0.0: turn-engine은 쓰지 않는다. LoRA-A 출력 규칙은 계약 `boundary_contracts.action_rules`와 규칙 데이터가 정본이고 model-runtime 서버가 보증한다(ADR 0010, R7). 계보 표지는 `action_rules_version`. 아래는 2.x 기록이다.

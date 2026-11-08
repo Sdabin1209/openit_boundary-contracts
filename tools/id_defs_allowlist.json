@@ -1,16 +1,179 @@
 {
-  "description": "tools/check_id_defs.py 의 허용 목록(계약 5.0.0). 항목마다 근거(reason)가 필수다. 근거 없는 항목은 점검이 실패한다.",
-  "generated_files": [
-    {"file": "schemas/OpsFeedbackDeidentifiedTrace.schema.json", "reason": "tools/gen_deid_view.py 의 생성물. session_id·turn_id 는 의사 식별자(Pseudonym), 그 밖은 [MASKED]/[DROPPED] 가 될 수 있는 비식별 값이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."},
-    {"file": "schemas/OpsFeedbackReviewTrace.schema.json", "reason": "tools/gen_deid_view.py 의 생성물(검토 사본). 위와 같은 이유."}
-  ],
-  "excluded_names": [
-    {"name": "id", "reason": "'id' 는 그 객체의 식별자라는 뜻만 같고 대상이 위치마다 다르다(산출물 Id, 위험 규칙 ID, Hugging Face 기본 모델 ID, ops 규칙 ID). 같은 이름 같은 뜻 규칙(D117)의 대상이 아니다. 대상별 이름(question_set_id 등)은 점검한다."}
-  ],
-  "refinements": [
-    {"file": "schemas/PublicApiRequests.schema.json", "pointer": "/$defs/UtteranceBody/properties/turn_id", "reason": "공개 입구가 서버 예약 턴 ID(start·end·idle-expire, PUBLIC_API A절)를 받지 않게 좁힌다. 타입은 Id 그대로다."},
-    {"file": "schemas/PublicApiRequests.schema.json", "pointer": "/$defs/InterventionBody/properties/turn_id", "reason": "위와 같다(서버 예약 턴 ID 금지)."},
-    {"file": "schemas/PublicApiRequests.schema.json", "pointer": "/$defs/StaffCallRetryBody/allOf/1/properties/turn_id", "reason": "위와 같다(서버 예약 턴 ID 금지)."},
-    {"file": "schemas/PublicApiRequests.schema.json", "pointer": "/$defs/StaffCallReportBody/allOf/1/properties/turn_id", "reason": "위와 같다(서버 예약 턴 ID 금지)."}
-  ]
+ "description": "tools/check_id_defs.py 의 허용 목록(계약 5.0.0). 항목마다 근거(reason, id_registry 는 means)가 필수이고 쓰이지 않는 항목은 점검이 실패한다.",
+ "generated": [
+  {
+   "file": "schemas/OpsFeedbackDeidentifiedTrace.schema.json",
+   "name": "session_id",
+   "kind": "Pseudonym",
+   "reason": "tools/gen_deid_view.py 의 생성물: 비식별기가 낼 수 있는 값(의사 식별자·[MASKED]·[DROPPED])이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."
+  },
+  {
+   "file": "schemas/OpsFeedbackDeidentifiedTrace.schema.json",
+   "name": "turn_id",
+   "kind": "Pseudonym",
+   "reason": "tools/gen_deid_view.py 의 생성물: 비식별기가 낼 수 있는 값(의사 식별자·[MASKED]·[DROPPED])이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."
+  },
+  {
+   "file": "schemas/OpsFeedbackDeidentifiedTrace.schema.json",
+   "name": "question_set_id",
+   "kind": "Masked",
+   "reason": "tools/gen_deid_view.py 의 생성물: 비식별기가 낼 수 있는 값(의사 식별자·[MASKED]·[DROPPED])이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."
+  },
+  {
+   "file": "schemas/OpsFeedbackDeidentifiedTrace.schema.json",
+   "name": "staff_id",
+   "kind": "Masked",
+   "reason": "tools/gen_deid_view.py 의 생성물: 비식별기가 낼 수 있는 값(의사 식별자·[MASKED]·[DROPPED])이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."
+  },
+  {
+   "file": "schemas/OpsFeedbackDeidentifiedTrace.schema.json",
+   "name": "question_id",
+   "kind": "deid-anyof",
+   "reason": "tools/gen_deid_view.py 의 생성물: 비식별기가 낼 수 있는 값(의사 식별자·[MASKED]·[DROPPED])이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."
+  },
+  {
+   "file": "schemas/OpsFeedbackDeidentifiedTrace.schema.json",
+   "name": "slot_id",
+   "kind": "deid-anyof",
+   "reason": "tools/gen_deid_view.py 의 생성물: 비식별기가 낼 수 있는 값(의사 식별자·[MASKED]·[DROPPED])이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."
+  },
+  {
+   "file": "schemas/OpsFeedbackDeidentifiedTrace.schema.json",
+   "name": "current_question_id",
+   "kind": "deid-anyof",
+   "reason": "tools/gen_deid_view.py 의 생성물: 비식별기가 낼 수 있는 값(의사 식별자·[MASKED]·[DROPPED])이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."
+  },
+  {
+   "file": "schemas/OpsFeedbackReviewTrace.schema.json",
+   "name": "session_id",
+   "kind": "Pseudonym",
+   "reason": "tools/gen_deid_view.py 의 생성물: 비식별기가 낼 수 있는 값(의사 식별자·[MASKED]·[DROPPED])이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."
+  },
+  {
+   "file": "schemas/OpsFeedbackReviewTrace.schema.json",
+   "name": "turn_id",
+   "kind": "Pseudonym",
+   "reason": "tools/gen_deid_view.py 의 생성물: 비식별기가 낼 수 있는 값(의사 식별자·[MASKED]·[DROPPED])이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."
+  },
+  {
+   "file": "schemas/OpsFeedbackReviewTrace.schema.json",
+   "name": "question_set_id",
+   "kind": "Masked",
+   "reason": "tools/gen_deid_view.py 의 생성물: 비식별기가 낼 수 있는 값(의사 식별자·[MASKED]·[DROPPED])이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."
+  },
+  {
+   "file": "schemas/OpsFeedbackReviewTrace.schema.json",
+   "name": "staff_id",
+   "kind": "Masked",
+   "reason": "tools/gen_deid_view.py 의 생성물: 비식별기가 낼 수 있는 값(의사 식별자·[MASKED]·[DROPPED])이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."
+  },
+  {
+   "file": "schemas/OpsFeedbackReviewTrace.schema.json",
+   "name": "question_id",
+   "kind": "deid-anyof",
+   "reason": "tools/gen_deid_view.py 의 생성물: 비식별기가 낼 수 있는 값(의사 식별자·[MASKED]·[DROPPED])이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."
+  },
+  {
+   "file": "schemas/OpsFeedbackReviewTrace.schema.json",
+   "name": "slot_id",
+   "kind": "deid-anyof",
+   "reason": "tools/gen_deid_view.py 의 생성물: 비식별기가 낼 수 있는 값(의사 식별자·[MASKED]·[DROPPED])이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."
+  },
+  {
+   "file": "schemas/OpsFeedbackReviewTrace.schema.json",
+   "name": "current_question_id",
+   "kind": "deid-anyof",
+   "reason": "tools/gen_deid_view.py 의 생성물: 비식별기가 낼 수 있는 값(의사 식별자·[MASKED]·[DROPPED])이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."
+  }
+ ],
+ "refinements": [
+  {
+   "file": "schemas/PublicApiRequests.schema.json",
+   "pointer": "/$defs/UtteranceBody/properties/turn_id",
+   "reason": "공개 입구가 서버 예약 턴 ID(start·end·idle-expire, PUBLIC_API A절)를 받지 않게 좁힌다. 타입은 Id 그대로다."
+  },
+  {
+   "file": "schemas/PublicApiRequests.schema.json",
+   "pointer": "/$defs/InterventionBody/properties/turn_id",
+   "reason": "공개 입구가 서버 예약 턴 ID(start·end·idle-expire, PUBLIC_API A절)를 받지 않게 좁힌다. 타입은 Id 그대로다."
+  },
+  {
+   "file": "schemas/PublicApiRequests.schema.json",
+   "pointer": "/$defs/StaffCallRetryBody/allOf/1/properties/turn_id",
+   "reason": "공개 입구가 서버 예약 턴 ID(start·end·idle-expire, PUBLIC_API A절)를 받지 않게 좁힌다. 타입은 Id 그대로다."
+  },
+  {
+   "file": "schemas/PublicApiRequests.schema.json",
+   "pointer": "/$defs/StaffCallReportBody/allOf/1/properties/turn_id",
+   "reason": "공개 입구가 서버 예약 턴 ID(start·end·idle-expire, PUBLIC_API A절)를 받지 않게 좁힌다. 타입은 Id 그대로다."
+  }
+ ],
+ "id_registry": [
+  {
+   "file": "schemas/ArtifactRef.schema.json",
+   "pointer": "/properties/id",
+   "endpoint": "schemas/_common.schema.json#/$defs/Id",
+   "means": "불변 산출물 ID(문항 세트·모델 패키지 등)"
+  },
+  {
+   "file": "schemas/_common.schema.json",
+   "pointer": "/$defs/ArtifactRef/properties/id",
+   "endpoint": "schemas/_common.schema.json#/$defs/Id",
+   "means": "불변 산출물 ID(위와 같은 뜻, 공통 정의)"
+  },
+  {
+   "file": "schemas/_common.schema.json",
+   "pointer": "/$defs/QuestionSetRef/properties/id",
+   "endpoint": "schemas/_common.schema.json#/$defs/Id",
+   "means": "문항 세트 ID(question_set_id 와 같은 뜻)"
+  },
+  {
+   "file": "schemas/AuthoringRequests.schema.json",
+   "pointer": "/$defs/AddReviewRequest/properties/question_set/properties/id",
+   "endpoint": "schemas/_common.schema.json#/$defs/Id",
+   "means": "문항 세트 ID"
+  },
+  {
+   "file": "schemas/AuthoringResponses.schema.json",
+   "pointer": "/$defs/Draft/properties/base/oneOf/0/properties/id",
+   "endpoint": "schemas/_common.schema.json#/$defs/Id",
+   "means": "초안의 기준 문항 세트 ID"
+  },
+  {
+   "file": "schemas/AuthoringResponses.schema.json",
+   "pointer": "/$defs/Draft/properties/confirmed/properties/ref/properties/id",
+   "endpoint": "schemas/_common.schema.json#/$defs/Id",
+   "means": "확정된 문항 세트 ID"
+  },
+  {
+   "file": "schemas/GateDecision.schema.json",
+   "pointer": "/properties/approver/properties/id",
+   "endpoint": "schemas/_common.schema.json#/$defs/Id",
+   "means": "승인자(사람) 식별자"
+  },
+  {
+   "file": "schemas/SyntheticJobConfigRun.schema.json",
+   "pointer": "/properties/question_sets/items/properties/id",
+   "endpoint": "schemas/_common.schema.json#/$defs/Id",
+   "means": "문항 세트 ID"
+  },
+  {
+   "file": "schemas/ModelPackageManifest.schema.json",
+   "pointer": "/properties/base_model/properties/id",
+   "endpoint": "inline",
+   "means": "기본 모델의 외부 ID(Hugging Face 저장소 이름, 예 Qwen/Qwen3-8B). '/' 를 포함하므로 Id 가 아니다. 상한 200 은 4.x 값(설계 상한)."
+  },
+  {
+   "file": "schemas/OpsFeedbackJobConfig.schema.json",
+   "pointer": "/$defs/Rule/properties/id",
+   "endpoint": "schemas/OpsFeedbackJobConfig.schema.json#/$defs/RuleId",
+   "means": "ops-feedback 탐지 규칙 ID(닫힌 열거)"
+  },
+  {
+   "file": "schemas/SurveyRiskRulesFile.schema.json",
+   "pointer": "/properties/rules/items/properties/id",
+   "endpoint": "inline",
+   "means": "위험 문구 규칙 ID(규칙 파일 안에서만 쓰는 이름, 64자). 다른 계약 칸이 참조하지 않는다."
+  }
+ ]
 }

@@ -103,6 +103,11 @@ HTTP 층의 보충 규칙(PUBLIC_API.md의 표가 공개 API의 정본이다):
 
 ## 10. 직렬화 규칙
 
+- **계약 JSON 공통 규칙(5.0.0, I-JSON RFC 7493).** 영역 사이를 오가는 모든 JSON 값(HTTP 본문·잡 입출력·계약 파일)은 다음을 지킨다. 정본 구현은 `boundary_contracts.strict_json`(`loads`·`dumps`·`check_json_value`)과 `boundary_contracts.validate(name, value)` 이고, 어기면 `INVALID_RECORD` 다(받는 쪽 입구에서 400).
+  - UTF-8, 중복 키 없음, 짝 없는 서로게이트 없음(I-JSON 2.1·2.3).
+  - 수는 유한한 배정밀도: `NaN`·`Infinity`·`-Infinity` 글자와 배정밀도를 넘는 수(`1e999` 처럼 읽으면 무한대가 되는 값)는 거부한다. 정수는 ±2^53 이내(I-JSON 2.2, RFC 8785 와 같은 범위). 직렬화는 `allow_nan=False`. 계약 검증기(`validator`)의 `number`·`integer` 타입도 무한대·NaN 을 받지 않는다. 모델 값 칸에 도메인 상한을 일괄로 붙이지는 않는다(칸마다 스키마가 정한다).
+  - 깊이 ≤ 64: 루트 객체·배열이 1, 그 안의 객체·배열마다 1 을 더한다(스칼라는 세지 않는다). 근거: link 0.3.0 `openit_link/server.py` 의 `max_json_depth=64`·괄호 깊이 사전 검사(루트=1)를 계약으로 올렸다(설계 상한, 측정 안 함). 이 깊이를 넘는 값은 해시(`canonicalize`)도 재귀에 들어가기 전에 같은 오류로 거부한다.
+  - 본문 바이트 ≤ 1 MiB, 값 수 ≤ 2^19. 근거: link `DEFAULT_MAX_BODY`(레코드 하나의 설계 상한). 값 하나는 구분자 포함 최소 2바이트라 1 MiB 본문의 값 수는 2^19 를 넘지 않는다; 바이트가 없는 파이썬 객체 진입점도 같은 값 예산을 쓴다. 바이너리 본문(패키지 tar 등)은 이 규칙의 대상이 아니다.
 - **모델 입출력(`ActionExtractionInput`, `ActionExtraction`, `ResponseRequest`, `ResponseText`)은 레코드가 아니다.** 모델이 말하는 형식 그대로여서 `pipeline_schema_version`과 `ext`가 없고(`additionalProperties: false`), 읽는 쪽도 완화 없이 엄격하게 검증한다. 데이터셋 줄(`ActionExtractionSample`, `ResponseSample`)이 레코드이고 `ext`를 가진다.
 - **키 문법이 둘이다.** (1) `SlotRef` 문자열(`ChangeClassification.affected_slots` 등 문항 저작의 구조 참조): 아래 첫 항목. (2) **모델 키**(`ActionExtraction.values[].key`, `targets[]`): `<문항>.<칸>` 또는 술 칸의 `<문항>[<종류>].<칸>`(종류는 soju, beer, spirits, makgeolli, wine). 종류를 모르는 술 칸은 괄호 없는 `Q7_1.amount`다. 모델 키를 `SlotRef`로 바꿀 때는 `[종류]`를 떼고, 반대로는 종류를 알 수 없으므로 바꾸지 않는다(서비스가 문항 은행과 대조해 쓴다).
 - `SlotRef`를 문자열로 쓸 때는 `<question_id>.<slot_id>`이다(반복 키는 쓰지 않는다). 읽을 때는 **마지막 `.`**에서 나눈다. 문항 ID에는 `.`이 있을 수 있고 슬롯 ID에는 없다.

@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
-"""같은 이름 다른 정의 점검(계약 5.0.0, D117 '같은 뜻의 타입은 한 번만'). 사용: check_id_defs.py [--root DIR] [--json]
+"""같은 이름 다른 정의 점검(계약 5.0.0, D117 '같은 뜻의 타입은 한 번만'). 사용: check_id_defs.py [--root DIR]
 
-무엇을 보나: schemas/*.json 과 openapi/*.json 의 모든 properties·쿼리/경로 매개변수 중 이름이 `_id` 로 끝나는 칸.
-같은 이름의 칸은 모두 같은 '정의 끝점'에 닿아야 한다. 끝점은 순수 별칭($ref 와 주석 키만 가진 노드)을 따라가 처음 만나는
-비별칭 노드의 위치다(예: _common.schema.json#/$defs/SessionId). 별칭 없이 그 자리에 모양을 쓴 칸(인라인)은 그 자체가 끝점이라,
-같은 이름의 다른 칸이 참조와 인라인으로 갈리면 위반이다(2026-11-08 결함 #22: session_id 6종, turn_id 64 대 128).
-null 허용(anyOf [{type:null}, X])은 X 의 끝점으로 본다. $ref 옆에 단언 키를 더 둔 칸(좁히기)은 허용 목록에 근거가 있어야 한다.
+보장 범위(이것만 보장한다): schemas/*.json·openapi/*.json 안에서 이름이 `_id` 로 끝나는 칸(properties 와 쿼리·경로 매개변수)과
+이름이 `id` 인 칸. 버전(version)·커서·current_item 처럼 이름이 `_id` 가 아닌 의미상 식별자는 이 점검의 범위 밖이다.
 
-보지 않는 것(이유는 허용 목록 파일 tools/id_defs_allowlist.json 에 있다): 조건부 하위 스키마(if·then·else·not·contains·dependentSchemas
-안의 칸은 기본 정의를 좁히거나 판별할 뿐 타입을 정의하지 않는다), 생성물 파일, 뜻이 위치마다 다른 이름(id).
+규칙
+1. 같은 이름의 `_id` 칸은 모두 같은 '정의'에 닿아야 한다. 정의 = (끝점, 경로 위 좁히기 묶음).
+   끝점: 순수 별칭($ref 와 주석 키만)을 따라가 만나는 첫 $defs 이름 타입(그 자체가 $ref 에 단언을 더해 새 타입을 만들어도 이름 있는 타입이다),
+   또는 별칭 없이 모양을 쓴 칸(인라인). 경로 중간의 칸이 $ref 옆에 단언을 더하면(좁히기) 그 단언이 정의에 전파된다.
+2. 같은 이름의 인라인 정의가 두 곳 이상이면 실패(정의는 한 번, 나머지는 $ref).
+3. 좁히기는 허용 목록 refinements 에 위치별 근거가 있어야 한다.
+4. 조건부: if·not·contains·propertyNames 안은 판별·부정이라 정의가 아니다(보지 않는다). then·else·dependentSchemas 안은 실제 정의라 본다.
+   다만 then/else 의 {"type": "null"} 은 '이 경우 칸이 null' 이라는 좁히기라 정의로 세지 않는다.
+5. 생성물(tools/gen_deid_view.py) 안의 칸은 파일·이름·끝점 단위로 허용 목록 generated 에 있어야 하고, 뜻이 달라(의사 식별자·마스킹) 비교에서 뺀다.
+6. 이름이 `id` 인 칸은 대상이 위치마다 달라 이름으로 묶지 않는다. 대신 허용 목록 id_registry 에 위치마다 뜻과 끝점을 적고, 점검이 대조한다.
+7. 허용 목록 항목은 근거(reason/means)가 필수이고, 쓰이지 않는 항목(낡은 항목)은 실패다.
 종료 코드: 0 위반 없음, 1 위반 있음, 2 사용 오류.
 """
 from __future__ import annotations
@@ -18,7 +24,8 @@ import pathlib
 import sys
 
 ANNOT = {"description", "$comment", "title", "default", "examples", "deprecated", "readOnly", "writeOnly", "x-default-content-type"}
-COND = {"if", "then", "else", "not", "contains", "dependentSchemas", "propertyNames"}
+SKIP_COND = {"if", "not", "contains", "propertyNames"}
+NULL_ONLY = {"type": "null"}
 
 
 def _ptr_get(doc, ptr):
@@ -27,6 +34,13 @@ def _ptr_get(doc, ptr):
         key = raw.replace("~1", "/").replace("~0", "~")
         cur = cur[int(key)] if isinstance(cur, list) else cur[key]
     return cur
+
+
+def _is_named_def(ptr: str) -> bool:
+    if "/$defs/" not in "/" + ptr:
+        return False
+    tail = ("/" + ptr).split("/$defs/")[-1]
+    return "/" not in tail
 
 
 class Repo:
@@ -41,8 +55,8 @@ class Repo:
 
     def resolve(self, base_rel: str, ref: str):
         target, _, frag = ref.partition("#")
-        rel = base_rel if not target else str((pathlib.PurePosixPath(base_rel).parent / target))
-        parts = []
+        rel = base_rel if not target else str(pathlib.PurePosixPath(base_rel).parent / target)
+        parts: list[str] = []
         for p in rel.split("/"):
             if p == "..":
                 parts.pop()
@@ -53,28 +67,28 @@ class Repo:
             rel = rel[len("boundary_contracts/"):]
         return rel, frag or "", _ptr_get(self.doc(rel), frag or "")
 
-    def endpoint(self, rel: str, ptr: str, node, depth=0):
-        """(끝점 문자열, 좁히기 여부)"""
+    def definition(self, rel: str, ptr: str, node, depth=0):
+        """(끝점, 좁히기 묶음(정렬된 문자열 튜플), 인라인 여부)"""
         if depth > 32:
             raise ValueError(f"$ref 순환: {rel}#{ptr}")
         if isinstance(node, dict):
             any_of = node.get("anyOf")
-            if isinstance(any_of, list) and len(any_of) == 2 and {"type": "null"} in any_of and set(node) - ANNOT == {"anyOf"}:
-                other = [a for a in any_of if a != {"type": "null"}][0]
-                return self.endpoint(rel, ptr + "/anyOf", other, depth + 1)
+            if isinstance(any_of, list) and len(any_of) == 2 and NULL_ONLY in any_of and set(node) - ANNOT == {"anyOf"}:
+                other = [a for a in any_of if a != NULL_ONLY][0]
+                i = any_of.index(other)
+                return self.definition(rel, f"{ptr}/anyOf/{i}", other, depth + 1)
             if "$ref" in node:
-                extra = set(node) - ANNOT - {"$ref"}
+                extra = {k: node[k] for k in node if k not in ANNOT and k != "$ref"}
+                if extra and _is_named_def(ptr):
+                    return f"{rel}#{ptr}", (), False
                 trel, tptr, tnode = self.resolve(rel, node["$ref"])
-                end, _ = self.endpoint(trel, tptr, tnode, depth + 1)
-                if extra:
-                    if "/$defs/" in "/" + ptr and "/properties/" not in ptr.split("/$defs/")[-1]:
-                        return f"{rel}#{ptr}", False   # $defs 의 이름 있는 타입이 다른 타입을 좁힌 것(예: SessionId = Id + 64자)은 그 자체가 새 타입이다
-                    return end, True
-                return end, False
-            if "/$defs/" in "/" + ptr and "/properties/" not in ptr.split("/$defs/")[-1]:
-                return f"{rel}#{ptr}", False
+                end, refs, _ = self.definition(trel, tptr, tnode, depth + 1)
+                mine = (json.dumps(extra, sort_keys=True, ensure_ascii=False),) if extra else ()
+                return end, tuple(sorted(set(refs) | set(mine))), False
+            if _is_named_def(ptr):
+                return f"{rel}#{ptr}", (), False
         shape = {k: v for k, v in node.items() if k not in ANNOT} if isinstance(node, dict) else node
-        return "inline:" + json.dumps(shape, sort_keys=True, ensure_ascii=False), False
+        return "inline:" + json.dumps(shape, sort_keys=True, ensure_ascii=False), (), True
 
 
 def _walk(o, ptr, out, rel):
@@ -82,7 +96,7 @@ def _walk(o, ptr, out, rel):
         props = o.get("properties")
         if isinstance(props, dict):
             for name, d in props.items():
-                out.append((name, rel, f"{ptr}/properties/{name}", d))
+                out.append((name, rel, f"{ptr}/properties/{name.replace('~', '~0').replace('/', '~1')}", d))
         if {"name", "in", "schema"} <= set(o) and isinstance(o.get("name"), str):
             out.append((o["name"], rel, f"{ptr}/schema", o["schema"]))
         for k, v in o.items():
@@ -92,37 +106,81 @@ def _walk(o, ptr, out, rel):
             _walk(v, f"{ptr}/{i}", out, rel)
 
 
+def _deid_kind(end: str) -> str:
+    if end.endswith("#/$defs/Pseudonym"):
+        return "Pseudonym"
+    if end.endswith("#/$defs/Masked"):
+        return "Masked"
+    if end.startswith('inline:{"anyOf": [{"$ref": "#/$defs/Masked"}') or end.startswith('inline:{"anyOf": [{"$ref": "#/$defs/Redacted"}'):
+        return "deid-anyof"
+    return "other"
+
+
 def check(root: pathlib.Path, allow: dict) -> list[str]:
     repo = Repo(root)
-    gen = {g["file"] for g in allow.get("generated_files", [])}
-    names_ex = {n["name"] for n in allow.get("excluded_names", [])}
-    loc_ok = {(l["file"], l["pointer"]) for l in allow.get("refinements", [])}
+    gen_files = {g["file"] for g in allow.get("generated", [])}
+    gen_ok = {(g["file"], g["name"], g["kind"]) for g in allow.get("generated", [])}
+    ref_ok = {(l["file"], l["pointer"]) for l in allow.get("refinements", [])}
+    reg = {(r["file"], r["pointer"]): r["endpoint"] for r in allow.get("id_registry", [])}
     fields = []
     for sub in ("schemas", "openapi"):
         for p in sorted((root / sub).glob("*.json")):
-            rel = f"{sub}/{p.name}"
-            if rel in gen:
-                continue
-            _walk(repo.doc(rel), "", fields, rel)
-    problems, by_name, seen_refine = [], {}, set()
+            _walk(repo.doc(f"{sub}/{p.name}"), "", fields, f"{sub}/{p.name}")
+    problems: list[str] = []
+    by_name: dict[str, dict[tuple, list[str]]] = {}
+    inline_locs: dict[str, list[str]] = {}
+    used_gen, used_ref, used_reg = set(), set(), set()
     for name, rel, ptr, node in fields:
-        if not name.endswith("_id") or name in names_ex:
+        segs = ptr.split("/")
+        if any(s in SKIP_COND for s in segs):
             continue
-        if any(seg in COND for seg in ptr.split("/")):
+        if not (name.endswith("_id") or name == "id"):
             continue
-        end, refined = repo.endpoint(rel, ptr, node)
-        if refined:
-            seen_refine.add((rel, ptr))
-            if (rel, ptr) not in loc_ok:
-                problems.append(f"{rel}#{ptr}: {name} 가 참조 옆에 단언을 더했다(좁히기). 근거를 허용 목록 refinements 에 적거나 공통 타입으로 올린다")
-        by_name.setdefault(name, {}).setdefault(end, []).append(f"{rel}#{ptr}")
-    for name, ends in sorted(by_name.items()):
-        if len(ends) > 1:
-            detail = "; ".join(f"{e[:90]} <- {locs[0]}" + (f" 외 {len(locs) - 1}곳" if len(locs) > 1 else "") for e, locs in ends.items())
-            problems.append(f"{name}: 정의 {len(ends)}종 — {detail}")
+        if node == NULL_ONLY and any(s in ("then", "else") for s in segs):
+            continue
+        end, refs, inline = repo.definition(rel, ptr, node)
+        loc = f"{rel}#{ptr}"
+        if rel in gen_files:
+            k = (rel, name, _deid_kind(end))
+            if k not in gen_ok:
+                problems.append(f"{loc}: 생성물 안의 {name} 이 허용 목록 generated 에 없는 끝점 {end[:80]}")
+            used_gen.add(k)
+            continue
+        if refs:
+            used_ref.add((rel, ptr))
+            if (rel, ptr) not in ref_ok:
+                problems.append(f"{loc}: {name} 의 좁히기 {list(refs)} 에 근거가 없다(허용 목록 refinements)")
+        if name == "id":
+            want = reg.get((rel, ptr))
+            used_reg.add((rel, ptr))
+            got = "inline" if inline else end
+            if want is None:
+                problems.append(f"{loc}: 'id' 칸이 id_registry 에 없다(뜻과 끝점을 적는다). 끝점 {got[:80]}")
+            elif want != got:
+                problems.append(f"{loc}: 'id' 칸의 끝점 {got[:80]} 이 id_registry 의 {want} 와 다르다")
+            continue
+        # 근거가 있는 좁히기는 같은 타입의 허용된 좁히기로 본다(정의 비교는 끝점으로). 근거 없는 좁히기는 위에서 실패했고 비교에도 다른 정의로 남는다.
+        key = (end, ()) if refs and (rel, ptr) in ref_ok else (end, refs)
+        by_name.setdefault(name, {}).setdefault(key, []).append(loc)
+        if inline:
+            inline_locs.setdefault(name, []).append(loc)
+    for name, defs in sorted(by_name.items()):
+        if len(defs) > 1:
+            detail = "; ".join(f"{e[:80]}{' +' + ','.join(r) if r else ''} <- {locs[0]}" + (f" 외 {len(locs) - 1}곳" if len(locs) > 1 else "")
+                               for (e, r), locs in defs.items())
+            problems.append(f"{name}: 정의 {len(defs)}종 — {detail}")
+    for name, locs in sorted(inline_locs.items()):
+        if len(locs) > 1:
+            problems.append(f"{name}: 인라인 정의가 {len(locs)}곳(정의는 한 번, 나머지는 $ref) — {', '.join(locs[:3])}")
+    for g in allow.get("generated", []):
+        if (g["file"], g["name"], g["kind"]) not in used_gen:
+            problems.append(f"허용 목록 generated 의 낡은 항목: {g['file']} {g['name']} {g['kind']}")
     for l in allow.get("refinements", []):
-        if (l["file"], l["pointer"]) not in seen_refine:
-            problems.append(f"허용 목록의 낡은 항목(그 자리에 좁히기가 없다): {l['file']}#{l['pointer']}")
+        if (l["file"], l["pointer"]) not in used_ref:
+            problems.append(f"허용 목록 refinements 의 낡은 항목(그 자리에 좁히기가 없다): {l['file']}#{l['pointer']}")
+    for k in reg:
+        if k not in used_reg:
+            problems.append(f"id_registry 의 낡은 항목: {k[0]}#{k[1]}")
     return problems
 
 
@@ -131,19 +189,21 @@ def main(argv):
     if "--root" in argv:
         i = argv.index("--root")
         if i + 1 >= len(argv):
-            print("--root 에는 디렉터리가 필요하다", file=sys.stderr); return 2
+            print("--root 에는 디렉터리가 필요하다", file=sys.stderr)
+            return 2
         root = pathlib.Path(argv[i + 1])
     allow_path = root / "tools/id_defs_allowlist.json"
     allow = json.loads(allow_path.read_text(encoding="utf-8")) if allow_path.exists() else {}
-    for sect in ("generated_files", "excluded_names", "refinements"):
+    for sect, key in (("generated", "reason"), ("refinements", "reason"), ("id_registry", "means")):
         for item in allow.get(sect, []):
-            if not str(item.get("reason", "")).strip():
-                print(f"허용 목록 {sect} 항목에 근거(reason)가 없다: {item}", file=sys.stderr); return 1
+            if not str(item.get(key, "")).strip():
+                print(f"FAIL 허용 목록 {sect} 항목에 근거({key})가 없다: {item}")
+                return 1
     probs = check(root, allow)
     for p in probs:
         print("FAIL", p)
     if not probs:
-        print("OK   같은 이름(_id)의 칸은 모두 같은 정의 끝점에 닿는다")
+        print("OK   _id·id 칸은 한 정의만 참조한다(범위: 이름이 _id 로 끝나거나 id 인 칸)")
     return 1 if probs else 0
 
 

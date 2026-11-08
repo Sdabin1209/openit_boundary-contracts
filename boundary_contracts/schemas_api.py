@@ -87,5 +87,33 @@ def validator(name: str, *, schema_sources=None):
     if fragment:
         schema = {"$ref": uri + "#" + fragment}
     jsonschema.Draft202012Validator.check_schema(schema)
-    return jsonschema.Draft202012Validator(schema, registry=schema_registry(schema_sources=schema_sources),
-                                          format_checker=format_checker(schema))
+    return _finite_validator_class()(schema, registry=schema_registry(schema_sources=schema_sources),
+                                     format_checker=format_checker(schema))
+
+
+@lru_cache(maxsize=1)
+def _finite_validator_class():
+    """Draft 2020-12 에서 "number"·"integer" 타입이 NaN·무한대를 받지 않게 한 검증기(5.0.0, I-JSON RFC 7493).
+    왜: 파이썬 객체를 바로 검증하면 json 이 만든 float('inf')(본문의 1e999)가 type number 를 통과했다(결함 대장 #10 가설).
+    정수 범위·깊이·노드 예산 같은 값 전체 규칙은 validate()/strict_json.check_json_value 가 본다."""
+    import math
+    import jsonschema
+    base = jsonschema.Draft202012Validator.TYPE_CHECKER
+    def number(checker, x):
+        return base.is_type(x, "number") and (not isinstance(x, float) or math.isfinite(x))
+    def integer(checker, x):
+        return base.is_type(x, "integer") and (not isinstance(x, float) or math.isfinite(x))
+    tc = base.redefine_many({"number": number, "integer": integer})
+    return jsonschema.validators.extend(jsonschema.Draft202012Validator, type_checker=tc)
+
+
+def validate(name: str, value, *, schema_sources=None) -> None:
+    """계약 검증 진입점(5.0.0): 계약 JSON 공통 규칙(strict_json.check_json_value: 유한한 수, ±2**53 정수, 깊이 64, 노드 예산)을 먼저 보고
+    스키마 검증을 한다. 어기면 BoundaryError(INVALID_RECORD, details.errors 에 처음 몇 개)."""
+    from .errors import BoundaryError
+    from .strict_json import check_json_value
+    check_json_value(value)
+    errs = sorted(validator(name, schema_sources=schema_sources).iter_errors(value), key=lambda e: list(e.absolute_path))
+    if errs:
+        raise BoundaryError("INVALID_RECORD", f"{name} 계약 위반 {len(errs)}건",
+                            {"errors": [f"/{'/'.join(map(str, e.absolute_path))}: {e.message[:200]}" for e in errs[:5]]})

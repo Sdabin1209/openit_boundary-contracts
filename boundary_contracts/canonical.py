@@ -90,10 +90,23 @@ def _write(v: Any, out: list[str]) -> None:
 
 
 def canonicalize(value: Any) -> bytes:
-    """JCS 정규화한 UTF-8 바이트."""
+    """JCS 정규화한 UTF-8 바이트. 깊이가 계약 상한(strict_json.MAX_JSON_DEPTH)을 넘으면 재귀에 들어가기 전에 ValueError 다
+    (5.0.0: 깊은 입력이 RecursionError 로 죽던 것을 이 모듈의 다른 거부와 같은 오류로)."""
+    _check_depth(value)
     out: list[str] = []
     _write(value, out)
     return "".join(out).encode("utf-8")
+
+
+def _check_depth(value: Any) -> None:
+    from .strict_json import MAX_JSON_DEPTH
+    stack = [(value, 0)]
+    while stack:
+        v, d = stack.pop()
+        if isinstance(v, (dict, list, tuple)):
+            if d + 1 > MAX_JSON_DEPTH:
+                raise ValueError(f"중첩이 너무 깊다(계약 상한 {MAX_JSON_DEPTH}, CONVENTIONS 1절)")
+            stack.extend((x, d + 1) for x in (v.values() if isinstance(v, dict) else v))
 
 
 def sha256_hash(value: Any) -> str:

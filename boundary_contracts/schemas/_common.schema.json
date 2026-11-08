@@ -18,12 +18,13 @@
     "SessionId": {
       "$ref": "#/$defs/Id",
       "maxLength": 64,
-      "description": "세션 ID(서버 발급, PUBLIC_API A절). Id 이면서 64자 이하. 근거: survey-service 가 secrets.token_hex(32)(64자 소문자 16진)로 발급한다(2026-11-08 결함 #21, 첫 글자 _·- 가 Id 를 어기던 token_urlsafe 를 대체). 4.x 의 공개 패턴 ^[A-Za-z0-9_-]{1,64}$ 를 Id 쪽으로 좁혔다(첫 글자 _·- 금지, 5.0.0)."
+      "pattern": "^[A-Za-z0-9_-]*$(?![\\s\\S])",
+      "description": "세션 ID(서버 발급, PUBLIC_API A절). 4.x 공개 형식 [A-Za-z0-9_-]{1,64} 와 Id 의 교집합: 첫 글자 영문·숫자, 이후 영문·숫자·_·-, 1~64자. '.'·':' 는 넓히지 않았다. 근거: survey-service 가 secrets.token_hex(32)(64자 소문자 16진)로 발급한다(2026-11-08 결함 #21, 첫 글자 _·- 가 Id 를 어기던 token_urlsafe 대체). 이 타입의 값은 Id 이므로 envelope_id 가 바꾸지 않는다(CONVENTIONS 116행)."
     },
     "QuestionId": {
       "type": "string",
       "pattern": "^Q[0-9]+(\\.D[0-9]{2})?(_[0-9]+)?$(?![\\s\\S])",
-      "description": "문항 ID(모델 입출력과 신호에서 쓰는 모양). 정본 근거: 학습 데이터셋 v2 labels(D74)·4.x ActionExtractionInput·ResponseRequest 의 같은 패턴. 5.0.0 에서 사본 셋을 이 하나로 모았다(D117). 길이 상한은 두지 않았다(모델 입출력 모양을 바꾸지 않기 위해, 사람 입구에는 쓰이지 않는다)."
+      "description": "문항 ID(모델 입출력·실패 사례 검토·신호에서 쓰는 모양). 정본 근거: 학습 데이터셋 v2 labels(D74)와 4.x ActionExtractionInput·ResponseRequest 의 같은 패턴. 5.0.0 에서 사본들을 이 하나로 모았다(D117). 사람 입구에도 쓰인다(CaseReviewRequest.reviewed_input·expected 로 검토자가 넣는 경로). 길이: 패턴의 숫자 자리는 무한이지만 그 경로의 본문은 계약 JSON 공통 규칙(1 MiB·깊이 64, CONVENTIONS 1절)으로 묶인다. 도메인 상한은 labels 근거를 찾은 뒤 정한다."
     },
     "Hash": {
       "type": "string",

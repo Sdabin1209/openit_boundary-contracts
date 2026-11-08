@@ -26,12 +26,15 @@
       ]
     },
     "snapshot_id": {
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/SnapshotId"
+        }
       ],
-      "maxLength": 128,
-      "description": "백업 저장소가 준 스냅숏 ID(restic snapshot id). 실패면 null"
+      "description": "백업 저장소가 준 스냅숏 ID. 실패면 null"
     },
     "bytes": {
       "type": "integer",
@@ -83,6 +86,12 @@
           "description": "code 와 retryable 의 짝은 BoundaryError 와 같다(UNAVAILABLE 만 재시도 가능)"
         }
       ]
+    },
+    "SnapshotId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "백업 저장소가 준 스냅숏 ID(restic snapshot id). 근거: 상한 128 은 4.x 값 그대로(설계 상한, 측정 안 함). 5.0.0: 사본 둘을 이 하나로(D117)."
     }
   },
   "allOf": [
@@ -100,8 +109,7 @@
             "type": "null"
           },
           "snapshot_id": {
-            "type": "string",
-            "minLength": 1
+            "$ref": "#/$defs/SnapshotId"
           }
         }
       },

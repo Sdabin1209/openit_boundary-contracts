@@ -36,6 +36,17 @@ class EnvelopeIdVectors(unittest.TestCase):
                 self.assertEqual(envelope_id(c["raw"]), c["expected"])
                 self.assertTrue(is_id(envelope_id(c["raw"])), "변환 결과는 항상 Id 다")
 
+    def test_벡터_기대값을_독립으로_다시_계산한다(self):
+        # 기대값을 파일에서 믿지 않고, 스키마 검증기(Id)와 hashlib 로 다시 계산해 파일·함수 둘 다와 대조한다
+        import hashlib
+        v = _frag("_common", "$defs", "Id")
+        doc = json.loads((ROOT / "conformance/vectors/envelope_id.json").read_text(encoding="utf-8"))
+        for c in doc["cases"]:
+            want = c["raw"] if v.is_valid(c["raw"]) else "x-" + hashlib.sha256(c["raw"].encode("utf-8")).hexdigest()[:32]
+            with self.subTest(c["name"]):
+                self.assertEqual(c["expected"], want)
+                self.assertEqual(envelope_id(c["raw"]), want)
+
     def test_문자열이_아니면_TypeError(self):
         with self.assertRaises(TypeError):
             envelope_id(None)
@@ -45,7 +56,8 @@ class IdTypes(unittest.TestCase):
     def test_SessionId_는_Id_이면서_64자(self):
         v = _frag("_common", "$defs", "SessionId")
         self.assertTrue(v.is_valid("0f" * 32))
-        for bad in ("_abc", "-abc", "a" * 65, "", "abc\n"):
+        self.assertTrue(v.is_valid("a_b-c"))
+        for bad in ("_abc", "-abc", "a" * 65, "", "abc\n", "a.b", "a:b"):
             with self.subTest(bad=bad):
                 self.assertFalse(v.is_valid(bad))
 
@@ -69,6 +81,14 @@ class IdTypes(unittest.TestCase):
             self.assertFalse(v.is_valid(bad), bad)
 
 
+class SessionIdEnvelope(unittest.TestCase):
+    def test_SessionId_값은_envelope_id_가_바꾸지_않는다(self):
+        v = _frag("_common", "$defs", "SessionId")
+        for sid in ("0f" * 32, "s1", "A", "a_b-c", "Z" * 64):
+            self.assertTrue(v.is_valid(sid), sid)
+            self.assertEqual(envelope_id(sid), sid)
+
+
 class InputBounds(unittest.TestCase):
     def test_알림_커서와_Last_Event_ID_는_18자리(self):
         for v in (_frag("HttpQueries", "$defs", "Alerts", "properties", "cursor"), _frag("HttpWire", "$defs", "EventId")):
@@ -79,6 +99,7 @@ class InputBounds(unittest.TestCase):
         v = _frag("PushSubscriptionRequest", "properties", "endpoint")
         self.assertTrue(v.is_valid("https://push.example.com/abc-DEF_1%20"))
         self.assertFalse(v.is_valid("https://push.example.com/" + "가" * 10))
+        self.assertFalse(v.is_valid("https://push.example.com/a%zz"), "format uri(RFC 3986) 위반: 잘못된 퍼센트 인코딩")
 
     def test_자료_파일_이름은_255자(self):
         v = _frag("AuthoringRequests", "$defs", "MaterialQuery", "properties", "filename")
@@ -126,18 +147,61 @@ class CheckIdDefsTool(unittest.TestCase):
         r = self._run(d)
         self.assertEqual(r.returncode, 1); self.assertIn("좁히기", r.stdout)
 
+    def _edit(self, d, rel, fn):
+        p = d / rel
+        doc = json.loads(p.read_text(encoding="utf-8")); fn(doc); p.write_text(json.dumps(doc), encoding="utf-8")
+
     def test_근거_없는_허용_항목은_실패(self):
-        d = self._copy(); p = d / "tools/id_defs_allowlist.json"
-        a = json.loads(p.read_text(encoding="utf-8")); a["excluded_names"].append({"name": "session_id", "reason": " "})
-        p.write_text(json.dumps(a), encoding="utf-8")
+        d = self._copy()
+        self._edit(d, "tools/id_defs_allowlist.json", lambda a: a["refinements"][0].update(reason=" "))
         self.assertEqual(self._run(d).returncode, 1)
 
     def test_낡은_허용_항목은_실패(self):
-        d = self._copy(); p = d / "tools/id_defs_allowlist.json"
-        a = json.loads(p.read_text(encoding="utf-8")); a["refinements"].append({"file": "schemas/StaffAlert.schema.json", "pointer": "/properties/alert_id", "reason": "시험"})
-        p.write_text(json.dumps(a), encoding="utf-8")
+        d = self._copy()
+        self._edit(d, "tools/id_defs_allowlist.json", lambda a: a["refinements"].append({"file": "schemas/StaffAlert.schema.json", "pointer": "/properties/alert_id", "reason": "시험"}))
         r = self._run(d)
         self.assertEqual(r.returncode, 1); self.assertIn("낡은", r.stdout)
+
+    def test_우회1_별칭_칸의_좁히기가_전파된다(self):
+        # KioskStartFragment.question_set_id 는 DeviceConfig 칸의 별칭이다. 중간 칸(DeviceConfig)에 단언을 더하면 별칭 쪽에도 전파되어 실패해야 한다
+        d = self._copy()
+        self._edit(d, "schemas/DeviceConfig.schema.json", lambda o: o["properties"]["question_set_id"].update(maxLength=5))
+        r = self._run(d)
+        self.assertEqual(r.returncode, 1); self.assertIn("KioskStartFragment", r.stdout)
+
+    def test_우회2_then_가지의_다른_정의(self):
+        d = self._copy()
+        self._edit(d, "schemas/ResponseRequest.schema.json", lambda o: o["allOf"][0]["then"]["properties"]["next"]["properties"].update(question_id={"type": "string", "minLength": 1}))
+        r = self._run(d)
+        self.assertEqual(r.returncode, 1); self.assertIn("question_id", r.stdout)
+
+    def test_우회3_같은_모양_인라인_사본_둘(self):
+        d = self._copy()
+        flag = {"type": "string", "pattern": "^fl-[0-9a-f]+(-[0-9]+)?$(?![\\s\\S])"}
+        def two(o):
+            o["$defs"]["Flag"]["properties"]["flag_id"] = dict(flag)
+            o["$defs"]["Draft"]["properties"]["flags"]["items"]["properties"]["flag_id"] = dict(flag)
+            o["$defs"]["Preview"]["properties"]["open_flags"]["items"]["properties"]["flag_id"] = dict(flag)
+        self._edit(d, "schemas/AuthoringResponses.schema.json", two)
+        r = self._run(d)
+        self.assertEqual(r.returncode, 1); self.assertIn("인라인 정의가", r.stdout)
+
+    def test_우회4_등록_안_된_id_칸(self):
+        d = self._copy()
+        self._edit(d, "tools/id_defs_allowlist.json", lambda a: a.update(id_registry=a["id_registry"][1:]))
+        r = self._run(d)
+        self.assertEqual(r.returncode, 1); self.assertIn("id_registry 에 없다", r.stdout)
+
+    def test_우회5_생성물_안의_다른_끝점(self):
+        d = self._copy()
+        self._edit(d, "schemas/OpsFeedbackDeidentifiedTrace.schema.json", lambda o: o["properties"].update(session_id={"type": "string"}))
+        r = self._run(d)
+        self.assertEqual(r.returncode, 1); self.assertIn("생성물", r.stdout)
+
+    def test_if_판별은_정의가_아니다(self):
+        d = self._copy()
+        r = self._run(d)
+        self.assertNotIn("REASK_STREAK", r.stdout)
 
 
 if __name__ == "__main__":

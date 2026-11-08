@@ -51,7 +51,7 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 255,
-          "description": "근거: 상한 255 는 POSIX NAME_MAX(대부분 파일 시스템의 파일 이름 바이트 상한과 같은 값, 문자 수로 적용). 5.0.0(결함 대장 #10)."
+          "description": "근거: 상한 255 는 설계 상한(코드 포인트 수, 측정 안 함). 파일 시스템 NAME_MAX(바이트)와는 다른 단위라 그것을 근거로 삼지 않는다. 저장 안전은 저장소가 사용자 파일 이름을 저장 경로로 쓰지 않는 것으로 보장한다(question-authoring 영향 목록). 5.0.0(결함 대장 #10)."
         },
         "base_version": {
           "anyOf": [
@@ -127,8 +127,7 @@
         "flag_ids": {
           "type": "array",
           "items": {
-            "type": "string",
-            "pattern": "^fl-[0-9a-f]+(-[0-9]+)?$(?![\\s\\S])"
+            "$ref": "AuthoringResponses.schema.json#/$defs/FlagId"
           },
           "maxItems": 5000,
           "description": "근거: 상한 5000 은 한 초안이 가질 수 있는 플래그 수의 상한과 같다(question-authoring MAX_FLAGS, 설계 상한 측정 안 함). 5.0.0(결함 대장 #10)."

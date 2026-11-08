@@ -23,8 +23,7 @@
       "additionalProperties": false,
       "properties": {
         "flag_id": {
-          "type": "string",
-          "pattern": "^fl-[0-9a-f]+(-[0-9]+)?$(?![\\s\\S])"
+          "$ref": "#/$defs/FlagId"
         },
         "path": {
           "type": "string",
@@ -205,8 +204,7 @@
             "additionalProperties": false,
             "properties": {
               "flag_id": {
-                "type": "string",
-                "pattern": "^fl-[0-9a-f]+(-[0-9]+)?$(?![\\s\\S])"
+                "$ref": "#/$defs/FlagId"
               },
               "path": {
                 "type": "string",
@@ -491,8 +489,7 @@
             "additionalProperties": false,
             "properties": {
               "flag_id": {
-                "type": "string",
-                "pattern": "^fl-[0-9a-f]+(-[0-9]+)?$(?![\\s\\S])"
+                "$ref": "#/$defs/FlagId"
               },
               "path": {
                 "type": "string",
@@ -705,6 +702,11 @@
           ]
         }
       }
+    },
+    "FlagId": {
+      "type": "string",
+      "pattern": "^fl-[0-9a-f]+(-[0-9]+)?$(?![\\s\\S])",
+      "description": "초안 플래그 ID(question-authoring 발급). 5.0.0: 사본 셋과 요청 쪽 사본을 이 하나로(D117)."
     }
   }
 }

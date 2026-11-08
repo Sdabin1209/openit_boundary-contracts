@@ -1,0 +1,10 @@
+{
+ "_설명": "5.0.0: 사람(검토자)이 직접 쓰는 실패 사례 검토 값(CaseReviewRequest.expected·reviewed_input)의 공개 규칙. 정본은 이 파일과 boundary_contracts.review_input.review_value_problems 이고 ops-feedback 은 이것을 부른다(D117: 4.x 에서 ops-feedback 코드에만 있던 거부를 계약으로 올렸다). 패턴은 부분 일치(search)로 쓴다. 이름·주소처럼 패턴으로 알 수 없는 개인정보는 검토 화면 안내와 사람 책임이다.",
+ "max_string_length": 20000,
+ "max_string_length_설명": "문자열 하나의 상한(코드 포인트). 근거: ops-feedback ADR 0008 의 설계 상한(검토자가 쓰는 문장·JSON 값으로 충분, 측정 안 함)을 계약으로 올렸다.",
+ "patterns": {
+  "phone_kr": "0\\d{1,2}[- .]?\\d{3,4}[- .]?\\d{4}",
+  "rrn_kr": "\\d{6}[- ]?[1-8]\\d{6}"
+ },
+ "email": "local@domain.tld 모양(앞 문자 [A-Za-z0-9._%+-] 하나 + '@' + 도메인 문자 [A-Za-z0-9.-]* 안의 마지막 '.' 뒤 영문 2자). 선형 시간 탐지로 구현한다(정규식 \\.[A-Za-z]{2,} 와 같은 뜻)."
+}
