@@ -68,6 +68,10 @@
 | `openit_model_engine_duration_seconds` | model-runtime | 서버 쪽 호출 하나(대기+추론+재시도) | `op`, `outcome`, `attempts` | — |
 | `openit_model_queue_wait_seconds` | model-runtime | 엔진 큐 대기 | `op` | p95 ≤ 0.3 |
 | `openit_next_item_overridden_total` | model-runtime | 모델이 낸 next_item 과 서버가 채운 값이 다른 횟수(카운터, ADR 0014 과도기 신호) | `op` | 추세 관찰 |
+| `openit_job_last_exit_status` | deploy(잡 실행기, scripts/job-metrics.sh) | 마지막 실행 결과: 0 성공, 1 실패(종료 코드·신호·제한 시간 초과 모두 실패, 5.0.1) | `job_name`(잡 이름) | 경보: 1 |
+| `openit_job_last_run_timestamp_seconds` | deploy | 마지막 실행이 끝난 시각(유닉스 초) | `job_name` | — |
+| `openit_job_last_success_timestamp_seconds` | deploy | 마지막 성공 시각. 실패하면 이전 값을 유지하고, 한 번도 성공하지 않았으면 쓰지 않는다(경보 규칙은 값이 없으면 판정하지 않는다) | `job_name` | 경보: 지금 − 값 > 주기×2 |
+| `openit_job_interval_seconds` | deploy | 잡 주기(타이머 OnUnitActiveSec 과 같은 값). 경보의 '주기의 2배' 기준 | `job_name` | — |
 노출 방식과 수집은 deploy 의 감시 배선 소관이다(이름만 계약). 목표 값은 D125 의 2초 목표에서 나눈 것이며 실측 뒤 조정한다(측정 전).
 
 ## v1 지표 처분 요약
