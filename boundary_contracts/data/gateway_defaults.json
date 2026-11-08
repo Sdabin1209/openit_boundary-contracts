@@ -1,0 +1,15 @@
+{
+  "$comment": "게이트웨이(공개 입구·영역 게이트웨이)가 Exposure 선언에 값이 없을 때 쓰는 기본값의 정본(5.0.1). 사람이 읽는 표는 CONVENTIONS '시간 상한 사슬', 설명은 Exposure.schema.json. 이 파일을 읽어 쓰고 사본을 두지 않는다(D117).",
+  "max_body_bytes": 8388608,
+  "timeouts_ms": {
+    "dial": 1000,
+    "response_header": {
+      "default": 55000,
+      "by_service": {
+        "release-gate": 180000,
+        "question-authoring": 120000,
+        "ops-feedback": 60000
+      }
+    }
+  }
+}

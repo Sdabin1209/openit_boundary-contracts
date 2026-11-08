@@ -152,13 +152,15 @@
               "minimum": 1
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "description": "값이 없으면 boundary_contracts.gateway_defaults()['timeouts_ms'](연결 1000ms, 응답 헤더는 서비스별 표 — CONVENTIONS '시간 상한 사슬')를 쓴다(5.0.1)."
         },
         "max_body_bytes": {
           "type": "integer",
           "minimum": 1,
           "maximum": 8589934592,
-          "description": "3.4.7(RUNTIME R3.5·R10.13): 이 경로의 요청 본문 상한(바이트). platform 공개 입구와 영역 게이트웨이가 둘 다 이 값으로 413 을 낸다(앱에 닿기 전). 없으면 8MiB(8388608, 지금까지의 공개 입구 기본, 시작값·측정 안 함). 상한은 클라이언트 max_tar_bytes 8GiB. 값은 받는 영역이 ADR 로 근거와 함께 정한다"
+          "description": "3.4.7(RUNTIME R3.5·R10.13): 이 경로의 요청 본문 상한(바이트). platform 공개 입구와 영역 게이트웨이가 둘 다 이 값으로 413 을 낸다(앱에 닿기 전). 없으면 8MiB(8388608, 지금까지의 공개 입구 기본, 시작값·측정 안 함). 상한은 클라이언트 max_tar_bytes 8GiB. 값은 받는 영역이 ADR 로 근거와 함께 정한다 기계가 읽는 기본값은 boundary_contracts.gateway_defaults()['max_body_bytes'](5.0.1).",
+          "default": 8388608
         },
         "upstream_port": {
           "type": "integer",

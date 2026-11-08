@@ -79,3 +79,21 @@ class SchemaValidator(unittest.TestCase):
                 self.assertFalse(v.is_valid(bad))
         # evolve 뒤에도 같은 규칙(ContractValidator 재감싸기)
         self.assertFalse(v.evolve(schema=area).is_valid({"n": float("-inf")}))
+
+
+class GatewayDefaults(unittest.TestCase):
+    def test_defaults_match_schema_and_conventions(self):
+        g = bc.gateway_defaults()
+        ex = bc.load_schema("Exposure")["$defs"]["route"]["properties"]
+        self.assertEqual(ex["max_body_bytes"]["default"], g["max_body_bytes"])
+        conv = (ROOT / "CONVENTIONS.md").read_text(encoding="utf-8")
+        # 사람이 읽는 표의 값과 같은지(표가 정본 파일과 어긋나면 실패)
+        for svc, ms in g["timeouts_ms"]["response_header"]["by_service"].items():
+            with self.subTest(svc):
+                self.assertIn(f"초({ms // 1000})", conv)
+        self.assertIn(f"응답 헤더 {g['timeouts_ms']['response_header']['default'] // 1000}초", conv)
+        self.assertIn(f"연결 {g['timeouts_ms']['dial'] // 1000}초", conv)
+
+    def test_returns_copy(self):
+        bc.gateway_defaults()["max_body_bytes"] = 1
+        self.assertEqual(bc.gateway_defaults()["max_body_bytes"], 8388608)

@@ -8,6 +8,7 @@
 - 호환: 추가만. 기존 file:// 등록과 상대 `$ref`·`$id` 해석은 그대로다. 계약 스키마 본문은 바뀌지 않았다. `PIPELINE_SCHEMA_VERSION` 은 "5.0" 그대로.
 - `schema_validator(schema)`(새 공개 함수): 영역 내부 스키마(dict)에도 계약 registry·format_checker·비유한 수 거부를 씌운다. 5.0.0 의 `validator(name)` 은 계약 이름만 받아 영역 스키마 검증에는 CONVENTIONS 10절 수 규칙이 걸리지 않았다(model-runtime 반영 중 발견).
 - CONVENTIONS 10절: JSON 본문 1 MiB 는 기본값이고 openapi 경로의 `x-max-body-bytes` 가 그 경로의 상한이라는 것을 명시했다(5.0.0 문구가 model-serving 4 MiB 경로와 어긋나 보였다; link 는 이미 경로 상한을 `max_bytes` 로 넘긴다).
+- `gateway_defaults()`(새 공개 함수)와 `data/gateway_defaults.json`: 게이트웨이 기본값(본문 상한 8 MiB, 연결 1초, 응답 헤더 서비스별)을 기계가 읽게 했다. 5.0.0 까지는 Exposure 설명 산문과 CONVENTIONS 표에만 있어 platform 이 코드에 사본을 뒀다(platform 반영 중 발견, 변경 요청 2026-11-08). Exposure.max_body_bytes 에 `default` 를 달았다. 시험이 CONVENTIONS 표와 대조한다.
 - 시험: `tests/test_stable_uri_501.py`(모든 계약 스키마가 안정 URI 로 풀림, 외부 문서가 SessionId·QuestionId 를 위임해 좋은 값 통과·나쁜 값 거부, registry 없이는 Unresolvable 로 실패, 읽기 모드 등록).
 
 

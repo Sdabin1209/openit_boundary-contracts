@@ -105,6 +105,15 @@ def schema_validator(schema: dict, *, schema_sources=None):
                                                              format_checker=format_checker(schema)))
 
 
+def gateway_defaults() -> dict:
+    """게이트웨이 기본값(Exposure 에 값이 없을 때)의 정본(5.0.1): 본문 상한 바이트, 연결·응답 헤더 상한(ms, 서비스별).
+    왜 데이터 파일인가: 5.0.0 까지 이 값은 스키마 설명 산문과 CONVENTIONS 표에만 있어 platform 이 코드에 사본을 둘 수밖에 없었다(D117)."""
+    import copy
+    doc = json.loads((Path(__file__).parent / "data" / "gateway_defaults.json").read_text(encoding="utf-8"))
+    doc.pop("$comment", None)
+    return copy.deepcopy(doc)
+
+
 def nonfinite_errors(instance):
     """값 안의 NaN·무한대 float 위치마다 jsonschema.ValidationError 하나(값은 싣지 않는다). 반복 순회(재귀 없음).
     왜 스키마 키워드가 아니라 값 순회인가: jsonschema 는 $ref 로 다른 파일에 들어가면 그 파일의 $schema 로 검증기 클래스를
