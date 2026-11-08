@@ -2,8 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "StaffCallRetryResult",
   "description": "재알림 응답(2.1.0, CR-H001). 같은 alert_id로 다시 전달한 결과.",
-  "x-producers": ["survey-service"],
-  "x-consumers": ["kiosk-frontend"],
+  "x-producers": [
+    "survey-service"
+  ],
+  "x-consumers": [
+    "kiosk-frontend"
+  ],
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -14,8 +18,7 @@
   ],
   "properties": {
     "alert_id": {
-      "type": "string",
-      "minLength": 1
+      "$ref": "_common.schema.json#/$defs/Id"
     },
     "staff_alert": {
       "enum": [

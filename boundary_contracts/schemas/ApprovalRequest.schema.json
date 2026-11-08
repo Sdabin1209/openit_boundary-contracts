@@ -33,7 +33,8 @@
     "reason": {
       "type": "string",
       "minLength": 1,
-      "description": "반려에는 필수"
+      "description": "반려에는 필수 근거: 사람이 쓰는 사유 한 단락의 설계 상한 2000자(측정 안 함). 5.0.0: 사람 입구 길이 무한을 닫는다(결함 대장 #10).",
+      "maxLength": 2000
     },
     "report_hash": {
       "$ref": "_common.schema.json#/$defs/Hash",

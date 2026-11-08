@@ -51,8 +51,7 @@
       "type": "object",
       "properties": {
         "question_set_id": {
-          "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])"
+          "$ref": "_common.schema.json#/$defs/Id"
         }
       },
       "required": [],
@@ -88,7 +87,8 @@
         },
         "version": {
           "type": "string",
-          "pattern": "^[0-9]+$(?![\\s\\S])"
+          "pattern": "^[0-9]{1,18}$(?![\\s\\S])",
+          "description": "근거: 18자리는 부호 있는 64비트 정수(BIGINT, 최대 9223372036854775807, 19자리)에 항상 들어가는 자릿수다(HttpQueries.Results.cursor 와 같은 선례). 5.0.0: 자릿수 무한이 저장소 오류(5xx)로 이어지던 것을 계약에서 막는다(결함 대장 #10)."
         },
         "latest_only": {
           "enum": [
@@ -112,8 +112,7 @@
           "$ref": "_common.schema.json#/$defs/FailureType"
         },
         "source_release_id": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "_common.schema.json#/$defs/Id"
         },
         "cursor": {
           "type": "string",
@@ -127,7 +126,8 @@
       "properties": {
         "version": {
           "type": "string",
-          "pattern": "^[0-9]+$(?![\\s\\S])"
+          "pattern": "^[0-9]{1,18}$(?![\\s\\S])",
+          "description": "근거: 18자리는 부호 있는 64비트 정수(BIGINT, 최대 9223372036854775807, 19자리)에 항상 들어가는 자릿수다(HttpQueries.Results.cursor 와 같은 선례). 5.0.0: 자릿수 무한이 저장소 오류(5xx)로 이어지던 것을 계약에서 막는다(결함 대장 #10)."
         }
       },
       "required": [],
@@ -147,8 +147,7 @@
           "description": "근거: 기본 100·최대 500(HTTP.md 목록 쿼리 규칙)"
         },
         "question_set_id": {
-          "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])"
+          "$ref": "_common.schema.json#/$defs/Id"
         },
         "question_set_version": {
           "type": "string",
@@ -171,8 +170,7 @@
           "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])"
         },
         "submission_id": {
-          "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$(?![\\s\\S])"
+          "$ref": "_common.schema.json#/$defs/Id"
         }
       },
       "required": [],
@@ -206,7 +204,8 @@
         },
         "cursor": {
           "type": "string",
-          "pattern": "^[0-9]+$(?![\\s\\S])"
+          "pattern": "^[0-9]{1,18}$(?![\\s\\S])",
+          "description": "근거: 18자리는 부호 있는 64비트 정수(BIGINT, 최대 9223372036854775807, 19자리)에 항상 들어가는 자릿수다(HttpQueries.Results.cursor 와 같은 선례). 5.0.0: 자릿수 무한이 저장소 오류(5xx)로 이어지던 것을 계약에서 막는다(결함 대장 #10)."
         }
       },
       "required": [],

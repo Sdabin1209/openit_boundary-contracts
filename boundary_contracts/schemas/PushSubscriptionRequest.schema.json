@@ -20,7 +20,7 @@
     "endpoint": {
       "type": "string",
       "maxLength": 2048,
-      "pattern": "^https://(?=[^/:]*[A-Za-z])[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+(:443)?/\\S*$(?![\\s\\S])",
+      "pattern": "^https://(?=[^/:]*[A-Za-z])[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+(:443)?/[\\x21-\\x7E]*$(?![\\s\\S])",
       "allOf": [
         {
           "not": {
@@ -33,7 +33,7 @@
           }
         }
       ],
-      "description": "웹 푸시 endpoint(PushSubscription.endpoint). https, 포트 없음 또는 443, 점이 있는 이름 호스트(IP 리터럴·localhost·.local/.localdomain/.internal/.lan/.home/.corp/.intranet 거부), 경로가 있고 공백이 없다. 3.7.0: PublicApiRequests.PushSubscribeBody 와 둘로 갈라져 있던 제약을 여기 하나로 합쳤다 근거: 상한 2048 은 브라우저·프록시가 넘기는 URL 길이의 관례적 하한(측정 안 함)"
+      "description": "웹 푸시 endpoint(PushSubscription.endpoint). https, 포트 없음 또는 443, 점이 있는 이름 호스트(IP 리터럴·localhost·.local/.localdomain/.internal/.lan/.home/.corp/.intranet 거부), 경로가 있고 공백이 없다. 3.7.0: PublicApiRequests.PushSubscribeBody 와 둘로 갈라져 있던 제약을 여기 하나로 합쳤다 근거: 상한 2048 은 브라우저·프록시가 넘기는 URL 길이의 관례적 하한(측정 안 함) 5.0.0: 경로는 ASCII 표시 문자만(RFC 3986 2절: URI 는 ASCII 문자열, 비ASCII 는 퍼센트 인코딩). 비ASCII 경로가 저장소 키 상한을 넘겨 5xx 가 되던 것을 막는다(결함 대장 #10)."
     },
     "keys": {
       "type": "object",
@@ -68,7 +68,8 @@
           "results"
         ]
       },
-      "description": "구독 주제(계약 3.4.0). alerts=직원 알림(staff 역할), results=결과 도착(clinician 역할=result-reader 토큰). 없으면 [\"alerts\"]. 역할 확인은 서비스가 한다."
+      "description": "구독 주제(계약 3.4.0). alerts=직원 알림(staff 역할), results=결과 도착(clinician 역할=result-reader 토큰). 없으면 [\"alerts\"]. 역할 확인은 서비스가 한다.",
+      "maxItems": 2
     }
   }
 }

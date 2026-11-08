@@ -84,8 +84,7 @@
         ],
         "properties": {
           "id": {
-            "type": "string",
-            "minLength": 1
+            "$ref": "_common.schema.json#/$defs/Id"
           },
           "version": {
             "type": "string"
@@ -114,7 +113,7 @@
           "default": false
         },
         "question_set_id": {
-          "type": "string"
+          "$ref": "_common.schema.json#/$defs/Id"
         },
         "max_pii_suspect_rows": {
           "type": [

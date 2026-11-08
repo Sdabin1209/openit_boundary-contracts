@@ -29,7 +29,8 @@
           "items": {
             "$ref": "_common.schema.json#/$defs/ArtifactRef"
           },
-          "description": "3.3.0: 함께 승인·판정하는 문진표 전부(하나 이상, id 중복 금지). 3.2.x의 단수 question_set을 대체한다."
+          "description": "3.3.0: 함께 승인·판정하는 문진표 전부(하나 이상, id 중복 금지). 3.2.x의 단수 question_set을 대체한다. 근거: 상한 100 은 함께 릴리스하는 문진표 수의 설계 상한(측정 안 함, 현재 활성 문진표 2개). 5.0.0(결함 대장 #10).",
+          "maxItems": 100
         },
         "lora_a": {
           "$ref": "_common.schema.json#/$defs/ArtifactRef"

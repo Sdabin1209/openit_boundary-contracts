@@ -1,5 +1,5 @@
 {
-  "pipeline_schema_version": "4.0",
+  "pipeline_schema_version": "5.0",
   "submission_id": "sub-1",
   "submitted_at": "2026-10-15T00:00:00Z",
   "submitted_by_role": "operator",

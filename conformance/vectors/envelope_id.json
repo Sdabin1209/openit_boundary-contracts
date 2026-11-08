@@ -1,0 +1,65 @@
+{
+  "description": "boundary_contracts.envelope_id 적합성 벡터(계약 5.0.0, CONVENTIONS 116행). 같은 규칙을 다른 언어로 구현하는 쪽도 이 벡터를 통과해야 한다. expected 는 Id 형식이면 원본, 아니면 'x-' + SHA-256(UTF-8 원본) 앞 32자(소문자 16진).",
+  "cases": [
+    {
+      "name": "정상 Id 그대로",
+      "raw": "abc123",
+      "expected": "abc123"
+    },
+    {
+      "name": "서버 발급 세션 ID(64자 16진) 그대로",
+      "raw": "0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f",
+      "expected": "0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"
+    },
+    {
+      "name": "점·콜론·밑줄·하이픈 포함 Id 그대로",
+      "raw": "t-1.a:b_c",
+      "expected": "t-1.a:b_c"
+    },
+    {
+      "name": "128자 Id 그대로",
+      "raw": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "name": "129자는 변환",
+      "raw": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected": "x-c12cb024a2e5551cca0e08fce8f1c5e3"
+    },
+    {
+      "name": "첫 글자 밑줄은 변환",
+      "raw": "_abc",
+      "expected": "x-999d81eb05d9aee77afd778f5525fa09"
+    },
+    {
+      "name": "첫 글자 하이픈은 변환",
+      "raw": "-abc",
+      "expected": "x-649d85fcc5d7e13d1217fc85fc746817"
+    },
+    {
+      "name": "비ASCII 는 UTF-8 바이트로 해시",
+      "raw": "세션1",
+      "expected": "x-91f0951cf54c90ef349b63150beac7fd"
+    },
+    {
+      "name": "끝 줄바꿈은 Id 가 아니다(변환)",
+      "raw": "abc\n",
+      "expected": "x-edeaaff3f1774ad2888673770c6d6409"
+    },
+    {
+      "name": "빈 문자열은 변환",
+      "raw": "",
+      "expected": "x-e3b0c44298fc1c149afbf4c8996fb924"
+    },
+    {
+      "name": "공백 포함은 변환",
+      "raw": "a b",
+      "expected": "x-c8687a08aa5d6ed2044328fa6a697ab8"
+    },
+    {
+      "name": "슬래시 포함은 변환",
+      "raw": "a/b",
+      "expected": "x-c14cddc033f64b9dea80ea675cf280a0"
+    }
+  ]
+}

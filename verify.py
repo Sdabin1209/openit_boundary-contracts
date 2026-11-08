@@ -145,4 +145,7 @@ for label, schema, base_ex, mutate in _V2:
 v = val("ResponseText"); r = bool(list(v.iter_errors({"response_text": "x"}))); print("OK  " if r else "FAIL", "거부되어야 함: 응답이 JSON 객체"); bad += (not r)
 removed = [n for n in ("ParserSample", "GeneratorSample") if os.path.exists(f"{here}/schemas/{n}.schema.json")]
 print("OK  " if not removed else "FAIL", "v1 스키마 ParserSample/GeneratorSample는 없다", removed); bad += bool(removed)
+# 5.0.0: 같은 이름(_id) 다른 정의 점검(D117). 허용 목록과 근거는 tools/id_defs_allowlist.json
+_r = subprocess.run([sys.executable, here + "/tools/check_id_defs.py"])
+print("OK  " if _r.returncode == 0 else "FAIL", "같은 이름의 ID 칸은 한 정의를 참조한다(tools/check_id_defs.py)"); bad += _r.returncode != 0
 sys.exit(1 if bad else 0)

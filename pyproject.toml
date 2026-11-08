@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "boundary-contracts"
-version = "4.0.5"
+version = "5.0.0"
 requires-python = ">=3.10"
 description = "영역 사이 계약의 스키마와 기준 구현. 버전 MAJOR.MINOR는 pipeline_schema_version과 같다."
 dependencies = ["jsonschema[format-nongpl]>=4.18,<5", "referencing>=0.30,<1"]
@@ -14,4 +14,4 @@ packages = ["boundary_contracts", "boundary_contracts.clients", "conformance"]
 
 [tool.setuptools.package-data]
 boundary_contracts = ["schemas/*.json", "metrics.json", "data/*.json", "openapi/*.json"]
-conformance = ["examples/*.json", "examples_invalid/*.json", "promoted/*.json"]
+conformance = ["examples/*.json", "examples_invalid/*.json", "promoted/*.json", "vectors/*.json"]

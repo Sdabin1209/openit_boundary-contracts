@@ -1,0 +1,16 @@
+{
+  "description": "tools/check_id_defs.py 의 허용 목록(계약 5.0.0). 항목마다 근거(reason)가 필수다. 근거 없는 항목은 점검이 실패한다.",
+  "generated_files": [
+    {"file": "schemas/OpsFeedbackDeidentifiedTrace.schema.json", "reason": "tools/gen_deid_view.py 의 생성물. session_id·turn_id 는 의사 식별자(Pseudonym), 그 밖은 [MASKED]/[DROPPED] 가 될 수 있는 비식별 값이라 원본 ID 와 뜻이 다르다. 손으로 고치지 않고 생성기가 정한다(gen_deid_view.py --check)."},
+    {"file": "schemas/OpsFeedbackReviewTrace.schema.json", "reason": "tools/gen_deid_view.py 의 생성물(검토 사본). 위와 같은 이유."}
+  ],
+  "excluded_names": [
+    {"name": "id", "reason": "'id' 는 그 객체의 식별자라는 뜻만 같고 대상이 위치마다 다르다(산출물 Id, 위험 규칙 ID, Hugging Face 기본 모델 ID, ops 규칙 ID). 같은 이름 같은 뜻 규칙(D117)의 대상이 아니다. 대상별 이름(question_set_id 등)은 점검한다."}
+  ],
+  "refinements": [
+    {"file": "schemas/PublicApiRequests.schema.json", "pointer": "/$defs/UtteranceBody/properties/turn_id", "reason": "공개 입구가 서버 예약 턴 ID(start·end·idle-expire, PUBLIC_API A절)를 받지 않게 좁힌다. 타입은 Id 그대로다."},
+    {"file": "schemas/PublicApiRequests.schema.json", "pointer": "/$defs/InterventionBody/properties/turn_id", "reason": "위와 같다(서버 예약 턴 ID 금지)."},
+    {"file": "schemas/PublicApiRequests.schema.json", "pointer": "/$defs/StaffCallRetryBody/allOf/1/properties/turn_id", "reason": "위와 같다(서버 예약 턴 ID 금지)."},
+    {"file": "schemas/PublicApiRequests.schema.json", "pointer": "/$defs/StaffCallReportBody/allOf/1/properties/turn_id", "reason": "위와 같다(서버 예약 턴 ID 금지)."}
+  ]
+}

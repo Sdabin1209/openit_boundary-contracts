@@ -18,7 +18,7 @@
   "additionalProperties": false,
   "properties": {
     "session_id": {
-      "$ref": "_common.schema.json#/$defs/Id"
+      "$ref": "_common.schema.json#/$defs/SessionId"
     },
     "status": {
       "type": "string",
