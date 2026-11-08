@@ -83,8 +83,9 @@ class HttpContract:
         if key not in self._validators:
             rooted = {"$id": self.base, **schema}
             jsonschema.Draft202012Validator.check_schema(rooted)
-            self._validators[key] = jsonschema.Draft202012Validator(rooted, registry=self._registry,
-                                                                    format_checker=format_checker(schema))
+            from .schemas_api import ContractValidator   # 5.0.0: 비유한 수 검사를 HTTP 계약 경로에도(CONVENTIONS 10절)
+            self._validators[key] = ContractValidator(jsonschema.Draft202012Validator(rooted, registry=self._registry,
+                                                                                      format_checker=format_checker(schema)))
         return self._validators[key]
 
     def check(self, schema: dict, value, where: str):

@@ -1,10 +1,13 @@
 """계약 JSON 공통 규칙(5.0.0, CONVENTIONS 10절 첫 항목, I-JSON RFC 7493)과 검토 값 검사."""
 import json
+import pathlib
 import unittest
 
 from boundary_contracts import BoundaryError, canonicalize, strict_json, validate
 from boundary_contracts.review_input import review_value_problems
-from boundary_contracts.strict_json import MAX_JSON_DEPTH, check_json_value, dumps, loads
+from boundary_contracts.strict_json import MAX_JSON_BYTES, MAX_JSON_DEPTH, check_json_value, dumps, loads
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 def nest(n):
@@ -61,17 +64,79 @@ class Numbers(unittest.TestCase):
             dumps({"a": float("inf")})
         self.assertEqual(dumps({"a": 1}), '{"a": 1}')
 
-    def test_검증기는_무한대를_number_로_보지_않는다(self):
-        from boundary_contracts.schemas_api import _finite_validator_class
-        V = _finite_validator_class()
-        self.assertFalse(V({"type": "number"}).is_valid(float("inf")))
-        self.assertFalse(V({"type": "number"}).is_valid(float("nan")))
-        self.assertTrue(V({"type": "number"}).is_valid(1.5))
-        self.assertTrue(V({"type": "integer"}).is_valid(3))
+    def test_검증기는_파일_간_참조_뒤에서도_비유한_수를_거부한다(self):
+        # codex 재검토: 확장 클래스는 $ref 로 다른 파일($schema 있음)에 들어가면 표준 클래스로 돌아갔다. 실제 파일 참조로 회귀 시험
+        import copy
+        from boundary_contracts import validator
+        ex = json.loads((ROOT / "examples/ActionExtractionSample.json").read_text(encoding="utf-8"))
+        v = validator("ActionExtractionSample")
+        self.assertTrue(v.is_valid(ex))
+        for bad in (float("inf"), float("-inf"), float("nan")):
+            d = copy.deepcopy(ex)
+            num = [x for x in d["expected"]["values"]]
+            num[0]["value"] = bad          # ActionExtractionSample.expected -> ActionExtraction.schema.json(파일 간 $ref)의 number 칸
+            with self.subTest(bad=bad):
+                self.assertFalse(v.is_valid(d))
+                self.assertTrue(any(e.validator == "finite" for e in v.iter_errors(d)))
+                with self.assertRaises(Exception):
+                    v.validate(d)
+
+    def test_조각_참조와_HTTP_계약도_비유한_수를_거부한다(self):
+        from boundary_contracts import validator
+        from boundary_contracts.http_contracts import ContractViolation, HttpContract
+        frag = validator("ActionExtraction#/properties/values")
+        good = [{"key": "Q1.D01.count", "value": 1.5, "precision": "exact", "status": "ANSWERED", "save": True}]
+        self.assertTrue(frag.is_valid(good))
+        self.assertFalse(frag.is_valid([dict(good[0], value=float("inf"))]))
+        c = HttpContract("question-authoring")
+        with self.assertRaises(ContractViolation):
+            c.check({"type": "object"}, {"a": float("nan")}, "body")
+        c.check({"type": "object"}, {"a": 1.0}, "body")
 
     def test_validate_진입점(self):
         with self.assertRaises(BoundaryError):
             validate("BoundaryError", {"pipeline_schema_version": "5.0", "code": "UNAVAILABLE", "message": "x", "retryable": True, "details": {"n": float("inf")}})
+
+
+class SizeBudget(unittest.TestCase):
+    def _str_body(self, n_chars, ch):
+        return ch * n_chars
+
+    def test_dumps_와_loads_는_같은_바이트_상한(self):
+        # 직렬화 '"' + s + '"' 의 바이트 = 문자 바이트 * n + 2
+        for ch, w in (("a", 1), ("가", 3)):
+            n_ok = (MAX_JSON_BYTES - 2) // w
+            with self.subTest(ch=ch):
+                out = dumps(ch * n_ok)
+                self.assertLessEqual(len(out.encode("utf-8")), MAX_JSON_BYTES)
+                self.assertEqual(loads(out), ch * n_ok)
+                with self.assertRaises(BoundaryError):
+                    dumps(ch * (n_ok + 1))
+                with self.assertRaises(BoundaryError):
+                    loads(json.dumps(ch * (n_ok + 1), ensure_ascii=False))
+
+    def test_validate_는_압축_직렬화_크기를_본다(self):
+        rec = {"pipeline_schema_version": "5.0", "code": "UNAVAILABLE", "message": "x" * MAX_JSON_BYTES, "retryable": True}
+        with self.assertRaises(BoundaryError):
+            validate("BoundaryError", rec)
+
+
+class NoValuesInErrors(unittest.TestCase):
+    def test_오류에_값과_사용자_키가_없다(self):
+        canary = "CANARY환자문장-010"
+        rec = {"pipeline_schema_version": "5.0", "code": canary, "message": canary, "retryable": "no", canary: canary}
+        with self.assertRaises(BoundaryError) as cm:
+            validate("BoundaryError", rec)
+        dumped = json.dumps(cm.exception.to_record("5.0"), ensure_ascii=False)
+        self.assertNotIn("CANARY", dumped)
+        self.assertTrue(cm.exception.details["errors"])
+        for e in cm.exception.details["errors"]:
+            self.assertEqual(set(e), {"schema_path", "keyword"})
+
+    def test_strict_loads_오류에_키가_없다(self):
+        with self.assertRaises(BoundaryError) as cm:
+            loads('{"CANARY키": 1, "CANARY키": 2}')
+        self.assertNotIn("CANARY", str(cm.exception.message))
 
 
 class Others(unittest.TestCase):

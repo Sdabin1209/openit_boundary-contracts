@@ -87,33 +87,68 @@ def validator(name: str, *, schema_sources=None):
     if fragment:
         schema = {"$ref": uri + "#" + fragment}
     jsonschema.Draft202012Validator.check_schema(schema)
-    return _finite_validator_class()(schema, registry=schema_registry(schema_sources=schema_sources),
-                                     format_checker=format_checker(schema))
+    return ContractValidator(jsonschema.Draft202012Validator(schema, registry=schema_registry(schema_sources=schema_sources),
+                                                             format_checker=format_checker(schema)))
 
 
-@lru_cache(maxsize=1)
-def _finite_validator_class():
-    """Draft 2020-12 에서 "number"·"integer" 타입이 NaN·무한대를 받지 않게 한 검증기(5.0.0, I-JSON RFC 7493).
-    왜: 파이썬 객체를 바로 검증하면 json 이 만든 float('inf')(본문의 1e999)가 type number 를 통과했다(결함 대장 #10 가설).
-    정수 범위·깊이·노드 예산 같은 값 전체 규칙은 validate()/strict_json.check_json_value 가 본다."""
+def nonfinite_errors(instance):
+    """값 안의 NaN·무한대 float 위치마다 jsonschema.ValidationError 하나(값은 싣지 않는다). 반복 순회(재귀 없음).
+    왜 스키마 키워드가 아니라 값 순회인가: jsonschema 는 $ref 로 다른 파일에 들어가면 그 파일의 $schema 로 검증기 클래스를
+    다시 고른다(validator_for). 그래서 type checker 를 바꾼 확장 클래스는 파일 경계를 넘으면 표준 클래스로 돌아가
+    number 가 무한대를 받았다(codex 재검토 2026-11-08). 값 전체를 먼저 보면 참조 경로와 상관없다(I-JSON RFC 7493, CONVENTIONS 10절)."""
     import math
+    from collections import deque
     import jsonschema
-    base = jsonschema.Draft202012Validator.TYPE_CHECKER
-    def number(checker, x):
-        return base.is_type(x, "number") and (not isinstance(x, float) or math.isfinite(x))
-    def integer(checker, x):
-        return base.is_type(x, "integer") and (not isinstance(x, float) or math.isfinite(x))
-    tc = base.redefine_many({"number": number, "integer": integer})
-    return jsonschema.validators.extend(jsonschema.Draft202012Validator, type_checker=tc)
+    stack = [(instance, ())]
+    while stack:
+        v, path = stack.pop()
+        if isinstance(v, float) and not math.isfinite(v):
+            yield jsonschema.ValidationError("NaN·무한대는 계약 JSON 값이 아니다(I-JSON, CONVENTIONS 10절)", validator="finite",
+                                             path=deque(path), validator_value=None, instance=None, schema={})
+        elif isinstance(v, dict):
+            stack.extend((x, path + (k,)) for k, x in v.items())
+        elif isinstance(v, (list, tuple)):
+            stack.extend((x, path + (i,)) for i, x in enumerate(v))
+
+
+class ContractValidator:
+    """계약 검증기(5.0.0): 표준 Draft 2020-12 검증 앞에 비유한 수 검사를 붙인다. iter_errors·is_valid·validate 모두 같은 규칙이다.
+    나머지 속성(schema, evolve 등)은 안쪽 표준 검증기의 것을 그대로 쓴다."""
+
+    def __init__(self, inner):
+        self._inner = inner
+
+    def __getattr__(self, name):
+        return getattr(self._inner, name)
+
+    def iter_errors(self, instance, *args, **kwargs):
+        yield from nonfinite_errors(instance)
+        yield from self._inner.iter_errors(instance, *args, **kwargs)
+
+    def is_valid(self, instance, *args, **kwargs):
+        return next(self.iter_errors(instance, *args, **kwargs), None) is None
+
+    def validate(self, instance, *args, **kwargs):
+        import jsonschema
+        err = jsonschema.exceptions.best_match(self.iter_errors(instance, *args, **kwargs))
+        if err is not None:
+            raise err
+
+
+def safe_error(e) -> dict:
+    """값 없는 진단: 스키마 쪽 위치(absolute_schema_path)와 키워드 이름만. 인스턴스 경로는 사용자가 정한 키(환자 문장일 수 있다)를
+    담을 수 있어 싣지 않는다(INTERFACES I7 '오류에 값을 싣지 않는다'). 스키마 경로의 이름은 계약이 정한 이름뿐이다."""
+    return {"schema_path": "/" + "/".join(map(str, e.absolute_schema_path)), "keyword": str(e.validator)}
 
 
 def validate(name: str, value, *, schema_sources=None) -> None:
-    """계약 검증 진입점(5.0.0): 계약 JSON 공통 규칙(strict_json.check_json_value: 유한한 수, ±2**53 정수, 깊이 64, 노드 예산)을 먼저 보고
-    스키마 검증을 한다. 어기면 BoundaryError(INVALID_RECORD, details.errors 에 처음 몇 개)."""
+    """계약 검증 진입점(5.0.0). 먼저 계약 JSON 공통 규칙(strict_json.check_json_value: 유한한 수, ±2**53 정수, 깊이 64, 값 2**19,
+    압축 직렬화 1 MiB)을 보고, 그다음 스키마 검증을 한다. 어기면 BoundaryError(INVALID_RECORD).
+    오류에는 값을 싣지 않는다: details.errors 는 처음 5개의 {schema_path, keyword} 뿐이다(INTERFACES I7)."""
     from .errors import BoundaryError
-    from .strict_json import check_json_value
+    from .strict_json import check_json_value, check_serialized_size
     check_json_value(value)
-    errs = sorted(validator(name, schema_sources=schema_sources).iter_errors(value), key=lambda e: list(e.absolute_path))
+    check_serialized_size(value)
+    errs = list(validator(name, schema_sources=schema_sources).iter_errors(value))
     if errs:
-        raise BoundaryError("INVALID_RECORD", f"{name} 계약 위반 {len(errs)}건",
-                            {"errors": [f"/{'/'.join(map(str, e.absolute_path))}: {e.message[:200]}" for e in errs[:5]]})
+        raise BoundaryError("INVALID_RECORD", f"{name} 계약 위반 {len(errs)}건", {"errors": [safe_error(e) for e in errs[:5]]})

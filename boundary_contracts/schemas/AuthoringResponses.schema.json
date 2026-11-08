@@ -635,7 +635,7 @@
     },
     "Decisions": {
       "$ref": "HttpPages.schema.json#/$defs/Decisions",
-      "description": "3.4.7: 판정 조회 응답. items 는 release-gate 의 GateDecision 그대로(최신부터; 받은 값을 다시 검증하지 않는다, ADR 0010 R7) 5.0.0: release-gate /v1/decisions 의 목록 응답(HttpPages.Decisions)과 같은 뜻이라 그 별칭으로 바꿨다(같은 이름 두 정의 금지, D117). 4.x 의 닫힌 봉투(additionalProperties false)보다 넓다(ListEnvelope 는 모르는 키 허용)."
+      "description": "3.4.7: 판정 조회 응답. items 는 release-gate 의 GateDecision 그대로(최신부터; 받은 값을 다시 검증하지 않는다, ADR 0010 R7) 5.0.0: release-gate /v1/decisions 의 목록 응답(HttpPages.Decisions)과 같은 뜻이라 그 별칭으로 바꿨다(같은 이름 두 정의 금지, D117). 4.x 의 닫힌 봉투(additionalProperties false)보다 넓다(ListEnvelope 는 모르는 키 허용). 별칭으로 바뀌며 next_cursor 의 빈 문자열을 새로 거부한다(ListEnvelope.next_cursor minLength 1). 모르는 키를 허용하는 것은 읽는 쪽 관용이고, 생산자는 계약에 정의된 키만 낸다(CONVENTIONS 1절 '생산자 출력 검증', ADR 0010 R7)."
     },
     "QuestionSetVersions": {
       "type": "object",

@@ -153,4 +153,5 @@ def reader_validator(schema: dict, uri: str):
     from ..schemas_api import format_checker
     relaxed = _resource(schema, uri, False)
     registry = _base_registry().with_resources([(uri, relaxed), (strict_uri(uri), _resource(schema, uri, True))])
-    return jsonschema.Draft202012Validator(relaxed.contents, registry=registry, format_checker=format_checker(schema))
+    from ..schemas_api import ContractValidator   # 5.0.0: 읽기 모드도 비유한 수는 거부한다(넓히는 것은 모르는 필드·열거값뿐, CONVENTIONS 10절)
+    return ContractValidator(jsonschema.Draft202012Validator(relaxed.contents, registry=registry, format_checker=format_checker(schema)))

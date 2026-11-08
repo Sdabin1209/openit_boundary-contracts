@@ -103,7 +103,7 @@ def _no_dup(pairs):
     out = {}
     for k, v in pairs:
         if k in out:
-            raise ValueError(f"중복 키 {k[:40]!r}(I-JSON 2.3)")
+            raise ValueError("중복 키(I-JSON 2.3)")   # 키 이름은 싣지 않는다: 사용자가 정한 문자열일 수 있다(INTERFACES I7)
         out[k] = v
     return out
 
@@ -138,8 +138,20 @@ def loads(raw: bytes | str, *, max_depth: int = MAX_JSON_DEPTH, max_bytes: int =
     return obj
 
 
-def dumps(value: Any, **kw) -> str:
-    """계약 JSON 직렬화: 먼저 check_json_value, 그다음 allow_nan=False 로(NaN·Infinity 를 쓰지 않는다)."""
+def check_serialized_size(value: Any, *, max_bytes: int = MAX_JSON_BYTES) -> None:
+    """값의 압축 직렬화(구분자 ',' ':', ensure_ascii=False) UTF-8 바이트가 max_bytes 이하인지. 넘으면 INVALID_RECORD.
+    압축 직렬화는 같은 값의 가장 짧은 표현에 가깝다: 이것이 넘으면 어떤 직렬화도 loads 의 바이트 상한을 넘는다."""
+    n = len(json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(",", ":")).encode("utf-8"))
+    if n > max_bytes:
+        raise _bad(f"JSON 값이 너무 크다(직렬화 {n}바이트, 상한 {max_bytes}바이트)")
+
+
+def dumps(value: Any, *, max_bytes: int = MAX_JSON_BYTES, **kw) -> str:
+    """계약 JSON 직렬화: check_json_value 뒤 allow_nan=False 로 쓰고, **실제 출력**의 UTF-8 바이트가 max_bytes 를 넘으면 INVALID_RECORD.
+    왜 출력을 재나: 받는 쪽 loads 가 같은 바이트 상한으로 거부하므로, 보내는 쪽이 먼저 같은 기준으로 막아야 한다(CONVENTIONS 10절의 한 예산)."""
     check_json_value(value)
     kw.setdefault("ensure_ascii", False)
-    return json.dumps(value, allow_nan=False, **kw)
+    out = json.dumps(value, allow_nan=False, **kw)
+    if len(out.encode("utf-8")) > max_bytes:
+        raise _bad(f"JSON 출력이 너무 크다(상한 {max_bytes}바이트)")
+    return out

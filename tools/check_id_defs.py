@@ -106,13 +106,18 @@ def _walk(o, ptr, out, rel):
             _walk(v, f"{ptr}/{i}", out, rel)
 
 
-def _deid_kind(end: str) -> str:
-    if end.endswith("#/$defs/Pseudonym"):
-        return "Pseudonym"
-    if end.endswith("#/$defs/Masked"):
-        return "Masked"
-    if end.startswith('inline:{"anyOf": [{"$ref": "#/$defs/Masked"}') or end.startswith('inline:{"anyOf": [{"$ref": "#/$defs/Redacted"}'):
-        return "deid-anyof"
+DEID_REFS = {"#/$defs/Masked", "#/$defs/Redacted"}
+
+
+def _deid_kind(node) -> str:
+    """생성물 칸의 끝점 종류를 구조로 판정한다(문자열 접두어가 아니라): 의사 식별자 참조, 마스킹 참조, 또는
+    anyOf 가지 집합에 마스킹·제거 참조가 들어 있는 비식별 합집합(gen_deid_view.py 가 만드는 모양)."""
+    if isinstance(node, dict) and set(node) - ANNOT == {"$ref"}:
+        r = node["$ref"]
+        return "Pseudonym" if r == "#/$defs/Pseudonym" else "Masked" if r == "#/$defs/Masked" else "other"
+    if isinstance(node, dict) and set(node) - ANNOT == {"anyOf"} and isinstance(node["anyOf"], list):
+        refs = {a.get("$ref") for a in node["anyOf"] if isinstance(a, dict) and set(a) == {"$ref"}}
+        return "deid-anyof" if refs & DEID_REFS else "other"
     return "other"
 
 
@@ -141,7 +146,7 @@ def check(root: pathlib.Path, allow: dict) -> list[str]:
         end, refs, inline = repo.definition(rel, ptr, node)
         loc = f"{rel}#{ptr}"
         if rel in gen_files:
-            k = (rel, name, _deid_kind(end))
+            k = (rel, name, _deid_kind(node))
             if k not in gen_ok:
                 problems.append(f"{loc}: 생성물 안의 {name} 이 허용 목록 generated 에 없는 끝점 {end[:80]}")
             used_gen.add(k)
