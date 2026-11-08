@@ -94,6 +94,17 @@ def validator(name: str, *, schema_sources=None):
                                                              format_checker=format_checker(schema)))
 
 
+def schema_validator(schema: dict, *, schema_sources=None):
+    """영역 내부 스키마(계약 이름이 아닌 dict)에도 계약 검증과 같은 규칙을 씌운다(5.0.1): 계약 registry(안정 URI·file URI)로
+    계약 타입 $ref 를 풀고, format_checker 를 강제하고, NaN·무한대를 값 전체에서 먼저 거부한다(ContractValidator).
+    왜: validator(name) 은 계약 스키마 이름만 받아, 영역이 자기 스키마를 검증하려면 표준 Draft202012Validator 를 직접 만들 수밖에 없었고
+    그 경로에는 CONVENTIONS 10절의 비유한 수 거부가 걸리지 않았다(model-runtime 반영 중 발견, 2026-11-08)."""
+    import jsonschema
+    jsonschema.Draft202012Validator.check_schema(schema)
+    return ContractValidator(jsonschema.Draft202012Validator(schema, registry=schema_registry(schema_sources=schema_sources),
+                                                             format_checker=format_checker(schema)))
+
+
 def nonfinite_errors(instance):
     """값 안의 NaN·무한대 float 위치마다 jsonschema.ValidationError 하나(값은 싣지 않는다). 반복 순회(재귀 없음).
     왜 스키마 키워드가 아니라 값 순회인가: jsonschema 는 $ref 로 다른 파일에 들어가면 그 파일의 $schema 로 검증기 클래스를

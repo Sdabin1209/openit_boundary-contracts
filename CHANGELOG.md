@@ -6,6 +6,8 @@
 - 왜: 5.0.0 의 '같은 뜻의 타입은 한 번만'(D117)을 문진 스키마까지 지키려면 문진 스키마가 계약 타입을 `$ref` 로 가리켜야 하는데, 5.0.0 은 계약 스키마를 설치 경로(file://)로만 등록해 외부 문서가 가리킬 주소가 없었다(survey-service 반영 중 발견, 2026-11-08 22:5x). 5.0.0 검토가 계약 리포 안에서만 이뤄져 소비자 쪽 위임을 실행해 보지 않은 탓이다.
 - 왜 PATCH 인가: 5.0.0 이 약속한 D117(문진 스키마까지 같은 뜻 한 번만)을 지킬 수단이 빠진 결함의 수정이다(4.0.3 의 읽기 모드 검증기 결함 수정과 같은 분류). 계약 스키마 본문은 그대로다.
 - 호환: 추가만. 기존 file:// 등록과 상대 `$ref`·`$id` 해석은 그대로다. 계약 스키마 본문은 바뀌지 않았다. `PIPELINE_SCHEMA_VERSION` 은 "5.0" 그대로.
+- `schema_validator(schema)`(새 공개 함수): 영역 내부 스키마(dict)에도 계약 registry·format_checker·비유한 수 거부를 씌운다. 5.0.0 의 `validator(name)` 은 계약 이름만 받아 영역 스키마 검증에는 CONVENTIONS 10절 수 규칙이 걸리지 않았다(model-runtime 반영 중 발견).
+- CONVENTIONS 10절: JSON 본문 1 MiB 는 기본값이고 openapi 경로의 `x-max-body-bytes` 가 그 경로의 상한이라는 것을 명시했다(5.0.0 문구가 model-serving 4 MiB 경로와 어긋나 보였다; link 는 이미 경로 상한을 `max_bytes` 로 넘긴다).
 - 시험: `tests/test_stable_uri_501.py`(모든 계약 스키마가 안정 URI 로 풀림, 외부 문서가 SessionId·QuestionId 를 위임해 좋은 값 통과·나쁜 값 거부, registry 없이는 Unresolvable 로 실패, 읽기 모드 등록).
 
 

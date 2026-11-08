@@ -66,3 +66,16 @@ class StableUri(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SchemaValidator(unittest.TestCase):
+    def test_area_schema_gets_contract_rules(self):
+        area = {"$schema": "https://json-schema.org/draft/2020-12/schema", "type": "object",
+                "properties": {"n": {"type": "number"}, "sid": {"$ref": bc.contract_uri("_common") + "#/$defs/SessionId"}}}
+        v = bc.schema_validator(area)
+        self.assertTrue(v.is_valid({"n": 1.5, "sid": "ab"}))
+        for bad in ({"n": float("nan")}, {"n": float("inf")}, {"sid": "_x"}):
+            with self.subTest(bad):
+                self.assertFalse(v.is_valid(bad))
+        # evolve 뒤에도 같은 규칙(ContractValidator 재감싸기)
+        self.assertFalse(v.evolve(schema=area).is_valid({"n": float("-inf")}))
