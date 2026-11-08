@@ -119,17 +119,22 @@ class GatewayDefaults(unittest.TestCase):
 class SecretFormats(unittest.TestCase):
     def test_formats(self):
         f = bc.secret_format_problems
-        self.assertEqual(f("token_list", "abc123"), [])
-        self.assertEqual(f("token_list", "a,b,c"), [])
-        for bad in ("a,,b", "r=a", "a b", "a:b"):
-            with self.subTest(bad):
-                self.assertEqual(f("token_list", bad), ["FORMAT"])
-        self.assertEqual(f("role_token_list", "reviewer=t1,operator=t2"), [])
-        self.assertEqual(f("role_token_list", "t1"), ["FORMAT"])
-        self.assertEqual(f("token_actor_role_list", "t:author-e2e:question-author"), [])
-        self.assertEqual(f("token_actor_role_list", "t:author"), ["FORMAT"])
-        self.assertEqual(f("credentials_line", "user:pa:ss"), [])
-        self.assertEqual(f("credentials_line", "user"), ["FORMAT"])
+        ok = {"token_list": ["abc123", "a,b,c", "dG9rZW4=", "a:b"],
+              "role_token_list": ["reviewer=t1,operator=t2", "survey-service=dG9rZW4==", "r=a:b"],
+              "token_actor_role_list": ["t:author-e2e:question-author", "t1:a:r,t2:b:s"],
+              "credentials_line": ["user:pa:ss", "user:pass with space", "u:p=="]}
+        bad = {"token_list": ["a,,b", "a b", "a\tb", "a\x00b"],
+               "role_token_list": ["t1", "=t1", "r=", "r=a b", "r=a\x01"],
+               "token_actor_role_list": ["t:author", "t:a:r:x", "t::r"],
+               "credentials_line": ["user", ":pass", "user:", "user:pa\nss", "us\x7fer:p"]}
+        for kind, values in ok.items():
+            for v in values:
+                with self.subTest(kind=kind, ok=repr(v)):
+                    self.assertEqual(f(kind, v), [])
+        for kind, values in bad.items():
+            for v in values:
+                with self.subTest(kind=kind, bad=repr(v)):
+                    self.assertEqual(f(kind, v), ["FORMAT"])
         self.assertEqual(f("token_list", ""), ["EMPTY"])
         with self.assertRaises(ValueError):
             f("nope", "x")

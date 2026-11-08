@@ -48,16 +48,20 @@ def secret_source(name: str, *, environ: Optional[Mapping[str, str]] = None) -> 
 # 좁히면 MAJOR 라서 스키마는 그대로 두고, 정확한 문법은 이 함수로 만든 쪽(deploy gen-secrets)과 읽는 쪽이 같은 정의를 쓴다(D117).
 import re as _re
 
-_TOKEN = r"[^,=:\s]+"
+# 문자 규칙: 제어 문자(U+0000–U+001F, U+007F)는 어디에도 없다. 구분자 규칙은 실제 소비 코드의 나누기와 같다(codex 검토 2026-11-09):
+#  token_list 는 ',' 로만 나눈다(토큰 안의 '='·':' 허용 — 패딩된 bearer 토큰), role_token_list 는 항목을 ',' 로 나눈 뒤 **첫 '='** 에서
+#  역할과 토큰을 나눈다(토큰 쪽 '=' 보존: model-lab service/app.py, clients/_http.py, link server.py), token_actor_role_list 는
+#  ':' 로 정확히 셋(question-authoring __main__.py), credentials_line 은 한 줄을 **첫 ':'** 에서 나누고 암호 안의 공백은 허용한다
+#  (survey link_backup.py 는 암호를 URL 인코딩, platform backup-store 는 그대로 htpasswd 에 넘긴다).
+_C = r"\x00-\x1f\x7f"
+_ITEM = rf"[^,\s{_C}]+"
+_ROLE = rf"[^,=\s{_C}]+"
+_PART = rf"[^,:\s{_C}]+"
 SECRET_FORMATS = {
-    # 역할 없는 토큰 쉼표 목록(QuestionAuthoringEnv.TokenList, 예: QA_GATEWAY_TOKENS)
-    "token_list": _re.compile(rf"{_TOKEN}(,{_TOKEN})*"),
-    # '역할=토큰' 쉼표 목록(각 *Env 의 RoleTokenList)
-    "role_token_list": _re.compile(rf"{_TOKEN}={_TOKEN}(,{_TOKEN}={_TOKEN})*"),
-    # '토큰:actor-id:역할' 쉼표 목록(QA_AUTHOR_TOKENS)
-    "token_actor_role_list": _re.compile(rf"{_TOKEN}:{_TOKEN}:{_TOKEN}(,{_TOKEN}:{_TOKEN}:{_TOKEN})*"),
-    # 한 줄 '사용자:암호'(CommonEnv.OPENIT_BACKUP_CREDENTIALS_FILE)
-    "credentials_line": _re.compile(r"[^:\s]+:\S+"),
+    "token_list": _re.compile(rf"{_ITEM}(,{_ITEM})*"),
+    "role_token_list": _re.compile(rf"{_ROLE}={_ITEM}(,{_ROLE}={_ITEM})*"),
+    "token_actor_role_list": _re.compile(rf"{_PART}:{_PART}:{_PART}(,{_PART}:{_PART}:{_PART})*"),
+    "credentials_line": _re.compile(rf"[^:{_C}]+:[^{_C}]+"),
 }
 
 
